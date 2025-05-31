@@ -114,6 +114,16 @@ export const useProofsStore = defineStore("proofs", {
         });
       });
     },
+    async updateProofBucket(secret: string, newBucketId: string) {
+      await cashuDb.proofs.update(secret, { bucketId: newBucketId });
+    },
+    async moveProofs(proofs: WalletProof[], newBucketId: string) {
+      await cashuDb.transaction("rw", cashuDb.proofs, async () => {
+        for (const proof of proofs) {
+          await cashuDb.proofs.update(proof.secret, { bucketId: newBucketId });
+        }
+      });
+    },
     async getProofsForQuote(quote: string): Promise<WalletProof[]> {
       return await cashuDb.proofs.where("quote").equals(quote).toArray();
     },
