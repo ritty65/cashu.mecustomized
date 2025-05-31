@@ -575,6 +575,7 @@ import ChooseMint from "components/ChooseMint.vue";
 import { UR, UREncoder } from "@gandlaf21/bc-ur";
 import SendPaymentRequest from "./SendPaymentRequest.vue";
 import NumericKeyboard from "components/NumericKeyboard.vue";
+import { DEFAULT_BUCKET_ID } from "stores/buckets";
 import {
   ChevronLeft as ChevronLeftIcon,
   Clipboard as ClipboardIcon,
@@ -1055,6 +1056,7 @@ export default defineComponent({
           token: this.sendData.tokensBase64,
           unit: this.activeUnit,
           mint: this.activeMintUrl,
+          bucketId: sendProofs[0]?.bucketId || DEFAULT_BUCKET_ID,
         };
         this.addPendingToken(historyToken);
         this.sendData.historyToken = historyToken;
@@ -1109,6 +1111,7 @@ export default defineComponent({
           mint: this.activeMintUrl,
           paymentRequest: this.sendData.paymentRequest,
           status: "pending",
+          bucketId: sendProofs[0]?.bucketId || DEFAULT_BUCKET_ID,
         };
         this.addPendingToken(historyToken);
         this.sendData.historyToken = historyToken;

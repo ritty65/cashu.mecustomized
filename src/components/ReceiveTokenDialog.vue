@@ -517,8 +517,9 @@ export default defineComponent({
       tokensStore.addPendingToken({
         amount: amount,
         token: tokenStr,
-        mintInToken: mintInToken,
-        unitInToken: unitInToken,
+        mint: mintInToken,
+        unit: unitInToken,
+        bucketId: DEFAULT_BUCKET_ID,
       });
       this.showReceiveTokens = false;
       // show success notification

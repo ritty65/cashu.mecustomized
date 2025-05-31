@@ -26,6 +26,7 @@ import {
   Token,
 } from "@cashu/cashu-ts";
 import { useTokensStore } from "./tokens";
+import { DEFAULT_BUCKET_ID } from "./buckets";
 import {
   notifyApiError,
   notifyError,
@@ -592,6 +593,7 @@ export const useNostrStore = defineStore("nostr", {
         token: tokenStr,
         mint: token.getMint(decodedToken),
         unit: token.getUnit(decodedToken),
+        bucketId: DEFAULT_BUCKET_ID,
       });
       receiveStore.showReceiveTokens = false;
       // show success notification
