@@ -1266,6 +1266,11 @@ export default {
         placeholder: "npub, hex public key or name",
       },
     },
+    messages: {
+      loading: "Searching creators …",
+      no_results: "No creators found.",
+      empty: "Start searching for creators.",
+    },
   },
   BucketManager: {
     actions: {
