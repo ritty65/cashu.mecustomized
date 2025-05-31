@@ -575,6 +575,7 @@ import ChooseMint from "components/ChooseMint.vue";
 import { UR, UREncoder } from "@gandlaf21/bc-ur";
 import SendPaymentRequest from "./SendPaymentRequest.vue";
 import NumericKeyboard from "components/NumericKeyboard.vue";
+import { DEFAULT_BUCKET_ID } from "stores/buckets";
 import {
   ChevronLeft as ChevronLeftIcon,
   Clipboard as ClipboardIcon,
@@ -1038,13 +1039,14 @@ export default defineComponent({
         this.sendData.amount * this.activeUnitCurrencyMultiplyer
       );
       try {
-        // keep firstProofs, send scndProofs and delete them (invalidate=true)
         const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
+        const bucketId = this.activeProofs[0]?.bucketId || DEFAULT_BUCKET_ID;
         let { _, sendProofs } = await this.sendToLock(
           this.activeProofs,
           mintWallet,
           sendAmount,
-          this.sendData.p2pkPubkey
+          this.sendData.p2pkPubkey,
+          bucketId
         );
         // update UI
         this.sendData.tokens = sendProofs;
@@ -1055,6 +1057,7 @@ export default defineComponent({
           token: this.sendData.tokensBase64,
           unit: this.activeUnit,
           mint: this.activeMintUrl,
+          bucketId,
         };
         this.addPendingToken(historyToken);
         this.sendData.historyToken = historyToken;
@@ -1087,13 +1090,14 @@ export default defineComponent({
           this.sendData.amount * this.activeUnitCurrencyMultiplyer
         );
         const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
-        // keep firstProofs, send scndProofs and delete them (invalidate=true)
+        const bucketId = this.activeProofs[0]?.bucketId || DEFAULT_BUCKET_ID;
         let { _, sendProofs } = await this.send(
           this.activeProofs,
           mintWallet,
           sendAmount,
           true,
-          this.includeFeesInSendAmount
+          this.includeFeesInSendAmount,
+          bucketId
         );
 
         // update UI
@@ -1109,6 +1113,7 @@ export default defineComponent({
           mint: this.activeMintUrl,
           paymentRequest: this.sendData.paymentRequest,
           status: "pending",
+          bucketId,
         };
         this.addPendingToken(historyToken);
         this.sendData.historyToken = historyToken;

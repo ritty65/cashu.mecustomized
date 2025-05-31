@@ -15,6 +15,7 @@ export type HistoryToken = {
   token: string;
   mint: string;
   unit: string;
+  bucketId: string;
   paymentRequest?: PaymentRequest;
   fee?: number;
 };
@@ -32,6 +33,7 @@ export const useTokensStore = defineStore("tokens", {
       token,
       mint,
       unit,
+      bucketId,
       fee,
       paymentRequest,
     }: {
@@ -39,6 +41,7 @@ export const useTokensStore = defineStore("tokens", {
       token: string;
       mint: string;
       unit: string;
+      bucketId: string;
       fee?: number;
       paymentRequest?: PaymentRequest;
     }) {
@@ -49,6 +52,7 @@ export const useTokensStore = defineStore("tokens", {
         token,
         mint,
         unit,
+        bucketId,
         fee,
         paymentRequest,
       } as HistoryToken);
@@ -58,6 +62,7 @@ export const useTokensStore = defineStore("tokens", {
       token,
       mint,
       unit,
+      bucketId,
       fee,
       paymentRequest,
     }: {
@@ -65,6 +70,7 @@ export const useTokensStore = defineStore("tokens", {
       token: string;
       mint: string;
       unit: string;
+      bucketId: string;
       fee?: number;
       paymentRequest?: PaymentRequest;
     }) {
@@ -75,6 +81,7 @@ export const useTokensStore = defineStore("tokens", {
         token: token,
         mint,
         unit,
+        bucketId,
         fee,
         paymentRequest,
       });
@@ -87,6 +94,7 @@ export const useTokensStore = defineStore("tokens", {
         newStatus?: "paid" | "pending";
         newToken?: string;
         newFee?: number;
+        newBucketId?: string;
       }
     ): HistoryToken | undefined {
       const index = this.historyTokens.findIndex(
@@ -113,6 +121,9 @@ export const useTokensStore = defineStore("tokens", {
           }
           if (options.newFee) {
             this.historyTokens[index].fee = options.newFee;
+          }
+          if (options.newBucketId) {
+            this.historyTokens[index].bucketId = options.newBucketId;
           }
         }
 

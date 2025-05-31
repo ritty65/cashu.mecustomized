@@ -503,6 +503,7 @@ export const useWalletStore = defineStore("wallet", {
         unit: unitInToken,
         mint: mintInToken,
         fee: fee,
+        bucketId: bucketId,
       } as HistoryToken;
       const mintWallet = this.mintWallet(historyToken.mint, historyToken.unit);
       const mint = mintStore.mints.find((m) => m.url === historyToken.mint);
@@ -677,6 +678,7 @@ export const useWalletStore = defineStore("wallet", {
           token: serializedProofs,
           unit: invoice.unit,
           mint: invoice.mint,
+          bucketId,
         });
         useInvoicesWorkerStore().removeInvoiceFromChecker(invoice.quote);
 
@@ -847,6 +849,7 @@ export const useWalletStore = defineStore("wallet", {
           token: proofsStore.serializeProofs(sendProofs),
           unit: mintWallet.unit,
           mint: mintWallet.mint.mintUrl,
+          bucketId,
         });
 
         this.updateOutgoingInvoiceInHistory(quote, {
@@ -931,6 +934,7 @@ export const useWalletStore = defineStore("wallet", {
               token: serializedProofs,
               unit: wallet.unit,
               mint: wallet.mint.mintUrl,
+              bucketId: spentProofs[0]?.bucketId ?? DEFAULT_BUCKET_ID,
             });
           }
         }
@@ -992,6 +996,7 @@ export const useWalletStore = defineStore("wallet", {
               newAmount: spentAmount,
               newStatus: "paid",
               newToken: serializedSpentProofs,
+              newBucketId: historyToken.bucketId,
             },
           );
           // add all unspent proofs back to the history
@@ -1002,6 +1007,7 @@ export const useWalletStore = defineStore("wallet", {
               token: serializedUnspentProofs,
               unit: historyToken2.unit,
               mint: historyToken2.mint,
+              bucketId: historyToken2.bucketId,
             });
           }
         }
