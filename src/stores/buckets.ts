@@ -25,19 +25,40 @@ export const useBucketsStore = defineStore("buckets", {
     const proofsStore = useProofsStore();
     const notifiedGoals = ref<Record<string, boolean>>({});
 
+    const checkGoals = () => {
+      buckets.value.forEach((bucket) => {
+        if (!bucket.goal) {
+          if (notifiedGoals.value[bucket.id]) {
+            delete notifiedGoals.value[bucket.id];
+          }
+          return;
+        }
+        const sum = proofsStore.proofs
+          .filter((p) => p.bucketId === bucket.id && !p.reserved)
+          .reduce((s, p) => s + p.amount, 0);
+        if (sum >= bucket.goal) {
+          if (!notifiedGoals.value[bucket.id]) {
+            notifySuccess(`Bucket ${bucket.name} goal reached!`);
+          }
+          notifiedGoals.value[bucket.id] = true;
+        } else if (notifiedGoals.value[bucket.id]) {
+          delete notifiedGoals.value[bucket.id];
+        }
+      });
+    };
+
     watch(
       () => proofsStore.proofs,
       () => {
-        buckets.value.forEach((bucket) => {
-          if (!bucket.goal) return;
-          const sum = proofsStore.proofs
-            .filter((p) => p.bucketId === bucket.id && !p.reserved)
-            .reduce((s, p) => s + p.amount, 0);
-          if (sum >= bucket.goal && !notifiedGoals.value[bucket.id]) {
-            notifySuccess(`Bucket ${bucket.name} goal reached!`);
-            notifiedGoals.value[bucket.id] = true;
-          }
-        });
+        checkGoals();
+      },
+      { deep: true }
+    );
+
+    watch(
+      buckets,
+      () => {
+        checkGoals();
       },
       { deep: true }
     );

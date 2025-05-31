@@ -1,7 +1,9 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useBucketsStore, DEFAULT_BUCKET_ID, DEFAULT_BUCKET_NAME } from '../../../src/stores/buckets'
 import { useProofsStore } from '../../../src/stores/proofs'
 import { cashuDb } from '../../../src/stores/dexie'
+import { nextTick } from 'vue'
+import { Notify } from 'quasar'
 
 beforeEach(async () => {
   localStorage.clear()
@@ -57,5 +59,28 @@ describe('Buckets store', () => {
     const count = buckets.bucketList.length
     await buckets.deleteBucket(DEFAULT_BUCKET_ID)
     expect(buckets.bucketList.length).toBe(count)
+  })
+
+  it('notifies when goal is added and resets when changed', async () => {
+    const buckets = useBucketsStore()
+    const proofs = useProofsStore()
+
+    const bucket = buckets.addBucket({ name: 'Goal' })
+    await proofs.addProofs([
+      { id: 'a', amount: 3, C: 'c1', secret: 's1' },
+    ], undefined, bucket.id)
+
+    vi.clearAllMocks()
+
+    buckets.editBucket(bucket.id, { goal: 2 })
+    await nextTick()
+    expect(Notify.create).toHaveBeenCalled()
+    expect(buckets.notifiedGoals[bucket.id]).toBe(true)
+
+    vi.clearAllMocks()
+    buckets.editBucket(bucket.id, { goal: 5 })
+    await nextTick()
+    expect(Notify.create).not.toHaveBeenCalled()
+    expect(buckets.notifiedGoals[bucket.id]).toBeUndefined()
   })
 })
