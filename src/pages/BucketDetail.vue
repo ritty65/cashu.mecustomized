@@ -92,6 +92,7 @@ import { useSendTokensStore } from 'stores/sendTokensStore';
 import { useTokensStore, HistoryToken } from 'stores/tokens';
 import SendTokenDialog from 'components/SendTokenDialog.vue';
 import HistoryTable from 'components/HistoryTable.vue';
+import { notifyError } from 'src/js/notify';
 
 const route = useRoute();
 const bucketsStore = useBucketsStore();
@@ -195,6 +196,15 @@ function saveEdit(){
 }
 
 async function moveSelected(){
+  if(!targetBucketId.value){
+    notifyError("Please select a bucket");
+    return;
+  }
+  const exists = bucketsStore.bucketList.some(b => b.id === targetBucketId.value);
+  if(!exists){
+    notifyError("Bucket not found");
+    return;
+  }
   await proofsStore.moveProofs(selectedSecrets.value, targetBucketId.value as string);
   selectedSecrets.value = [];
 }
