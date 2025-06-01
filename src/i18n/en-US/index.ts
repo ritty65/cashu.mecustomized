@@ -191,6 +191,9 @@ export default {
       experimental: "EXPERIMENTAL",
       appearance: "APPEARANCE",
     },
+    tooltips: {
+      proofs: "Proofs are blinded signatures representing your ecash",
+    },
     backup_restore: {
       backup_seed: {
         title: "Backup seed phrase",
@@ -492,6 +495,7 @@ export default {
       },
       mints: {
         label: "Mints",
+        tooltip: "A mint issues ecash; choose which one you are using",
       },
       buckets: {
         label: "Buckets",
@@ -533,6 +537,7 @@ export default {
     pending: {
       label: "Pending",
       tooltip: "Check all pending tokens",
+      infoTooltip: "Pending tokens are reserved until the transaction settles",
     },
   },
   WelcomePage: {
@@ -1317,6 +1322,9 @@ export default {
       description: "Description",
       goal: "Goal (sat)",
     },
+    info: {
+      tooltip: "Buckets group tokens by purpose or goal",
+    },
     validation: {
       name: "Name is required",
       goal: "Goal must be positive",
@@ -1331,6 +1339,9 @@ export default {
     send: "Send tokens",
     export: "Export bucket",
     locked_tokens_heading: "Locked tokens",
+    info: {
+      tooltip: "Buckets group tokens by purpose or goal",
+    },
     inputs: {
       target_bucket: {
         label: "Move to bucket",

@@ -163,6 +163,10 @@
         {{ formatCurrency(pendingBalance, this.activeUnit) }}
         <q-tooltip>{{ $t("BalanceView.pending.tooltip") }}</q-tooltip>
       </q-btn>
+      <InfoTooltip
+        class="q-ml-xs"
+        :text="$t('BalanceView.pending.infoTooltip')"
+      />
     </div>
   </div>
   <!-- </q-card-section>
@@ -181,6 +185,7 @@ import { usePriceStore } from "stores/price";
 import { useBucketsStore } from "stores/buckets";
 import ToggleUnit from "components/ToggleUnit.vue";
 import AnimatedNumber from "components/AnimatedNumber.vue";
+import InfoTooltip from "./InfoTooltip.vue";
 import axios from "axios";
 import { map } from "underscore";
 
@@ -190,6 +195,7 @@ export default defineComponent({
   components: {
     ToggleUnit,
     AnimatedNumber,
+    InfoTooltip,
   },
   props: {
     setTab: Function,

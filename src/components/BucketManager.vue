@@ -89,7 +89,10 @@
 
   <q-dialog v-model="showForm">
     <q-card class="q-pa-lg" style="max-width: 500px">
-      <h6 class="q-mt-none q-mb-md">{{ formTitle }}</h6>
+      <h6 class="q-mt-none q-mb-md">
+        {{ formTitle }}
+        <InfoTooltip :text="$t('BucketManager.info.tooltip')" />
+      </h6>
       <q-form ref="bucketForm">
         <q-input
           v-model="form.name"
@@ -162,6 +165,7 @@ import { useProofsStore } from "stores/proofs";
 import { storeToRefs } from "pinia";
 import { useUiStore } from "stores/ui";
 import { notifyError } from "src/js/notify";
+import InfoTooltip from "./InfoTooltip.vue";
 
 export default defineComponent({
   name: "BucketManager",
@@ -277,6 +281,7 @@ export default defineComponent({
       deleteBucket,
       formatCurrency,
       handleDrop,
+      InfoTooltip,
     };
   },
 });

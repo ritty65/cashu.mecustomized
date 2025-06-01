@@ -1354,9 +1354,13 @@
                       @click="checkActiveProofsSpendable"
                       >{{
                         $t("Settings.advanced.developer.remove_spent.button")
-                      }}</q-btn
-                    ></row
-                  ><row>
+                      }}</q-btn>
+                    <InfoTooltip
+                      class="q-ml-xs"
+                      :text="$t('Settings.tooltips.proofs')"
+                    />
+                  </row>
+                  <row>
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
@@ -1393,8 +1397,13 @@
                       {{
                         $t("Settings.advanced.developer.export_proofs.button")
                       }}
-                    </q-btn></row
-                  ><row>
+                    </q-btn>
+                    <InfoTooltip
+                      class="q-ml-xs"
+                      :text="$t('Settings.tooltips.proofs')"
+                    />
+                  </row>
+                  <row>
                     <q-item-label class="q-px-sm" caption
                       >{{
                         $t(
@@ -1601,6 +1610,7 @@ import { useReceiveTokensStore } from "../stores/receiveTokensStore";
 import { useWelcomeStore } from "src/stores/welcome";
 import { useStorageStore } from "src/stores/storage";
 import { useI18n } from "vue-i18n";
+import InfoTooltip from "./InfoTooltip.vue";
 
 export default defineComponent({
   name: "SettingsView",
@@ -1608,6 +1618,7 @@ export default defineComponent({
   components: {
     P2PKDialog,
     NWCDialog,
+    InfoTooltip,
   },
   props: {},
   data: function () {

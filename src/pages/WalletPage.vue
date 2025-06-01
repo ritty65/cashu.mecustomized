@@ -80,11 +80,10 @@
             :label="$t('WalletPage.tabs.invoices.label')"
           ></q-tab>
           <!-- <q-tab name="tokens" label="Tokens"></q-tab> -->
-          <q-tab
-            name="mints"
-            class="text-secondary"
-            :label="$t('WalletPage.tabs.mints.label')"
-          ></q-tab>
+          <q-tab name="mints" class="text-secondary">
+            <span>{{ $t('WalletPage.tabs.mints.label') }}</span>
+            <InfoTooltip :text="$t('WalletPage.tabs.mints.tooltip')" />
+          </q-tab>
           <q-tab
             name="buckets"
             class="text-secondary"
@@ -245,6 +244,7 @@ import iOSPWAPrompt from "components/iOSPWAPrompt.vue";
 import AndroidPWAPrompt from "components/AndroidPWAPrompt.vue";
 import ActivityOrb from "components/ActivityOrb.vue";
 import BucketManager from "components/BucketManager.vue";
+import InfoTooltip from "components/InfoTooltip.vue";
 
 // pinia stores
 import { mapActions, mapState, mapWritableState } from "pinia";
@@ -301,6 +301,7 @@ export default {
     ScanIcon,
     ActivityOrb,
     BucketManager,
+    InfoTooltip,
   },
   data: function () {
     return {

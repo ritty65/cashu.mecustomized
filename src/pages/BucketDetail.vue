@@ -1,7 +1,10 @@
 <template>
   <div class="q-pa-md" v-if="bucket">
     <div class="q-mb-lg">
-      <h5 class="q-my-none">{{ bucket.name }}</h5>
+      <h5 class="q-my-none">
+        {{ bucket.name }}
+        <InfoTooltip :text="$t('BucketDetail.info.tooltip')" />
+      </h5>
       <div v-if="bucket.description" class="text-caption q-mt-xs">{{ bucket.description }}</div>
       <div class="text-secondary q-mt-sm">
         <span>{{ formatCurrency(bucketBalance, activeUnit) }}</span>
@@ -104,6 +107,7 @@ import SendTokenDialog from 'components/SendTokenDialog.vue';
 import HistoryTable from 'components/HistoryTable.vue';
 import LockedTokensTable from 'components/LockedTokensTable.vue';
 import { notifyError } from 'src/js/notify';
+import InfoTooltip from 'components/InfoTooltip.vue';
 
 const route = useRoute();
 const bucketsStore = useBucketsStore();
