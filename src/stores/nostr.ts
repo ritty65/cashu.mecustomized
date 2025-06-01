@@ -339,7 +339,8 @@ export const useNostrStore = defineStore("nostr", {
     sendNip04DirectMessage: async function (
       recipient: string,
       message: string
-    ) {
+    ): Promise<NDKEvent | null> {
+      await this.walletSeedGenerateKeyPair();
       const ndk = new NDK({ signer: this.seedSigner });
       const event = new NDKEvent(ndk);
       event.kind = NDKKind.EncryptedDirectMessage;
@@ -356,28 +357,32 @@ export const useNostrStore = defineStore("nostr", {
 
       const pool = new SimplePool();
       const nostrEvent = await event.toNostrEvent();
-      const pub = pool.publish(this.relays, nostrEvent);
+      const result = pool.publish(this.relays, nostrEvent);
+
+      const pubs = Array.isArray(result) ? result : [result];
 
       let published = false;
-
-      pub.on("ok", (relay: any) => {
-        console.log(`Relay ${relay.url} accepted event`);
-        published = true;
-      });
-      pub.on("failed", (reason: any) => {
-        console.error(`Publish failed: ${reason}`);
-      });
-      pub.on("seen", (relay: any) => {
-        console.log(`Relay ${relay.url} already had event`);
+      pubs.forEach((pub) => {
+        pub.on("ok", () => {
+          published = true;
+        });
+        pub.on("seen", () => {
+          published = true;
+        });
+        pub.on("failed", (reason: any) => {
+          console.error(`Publish failed: ${reason}`);
+        });
       });
 
       await new Promise((resolve) => setTimeout(resolve, 3000));
 
       if (published) {
         notifySuccess("NIP-04 event published");
-      } else {
-        notifyError("Could not publish NIP-04 event");
+        return event;
       }
+
+      notifyError("Could not publish NIP-04 event");
+      return null;
     },
     subscribeToNip04DirectMessages: async function () {
       await this.walletSeedGenerateKeyPair();
@@ -491,19 +496,21 @@ export const useNostrStore = defineStore("nostr", {
 
       const pool = new SimplePool();
       const nostrEvent = await wrapEvent.toNostrEvent();
-      const pub = pool.publish(relays ?? this.relays, nostrEvent);
+      const result = pool.publish(relays ?? this.relays, nostrEvent);
+
+      const pubs = Array.isArray(result) ? result : [result];
 
       let published = false;
-
-      pub.on("ok", (relay: any) => {
-        console.log(`Relay ${relay.url} accepted event`);
-        published = true;
-      });
-      pub.on("failed", (reason: any) => {
-        console.error(`Publish failed: ${reason}`);
-      });
-      pub.on("seen", (relay: any) => {
-        console.log(`Relay ${relay.url} already had event`);
+      pubs.forEach((pub) => {
+        pub.on("ok", () => {
+          published = true;
+        });
+        pub.on("seen", () => {
+          published = true;
+        });
+        pub.on("failed", (reason: any) => {
+          console.error(`Publish failed: ${reason}`);
+        });
       });
 
       await new Promise((resolve) => setTimeout(resolve, 3000));
