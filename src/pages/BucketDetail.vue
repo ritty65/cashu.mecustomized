@@ -53,10 +53,14 @@
         <q-btn color="primary" outline :disable="!selectedSecrets.length" @click="sendSelected">
           {{ $t('BucketDetail.send') }}
         </q-btn>
+        <q-btn color="primary" outline @click="importTokens">
+          {{ $t('BucketDetail.import') }}
+        </q-btn>
       </div>
     </div>
 
     <SendTokenDialog />
+    <ReceiveTokenDialog v-model="showReceiveTokens" />
     <q-dialog v-model="editDialog.show">
       <q-card class="q-pa-md" style="max-width: 400px">
         <h6 class="q-mt-none q-mb-md">Edit token</h6>
@@ -98,9 +102,11 @@ import { useSendTokensStore } from 'stores/sendTokensStore';
 import { useTokensStore, HistoryToken } from 'stores/tokens';
 import { useLockedTokensStore } from 'stores/lockedTokens';
 import SendTokenDialog from 'components/SendTokenDialog.vue';
+import ReceiveTokenDialog from 'components/ReceiveTokenDialog.vue';
 import HistoryTable from 'components/HistoryTable.vue';
 import LockedTokensTable from 'components/LockedTokensTable.vue';
 import { notifyError } from 'src/js/notify';
+import { useReceiveTokensStore } from 'stores/receiveTokensStore';
 
 const route = useRoute();
 const bucketsStore = useBucketsStore();
@@ -110,6 +116,7 @@ const uiStore = useUiStore();
 const sendTokensStore = useSendTokensStore();
 const tokensStore = useTokensStore();
 const lockedTokensStore = useLockedTokensStore();
+const receiveTokensStore = useReceiveTokensStore();
 
 const bucketId = route.params.id as string;
 const bucket = computed(() => bucketsStore.bucketList.find(b => b.id === bucketId));
@@ -118,6 +125,7 @@ const bucketBalance = computed(() => bucketProofs.value.reduce((s,p)=>s+p.amount
 const bucketLockedTokens = computed(() => lockedTokensStore.tokensByBucket(bucketId));
 const { activeUnit } = storeToRefs(mintsStore);
 const showSendTokens = storeToRefs(sendTokensStore).showSendTokens;
+const showReceiveTokens = storeToRefs(receiveTokensStore).showReceiveTokens;
 
 const selectedSecrets = ref<string[]>([]);
 const targetBucketId = ref<string | null>(null);
@@ -233,5 +241,11 @@ function sendSelected(){
   sendTokensStore.clearSendData();
   sendTokensStore.sendData.tokensBase64 = token;
   showSendTokens.value = true;
+}
+
+function importTokens(){
+  receiveTokensStore.receiveData.bucketId = bucketId;
+  receiveTokensStore.receiveData.tokensBase64 = '';
+  showReceiveTokens.value = true;
 }
 </script>

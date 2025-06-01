@@ -1329,6 +1329,7 @@ export default {
   BucketDetail: {
     move: "Move tokens",
     send: "Send tokens",
+    import: "Import tokens",
     locked_tokens_heading: "Locked tokens",
     inputs: {
       target_bucket: {

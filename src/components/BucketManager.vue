@@ -66,6 +66,13 @@
                 size="sm"
                 @click.stop.prevent="openDelete(bucket.id)"
               />
+              <q-btn
+                icon="arrow_circle_down"
+                flat
+                round
+                size="sm"
+                @click.stop.prevent="importTokens(bucket.id)"
+              />
             </q-item-section>
           </q-item>
         </router-link>
@@ -151,6 +158,8 @@
       </q-card-actions>
     </q-card>
   </q-dialog>
+
+  <ReceiveTokenDialog v-model="showReceiveTokens" />
 </template>
 
 <script>
@@ -162,6 +171,8 @@ import { useProofsStore } from "stores/proofs";
 import { storeToRefs } from "pinia";
 import { useUiStore } from "stores/ui";
 import { notifyError } from "src/js/notify";
+import ReceiveTokenDialog from "./ReceiveTokenDialog.vue";
+import { useReceiveTokensStore } from "stores/receiveTokensStore";
 
 export default defineComponent({
   name: "BucketManager",
@@ -172,6 +183,8 @@ export default defineComponent({
     const showForm = ref(false);
     const bucketForm = ref(null);
     const showDelete = ref(false);
+    const receiveTokensStore = useReceiveTokensStore();
+    const showReceiveTokens = storeToRefs(receiveTokensStore).showReceiveTokens;
     const editId = ref(null);
     const deleteId = ref(null);
     const form = ref({
@@ -253,6 +266,12 @@ export default defineComponent({
       showDelete.value = true;
     };
 
+    const importTokens = (id) => {
+      receiveTokensStore.receiveData.bucketId = id;
+      receiveTokensStore.receiveData.tokensBase64 = "";
+      showReceiveTokens.value = true;
+    };
+
     const deleteBucket = () => {
       bucketsStore.deleteBucket(deleteId.value);
       showDelete.value = false;
@@ -277,6 +296,8 @@ export default defineComponent({
       deleteBucket,
       formatCurrency,
       handleDrop,
+      importTokens,
+      showReceiveTokens,
     };
   },
 });
