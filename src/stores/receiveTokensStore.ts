@@ -17,8 +17,9 @@ import { Clipboard } from "@capacitor/clipboard";
 import { DEFAULT_BUCKET_ID } from "./buckets";
 
 function isValidTokenString(tokenStr: string): boolean {
+  const sanitized = tokenStr.replace(/\s+/g, "");
   const prefixRegex = /^cashu[A-B][0-9A-Za-z]+$/;
-  return prefixRegex.test(tokenStr);
+  return prefixRegex.test(sanitized);
 }
 
 export const useReceiveTokensStore = defineStore("receiveTokensStore", {
@@ -35,6 +36,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
   }),
   actions: {
     decodeToken: function (encodedToken: string) {
+      encodedToken = encodedToken.replace(/\s+/g, "");
       if (!isValidTokenString(encodedToken)) {
         console.error("Invalid token string");
         return undefined;

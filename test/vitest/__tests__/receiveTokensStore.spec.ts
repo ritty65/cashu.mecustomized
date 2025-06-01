@@ -27,4 +27,17 @@ describe("receiveTokensStore.decodeToken", () => {
     const store = useReceiveTokensStore();
     expect(store.decodeToken("cashuAinvalid")).toBeUndefined();
   });
+
+  it("decodes token with surrounding whitespace", () => {
+    const store = useReceiveTokensStore();
+    const decoded = store.decodeToken(`  ${VALID_TOKEN}\n`);
+    expect(decoded?.mint).toBe("https://8333.space:3338");
+  });
+
+  it("decodes token with internal whitespace", () => {
+    const store = useReceiveTokensStore();
+    const spaced = `${VALID_TOKEN.slice(0, 5)} \n${VALID_TOKEN.slice(5)}`;
+    const decoded = store.decodeToken(spaced);
+    expect(decoded?.mint).toBe("https://8333.space:3338");
+  });
 });
