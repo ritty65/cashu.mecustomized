@@ -600,6 +600,7 @@ import token from "src/js/token";
 import { Buffer } from "buffer";
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
+import { useNostrStore } from "src/stores/nostr";
 import TokenInformation from "components/TokenInformation.vue";
 import { getDecodedToken, getEncodedTokenV4 } from "@cashu/cashu-ts";
 import { DEFAULT_BUCKET_ID, useBucketsStore } from "src/stores/buckets";
@@ -669,6 +670,8 @@ export default defineComponent({
       "showSendTokens",
       "showLockInput",
       "sendData",
+      "recipientPubkey",
+      "sendViaNostr",
     ]),
     ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
     ...mapState(useUiStore, [
@@ -820,6 +823,8 @@ export default defineComponent({
         this.sendData.tokensBase64 = "";
         this.sendData.historyToken = null;
         this.sendData.paymentRequest = null;
+        this.recipientPubkey = "";
+        this.sendViaNostr = false;
       }
     },
     locktimeInput(val) {
@@ -1109,8 +1114,20 @@ export default defineComponent({
         );
         // update UI
         this.sendData.tokens = sendProofs;
-
         this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
+        if (this.sendViaNostr && this.recipientPubkey) {
+          try {
+            await useNostrStore().sendNip17DirectMessage(
+              this.recipientPubkey,
+              this.sendData.tokensBase64
+            );
+            this.recipientPubkey = "";
+            this.sendViaNostr = false;
+          } catch (e) {
+            console.error(e);
+            notifyError("Failed to send token via Nostr");
+          }
+        }
         useLockedTokensStore().addLockedToken({
           amount: sendAmount,
           token: this.sendData.tokensBase64,
@@ -1175,6 +1192,19 @@ export default defineComponent({
         // update UI
         this.sendData.tokens = sendProofs;
         this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
+        if (this.sendViaNostr && this.recipientPubkey) {
+          try {
+            await useNostrStore().sendNip17DirectMessage(
+              this.recipientPubkey,
+              this.sendData.tokensBase64
+            );
+            this.recipientPubkey = "";
+            this.sendViaNostr = false;
+          } catch (e) {
+            console.error(e);
+            notifyError("Failed to send token via Nostr");
+          }
+        }
         this.sendData.historyAmount =
           -this.sendData.amount * this.activeUnitCurrencyMultiplyer;
 

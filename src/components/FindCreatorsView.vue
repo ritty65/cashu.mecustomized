@@ -82,6 +82,8 @@ export default defineComponent({
       sendTokensStore.sendData.bucketId = bucketId;
       sendTokensStore.sendData.p2pkPubkey = locked ? donateCreator.value.pubkey : "";
       sendTokensStore.showLockInput = locked;
+      sendTokensStore.recipientPubkey = donateCreator.value.pubkey;
+      sendTokensStore.sendViaNostr = true;
       showDonateDialog.value = false;
       sendTokensStore.showSendTokens = true;
     };
