@@ -7,6 +7,7 @@
         <span>{{ formatCurrency(bucketBalance, activeUnit) }}</span>
         <span v-if="bucket.goal"> / {{ formatCurrency(bucket.goal, activeUnit) }}</span>
       </div>
+      <div class="text-caption q-mt-xs">{{ bucketTokenCount }} tokens</div>
     </div>
 
     <q-list bordered>
@@ -113,9 +114,16 @@ const lockedTokensStore = useLockedTokensStore();
 
 const bucketId = route.params.id as string;
 const bucket = computed(() => bucketsStore.bucketList.find(b => b.id === bucketId));
-const bucketProofs = computed(() => proofsStore.proofs.filter(p => p.bucketId === bucketId && !p.reserved));
-const bucketBalance = computed(() => bucketProofs.value.reduce((s,p)=>s+p.amount,0));
-const bucketLockedTokens = computed(() => lockedTokensStore.tokensByBucket(bucketId));
+const bucketProofs = computed(() =>
+  proofsStore.proofs.filter(p => p.bucketId === bucketId && !p.reserved)
+);
+const bucketBalance = computed(() =>
+  bucketProofs.value.reduce((s, p) => s + p.amount, 0)
+);
+const bucketTokenCount = computed(() => bucketsStore.bucketTokenCount(bucketId));
+const bucketLockedTokens = computed(() =>
+  lockedTokensStore.tokensByBucket(bucketId)
+);
 const { activeUnit } = storeToRefs(mintsStore);
 const showSendTokens = storeToRefs(sendTokensStore).showSendTokens;
 

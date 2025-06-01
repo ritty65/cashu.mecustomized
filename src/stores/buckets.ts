@@ -77,6 +77,22 @@ export const useBucketsStore = defineStore("buckets", {
       });
       return balances;
     },
+    bucketTokenCount: () => (bucketId: string): number => {
+      const proofsStore = useProofsStore();
+      return proofsStore.proofs.filter(
+        (p) => p.bucketId === bucketId && !p.reserved
+      ).length;
+    },
+    bucketTokenCounts(): Record<string, number> {
+      const proofsStore = useProofsStore();
+      const counts: Record<string, number> = {};
+      this.bucketList.forEach((bucket) => {
+        counts[bucket.id] = proofsStore.proofs.filter(
+          (p) => p.bucketId === bucket.id && !p.reserved
+        ).length;
+      });
+      return counts;
+    },
     lockedBucketBalance: () => (bucketId: string): number => {
       const ltStore = useLockedTokensStore();
       return ltStore.lockedTokens

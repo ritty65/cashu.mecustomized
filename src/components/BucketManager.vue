@@ -43,6 +43,7 @@
                 <span v-if="bucket.goal"
                   >/ {{ formatCurrency(bucket.goal, activeUnit.value) }}</span
                 >
+                <span class="q-ml-sm">({{ bucketTokenCounts[bucket.id] ?? 0 }})</span>
               </q-item-label>
               <q-linear-progress
                 v-if="bucket.goal"
@@ -183,6 +184,7 @@ export default defineComponent({
 
     const bucketList = computed(() => bucketsStore.bucketList);
     const bucketBalances = computed(() => bucketsStore.bucketBalances);
+    const bucketTokenCounts = computed(() => bucketsStore.bucketTokenCounts);
 
     const formatCurrency = (amount, unit) => {
       return uiStore.formatCurrency(amount, unit);
@@ -262,6 +264,7 @@ export default defineComponent({
       DEFAULT_BUCKET_ID,
       bucketList,
       bucketBalances,
+      bucketTokenCounts,
       activeUnit,
       showForm,
       showDelete,

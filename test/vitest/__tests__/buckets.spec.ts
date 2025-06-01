@@ -116,4 +116,26 @@ describe('Buckets store', () => {
     expect(ht.label).toBe('My label')
     expect(ht.color).toBe('#00ff00')
   })
+
+  it('computes token counts per bucket', async () => {
+    const buckets = useBucketsStore()
+    const proofsStore = useProofsStore()
+
+    const b1 = buckets.addBucket({ name: 'B1' })!
+    await proofsStore.addProofs([
+      { id: 'a', amount: 1, C: 'c1', secret: 's1' },
+      { id: 'a', amount: 2, C: 'c2', secret: 's2' }
+    ], undefined, b1.id)
+
+    await proofsStore.addProofs([
+      { id: 'a', amount: 1, C: 'c3', secret: 's3' }
+    ], undefined, DEFAULT_BUCKET_ID)
+
+    await proofsStore.setReserved([{ id: 'a', amount: 2, C: 'c2', secret: 's2' }])
+
+    expect(buckets.bucketTokenCount(b1.id)).toBe(1)
+    const counts = buckets.bucketTokenCounts()
+    expect(counts[b1.id]).toBe(1)
+    expect(counts[DEFAULT_BUCKET_ID]).toBe(1)
+  })
 })
