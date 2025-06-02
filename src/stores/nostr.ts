@@ -124,6 +124,9 @@ export const useNostrStore = defineStore("nostr", {
   },
   actions: {
     initNdkReadOnly: function () {
+      if (this.connected && this.ndk) {
+        return;
+      }
       this.ndk = new NDK({ explicitRelayUrls: this.relays });
       this.ndk.connect();
       this.connected = true;
@@ -169,7 +172,7 @@ export const useNostrStore = defineStore("nostr", {
       if (this.profiles[pubkey]) {
         return this.profiles[pubkey];
       }
-      await this.initNdkReadOnly();
+      this.initNdkReadOnly();
       try {
         const user = this.ndk.getUser({ pubkey });
         await user.fetchProfile();
@@ -286,7 +289,7 @@ export const useNostrStore = defineStore("nostr", {
     },
 
     fetchFollowerCount: async function (pubkey: string): Promise<number> {
-      await this.initNdkReadOnly();
+      this.initNdkReadOnly();
       const filter: NDKFilter = { kinds: [3], "#p": [pubkey] };
       const events = await this.ndk.fetchEvents(filter);
       const authors = new Set<string>();
@@ -295,7 +298,7 @@ export const useNostrStore = defineStore("nostr", {
     },
 
     fetchFollowingCount: async function (pubkey: string): Promise<number> {
-      await this.initNdkReadOnly();
+      this.initNdkReadOnly();
       const filter: NDKFilter = { kinds: [3], authors: [pubkey] };
       const events = await this.ndk.fetchEvents(filter);
       let latest: NDKEvent | undefined;
@@ -315,7 +318,7 @@ export const useNostrStore = defineStore("nostr", {
     },
 
     fetchJoinDate: async function (pubkey: string): Promise<number | null> {
-      await this.initNdkReadOnly();
+      this.initNdkReadOnly();
       const filter: NDKFilter = { kinds: [0, 1], authors: [pubkey] };
       const events = await this.ndk.fetchEvents(filter);
       let earliest: number | null = null;
@@ -385,7 +388,7 @@ export const useNostrStore = defineStore("nostr", {
     },
     subscribeToNip04DirectMessages: async function () {
       await this.walletSeedGenerateKeyPair();
-      await this.initNdkReadOnly();
+      this.initNdkReadOnly();
       let nip04DirectMessageEvents: Set<NDKEvent> = new Set();
       const fetchEventsPromise = new Promise<Set<NDKEvent>>((resolve) => {
         if (!this.lastEventTimestamp) {
@@ -511,7 +514,7 @@ export const useNostrStore = defineStore("nostr", {
     },
     subscribeToNip17DirectMessages: async function () {
       await this.walletSeedGenerateKeyPair();
-      await this.initNdkReadOnly();
+      this.initNdkReadOnly();
       let nip17DirectMessageEvents: Set<NDKEvent> = new Set();
       const fetchEventsPromise = new Promise<Set<NDKEvent>>((resolve) => {
         if (!this.lastEventTimestamp) {

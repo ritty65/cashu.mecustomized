@@ -7,6 +7,7 @@ const getUserMock = vi.fn(() => ({ fetchProfile, profile: userProfile }));
 const nostrStoreMock = {
   initNdkReadOnly: vi.fn(),
   ndk: { getUser: getUserMock },
+  getProfile: vi.fn().mockResolvedValue(userProfile),
   fetchFollowerCount: vi.fn().mockResolvedValue(10),
   fetchFollowingCount: vi.fn().mockResolvedValue(5),
   fetchJoinDate: vi.fn().mockResolvedValue(123456),
@@ -41,6 +42,16 @@ describe("Creators store", () => {
     expect(creators.searchResults[0].joined).toBe(123456);
   });
 
+  it("populates searchResults for valid nprofile", async () => {
+    (nip19.decode as any).mockReturnValue({ data: { pubkey: "e".repeat(64) } });
+    const creators = useCreatorsStore();
+    await creators.searchCreators("nprofile1xyz");
+
+    expect(creators.error).toBe("");
+    expect(creators.searchResults.length).toBe(1);
+    expect(creators.searchResults[0].pubkey).toBe("e".repeat(64));
+  });
+
   it("populates searchResults for hex pubkey", async () => {
     const creators = useCreatorsStore();
     await creators.searchCreators("a".repeat(64));
@@ -70,6 +81,7 @@ describe("Creators store", () => {
   });
 
   it("loads featured creators", async () => {
+    (nip19.decode as any).mockReturnValue({ data: "f".repeat(64) });
     const creators = useCreatorsStore();
     await creators.loadFeaturedCreators();
 

@@ -1314,6 +1314,7 @@ export default {
       followers: "Followers",
       following: "Following",
       joined: "Joined",
+      no_results: "No creators found",
     },
     actions: {
       donate: {

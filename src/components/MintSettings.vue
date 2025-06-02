@@ -656,7 +656,7 @@ export default defineComponent({
     },
     fetchMintsFromNdk: async function () {
       this.discoveringMints = true;
-      await this.initNdkReadOnly();
+      this.initNdkReadOnly();
       console.log("### fetch mints");
       let maxTries = 5;
       let tries = 0;
