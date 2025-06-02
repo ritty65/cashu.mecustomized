@@ -47,7 +47,7 @@ describe('CreatorHub store', () => {
   it('addTier stores tier and calls saveTier', () => {
     const store = useCreatorHubStore()
     const spy = vi.spyOn(store, 'saveTier').mockResolvedValue()
-    store.addTier({ name: 'Tier 1', price: 5, perks: 'p' })
+    store.addTier({ name: 'Tier 1', price: 5, description: 'p' })
     const tier = store.getTierArray()[0]
     expect(tier.name).toBe('Tier 1')
     expect(spy).toHaveBeenCalledWith(tier)
@@ -55,7 +55,7 @@ describe('CreatorHub store', () => {
 
   it('saveTier creates proper nostr event', async () => {
     const store = useCreatorHubStore()
-    const tier = { id: 'id1', name: 'T', price: 1, perks: 'p', welcomeMessage: 'w' }
+    const tier = { id: 'id1', name: 'T', price: 1, description: 'p', welcomeMessage: 'w' }
     await store.saveTier(tier)
     expect(nostrStoreMock.initSignerIfNotSet).toHaveBeenCalled()
     expect(createdEvents).toHaveLength(1)
