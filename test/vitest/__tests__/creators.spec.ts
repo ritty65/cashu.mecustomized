@@ -41,6 +41,18 @@ describe("Creators store", () => {
     expect(creators.searchResults[0].joined).toBe(123456);
   });
 
+  it("populates searchResults for nprofile", async () => {
+    (nip19.decode as any).mockReturnValue({
+      data: { pubkey: "f".repeat(64) },
+    });
+    const creators = useCreatorsStore();
+    await creators.searchCreators("nprofile123");
+
+    expect(creators.error).toBe("");
+    expect(creators.searchResults.length).toBe(1);
+    expect(creators.searchResults[0].pubkey).toBe("f".repeat(64));
+  });
+
   it("populates searchResults for hex pubkey", async () => {
     const creators = useCreatorsStore();
     await creators.searchCreators("a".repeat(64));
@@ -70,6 +82,7 @@ describe("Creators store", () => {
   });
 
   it("loads featured creators", async () => {
+    (nip19.decode as any).mockReturnValue({ data: "f".repeat(64) });
     const creators = useCreatorsStore();
     await creators.loadFeaturedCreators();
 

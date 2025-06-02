@@ -123,9 +123,12 @@ export const useNostrStore = defineStore("nostr", {
     },
   },
   actions: {
-    initNdkReadOnly: function () {
+    initNdkReadOnly: async function () {
+      if (this.connected && this.ndk) {
+        return;
+      }
       this.ndk = new NDK({ explicitRelayUrls: this.relays });
-      this.ndk.connect();
+      await this.ndk.connect();
       this.connected = true;
     },
     initSignerIfNotSet: async function () {

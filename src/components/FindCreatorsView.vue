@@ -1,5 +1,5 @@
 <template>
-  <div style="max-width: 1200px; margin: 0 auto">
+  <div class="creators-container">
     <q-input
       rounded
       outlined
@@ -37,6 +37,9 @@
         @donate="openDonateDialog(creator)"
         @message="openMessageDialog(creator)"
       />
+    </div>
+    <div v-else-if="!searching" class="q-mt-md text-center">
+      {{ $t('FindCreators.labels.no_results') }}
     </div>
     <DonateDialog v-model="showDonateDialog" @confirm="handleDonate" />
     <q-dialog v-model="showActionDialog" persistent>
@@ -126,7 +129,14 @@ export default defineComponent({
       }
       clearTimeout(debounceTimeout);
       debounceTimeout = window.setTimeout(() => {
-        creatorsStore.searchCreators(val);
+        const trimmed = val.trim();
+        if (
+          /^[0-9a-fA-F]{64}$/.test(trimmed) ||
+          trimmed.startsWith("npub") ||
+          trimmed.startsWith("nprofile")
+        ) {
+          creatorsStore.searchCreators(trimmed);
+        }
       }, 500);
     });
 
@@ -282,6 +292,11 @@ export default defineComponent({
 </script>
 
 <style scoped>
+.creators-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
 .creators-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));

@@ -9,18 +9,18 @@
         <img :src="creator.profile.picture" alt="Creator image" />
       </q-avatar>
       <div class="q-ml-sm">
-        <div class="text-subtitle1">
+        <div class="text-subtitle1 ellipsis name-line">
           {{
             creator.profile?.display_name ||
             creator.profile?.name ||
-            creator.pubkey
+            shortPubkey
           }}
         </div>
-        <div class="text-caption">{{ creator.pubkey }}</div>
+        <div class="text-caption ellipsis pubkey-line">{{ shortPubkey }}</div>
       </div>
     </q-card-section>
     <q-card-section v-if="creator.profile?.about">
-      <div>{{ truncatedAbout }}</div>
+      <div class="about-text">{{ truncatedAbout }}</div>
     </q-card-section>
     <q-card-section v-if="creator.profile?.lud16">
       <div class="row items-center">
@@ -68,6 +68,10 @@ export default defineComponent({
         ? about.slice(0, MAX_LENGTH) + "…"
         : about;
     });
+    const shortPubkey = computed(() => {
+      const pk = props.creator.pubkey;
+      return pk.slice(0, 8) + "…" + pk.slice(-8);
+    });
     const joinedDateFormatted = computed(() => {
       if (!props.creator.joined) return "";
       return date.formatDate(
@@ -77,6 +81,7 @@ export default defineComponent({
     });
     return {
       truncatedAbout,
+      shortPubkey,
       joinedDateFormatted,
     };
   },
@@ -94,5 +99,14 @@ export default defineComponent({
 .creator-card.qcard {
   width: 100%;
   max-width: 280px;
+}
+.ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.about-text {
+  max-height: 4.5em;
+  overflow: hidden;
 }
 </style>
