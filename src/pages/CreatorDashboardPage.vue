@@ -35,22 +35,29 @@
               outlined
               class="q-mt-sm"
             />
-            <q-input
-              v-model.number="tier.price"
-              label="Cost (sats)"
-              type="number"
-              dense
-              outlined
-              class="q-mt-sm"
-            >
-              <template #hint>
-                <div v-if="bitcoinPrice">
-                  ~{{ formatCurrency((bitcoinPrice / 100000000) * tier.price, 'USD') }}
-                  /
-                  {{ formatCurrency((bitcoinPrice / 100000000) * tier.price, 'EUR') }}
-                </div>
-              </template>
-            </q-input>
+            <div class="row items-center q-mt-sm">
+              <q-input
+                v-model.number="tier.price"
+                :label="$t('CreatorHub.dashboard.inputs.price.label')"
+                type="number"
+                dense
+                outlined
+                class="col"
+              >
+                <template #hint>
+                  <div v-if="bitcoinPrice">
+                    ~{{ formatCurrency((bitcoinPrice / 100000000) * tier.price, 'USD') }}
+                    /
+                    {{ formatCurrency((bitcoinPrice / 100000000) * tier.price, 'EUR') }}
+                  </div>
+                </template>
+              </q-input>
+              <q-icon name="info" color="primary" class="q-ml-xs">
+                <q-tooltip class="text-grey"
+                  >This is the monthly amount supporters pledge.</q-tooltip
+                >
+              </q-icon>
+            </div>
             <q-input
               v-model="tier.description"
               label="Description (Markdown)"

@@ -18,21 +18,28 @@
           dense
           class="q-mb-sm"
         />
-        <q-input
-          v-model.number="localTier.price"
-          type="number"
-          :label="$t('CreatorHub.dashboard.inputs.price.label')"
-          outlined
-          dense
-          class="q-mb-sm"
-        >
-          <template #hint>
-            <div v-if="bitcoinPrice">
-              ~{{ formatCurrency((bitcoinPrice / 100000000) * localTier.price, 'USD') }} /
-              {{ formatCurrency((bitcoinPrice / 100000000) * localTier.price, 'EUR') }}
-            </div>
-          </template>
-        </q-input>
+        <div class="row items-center q-mb-sm">
+          <q-input
+            v-model.number="localTier.price"
+            type="number"
+            :label="$t('CreatorHub.dashboard.inputs.price.label')"
+            outlined
+            dense
+            class="col"
+          >
+            <template #hint>
+              <div v-if="bitcoinPrice">
+                ~{{ formatCurrency((bitcoinPrice / 100000000) * localTier.price, 'USD') }} /
+                {{ formatCurrency((bitcoinPrice / 100000000) * localTier.price, 'EUR') }}
+              </div>
+            </template>
+          </q-input>
+          <q-icon name="info" color="primary" class="q-ml-xs">
+            <q-tooltip class="text-grey"
+              >This is the monthly amount supporters pledge.</q-tooltip
+            >
+          </q-icon>
+        </div>
         <q-input
           v-model="localTier.description"
           type="textarea"

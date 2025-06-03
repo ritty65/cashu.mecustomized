@@ -1464,7 +1464,7 @@ export default {
           label: "Title",
         },
         price: {
-          label: "Cost (sats)",
+          label: "Cost (sats/month)",
         },
         description: {
           label: "Description (Markdown)",
