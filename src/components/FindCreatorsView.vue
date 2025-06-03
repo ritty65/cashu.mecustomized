@@ -22,9 +22,7 @@
       </template>
     </q-input>
 
-    <div class="text-h5 q-mt-md q-mb-sm text-center">
-      Featured Creators
-    </div>
+    <div class="text-h5 q-mt-md q-mb-sm text-center">Featured Creators</div>
 
     <div v-if="searching" class="q-mt-md flex flex-center">
       <q-spinner-dots color="primary" />
@@ -40,13 +38,18 @@
     </div>
 
     <div v-if="searchResults.length" class="q-mt-md creators-grid">
-      <creator-profile-card
+      <div
         v-for="creator in searchResults"
         :key="creator.pubkey"
-        :creator="creator"
-        @donate="openDonateDialog(creator)"
-        @message="openMessageDialog(creator)"
-      />
+        :ref="(el) => observe(el, creator.pubkey)"
+      >
+        <creator-profile-card
+          :creator="creator"
+          :visible="isCreatorVisible(creator.pubkey)"
+          @donate="openDonateDialog(creator)"
+          @message="openMessageDialog(creator)"
+        />
+      </div>
     </div>
     <DonateDialog v-model="showDonateDialog" @confirm="handleDonate" />
     <q-dialog v-model="showActionDialog" persistent>
@@ -78,7 +81,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch, onMounted } from "vue";
+import { defineComponent, ref, watch, onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import { useCreatorsStore } from "stores/creators";
 import CreatorProfileCard from "components/CreatorProfileCard.vue";
@@ -119,8 +122,32 @@ export default defineComponent({
     const selectedBucketId = ref<string>("");
     const selectedLocked = ref(false);
 
+    const visibleMap = ref<Record<string, boolean>>({});
+    let observer: IntersectionObserver | null = null;
+
+    const observe = (el: Element | null, pubkey: string) => {
+      if (!el || !observer) return;
+      (el as any).__pubkey = pubkey;
+      observer.observe(el);
+    };
+
+    const isCreatorVisible = (pubkey: string) => !!visibleMap.value[pubkey];
+
     onMounted(() => {
       creatorsStore.loadFeaturedCreators();
+      observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          const pk = (entry.target as any).__pubkey;
+          if (entry.isIntersecting && pk) {
+            visibleMap.value[pk] = true;
+            observer?.unobserve(entry.target);
+          }
+        });
+      });
+    });
+
+    onBeforeUnmount(() => {
+      observer?.disconnect();
     });
 
     const triggerSearch = () => {
@@ -286,6 +313,8 @@ export default defineComponent({
       showMessageDialog,
       openMessageDialog,
       sendMessage,
+      observe,
+      isCreatorVisible,
     };
   },
 });
