@@ -17,10 +17,11 @@ export const FEATURED_CREATORS = [
 
 export interface CreatorProfile {
   pubkey: string;
-  profile: any;
-  followers: number;
-  following: number;
+  profile: any | null;
+  followers: number | null;
+  following: number | null;
   joined: number | null;
+  loaded: boolean;
 }
 
 export const useCreatorsStore = defineStore("creators", {
@@ -31,14 +32,12 @@ export const useCreatorsStore = defineStore("creators", {
   }),
   actions: {
     async searchCreators(query: string) {
-      const nostrStore = useNostrStore();
       this.searchResults = [];
       this.error = "";
       if (!query) {
         return;
       }
       this.searching = true;
-      await nostrStore.initNdkReadOnly();
       let pubkey = query.trim();
       if (pubkey.startsWith("npub")) {
         try {
@@ -56,32 +55,21 @@ export const useCreatorsStore = defineStore("creators", {
         this.searching = false;
         return;
       }
-      try {
-        const user = nostrStore.ndk.getUser({ pubkey });
-        await user.fetchProfile();
-        const followers = await nostrStore.fetchFollowerCount(pubkey);
-        const following = await nostrStore.fetchFollowingCount(pubkey);
-        const joined = await nostrStore.fetchJoinDate(pubkey);
-        this.searchResults.push({
-          pubkey,
-          profile: user.profile,
-          followers,
-          following,
-          joined,
-        });
-      } catch (e) {
-        console.error(e);
-      } finally {
-        this.searching = false;
-      }
+      this.searchResults.push({
+        pubkey,
+        profile: null,
+        followers: null,
+        following: null,
+        joined: null,
+        loaded: false,
+      });
+      this.searching = false;
     },
 
     async loadFeaturedCreators() {
-      const nostrStore = useNostrStore();
       this.searchResults = [];
       this.error = "";
       this.searching = true;
-      await nostrStore.initNdkReadOnly();
 
       const pubkeys: string[] = [];
       for (const entry of FEATURED_CREATORS) {
@@ -105,40 +93,39 @@ export const useCreatorsStore = defineStore("creators", {
         pubkeys.push(pubkey);
       }
 
-      try {
-        const results = await Promise.all(
-          pubkeys.map(async (pubkey) => {
-            try {
-              const user = nostrStore.ndk.getUser({ pubkey });
-              const [_, followers, following, joined] = await Promise.all([
-                user.fetchProfile(),
-                nostrStore.fetchFollowerCount(pubkey),
-                nostrStore.fetchFollowingCount(pubkey),
-                nostrStore.fetchJoinDate(pubkey),
-              ]);
-              return {
-                pubkey,
-                profile: user.profile,
-                followers,
-                following,
-                joined,
-              } as CreatorProfile;
-            } catch (e) {
-              console.error(e);
-              return null;
-            }
-          }),
-        );
-
-        results.forEach((res) => {
-          if (res) {
-            this.searchResults.push(res);
-          }
+      pubkeys.forEach((pubkey) => {
+        this.searchResults.push({
+          pubkey,
+          profile: null,
+          followers: null,
+          following: null,
+          joined: null,
+          loaded: false,
         });
+      });
+      this.searching = false;
+    },
+
+    async loadCreatorDetails(pubkey: string) {
+      const nostrStore = useNostrStore();
+      const creator = this.searchResults.find((c) => c.pubkey === pubkey);
+      if (!creator || creator.loaded) return;
+      await nostrStore.initNdkReadOnly();
+      try {
+        const user = nostrStore.ndk.getUser({ pubkey });
+        const [_, followers, following, joined] = await Promise.all([
+          user.fetchProfile(),
+          nostrStore.fetchFollowerCount(pubkey),
+          nostrStore.fetchFollowingCount(pubkey),
+          nostrStore.fetchJoinDate(pubkey),
+        ]);
+        creator.profile = user.profile;
+        creator.followers = followers;
+        creator.following = following;
+        creator.joined = joined;
+        creator.loaded = true;
       } catch (e) {
         console.error(e);
-      } finally {
-        this.searching = false;
       }
     },
   },

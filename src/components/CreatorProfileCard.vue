@@ -2,8 +2,9 @@
   <q-card class="q-pa-md q-mb-md qcard creator-card shadow-2 rounded-borders">
     <q-card-section class="row items-center no-wrap">
       <q-avatar size="56px" class="creator-avatar">
+        <q-skeleton v-if="!creator.profile" type="QAvatar" />
         <img
-          v-if="creator.profile?.picture"
+          v-else-if="creator.profile.picture"
           :src="creator.profile.picture"
           alt="Creator image"
         />
@@ -25,17 +26,26 @@
     <q-card-section v-if="creator.profile?.about">
       <div class="truncated-text">{{ truncatedAbout }}</div>
     </q-card-section>
+    <q-card-section v-else>
+      <q-skeleton type="text" height="48px" width="100%" />
+    </q-card-section>
     <q-card-section v-if="creator.profile?.lud16">
       <div class="row items-center">
         <q-icon name="bolt" size="xs" class="q-mr-xs" />
         <span>{{ creator.profile.lud16 }}</span>
       </div>
     </q-card-section>
-    <q-card-section class="text-caption">
+    <q-card-section class="text-caption" v-if="creator.loaded">
       {{ $t("FindCreators.labels.view_profile_stats") }}
     </q-card-section>
-    <q-card-section class="text-caption" v-if="joinedDateFormatted">
+    <q-card-section class="text-caption" v-else>
+      <q-skeleton type="text" width="60%" />
+    </q-card-section>
+    <q-card-section class="text-caption" v-if="creator.loaded && joinedDateFormatted">
       {{ $t("FindCreators.labels.joined") }}: {{ joinedDateFormatted }}
+    </q-card-section>
+    <q-card-section class="text-caption" v-else>
+      <q-skeleton type="text" width="40%" />
     </q-card-section>
     <q-card-actions class="q-mt-sm">
       <q-btn color="primary" unelevated class="full-width" :to="profileLink">

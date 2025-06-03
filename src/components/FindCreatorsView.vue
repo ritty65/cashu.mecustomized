@@ -40,13 +40,17 @@
     </div>
 
     <div v-if="searchResults.length" class="q-mt-md creators-grid">
-      <creator-profile-card
+      <div
         v-for="creator in searchResults"
         :key="creator.pubkey"
-        :creator="creator"
-        @donate="openDonateDialog(creator)"
-        @message="openMessageDialog(creator)"
-      />
+        :ref="el => registerIntersection(el, creator.pubkey)"
+      >
+        <creator-profile-card
+          :creator="creator"
+          @donate="openDonateDialog(creator)"
+          @message="openMessageDialog(creator)"
+        />
+      </div>
     </div>
     <DonateDialog v-model="showDonateDialog" @confirm="handleDonate" />
     <q-dialog v-model="showActionDialog" persistent>
@@ -78,7 +82,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch, onMounted } from "vue";
+import { defineComponent, ref, watch, onMounted, onBeforeUnmount } from "vue";
 import { useRouter } from "vue-router";
 import { useCreatorsStore } from "stores/creators";
 import CreatorProfileCard from "components/CreatorProfileCard.vue";
@@ -119,8 +123,33 @@ export default defineComponent({
     const selectedBucketId = ref<string>("");
     const selectedLocked = ref(false);
 
+    let observer: IntersectionObserver | null = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const key = (entry.target as any).__pubkey;
+            if (key) {
+              creatorsStore.loadCreatorDetails(key);
+            }
+            observer?.unobserve(entry.target);
+          }
+        });
+      },
+      { rootMargin: '100px' },
+    );
+
+    const registerIntersection = (el: Element | null, pubkey: string) => {
+      if (!el) return;
+      (el as any).__pubkey = pubkey;
+      observer?.observe(el);
+    };
+
     onMounted(() => {
       creatorsStore.loadFeaturedCreators();
+    });
+
+    onBeforeUnmount(() => {
+      observer?.disconnect();
     });
 
     const triggerSearch = () => {
@@ -286,6 +315,7 @@ export default defineComponent({
       showMessageDialog,
       openMessageDialog,
       sendMessage,
+      registerIntersection,
     };
   },
 });
