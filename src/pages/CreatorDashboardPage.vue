@@ -108,6 +108,7 @@ import {
   onMounted,
   computed,
 } from 'vue';
+import { notifySuccess } from 'src/js/notify';
 import { useCreatorHubStore, Tier } from 'stores/creatorHub';
 import AddTierDialog from 'components/AddTierDialog.vue';
 import { useNostrStore } from 'stores/nostr';
@@ -163,6 +164,7 @@ export default defineComponent({
     const saveNewTier = (tier: Partial<Tier>) => {
       showAddTierDialog.value = false;
       store.addTier(tier);
+      notifySuccess(`Tier '${tier.name}' saved successfully!`);
     };
 
     const saveAllTiers = () => {
@@ -175,6 +177,7 @@ export default defineComponent({
 
     const saveTier = (tier: Tier) => {
       store.updateTier(tier.id, { ...tier });
+      notifySuccess(`Tier '${tier.name}' saved successfully!`);
     };
 
     const bitcoinPrice = computed(() => priceStore.bitcoinPrice);

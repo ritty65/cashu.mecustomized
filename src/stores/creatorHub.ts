@@ -57,11 +57,11 @@ export const useCreatorHubStore = defineStore("creatorHub", {
       this.tiers[id] = newTier;
       this.saveTier(newTier);
     },
-    updateTier(id: string, updates: Partial<Tier>) {
+    async updateTier(id: string, updates: Partial<Tier>) {
       const existing = this.tiers[id];
       if (!existing) return;
       this.tiers[id] = { ...existing, ...updates };
-      this.saveTier(this.tiers[id]);
+      return this.saveTier(this.tiers[id]);
     },
     async saveTier(tier: Tier) {
       const nostr = useNostrStore();
