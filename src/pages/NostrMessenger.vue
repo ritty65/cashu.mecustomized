@@ -39,6 +39,17 @@
             class="q-ml-sm"
             @click="drawer = !drawer"
           />
+          <q-btn
+            flat
+            dense
+            round
+            size="0.8em"
+            :icon="$q.dark.isActive ? 'wb_sunny' : 'brightness_3'"
+            color="primary"
+            aria-label="Toggle Dark Mode"
+            class="q-ml-sm"
+            @click="toggleDarkMode"
+          />
           <q-toolbar-title class="text-h6">
             Nostr Messenger
             <q-badge
@@ -60,6 +71,7 @@
 
 <script lang="ts" setup>
 import { computed, ref, onMounted } from 'vue';
+import { useQuasar } from 'quasar';
 import { useRouter } from 'vue-router';
 import { useMessengerStore } from 'src/stores/messenger';
 
@@ -78,12 +90,19 @@ onMounted(() => {
   messenger.start();
 });
 
+const $q = useQuasar();
+
 const router = useRouter();
 
 const drawer = ref(true);
 const selected = ref('');
 const messages = computed(() => messenger.conversations[selected.value] || []);
 const eventLog = computed(() => messenger.eventLog);
+
+const toggleDarkMode = () => {
+  $q.dark.toggle();
+  $q.localStorage.set('cashu.darkMode', $q.dark.isActive);
+};
 
 const selectConversation = (pubkey: string) => {
   selected.value = pubkey;
