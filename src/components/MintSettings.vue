@@ -159,9 +159,7 @@
                         display: inline-block;
                       "
                     >
-                      <span
-                        style="color: white; font-size: 14px; font-weight: 500"
-                      >
+                      <span class="unit-balance-text">
                         {{
                           formatCurrency(
                             mintClass(mint).unitBalance(unit),
@@ -199,8 +197,7 @@
         </div>
 
         <div
-          class="add-mint-description q-mb-lg text-left"
-          style="color: rgba(255, 255, 255, 0.7)"
+          class="add-mint-description q-mb-lg text-left text-grey-6"
         >
           {{ $t("MintSettings.add.description") }}
         </div>
@@ -729,6 +726,13 @@ export default defineComponent({
   top: 18px;
   right: 24px;
   z-index: 10;
+}
+
+/* Text color for unit balances adapts via CSS variable */
+.unit-balance-text {
+  color: var(--unit-balance-color);
+  font-size: 14px;
+  font-weight: 500;
 }
 
 /* Add Mint Section Styles */

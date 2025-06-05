@@ -93,12 +93,14 @@ body.body--dark {
   --icon-bg-color: var(--icon-bg-dark);
   --custom-btn-bg: var(--custom-btn-dark);
   --custom-btn-text: white;
+  --unit-balance-color: white;
 }
 
 body.body--light {
   --icon-bg-color: var(--icon-bg-light);
   --custom-btn-bg: var(--custom-btn-light);
   --custom-btn-text: black;
+  --unit-balance-color: white;
 }
 
 /* utility background classes */
