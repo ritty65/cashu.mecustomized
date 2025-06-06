@@ -10,7 +10,7 @@
         $t("CreatorHub.profile.back")
       }}</q-btn>
     </div>
-    <div class="text-h5 q-mb-md">{{ profile.display_name || creatorNpub }}</div>
+    <div class="text-h5 q-mb-md">{{ profile.display_name || pubkey }}</div>
     <div v-if="profile.picture" class="q-mb-md">
       <img :src="profile.picture" style="max-width: 150px" />
     </div>
@@ -20,17 +20,26 @@
       {{ $t("FindCreators.labels.following") }}: {{ following }}
     </div>
 
-    <div>
+    <div v-if="tiers.length">
       <div class="text-h6 q-mb-sm">{{ $t("CreatorHub.profile.tiers") }}</div>
-      <div v-if="!tiers.length">Creator has no subscription tiers</div>
-      <div v-else>
-        <div v-for="t in tiers" :key="t.id" class="q-pa-sm q-my-sm bg-grey-2">
-          <div class="text-h6">{{ t.name }} — {{ t.price_sats }} sats/month</div>
-          <div class="text-body1">{{ t.description }}</div>
-          <ul>
-            <li v-for="benefit in t.benefits" :key="benefit">{{ benefit }}</li>
-          </ul>
+      <div v-for="tier in tiers" :key="tier.id" class="q-mb-md">
+        <div class="text-subtitle1">
+          {{ tier.name }} - {{ tier.price }} sats/month
+          <span v-if="bitcoinPrice" class="text-caption">
+            ({{ formatFiat(tier.price) }})
+          </span>
         </div>
+        <div
+          class="text-caption"
+          v-html="renderMarkdown(tier.description)"
+        ></div>
+        <q-btn
+          color="primary"
+          dense
+          class="q-mt-sm"
+          @click="supportTier(tier)"
+          >{{ $t("CreatorHub.profile.support") }}</q-btn
+        >
       </div>
     </div>
   </div>
@@ -40,7 +49,7 @@
 import { defineComponent, ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 import { useNostrStore } from "stores/nostr";
-import { useCreatorsStore } from "stores/creators";
+import { useCreatorHubStore, Tier } from "stores/creatorHub";
 import { usePriceStore } from "stores/price";
 import { useUiStore } from "stores/ui";
 import { renderMarkdown as renderMarkdownFn } from "src/js/simple-markdown";
@@ -50,21 +59,20 @@ export default defineComponent({
   setup() {
     const route = useRoute();
     const nostr = useNostrStore();
-    const creators = useCreatorsStore();
+    const hub = useCreatorHubStore();
     const priceStore = usePriceStore();
     const uiStore = useUiStore();
     const bitcoinPrice = computed(() => priceStore.bitcoinPrice);
-    const creatorNpub = route.params.npubOrVanityName as string;
+    const pubkey = route.params.npubOrVanityName as string;
     const profile = ref<any>({});
-    const tiers = computed(() => creators.tiersMap[creatorNpub] || []);
+    const tiers = ref(hub.getTierArray());
     const followers = ref<number | null>(null);
     const following = ref<number | null>(null);
     onMounted(async () => {
-      creators.fetchTierDefinitions(creatorNpub);
-      const p = await nostr.getProfile(creatorNpub);
+      const p = await nostr.getProfile(pubkey);
       if (p) profile.value = { ...p };
-      followers.value = await nostr.fetchFollowerCount(creatorNpub);
-      following.value = await nostr.fetchFollowingCount(creatorNpub);
+      followers.value = await nostr.fetchFollowerCount(pubkey);
+      following.value = await nostr.fetchFollowingCount(pubkey);
     });
     function renderMarkdown(text: string): string {
       return renderMarkdownFn(text || "");
@@ -76,8 +84,21 @@ export default defineComponent({
       return uiStore.formatCurrency(value, "USD", true);
     }
 
+    async function supportTier(tier: Tier) {
+      if (tier.welcomeMessage) {
+        try {
+          await useNostrStore().sendNip04DirectMessage(
+            pubkey,
+            tier.welcomeMessage,
+          );
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+
     return {
-      creatorNpub,
+      pubkey,
       profile,
       tiers,
       followers,
@@ -85,6 +106,7 @@ export default defineComponent({
       bitcoinPrice,
       renderMarkdown,
       formatFiat,
+      supportTier,
     };
   },
 });
