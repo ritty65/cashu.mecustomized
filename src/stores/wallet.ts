@@ -83,9 +83,6 @@ type KeysetCounter = {
   counter: number;
 };
 
-const receiveStore = useReceiveTokensStore();
-const tokenStore = useTokensStore();
-const proofsStore = useProofsStore();
 
 export const useWalletStore = defineStore("wallet", {
   state: () => {
@@ -518,6 +515,9 @@ export const useWalletStore = defineStore("wallet", {
       const uIStore = useUiStore();
       const mintStore = useMintsStore();
       const p2pkStore = useP2PKStore();
+      const receiveStore = useReceiveTokensStore();
+      const tokenStore = useTokensStore();
+      const proofsStore = useProofsStore();
 
       receiveStore.showReceiveTokens = false;
 
@@ -1139,6 +1139,7 @@ export const useWalletStore = defineStore("wallet", {
     checkOutgoingInvoice: async function (quote: string, verbose = true) {
       const uIStore = useUiStore();
       const mintStore = useMintsStore();
+      const proofsStore = useProofsStore();
       const invoice = this.invoiceHistory.find((i) => i.quote === quote);
       if (!invoice) {
         throw new Error("invoice not found");
@@ -1468,6 +1469,7 @@ export const useWalletStore = defineStore("wallet", {
       await this.meltQuoteInvoiceData();
     },
     handleCashuToken: function () {
+      const receiveStore = useReceiveTokensStore();
       this.payInvoiceData.show = false;
       receiveStore.showReceiveTokens = true;
     },
@@ -1483,6 +1485,7 @@ export const useWalletStore = defineStore("wallet", {
     },
     decodeRequest: async function (req: string) {
       const p2pkStore = useP2PKStore();
+      const receiveStore = useReceiveTokensStore();
       req = req.trim();
       this.payInvoiceData.input.request = req;
       if (req.toLowerCase().startsWith("lnbc")) {
