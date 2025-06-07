@@ -1,13 +1,9 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { watch } from "vue";
-import {
-  generateSecretKey,
-  getPublicKey,
-  Event as NostrEvent,
-} from "nostr-tools";
-import { useNostrStore } from "./nostr";
-import { bytesToHex } from "@noble/hashes/utils";
+import { Event as NostrEvent, getPublicKey } from "nostr-tools";
+import { useNostrStore, SignerType } from "./nostr";
+import { hexToBytes } from "@noble/hashes/utils";
 import { v4 as uuidv4 } from "uuid";
 import { useSettingsStore } from "./settings";
 import { sanitizeMessage } from "src/js/message-utils";
@@ -22,8 +18,6 @@ export type MessengerMessage = {
 
 export const useMessengerStore = defineStore("messenger", {
   state: () => ({
-    privKey: useLocalStorage<string>("cashu.messenger.privKey", ""),
-    pubKey: useLocalStorage<string>("cashu.messenger.pubKey", ""),
     relays: useSettingsStore().defaultNostrRelays,
     conversations: useLocalStorage<Record<string, MessengerMessage[]>>(
       "cashu.messenger.conversations",
@@ -45,19 +39,26 @@ export const useMessengerStore = defineStore("messenger", {
       const nostr = useNostrStore();
       return nostr.connected;
     },
+    privKey(): string {
+      const nostr = useNostrStore();
+      if (nostr.signerType === SignerType.PRIVATEKEY) {
+        return nostr.privateKeySignerPrivateKey;
+      }
+      return nostr.seedSignerPrivateKey;
+    },
+    pubKey(): string {
+      const nostr = useNostrStore();
+      if (nostr.pubkey) {
+        return nostr.pubkey;
+      }
+      if (nostr.privateKeySignerPrivateKey) {
+        return getPublicKey(hexToBytes(nostr.privateKeySignerPrivateKey));
+      }
+      return "";
+    },
   },
   actions: {
-    loadIdentity() {
-      if (!this.privKey) {
-        const sk = generateSecretKey();
-        this.privKey = bytesToHex(sk);
-        this.pubKey = getPublicKey(sk);
-      } else if (!this.pubKey) {
-        this.pubKey = getPublicKey(this.privKey);
-      }
-    },
     async sendDm(recipient: string, message: string) {
-      this.loadIdentity();
       const nostr = useNostrStore();
       const { success, event } = await nostr.sendNip04DirectMessage(
         recipient,
@@ -91,7 +92,6 @@ export const useMessengerStore = defineStore("messenger", {
       this.eventLog.push(msg);
     },
     async addIncomingMessage(event: NostrEvent) {
-      this.loadIdentity();
       const nostr = useNostrStore();
       const decrypted = await nostr.decryptNip04(
         this.privKey,
@@ -133,7 +133,6 @@ export const useMessengerStore = defineStore("messenger", {
       if (this.started) {
         return;
       }
-      this.loadIdentity();
       const nostr = useNostrStore();
       await nostr.subscribeToNip04DirectMessagesCallback(
         this.privKey,

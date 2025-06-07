@@ -31,12 +31,14 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import { useMessengerStore } from 'src/stores/messenger';
+import { useNostrStore } from 'src/stores/nostr';
 
 const messenger = useMessengerStore();
+const nostr = useNostrStore();
 
 const showDialog = ref(false);
-const privKey = ref(messenger.privKey);
-const pubKey = ref(messenger.pubKey);
+const privKey = ref(nostr.privateKeySignerPrivateKey);
+const pubKey = ref(nostr.pubkey);
 const relayInput = ref('');
 const relays = ref<string[]>([...messenger.relays]);
 
@@ -52,10 +54,11 @@ const removeRelay = (index: number) => {
 };
 
 const save = () => {
-  messenger.privKey = privKey.value;
-  messenger.pubKey = pubKey.value;
+  nostr.privateKeySignerPrivateKey = privKey.value;
+  nostr.initPrivateKeySigner();
   messenger.relays = relays.value as any;
   messenger.start();
+  pubKey.value = nostr.pubkey;
   showDialog.value = false;
 };
 </script>
