@@ -5,7 +5,6 @@
       <q-card style="min-width: 350px">
         <q-card-section class="text-h6">Identity &amp; Relays</q-card-section>
         <q-card-section>
-          <q-input v-model="privKey" label="Private Key" type="text" />
           <q-input v-model="pubKey" label="Public Key" readonly class="q-mt-md" />
           <div class="q-mt-md">
             <q-input v-model="relayInput" label="Add Relay" @keyup.enter="addRelay" />
@@ -31,12 +30,13 @@
 <script lang="ts" setup>
 import { ref } from 'vue';
 import { useMessengerStore } from 'src/stores/messenger';
+import { useNostrStore } from 'src/stores/nostr';
 
 const messenger = useMessengerStore();
+const nostr = useNostrStore();
 
 const showDialog = ref(false);
-const privKey = ref(messenger.privKey);
-const pubKey = ref(messenger.pubKey);
+const pubKey = ref(nostr.pubkey);
 const relayInput = ref('');
 const relays = ref<string[]>([...messenger.relays]);
 
@@ -52,8 +52,6 @@ const removeRelay = (index: number) => {
 };
 
 const save = () => {
-  messenger.privKey = privKey.value;
-  messenger.pubKey = pubKey.value;
   messenger.relays = relays.value as any;
   messenger.start();
   showDialog.value = false;

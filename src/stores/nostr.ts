@@ -136,6 +136,15 @@ export const useNostrStore = defineStore("nostr", {
       };
       return nip19.nprofileEncode(profile);
     },
+    activePrivKey: (state): string => {
+      if (state.signerType === SignerType.PRIVATEKEY) {
+        return state.privateKeySignerPrivateKey;
+      }
+      if (state.signerType === SignerType.SEED) {
+        return state.seedSignerPrivateKey;
+      }
+      return "";
+    },
   },
   actions: {
     initNdkReadOnly: function () {

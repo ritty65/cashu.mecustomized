@@ -35,9 +35,8 @@ export default route(function (/* { store, ssrContext } */) {
   });
 
   Router.beforeEach((to, from, next) => {
-    const hasKey =
-      localStorage.getItem("cashu.ndk.privateKeySignerPrivateKey") ||
-      localStorage.getItem("cashu.ndk.seedSignerPrivateKey");
+    const nostr = useNostrStore();
+    const hasKey = !!nostr.pubkey;
     if (!hasKey && to.path !== "/identity") {
       next("/identity");
     } else {
