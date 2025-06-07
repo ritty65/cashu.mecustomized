@@ -74,7 +74,6 @@ import MessageInput from 'components/MessageInput.vue';
 import EventLog from 'components/EventLog.vue';
 
 const messenger = useMessengerStore();
-messenger.loadIdentity();
 onMounted(() => {
   messenger.start();
 });
