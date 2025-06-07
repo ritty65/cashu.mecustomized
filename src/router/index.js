@@ -6,6 +6,7 @@ import {
   createWebHashHistory,
 } from "vue-router";
 import routes from "./routes";
+import { useNostrStore } from "src/stores/nostr";
 
 /*
  * If not building with SSR mode, you can
@@ -31,6 +32,17 @@ export default route(function (/* { store, ssrContext } */) {
     // quasar.conf.js -> build -> vueRouterMode
     // quasar.conf.js -> build -> publicPath
     history: createHistory(process.env.VUE_ROUTER_BASE),
+  });
+
+  Router.beforeEach((to, from, next) => {
+    const hasKey =
+      localStorage.getItem("cashu.ndk.privateKeySignerPrivateKey") ||
+      localStorage.getItem("cashu.ndk.seedSignerPrivateKey");
+    if (!hasKey && to.path !== "/identity") {
+      next("/identity");
+    } else {
+      next();
+    }
   });
 
   return Router;
