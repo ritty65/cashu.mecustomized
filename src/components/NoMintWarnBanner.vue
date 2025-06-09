@@ -24,7 +24,7 @@
           class="q-px-md"
           :label="$t('NoMintWarnBanner.actions.add_mint.label')"
           @click="handleAddMintClick"
-        />
+         aria-label="button"/>
       </div>
       <div class="row items-center justify-center q-pt-md">
         <q-btn
@@ -34,7 +34,7 @@
           class="q-px-md"
           :label="$t('NoMintWarnBanner.actions.receive.label')"
           @click="handleReceiveEcash"
-        />
+         aria-label="button"/>
       </div>
     </q-card-section>
   </q-card>

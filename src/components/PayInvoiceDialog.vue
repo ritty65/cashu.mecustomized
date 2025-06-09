@@ -103,12 +103,12 @@
             "
             :loading="globalMutexLock && !payInvoiceData.blocking"
             class="q-px-lg"
-          >
+           aria-label="button">
             <template v-slot:loading>
               <q-spinner-hourglass />
             </template>
           </q-btn>
-          <q-btn v-close-popup flat color="grey" class="q-ml-auto">{{
+          <q-btn v-close-popup flat color="grey" class="q-ml-auto" aria-label="button">{{
             $t("PayInvoiceDialog.invoice.actions.close.label")
           }}</q-btn>
         </div>
@@ -119,11 +119,11 @@
             disabled
             color="yellow"
             text-color="black"
-            >{{
+             aria-label="button">{{
               $t("PayInvoiceDialog.invoice.balance_too_low_warning_text")
             }}</q-btn
           >
-          <q-btn v-close-popup flat color="grey" class="q-ml-auto">{{
+          <q-btn v-close-popup flat color="grey" class="q-ml-auto" aria-label="button">{{
             $t("PayInvoiceDialog.invoice.actions.close.label")
           }}</q-btn>
         </div>
@@ -217,10 +217,10 @@
             </div>
           </div>
           <div class="row q-mt-lg">
-            <q-btn unelevated color="primary" type="submit">{{
+            <q-btn unelevated color="primary" type="submit" aria-label="button">{{
               $t("PayInvoiceDialog.lnurlpay.actions.send.label")
             }}</q-btn>
-            <q-btn v-close-popup flat color="grey" class="q-ml-auto">{{
+            <q-btn v-close-popup flat color="grey" class="q-ml-auto" aria-label="button">{{
               $t("PayInvoiceDialog.lnurlpay.actions.close.label")
             }}</q-btn>
           </div>
@@ -266,7 +266,7 @@
               class="q-mr-sm"
               v-if="payInvoiceData.input.request != ''"
               type="submit"
-              >{{
+               aria-label="button">{{
                 $t("PayInvoiceDialog.input_data.actions.enter.label")
               }}</q-btn
             >
@@ -275,7 +275,7 @@
               dense
               v-if="canPasteFromClipboard && payInvoiceData.input.request == ''"
               @click="pasteToParseDialog"
-              ><q-icon name="content_paste" class="q-pr-sm" />{{
+              ><q-icon name="content_paste" class="q-pr-sm"  aria-label="button"/>{{
                 $t("PayInvoiceDialog.input_data.actions.paste.label")
               }}</q-btn
             >
@@ -284,13 +284,13 @@
               class="q-mx-0"
               v-if="hasCamera && payInvoiceData.input.request == ''"
               @click="showCamera"
-            >
+             aria-label="button">
               <ScanIcon />
               <span class="q-pl-sm">{{
                 $t("PayInvoiceDialog.input_data.actions.scan.label")
               }}</span>
             </q-btn>
-            <q-btn v-close-popup flat rounded color="grey" class="q-ml-auto">{{
+            <q-btn v-close-popup flat rounded color="grey" class="q-ml-auto" aria-label="button">{{
               $t("PayInvoiceDialog.input_data.actions.close.label")
             }}</q-btn>
           </div>
@@ -303,7 +303,7 @@
               ></qrcode-stream>
             </q-responsive>
             <div class="row q-mt-lg">
-              <q-btn @click="closeCamera" flat color="grey" class="q-ml-auto">
+              <q-btn @click="closeCamera" flat color="grey" class="q-ml-auto" aria-label="button">
                 Close
               </q-btn>
             </div>

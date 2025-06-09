@@ -49,9 +49,9 @@
             size="md"
             flat
             @click="copyText(showNWCData.connectionString)"
-            >{{ $t("NWCDialog.actions.copy.label") }}</q-btn
+             aria-label="button">{{ $t("NWCDialog.actions.copy.label") }}</q-btn
           >
-          <q-btn v-close-popup flat color="grey" class="q-ml-auto">{{
+          <q-btn v-close-popup flat color="grey" class="q-ml-auto" aria-label="button">{{
             $t("NWCDialog.actions.close.label")
           }}</q-btn>
         </div>

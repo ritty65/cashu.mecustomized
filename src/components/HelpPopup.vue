@@ -13,7 +13,7 @@
           <slot>{{ text }}</slot>
         </q-card-section>
         <q-card-actions align="right">
-          <q-btn flat color="primary" v-close-popup>{{ closeLabel }}</q-btn>
+          <q-btn flat color="primary" v-close-popup aria-label="button">{{ closeLabel }}</q-btn>
         </q-card-actions>
       </q-card>
     </q-dialog>

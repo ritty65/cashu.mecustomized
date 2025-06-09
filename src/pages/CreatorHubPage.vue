@@ -7,7 +7,7 @@
       <div class="text-h5 text-center q-mb-lg">Creator Hub</div>
 
       <div v-if="!loggedIn" class="text-center q-my-xl">
-        <q-btn color="primary" to="/creator/login" rounded unelevated label="Login" />
+        <q-btn color="primary" to="/creator/login" rounded unelevated label="Login"  aria-label="button"/>
       </div>
 
       <div v-else>
@@ -23,7 +23,7 @@
           </q-card>
         </div>
         <div class="text-center q-mt-md">
-          <q-btn color="primary" to="/creator/dashboard" rounded unelevated label="Edit Tiers" />
+          <q-btn color="primary" to="/creator/dashboard" rounded unelevated label="Edit Tiers"  aria-label="button"/>
         </div>
       </div>
     </div>

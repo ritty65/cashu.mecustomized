@@ -58,14 +58,14 @@
             "
             color="primary"
             @click="triggerPwaInstall()"
-            >Install Cashu</q-btn
+             aria-label="button">Install Cashu</q-btn
           >
           <q-btn
             flat
             size="0.6rem"
             class="q-mx-xs q-px-none"
             @click="copyText(baseURL)"
-            >Copy URL</q-btn
+             aria-label="button">Copy URL</q-btn
           >
           <q-btn
             flat
@@ -74,7 +74,7 @@
             color="warning"
             icon="upload_for_offline"
             @click="browseBackupFile"
-            >Restore<q-tooltip
+             aria-label="button">Restore<q-tooltip
               >You can drag &amp; drop the wallet backup here!</q-tooltip
             ></q-btn
           >
@@ -84,7 +84,7 @@
             size="0.8rem"
             class="q-ml-auto"
             @click="setWelcomeDialogSeen()"
-            >Continue</q-btn
+             aria-label="button">Continue</q-btn
           >
         </div>
       </q-card-section>

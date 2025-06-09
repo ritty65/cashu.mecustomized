@@ -132,11 +132,11 @@ export default {
         unelevated
         v-if="canPasteFromClipboard"
         @click="pasteToParseDialog"
-      >
+       aria-label="button">
         <q-icon name="content_paste" class="q-mr-sm" />
         {{ $t("QrcodeReader.actions.paste.label") }}</q-btn
       >
-      <q-btn @click="closeCamera" flat color="grey" class="q-ml-auto">{{
+      <q-btn @click="closeCamera" flat color="grey" class="q-ml-auto" aria-label="button">{{
         $t("QrcodeReader.actions.close.label")
       }}</q-btn>
     </div>

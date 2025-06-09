@@ -8,8 +8,8 @@
       dense
     />
     <div class="row q-gutter-sm">
-      <q-btn label="Connect" color="primary" @click="connect" dense />
-      <q-btn label="Disconnect" color="primary" @click="disconnect" dense />
+      <q-btn label="Connect" color="primary" @click="connect" dense  aria-label="button"/>
+      <q-btn label="Disconnect" color="primary" @click="disconnect" dense  aria-label="button"/>
     </div>
   </div>
 </template>

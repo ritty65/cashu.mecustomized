@@ -51,11 +51,11 @@
             color="primary"
             rounded
             @click="removeMintLocal"
-            >{{ $t("RemoveMintDialog.actions.confirm.label") }}</q-btn
+             aria-label="button">{{ $t("RemoveMintDialog.actions.confirm.label") }}</q-btn
           >
         </div>
         <div class="col">
-          <q-btn v-close-popup flat color="grey" class="float-right">{{
+          <q-btn v-close-popup flat color="grey" class="float-right" aria-label="button">{{
             $t("RemoveMintDialog.actions.cancel.label")
           }}</q-btn>
         </div>

@@ -66,7 +66,7 @@
           <q-card-section class="q-pa-sm">
             <div class="row justify-center q-pt-sm">
               <div v-if="!isEditingAmount">
-                <q-btn color="primary" rounded @click="startEditingAmount">
+                <q-btn color="primary" rounded @click="startEditingAmount" aria-label="button">
                   <q-icon name="edit_note" size="xs" class="q-mr-sm" />
                   {{ amountLabel }}</q-btn
                 >
@@ -93,7 +93,7 @@
           rounded
           dense
           @click="newRequest"
-        >
+         aria-label="button">
           <q-icon name="refresh" class="q-pr-sm" size="xs" />
           {{ $t("PaymentRequestDialog.actions.new_request.label") }}</q-btn
         >
@@ -103,9 +103,9 @@
             size="md"
             flat
             @click="copyText(showPRKData)"
-            >{{ $t("PaymentRequestDialog.actions.copy.label") }}</q-btn
+             aria-label="button">{{ $t("PaymentRequestDialog.actions.copy.label") }}</q-btn
           >
-          <q-btn v-close-popup flat color="grey" class="q-ml-auto">{{
+          <q-btn v-close-popup flat color="grey" class="q-ml-auto" aria-label="button">{{
             $t("PaymentRequestDialog.actions.close.label")
           }}</q-btn>
         </div>

@@ -87,7 +87,7 @@
       </div>
       <q-item>
         <q-item-section>
-          <q-btn color="primary" icon="add" outline @click="openAdd">
+          <q-btn color="primary" icon="add" outline @click="openAdd" aria-label="button">
             {{ $t("BucketManager.actions.add") }}
             <q-tooltip>{{ $t("BucketManager.tooltips.add_button") }}</q-tooltip>
           </q-btn>
@@ -96,7 +96,7 @@
       <q-item>
         <q-item-section>
           <router-link to="/move-tokens" style="text-decoration: none">
-            <q-btn color="primary" outline>
+            <q-btn color="primary" outline aria-label="button">
               {{ $t("BucketDetail.move") }}
               <q-tooltip>{{
                 $t("BucketManager.tooltips.move_button")
@@ -172,10 +172,10 @@
           </template>
         </q-input>
         <div class="row q-mt-md">
-          <q-btn color="primary" rounded @click="saveBucket">{{
+          <q-btn color="primary" rounded @click="saveBucket" aria-label="button">{{
             $t("global.actions.update.label")
           }}</q-btn>
-          <q-btn flat rounded color="grey" class="q-ml-auto" v-close-popup>{{
+          <q-btn flat rounded color="grey" class="q-ml-auto" v-close-popup aria-label="button">{{
             $t("global.actions.cancel.label")
           }}</q-btn>
         </div>
@@ -192,10 +192,10 @@
         }}</span>
       </q-card-section>
       <q-card-actions align="right">
-        <q-btn flat color="grey" v-close-popup>{{
+        <q-btn flat color="grey" v-close-popup aria-label="button">{{
           $t("global.actions.cancel.label")
         }}</q-btn>
-        <q-btn color="negative" @click="deleteBucket">{{
+        <q-btn color="negative" @click="deleteBucket" aria-label="button">{{
           $t("BucketManager.actions.delete")
         }}</q-btn>
       </q-card-actions>

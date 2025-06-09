@@ -5,7 +5,7 @@
     :color="color"
     @click="toggleUnit()"
     :label="activeUnitLabelAdopted"
-  />
+   aria-label="button"/>
 </template>
 <script>
 import { defineComponent } from "vue";

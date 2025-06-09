@@ -140,7 +140,7 @@
               color="primary"
               @click="toggleUnit()"
               :label="activeUnitLabel"
-            />
+             aria-label="button"/>
           </q-input>
           <q-input
             filled
@@ -243,7 +243,7 @@
               rounded
               type="submit"
               :loading="globalMutexLock"
-              >{{ $t("SendTokenDialog.actions.send.label") }}
+               aria-label="button">{{ $t("SendTokenDialog.actions.send.label") }}
               <template v-slot:loading>
                 <q-spinner-hourglass />
               </template>
@@ -265,7 +265,7 @@
                 >
                   Locked
                 </q-chip>
-                <!-- <q-btn rounded flat color="primary" icon="lock">Locked</q-btn> -->
+                <!-- <q-btn rounded flat color="primary" icon="lock" aria-label="button">Locked</q-btn> -->
               </transition>
             </div>
             <transition
@@ -275,7 +275,7 @@
             >
               <q-btn
                 v-if="
-                  sendData.amount > 0 &&
+                  sendData.amount  aria-label="button"> 0 &&
                   !showLockInput &&
                   activeBalance >= sendData.amount
                 "
@@ -290,7 +290,7 @@
                 {{ $t("SendTokenDialog.actions.lock.label") }}</q-btn
               >
             </transition>
-            <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto">{{
+            <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto" aria-label="button">{{
               $t("SendTokenDialog.actions.close.label")
             }}</q-btn>
           </div>
@@ -301,11 +301,11 @@
               disabled
               color="yellow"
               text-color="black"
-              >{{
+               aria-label="button">{{
                 $t("SendTokenDialog.inputs.amount.invalid_too_much_error_text")
               }}</q-btn
             >
-            <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto">{{
+            <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto" aria-label="button">{{
               $t("SendTokenDialog.actions.close.label")
             }}</q-btn>
           </div>
@@ -341,7 +341,7 @@
               color="grey"
               class="q-ma-none"
               @click="changeSpeed"
-            >
+             aria-label="button">
               <q-icon name="speed" style="margin-right: 8px"></q-icon>
               Speed: {{ fragmentSpeedLabel }}
             </q-btn>
@@ -359,7 +359,7 @@
               class="q-ma-none"
               color="grey"
               @click="changeSize"
-            >
+             aria-label="button">
               <q-icon name="zoom_in" style="margin-right: 8px"></q-icon>
               Size: {{ fragmentLengthLabel }}
             </q-btn>
@@ -443,7 +443,7 @@
                   flat
                   dense
                   @click="copyText(sendData.tokensBase64)"
-                  >{{ $t("SendTokenDialog.actions.copy_tokens.label") }}</q-btn
+                   aria-label="button">{{ $t("SendTokenDialog.actions.copy_tokens.label") }}</q-btn
                 >
                 <q-btn
                   class="q-mx-none"
@@ -451,7 +451,7 @@
                   flat
                   dense
                   @click="toggleExpandButtons"
-                >
+                 aria-label="button">
                   <q-icon
                     :name="
                       showExpandedButtons ? 'chevron_left' : 'chevron_right'
@@ -466,7 +466,7 @@
                     flat
                     dense
                     @click="copyText(encodeToPeanut(sendData.tokensBase64))"
-                    >{{ $t("SendTokenDialog.actions.copy_emoji.label") }}
+                     aria-label="button">{{ $t("SendTokenDialog.actions.copy_emoji.label") }}
                     <q-tooltip>{{
                       $t("SendTokenDialog.actions.copy_emoji.tooltip_text")
                     }}</q-tooltip>
@@ -582,7 +582,7 @@
                 flat
                 color="grey"
                 class="q-ml-auto q-mr-md"
-                >{{
+                 aria-label="button">{{
                   $t("SendTokenDialog.actions.close_card_scanner.label")
                 }}</q-btn
               >
@@ -594,7 +594,7 @@
                 flat
                 color="grey"
                 class="q-ml-auto"
-                >{{ $t("SendTokenDialog.actions.close.label") }}</q-btn
+                 aria-label="button">{{ $t("SendTokenDialog.actions.close.label") }}</q-btn
               >
             </div>
           </q-card-section>
@@ -629,10 +629,10 @@
             color="negative"
             rounded
             class="q-mr-sm"
-            >Delete</q-btn
+             aria-label="button">Delete</q-btn
           >
           <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto"
-            >Cancel</q-btn
+             aria-label="button">Cancel</q-btn
           >
         </div>
       </q-card-section>

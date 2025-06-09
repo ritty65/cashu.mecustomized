@@ -37,7 +37,7 @@
           :label="$t('WelcomePage.actions.previous.label')"
           v-if="welcomeStore.canGoPrev"
           @click="welcomeStore.goToPrevSlide"
-        />
+         aria-label="button"/>
         <!-- language selector -->
         <div
           class="q-ml-md"
@@ -61,13 +61,13 @@
           :label="$t('WelcomePage.actions.next.label')"
           :disable="!welcomeStore.canProceed"
           @click="welcomeStore.goToNextSlide"
-        />
+         aria-label="button"/>
         <q-btn
           flat
           icon="close"
           :label="$t('WelcomePage.actions.skip.label')"
           @click="welcomeStore.skipTutorial"
-        />
+         aria-label="button"/>
       </div>
     </q-card>
   </q-dialog>

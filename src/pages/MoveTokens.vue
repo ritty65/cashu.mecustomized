@@ -26,7 +26,7 @@
       :disable="!selectedSecrets.length || !targetBucketId"
       @click="moveSelected"
       class="q-mb-lg"
-    >
+     aria-label="button">
       {{ $t("BucketDetail.move") }}
     </q-btn>
     <div v-for="bucket in bucketList" :key="bucket.id" class="q-mb-md">

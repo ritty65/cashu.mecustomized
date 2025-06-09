@@ -43,7 +43,7 @@
           <q-btn
             class="full-width custom-btn"
             @click="toggleReceiveEcashDrawer"
-          >
+           aria-label="button">
             <div class="row items-center full-width">
               <div class="icon-background q-mr-md" :style="{ backgroundColor: iconBgColor }">
                 <CoinsIcon />
@@ -56,7 +56,7 @@
             </div>
           </q-btn>
 
-          <q-btn class="full-width custom-btn" @click="showInvoiceCreateDialog">
+          <q-btn class="full-width custom-btn" @click="showInvoiceCreateDialog" aria-label="button">
             <div class="row items-center full-width">
               <div class="icon-background q-mr-md" :style="{ backgroundColor: iconBgColor }">
                 <ZapIcon />

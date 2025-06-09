@@ -16,7 +16,7 @@
         </q-list>
       </q-card-section>
       <q-card-actions align="right">
-        <q-btn flat color="primary" @click="back">{{ $t('global.actions.cancel.label') }}</q-btn>
+        <q-btn flat color="primary" @click="back" aria-label="button">{{ $t('global.actions.cancel.label') }}</q-btn>
       </q-card-actions>
     </q-card>
   </q-dialog>

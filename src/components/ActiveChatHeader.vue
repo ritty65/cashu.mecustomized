@@ -8,7 +8,7 @@
         icon="payments"
         class="q-mr-sm"
         @click="openSendTokenDialog"
-      />
+       aria-label="button"/>
       <q-btn
         v-if="$q.screen.lt.sm"
         flat
@@ -17,7 +17,7 @@
         icon="menu"
         class="q-mr-sm"
         @click="messenger.toggleDrawer()"
-      />
+       aria-label="button"/>
       <template v-if="pubkey">
         <q-avatar size="md" class="q-mr-sm">
           <img v-if="profile?.picture" :src="profile.picture" />
@@ -31,7 +31,7 @@
           icon="more_vert"
           class="q-ml-xs"
           @click="showProfileDialog = true"
-        />
+         aria-label="button"/>
         <ProfileInfoDialog
           v-model="showProfileDialog"
           :pubkey="props.pubkey"
@@ -48,7 +48,7 @@
       round
       :icon="$q.dark.isActive ? 'wb_sunny' : 'brightness_3'"
       @click="$q.dark.toggle()"
-    />
+     aria-label="button"/>
   </div>
 </template>
 

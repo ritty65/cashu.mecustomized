@@ -6,8 +6,8 @@
         <q-input v-model="key" type="text" label="nsec or hex private key" />
       </q-card-section>
       <q-card-actions vertical class="q-gutter-sm">
-        <q-btn color="primary" @click="submitKey">Use Key</q-btn>
-        <q-btn flat color="primary" @click="createIdentity">Create Identity</q-btn>
+        <q-btn color="primary" @click="submitKey" aria-label="button">Use Key</q-btn>
+        <q-btn flat color="primary" @click="createIdentity" aria-label="button">Create Identity</q-btn>
       </q-card-actions>
     </q-card>
   </div>

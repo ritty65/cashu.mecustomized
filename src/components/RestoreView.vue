@@ -37,7 +37,7 @@
                       icon="content_paste"
                       @click="pasteMnemonic"
                       class="cursor-pointer q-mt-md"
-                    ></q-btn>
+                    ></q-btn aria-label="button">
                   </template>
                 </q-input>
               </div>
@@ -90,7 +90,7 @@
         outline
         @click="restoreAllMints"
         :disabled="!isMnemonicValid || restoringState"
-      >
+       aria-label="button">
         <q-spinner-hourglass size="sm" v-if="restoringState" class="q-mr-sm" />
         {{ restoreAllMintsText }}
       </q-btn>
@@ -155,7 +155,7 @@
                 :disabled="!isMnemonicValid || restoringState"
                 :loading="restoringMint === mint.url"
                 :label="$t('RestoreView.actions.restore.label')"
-              />
+               aria-label="button"/>
             </q-item-section>
           </q-item>
           <q-separator spaced />

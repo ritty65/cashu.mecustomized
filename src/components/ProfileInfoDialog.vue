@@ -33,8 +33,8 @@
         </div>
       </q-card-section>
       <q-card-actions align="right">
-        <q-btn flat color="negative" @click="handleClear">Clear Chat</q-btn>
-        <q-btn flat v-close-popup color="grey">Close</q-btn>
+        <q-btn flat color="negative" @click="handleClear" aria-label="button">Clear Chat</q-btn>
+        <q-btn flat v-close-popup color="grey" aria-label="button">Close</q-btn>
       </q-card-actions>
     </q-card>
   </q-dialog>

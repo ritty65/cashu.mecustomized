@@ -44,7 +44,7 @@
             :loading="addMintBlocking"
             @click="addMintLocal"
             style="width: calc(75%)"
-            >{{ $t("AddMintDialog.actions.add_mint.label") }}
+             aria-label="button">{{ $t("AddMintDialog.actions.add_mint.label") }}
             <template v-slot:loading>
               <q-spinner-hourglass />
               {{ $t("AddMintDialog.actions.add_mint.in_progress") }}</template
@@ -52,7 +52,7 @@
           </q-btn>
         </div>
         <div class="col">
-          <q-btn v-close-popup flat class="float-right" color="grey">{{
+          <q-btn v-close-popup flat class="float-right" color="grey" aria-label="button">{{
             $t("AddMintDialog.actions.cancel.label")
           }}</q-btn>
         </div>

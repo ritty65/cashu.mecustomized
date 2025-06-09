@@ -15,7 +15,7 @@
         unelevated
         to="/"
         :label="$t('AlreadyRunning.actions.retry.label')"
-      />
+       aria-label="button"/>
     </div>
   </div>
 </template>

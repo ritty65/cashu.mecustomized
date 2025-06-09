@@ -11,8 +11,8 @@
         />
       </q-card-section>
       <q-card-actions align="right">
-        <q-btn flat color="primary" @click="cancel">{{ $t('SendMessageDialog.actions.cancel.label') }}</q-btn>
-        <q-btn flat color="primary" @click="confirm">{{ $t('SendMessageDialog.actions.send.label') }}</q-btn>
+        <q-btn flat color="primary" @click="cancel" aria-label="button">{{ $t('SendMessageDialog.actions.cancel.label') }}</q-btn>
+        <q-btn flat color="primary" @click="confirm" aria-label="button">{{ $t('SendMessageDialog.actions.send.label') }}</q-btn>
       </q-card-actions>
     </q-card>
   </q-dialog>

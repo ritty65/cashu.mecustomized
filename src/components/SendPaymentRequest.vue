@@ -7,7 +7,7 @@
         color="primary"
         class="q-px-md"
         @click="clickPaymentRequest"
-      >
+       aria-label="button">
         <q-icon v-if="!loading" name="send" class="q-pr-xs" />
         <q-spinner-hourglass v-else size="1em" class="q-mr-md" />
         Pay via {{ getPaymentRequestTransportType(sendData.paymentRequest) }}

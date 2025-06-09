@@ -14,7 +14,7 @@
         flat
         color="grey"
         class="close-btn-position"
-        >{{ $t("ReceiveTokenDialog.actions.close.label") }}</q-btn
+         aria-label="button">{{ $t("ReceiveTokenDialog.actions.close.label") }}</q-btn
       >
       <div>
         <div class="row items-center no-wrap q-mb-sm q-mb-sm q-py-lg">
@@ -76,7 +76,7 @@
           unelevated
           class="q-ml-xs q-mr-sm"
           :label="$t('ReceiveTokenDialog.errors.invalid_token.label')"
-        ></q-btn>
+        ></q-btn aria-label="button">
 
         <!-- EMPTY INPUT -->
         <div v-if="!receiveData.tokensBase64.length">
@@ -86,7 +86,7 @@
             class="q-mr-sm"
             v-if="canPasteFromClipboard"
             @click="pasteToParseDialog(true)"
-          >
+           aria-label="button">
             <q-icon name="content_paste" class="q-pr-sm" />{{
               $t("ReceiveTokenDialog.actions.paste.label")
             }}</q-btn
@@ -97,7 +97,7 @@
             class="q-mx-sm"
             v-if="hasCamera"
             @click="showCamera"
-          >
+           aria-label="button">
             <ScanIcon size="1.5em" />
             <span class="q-pl-sm">{{
               $t("ReceiveTokenDialog.actions.scan.label")
@@ -111,7 +111,7 @@
             :loading="scanningCard"
             :disabled="scanningCard"
             @click="toggleScanner"
-          >
+           aria-label="button">
             <NfcIcon class="q-pr-xs" />
             <q-tooltip>{{
               ndefSupported
@@ -208,7 +208,7 @@
                     : $t('ReceiveTokenDialog.actions.receive.label_known_mint')
                   : $t('ReceiveTokenDialog.actions.receive.label')
               "
-            >
+             aria-label="button">
               <template v-slot:loading>
                 <q-spinner-hourglass />
               </template>
@@ -221,7 +221,7 @@
               rounded
               flat
               class="q-mr-none"
-            >
+             aria-label="button">
               <q-icon name="swap_horiz" class="q-pr-sm" />
               {{ $t("ReceiveTokenDialog.actions.swap.label") }}
               <q-tooltip>{{
@@ -234,7 +234,7 @@
               rounded
               flat
               class="q-mr-none"
-              >{{ $t("ReceiveTokenDialog.actions.later.label") }}
+               aria-label="button">{{ $t("ReceiveTokenDialog.actions.later.label") }}
               <q-tooltip>{{
                 $t("ReceiveTokenDialog.actions.later.tooltip_text")
               }}</q-tooltip>
@@ -276,7 +276,7 @@
               class="q-pr-md"
               :loading="swapBlocking"
               :disabled="activeMintUrl == tokenMint"
-            >
+             aria-label="button">
               <q-icon name="swap_horiz" class="q-pr-sm" />
               {{ $t("ReceiveTokenDialog.actions.confirm_swap.label") }}
               <template v-slot:loading>
@@ -294,7 +294,7 @@
               flat
               class="q-mr-none q-pr-sm"
               v-if="!swapBlocking"
-            >
+             aria-label="button">
               <q-icon name="close" class="q-pr-sm" />
               {{ $t("ReceiveTokenDialog.actions.cancel_swap.label") }}
               <q-tooltip>{{

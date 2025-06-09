@@ -47,9 +47,9 @@
           rounded
           color="primary"
           @click="updateMintLocal"
-          >{{ $t("EditMintDialog.actions.update.label") }}</q-btn
+           aria-label="button">{{ $t("EditMintDialog.actions.update.label") }}</q-btn
         >
-        <q-btn v-close-popup flat class="q-ml-auto" color="grey">{{
+        <q-btn v-close-popup flat class="q-ml-auto" color="grey" aria-label="button">{{
           $t("EditMintDialog.actions.cancel.label")
         }}</q-btn>
       </div>

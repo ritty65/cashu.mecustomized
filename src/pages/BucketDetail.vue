@@ -65,13 +65,13 @@
         </template>
       </q-select>
       <div class="row q-gutter-sm">
-        <q-btn color="primary" :disable="!selectedSecrets.length" @click="moveSelected">
+        <q-btn color="primary" :disable="!selectedSecrets.length" @click="moveSelected" aria-label="button">
           {{ $t('BucketDetail.move') }}
         </q-btn>
-        <q-btn color="primary" outline :disable="!selectedSecrets.length" @click="sendSelected">
+        <q-btn color="primary" outline :disable="!selectedSecrets.length" @click="sendSelected" aria-label="button">
           {{ $t('BucketDetail.send') }}
         </q-btn>
-        <q-btn color="primary" outline :disable="!bucketProofs.length" @click="exportBucket">
+        <q-btn color="primary" outline :disable="!bucketProofs.length" @click="exportBucket" aria-label="button">
           {{ $t('BucketDetail.export') }}
         </q-btn>
         <q-btn
@@ -80,7 +80,7 @@
           outline
           :disable="!bucketLockedTokens.length"
           @click="sendBucketToCreator"
-        >
+         aria-label="button">
           {{ $t('BucketDetail.send_to_creator') }}
         </q-btn>
       </div>
@@ -103,8 +103,8 @@
           label="Color"
         />
         <div class="row q-mt-md">
-          <q-btn color="primary" rounded @click="saveEdit">Update</q-btn>
-          <q-btn flat rounded color="grey" class="q-ml-auto" v-close-popup>Cancel</q-btn>
+          <q-btn color="primary" rounded @click="saveEdit" aria-label="button">Update</q-btn>
+          <q-btn flat rounded color="grey" class="q-ml-auto" v-close-popup aria-label="button">Cancel</q-btn>
         </div>
       </q-card>
     </q-dialog>

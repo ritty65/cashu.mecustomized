@@ -6,7 +6,7 @@
     ]"
   >
     <div class="q-mb-md">
-      <q-btn flat color="primary" to="/creator/dashboard">
+      <q-btn flat color="primary" to="/creator/dashboard" aria-label="button">
         {{ $t("CreatorHub.profile.back") }}
       </q-btn>
     </div>
@@ -25,7 +25,7 @@
           dense
           icon="content_copy"
           @click="copyText(npub)"
-        />
+         aria-label="button"/>
       </div>
       <div v-if="seedSignerPrivateKeyNsecComputed" class="row items-center q-gutter-x-sm q-mt-xs">
         <div><strong>nsec:</strong> {{ seedSignerPrivateKeyNsecComputed }}</div>
@@ -34,7 +34,7 @@
           dense
           icon="content_copy"
           @click="copyText(seedSignerPrivateKeyNsecComputed)"
-        />
+         aria-label="button"/>
       </div>
       <div v-if="privateKeySignerPrivateKey" class="row items-center q-gutter-x-sm q-mt-xs">
         <div><strong>hex:</strong> {{ privateKeySignerPrivateKey }}</div>
@@ -43,7 +43,7 @@
           dense
           icon="content_copy"
           @click="copyText(privateKeySignerPrivateKey)"
-        />
+         aria-label="button"/>
       </div>
       <div class="q-mt-sm">
         <strong>Wallet balance:</strong>
@@ -68,7 +68,7 @@
           dense
           class="q-mt-sm"
           @click="supportTier(tier)"
-          >{{ $t("CreatorHub.profile.support") }}</q-btn
+           aria-label="button">{{ $t("CreatorHub.profile.support") }}</q-btn
         >
       </div>
     </div>

@@ -88,7 +88,7 @@
         dense
         round
         size="0.8em"
-        :icon="countdown > 0 ? 'close' : 'refresh'"
+        :icon="countdown  aria-label="button"> 0 ? 'close' : 'refresh'"
         :color="countdown > 0 ? 'negative' : 'primary'"
         aria-label="Refresh"
         @click="reload"

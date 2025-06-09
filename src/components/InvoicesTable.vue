@@ -45,7 +45,7 @@
               dense
               icon="sync"
               @click="
-                invoice.amount > 0
+                invoice.amount  aria-label="button"> 0
                   ? checkInvoice(invoice.quote, true)
                   : checkOutgoingInvoice(invoice.quote, true)
               "
@@ -78,7 +78,7 @@
           "
           class="q-ml-sm q-px-md"
           size="sm"
-        />
+         aria-label="button"/>
       </div>
       <div v-if="paginatedInvoices.length === 0" class="text-center q-mt-lg">
         <q-item-label caption class="text-primary">{{

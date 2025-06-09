@@ -9,7 +9,7 @@
   >
     <q-card :class="[cardClass, 'full-width-card q-pb-lg']">
       <q-card-section class="row items-center q-pb-sm">
-        <q-btn flat round dense @click="goBack" class="q-ml-sm" color="primary">
+        <q-btn flat round dense @click="goBack" class="q-ml-sm" color="primary" aria-label="button">
           <ChevronLeftIcon />
         </q-btn>
         <div class="col text-center">
@@ -22,14 +22,14 @@
           @click="showCamera"
           class="q-mr-sm"
           color="primary"
-        >
+         aria-label="button">
           <ScanIcon />
         </q-btn>
       </q-card-section>
 
       <q-card-section class="q-pa-md">
         <div class="q-gutter-y-md">
-          <q-btn class="full-width custom-btn" @click="handlePasteBtn">
+          <q-btn class="full-width custom-btn" @click="handlePasteBtn" aria-label="button">
             <div class="row items-center full-width">
               <div class="icon-background q-mr-md" :style="{ backgroundColor: iconBgColor }">
                 <ClipboardIcon />
@@ -42,7 +42,7 @@
             </div>
           </q-btn>
 
-          <q-btn class="full-width custom-btn" @click="showCamera">
+          <q-btn class="full-width custom-btn" @click="showCamera" aria-label="button">
             <div class="row items-center full-width">
               <div class="icon-background q-mr-md" :style="{ backgroundColor: iconBgColor }">
                 <ScanIcon />
@@ -59,7 +59,7 @@
             v-if="enablePaymentRequest"
             class="full-width custom-btn"
             @click="handlePaymentRequestBtn"
-          >
+           aria-label="button">
             <div class="row items-center full-width">
               <div class="icon-background q-mr-md" :style="{ backgroundColor: iconBgColor }">
                 <FileTextIcon />
@@ -76,7 +76,7 @@
             v-if="showP2PkButtonInDrawer"
             class="full-width custom-btn"
             @click="handleLockBtn"
-          >
+           aria-label="button">
             <div class="row items-center full-width">
               <div class="icon-background q-mr-md" :style="{ backgroundColor: iconBgColor }">
                 <LockIcon />
@@ -93,7 +93,7 @@
             v-if="ndefSupported && showNfcButtonInDrawer"
             class="full-width custom-btn"
             @click="handleNFCBtn"
-          >
+           aria-label="button">
             <div class="row items-center full-width">
               <div class="icon-background q-mr-md" :style="{ backgroundColor: iconBgColor }">
                 <q-spinner v-if="scanningCard" size="sm" />

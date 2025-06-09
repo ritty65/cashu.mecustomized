@@ -14,28 +14,28 @@
       v-if="showNumericKeyboard"
     >
       <div class="keyboard-grid">
-        <q-btn flat dense class="text-h5" @click="addDigit('1')">1</q-btn>
-        <q-btn flat dense class="text-h5" @click="addDigit('2')">2</q-btn>
-        <q-btn flat dense class="text-h5" @click="addDigit('3')">3</q-btn>
+        <q-btn flat dense class="text-h5" @click="addDigit('1')" aria-label="button">1</q-btn>
+        <q-btn flat dense class="text-h5" @click="addDigit('2')" aria-label="button">2</q-btn>
+        <q-btn flat dense class="text-h5" @click="addDigit('3')" aria-label="button">3</q-btn>
 
-        <q-btn flat dense class="text-h5" @click="addDigit('4')">4</q-btn>
-        <q-btn flat dense class="text-h5" @click="addDigit('5')">5</q-btn>
-        <q-btn flat dense class="text-h5" @click="addDigit('6')">6</q-btn>
+        <q-btn flat dense class="text-h5" @click="addDigit('4')" aria-label="button">4</q-btn>
+        <q-btn flat dense class="text-h5" @click="addDigit('5')" aria-label="button">5</q-btn>
+        <q-btn flat dense class="text-h5" @click="addDigit('6')" aria-label="button">6</q-btn>
 
-        <q-btn flat dense class="text-h5" @click="addDigit('7')">7</q-btn>
-        <q-btn flat dense class="text-h5" @click="addDigit('8')">8</q-btn>
-        <q-btn flat dense class="text-h5" @click="addDigit('9')">9</q-btn>
+        <q-btn flat dense class="text-h5" @click="addDigit('7')" aria-label="button">7</q-btn>
+        <q-btn flat dense class="text-h5" @click="addDigit('8')" aria-label="button">8</q-btn>
+        <q-btn flat dense class="text-h5" @click="addDigit('9')" aria-label="button">9</q-btn>
 
-        <q-btn flat dense class="text-h5" @click="addComma">.</q-btn>
-        <q-btn flat dense class="text-h5" @click="addDigit('0')">0</q-btn>
-        <q-btn flat dense class="text-h5" @click="backspace">
+        <q-btn flat dense class="text-h5" @click="addComma" aria-label="button">.</q-btn>
+        <q-btn flat dense class="text-h5" @click="addDigit('0')" aria-label="button">0</q-btn>
+        <q-btn flat dense class="text-h5" @click="backspace" aria-label="button">
           <q-icon name="backspace" size="sm" />
         </q-btn>
-        <q-btn flat dense @click="closeKeyboard">{{
+        <q-btn flat dense @click="closeKeyboard" aria-label="button">{{
           $t("NumericKeyboard.actions.close.label")
         }}</q-btn>
         <br />
-        <q-btn flat dense @click="emitDone">{{
+        <q-btn flat dense @click="emitDone" aria-label="button">{{
           $t("NumericKeyboard.actions.enter.label")
         }}</q-btn>
       </div>

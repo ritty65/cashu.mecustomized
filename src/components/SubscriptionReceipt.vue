@@ -26,7 +26,7 @@
                     :icon="expanded[r.id] ? 'expand_less' : 'expand_more'"
                     class="q-ml-xs"
                     @click.stop="toggle(r.id)"
-                  />
+                   aria-label="button"/>
                 </div>
                 <q-slide-transition>
                   <div v-if="expanded[r.id]" class="text-caption q-mt-xs token-full">
@@ -35,10 +35,10 @@
                 </q-slide-transition>
               </td>
               <td class="text-right">
-                <q-btn flat color="primary" size="sm" @click="copyToken(r.token)">
+                <q-btn flat color="primary" size="sm" @click="copyToken(r.token)" aria-label="button">
                   {{ $t('global.actions.copy.label') }}
                 </q-btn>
-                <q-btn flat color="primary" size="sm" @click="saveToken(r.token)">
+                <q-btn flat color="primary" size="sm" @click="saveToken(r.token)" aria-label="button">
                   {{ $t('SubscriptionReceipt.actions.save.label') }}
                 </q-btn>
               </td>
@@ -50,7 +50,7 @@
         </q-markup-table>
       </q-card-section>
       <q-card-actions align="right">
-        <q-btn v-close-popup flat color="grey">{{ $t('global.actions.close.label') }}</q-btn>
+        <q-btn v-close-popup flat color="grey" aria-label="button">{{ $t('global.actions.close.label') }}</q-btn>
       </q-card-actions>
     </q-card>
   </q-dialog>

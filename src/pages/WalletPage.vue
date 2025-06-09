@@ -13,7 +13,7 @@
           class="wallet-action-btn q-mb-md text-subtitle2"
           color="primary"
           @click="showReceiveDialog = true"
-        >
+         aria-label="button">
           <div class="button-content">
             <q-icon name="south_west" size="1.2rem" class="q-mr-xs" />
             <span>{{ $t("WalletPage.actions.receive.label") }}</span>
@@ -22,7 +22,7 @@
 
         <transition appear enter-active-class="animated pulse">
           <div class="scan-button-container">
-            <q-btn size="lg" outline color="primary" flat @click="showCamera">
+            <q-btn size="lg" outline color="primary" flat @click="showCamera" aria-label="button">
               <ScanIcon size="2.5em" />
             </q-btn>
             <InfoTooltip
@@ -39,7 +39,7 @@
           class="wallet-action-btn q-mb-md text-subtitle2"
           color="primary"
           @click="showSendDialog = true"
-        >
+         aria-label="button">
           <div class="button-content">
             <q-icon name="north_east" size="1.2rem" class="q-mr-xs" />
             <span>{{ $t("WalletPage.actions.send.label") }}</span>
@@ -130,7 +130,7 @@
               "
               color="primary"
               @click="triggerPwaInstall()"
-              ><b>{{ $t("WalletPage.install.text") }}</b
+              ><b aria-label="button">{{ $t("WalletPage.install.text") }}</b
               ><q-tooltip>{{
                 $t("WalletPage.install.tooltip")
               }}</q-tooltip></q-btn

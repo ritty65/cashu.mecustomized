@@ -47,7 +47,7 @@
           rounded
           dense
           @click="newKeys"
-        >
+         aria-label="button">
           <q-icon name="refresh" class="q-pr-sm" size="xs" />
           {{ $t("P2PKDialog.actions.new_key.label") }}</q-btn
         >
@@ -57,9 +57,9 @@
             size="md"
             flat
             @click="copyText(showP2PKData.publicKey)"
-            >{{ $t("P2PKDialog.actions.copy.label") }}</q-btn
+             aria-label="button">{{ $t("P2PKDialog.actions.copy.label") }}</q-btn
           >
-          <q-btn v-close-popup flat color="grey" class="q-ml-auto">{{
+          <q-btn v-close-popup flat color="grey" class="q-ml-auto" aria-label="button">{{
             $t("P2PKDialog.actions.close.label")
           }}</q-btn>
         </div>

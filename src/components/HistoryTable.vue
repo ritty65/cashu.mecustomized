@@ -91,7 +91,7 @@
             icon="arrow_circle_down"
             @click="receiveToken(token.token)"
             class="cursor-pointer"
-            v-if="token.status === 'pending' && token.amount > 0"
+            v-if="token.status === 'pending' && token.amount  aria-label="button"> 0"
             :aria-label="$t('HistoryTable.actions.receive.tooltip_text')"
             :title="$t('HistoryTable.actions.receive.tooltip_text')"
           >
@@ -118,7 +118,7 @@
         "
         class="q-ml-sm q-px-md"
         size="sm"
-      />
+       aria-label="button"/>
     </div>
     <div v-if="paginatedTokens.length === 0" class="text-center q-mt-lg">
       <q-item-label caption class="text-primary">{{
@@ -155,10 +155,10 @@
           :label="$t('BucketManager.inputs.color')"
         />
         <div class="row q-mt-md">
-          <q-btn color="primary" rounded @click="saveLabel">{{
+          <q-btn color="primary" rounded @click="saveLabel" aria-label="button">{{
             $t('global.actions.update.label')
           }}</q-btn>
-          <q-btn flat rounded color="grey" class="q-ml-auto" v-close-popup>{{
+          <q-btn flat rounded color="grey" class="q-ml-auto" v-close-popup aria-label="button">{{
             $t('global.actions.cancel.label')
           }}</q-btn>
         </div>

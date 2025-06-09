@@ -233,7 +233,7 @@
               flat
               :disable="addMintData.url.length === 0"
               @click="
-                addMintData.url.length > 0
+                addMintData.url.length  aria-label="button"> 0
                   ? sanitizeMintUrlAndShowAddDialog()
                   : null
               "
@@ -244,7 +244,7 @@
               <span>{{ $t("MintSettings.add.actions.add_mint.label") }}</span>
             </q-btn>
 
-            <q-btn flat @click="showCamera" class="text-white">
+            <q-btn flat @click="showCamera" class="text-white" aria-label="button">
               <q-icon name="qr_code" size="20px" class="q-mr-sm" />
               <span>{{ $t("MintSettings.add.actions.scan.label") }}</span>
             </q-btn>
@@ -281,7 +281,7 @@
             outline
             :loading="discoveringMints"
             @click="fetchMintsFromNdk"
-            >{{ $t("MintSettings.discover.actions.discover.label") }}
+             aria-label="button">{{ $t("MintSettings.discover.actions.discover.label") }}
             <template v-slot:loading>
               <q-spinner-hourglass class="on-left" />
               {{ $t("MintSettings.discover.actions.discover.in_progress") }}
@@ -440,7 +440,7 @@
             :disable="
               !swapData.fromUrl ||
               !swapData.toUrl ||
-              !(swapData.amount > 0) ||
+              !(swapData.amount  aria-label="button"> 0) ||
               swapData.fromUrl == swapData.toUrl
             "
             :loading="swapBlocking"

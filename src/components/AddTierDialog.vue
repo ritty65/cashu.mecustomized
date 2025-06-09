@@ -54,8 +54,8 @@
         />
       </q-card-section>
       <q-card-actions align="between" class="q-pt-none">
-        <q-btn flat color="primary" @click="save">{{ $t('CreatorHub.dashboard.save_tier') }}</q-btn>
-        <q-btn flat color="grey" v-close-popup>{{ $t('global.actions.cancel.label') }}</q-btn>
+        <q-btn flat color="primary" @click="save" aria-label="button">{{ $t('CreatorHub.dashboard.save_tier') }}</q-btn>
+        <q-btn flat color="grey" v-close-popup aria-label="button">{{ $t('global.actions.cancel.label') }}</q-btn>
       </q-card-actions>
     </q-card>
   </q-dialog>

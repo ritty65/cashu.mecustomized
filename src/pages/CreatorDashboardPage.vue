@@ -2,7 +2,7 @@
   <div :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark', 'q-pa-md']">
     <div class="row items-center justify-between">
       <div class="text-h5">{{ $t('CreatorHub.dashboard.title') }}</div>
-      <q-btn flat color="primary" @click="logout">{{ $t('CreatorHub.dashboard.logout') }}</q-btn>
+      <q-btn flat color="primary" @click="logout" aria-label="button">{{ $t('CreatorHub.dashboard.logout') }}</q-btn>
     </div>
 
     <div class="q-mt-md">
@@ -10,7 +10,7 @@
       <q-input v-model="profile.display_name" label="Display Name" class="q-mt-sm" />
       <q-input v-model="profile.picture" label="Profile Picture URL" class="q-mt-sm" />
       <q-input v-model="profile.about" type="textarea" label="Bio" class="q-mt-sm" />
-      <q-btn color="primary" flat class="q-mt-sm" @click="saveProfile">{{ $t('global.actions.update.label') }}</q-btn>
+      <q-btn color="primary" flat class="q-mt-sm" @click="saveProfile" aria-label="button">{{ $t('global.actions.update.label') }}</q-btn>
     </div>
 
     <div class="q-mt-lg">
@@ -82,7 +82,7 @@
               color="primary"
               flat
               @click="saveTier(tier)"
-              >{{ $t('CreatorHub.dashboard.save_tier') }}</q-btn
+               aria-label="button">{{ $t('CreatorHub.dashboard.save_tier') }}</q-btn
             >
             <q-btn
               outline
@@ -90,20 +90,20 @@
               class="q-mr-sm"
               :style="{ borderRadius: '8px' }"
               @click="cancelEdit(tier.id)"
-              >{{ $t('global.actions.cancel.label') }}</q-btn
+               aria-label="button">{{ $t('global.actions.cancel.label') }}</q-btn
             >
             <q-btn
               color="negative"
               flat
               @click="removeTier(tier.id)"
-              >{{ $t('CreatorHub.dashboard.delete_tier') }}</q-btn
+               aria-label="button">{{ $t('CreatorHub.dashboard.delete_tier') }}</q-btn
             >
           </q-card-actions>
         </q-card>
       </div>
       <div class="row q-gutter-sm q-mt-md">
-        <q-btn color="primary" flat @click="openAddTier">{{ $t('CreatorHub.dashboard.add_tier') }}</q-btn>
-        <q-btn color="primary" flat @click="saveAllTiers">{{ $t('CreatorHub.dashboard.save_tier') }}</q-btn>
+        <q-btn color="primary" flat @click="openAddTier" aria-label="button">{{ $t('CreatorHub.dashboard.add_tier') }}</q-btn>
+        <q-btn color="primary" flat @click="saveAllTiers" aria-label="button">{{ $t('CreatorHub.dashboard.save_tier') }}</q-btn>
       </div>
     </div>
   </div>

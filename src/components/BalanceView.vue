@@ -158,7 +158,7 @@
         outline
         class="q-mx-none q-mt-xs q-pr-sm cursor-pointer"
         @click="checkPendingTokens()"
-        ><q-icon name="history" size="1rem" class="q-mx-xs" />
+        ><q-icon name="history" size="1rem" class="q-mx-xs"  aria-label="button"/>
         {{ $t("BalanceView.pending.label") }}:
         {{ formatCurrency(pendingBalance, this.activeUnit) }}
         <q-tooltip>{{ $t("BalanceView.pending.tooltip") }}</q-tooltip>

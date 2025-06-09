@@ -3,10 +3,10 @@
     <q-card class="q-pa-md" style="max-width:400px; width:100%">
       <q-card-section class="text-h6">{{ $t('CreatorHub.login.title') }}</q-card-section>
       <q-card-actions vertical>
-        <q-btn color="primary" @click="loginNip07">{{ $t('CreatorHub.login.nip07') }}</q-btn>
+        <q-btn color="primary" @click="loginNip07" aria-label="button">{{ $t('CreatorHub.login.nip07') }}</q-btn>
         <q-input v-model="nsec" type="password" :label="$t('CreatorHub.login.nsec')" class="q-mt-md" />
         <div class="text-negative text-caption q-mt-sm">{{ $t('CreatorHub.login.nsec_warning') }}</div>
-        <q-btn color="primary" flat @click="loginNsec" class="q-mt-md">{{ $t('CreatorHub.login.nsec_button') }}</q-btn>
+        <q-btn color="primary" flat @click="loginNsec" class="q-mt-md" aria-label="button">{{ $t('CreatorHub.login.nsec_button') }}</q-btn>
       </q-card-actions>
     </q-card>
   </div>

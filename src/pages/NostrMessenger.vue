@@ -35,7 +35,7 @@
     <div :class="['col column', $q.screen.gt.xs ? 'q-pa-lg' : 'q-pa-md']">
       <q-header elevated class="q-mb-md bg-transparent">
         <q-toolbar>
-          <q-btn flat round dense icon="arrow_back" @click="goBack" />
+          <q-btn flat round dense icon="arrow_back" @click="goBack"  aria-label="button"/>
           <q-toolbar-title class="text-h6 ellipsis">
             Nostr Messenger
             <q-badge

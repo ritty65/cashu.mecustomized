@@ -82,7 +82,7 @@
             rounded
             outline
             to="/restore"
-            >{{ $t("Settings.backup_restore.restore_ecash.button") }}</q-btn
+             aria-label="button">{{ $t("Settings.backup_restore.restore_ecash.button") }}</q-btn
           >
         </q-item>
       </q-list>
@@ -404,7 +404,7 @@
                     icon="add"
                     color="primary"
                     @click="addNostrRelay"
-                  ></q-btn>
+                  ></q-btn aria-label="button">
                 </template>
               </q-input>
             </q-item-section>
@@ -546,7 +546,7 @@
             rounded
             outline
             @click="listenToNWCCommands()"
-            >Link wallet</q-btn
+             aria-label="button">Link wallet</q-btn
           >
         </q-item> -->
         <q-item v-if="enableNwc">
@@ -663,7 +663,7 @@
                       icon="add"
                       color="primary"
                       @click="addRelay"
-                    ></q-btn>
+                    ></q-btn aria-label="button">
                   </template>
                 </q-input>
               </q-item-section>
@@ -873,7 +873,7 @@
                 rounded
                 outline
                 @click="generateKeypair"
-                >{{ $t("Settings.p2pk_features.generate_button") }}</q-btn
+                 aria-label="button">{{ $t("Settings.p2pk_features.generate_button") }}</q-btn
               >
             </q-item>
             <q-item style="display: inline-block">
@@ -884,7 +884,7 @@
                 rounded
                 outline
                 @click="importNsec"
-                >{{ $t("Settings.p2pk_features.import_button") }}</q-btn
+                 aria-label="button">{{ $t("Settings.p2pk_features.import_button") }}</q-btn
               >
             </q-item>
             <q-item>
@@ -1151,7 +1151,7 @@
                   @click="copyText(auditorUrl)"
                   size="sm"
                   color="grey"
-                />
+                 aria-label="button"/>
               </template>
             </q-input>
           </div>
@@ -1175,7 +1175,7 @@
                   @click="copyText(auditorApiUrl)"
                   size="sm"
                   color="grey"
-                />
+                 aria-label="button"/>
               </template>
             </q-input>
           </div>
@@ -1229,7 +1229,7 @@
                 </q-item-label>
                 <!-- <div class="row q-py-md">
               <q-btn dense flat rounded @click="toggleDarkMode" size="md"
-                >Toggle dark mode<q-icon
+                 aria-label="button">Toggle dark mode<q-icon
                   class="q-ml-sm"
                   :name="$q.dark.isActive ? 'brightness_3' : 'wb_sunny'"
                 />
@@ -1452,7 +1452,7 @@
                         flat
                         dense
                         @click="confirmMnemonic = !confirmMnemonic"
-                        >{{
+                         aria-label="button">{{
                           $t("Settings.advanced.developer.new_seed.button")
                         }}</q-btn
                       >
@@ -1480,7 +1480,7 @@
                         class="q-ml-sm"
                         color="warning"
                         @click="confirmMnemonic = false"
-                        >{{
+                         aria-label="button">{{
                           $t("Settings.advanced.developer.new_seed.cancel")
                         }}</q-btn
                       >
@@ -1493,7 +1493,7 @@
                           confirmMnemonic = false;
                           generateNewMnemonic();
                         "
-                        >{{
+                         aria-label="button">{{
                           $t("Settings.advanced.developer.new_seed.confirm")
                         }}</q-btn
                       >
@@ -1510,7 +1510,7 @@
                       outline
                       click
                       @click="checkActiveProofsSpendable"
-                      >{{
+                       aria-label="button">{{
                         $t("Settings.advanced.developer.remove_spent.button")
                       }}</q-btn
                     ></row
@@ -1528,7 +1528,7 @@
               <q-item>
                 <q-item-section>
                   <row>
-                    <q-btn dense flat outline click @click="toggleTerminal">
+                    <q-btn dense flat outline click @click="toggleTerminal" aria-label="button">
                       {{
                         $t("Settings.advanced.developer.debug_console.button")
                       }}
@@ -1547,7 +1547,7 @@
               <q-item>
                 <q-item-section>
                   <row>
-                    <q-btn dense flat outline click @click="exportActiveProofs">
+                    <q-btn dense flat outline click @click="exportActiveProofs" aria-label="button">
                       {{
                         $t("Settings.advanced.developer.export_proofs.button")
                       }}
@@ -1596,7 +1596,7 @@
                         flat
                         click
                         @click="increaseKeysetCounter(counter.id, 1)"
-                        >{{ counter.id }} - counter: {{ counter.counter }}
+                         aria-label="button">{{ counter.id }} - counter: {{ counter.counter }}
                       </q-btn>
                     </row>
                   </row>
@@ -1611,7 +1611,7 @@
                       outline
                       click
                       @click="unsetAllReservedProofs"
-                    >
+                     aria-label="button">
                       {{
                         $t("Settings.advanced.developer.unset_reserved.button")
                       }}
@@ -1630,7 +1630,7 @@
               <q-item>
                 <q-item-section>
                   <row>
-                    <q-btn dense flat outline click @click="showOnboarding">
+                    <q-btn dense flat outline click @click="showOnboarding" aria-label="button">
                       {{
                         $t("Settings.advanced.developer.show_onboarding.button")
                       }}
@@ -1656,7 +1656,7 @@
                       outline
                       click
                       @click="confirmNuke = !confirmNuke"
-                    >
+                     aria-label="button">
                       {{
                         $t("Settings.advanced.developer.reset_wallet.button")
                       }}
@@ -1682,7 +1682,7 @@
                       class="q-ml-sm"
                       color="primary"
                       @click="confirmNuke = false"
-                      >{{
+                       aria-label="button">{{
                         $t("Settings.advanced.developer.reset_wallet.cancel")
                       }}</q-btn
                     >
@@ -1695,7 +1695,7 @@
                         confirmNuke = false;
                         nukeWallet();
                       "
-                      >{{
+                       aria-label="button">{{
                         $t("Settings.advanced.developer.reset_wallet.confirm")
                       }}</q-btn
                     >
@@ -1705,7 +1705,7 @@
               <q-item>
                 <q-item-section>
                   <row>
-                    <q-btn dense flat outline click @click="exportWalletState">
+                    <q-btn dense flat outline click @click="exportWalletState" aria-label="button">
                       {{
                         $t("Settings.advanced.developer.export_wallet.button")
                       }}

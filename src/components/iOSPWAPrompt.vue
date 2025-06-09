@@ -19,7 +19,7 @@
           @click="closePrompt"
           size="sm"
           class="close-btn q-px-sm"
-        />
+         aria-label="button"/>
       </div>
 
       <div class="pwa-prompt-arrow"></div>

@@ -40,7 +40,7 @@
 
       <q-card-section class="q-pa-md">
         <div class="q-gutter-y-md">
-          <q-btn class="full-width custom-btn" @click="showSendTokensDialog">
+          <q-btn class="full-width custom-btn" @click="showSendTokensDialog" aria-label="button">
             <div class="row items-center full-width">
               <div class="icon-background q-mr-md" :style="{ backgroundColor: iconBgColor }">
                 <CoinsIcon />
@@ -53,7 +53,7 @@
             </div>
           </q-btn>
 
-          <q-btn class="full-width custom-btn" @click="showParseDialog">
+          <q-btn class="full-width custom-btn" @click="showParseDialog" aria-label="button">
             <div class="row items-center full-width">
               <div class="icon-background q-mr-md" :style="{ backgroundColor: iconBgColor }">
                 <ZapIcon />

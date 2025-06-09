@@ -16,7 +16,7 @@
         unelevated
         to="/"
         :label="$t('ErrorNotFound.actions.home.label')"
-      />
+       aria-label="button"/>
     </div>
   </div>
 </template>

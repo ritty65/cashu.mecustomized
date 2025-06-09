@@ -48,10 +48,10 @@
         </div>
       </q-card-section>
       <q-card-actions align="right">
-        <q-btn flat color="primary" @click="cancel">{{
+        <q-btn flat color="primary" @click="cancel" aria-label="button">{{
           $t("global.actions.cancel.label")
         }}</q-btn>
-        <q-btn flat color="primary" @click="confirm">{{
+        <q-btn flat color="primary" @click="confirm" aria-label="button">{{
           $t("global.actions.ok.label")
         }}</q-btn>
       </q-card-actions>

@@ -6,7 +6,7 @@
     ]"
   >
     <div class="q-mb-md">
-      <q-btn flat color="primary" to="/find-creators">{{
+      <q-btn flat color="primary" to="/find-creators" aria-label="button">{{
         $t("CreatorHub.profile.back")
       }}</q-btn>
     </div>
@@ -63,7 +63,7 @@
                 color="primary"
                 class="subscribe-btn"
                 @click="openSubscribe(t)"
-              />
+               aria-label="button"/>
             </div>
             <PaywalledContent
               :creator-npub="creatorNpub"

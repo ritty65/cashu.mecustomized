@@ -1,6 +1,6 @@
 <template>
   <div>
-    <q-btn label="Identity / Relays" color="primary" @click="showDialog = true" />
+    <q-btn label="Identity / Relays" color="primary" @click="showDialog = true"  aria-label="button"/>
     <q-dialog v-model="showDialog">
       <q-card style="min-width: 350px">
         <q-card-section class="text-h6">Identity &amp; Relays</q-card-section>
@@ -13,15 +13,15 @@
               <q-item v-for="(r, index) in relays" :key="index">
                 <q-item-section>{{ r }}</q-item-section>
                 <q-item-section side>
-                  <q-btn flat dense icon="delete" @click="removeRelay(index)" />
+                  <q-btn flat dense icon="delete" @click="removeRelay(index)"  aria-label="button"/>
                 </q-item-section>
               </q-item>
             </q-list>
           </div>
         </q-card-section>
         <q-card-actions align="right">
-          <q-btn flat v-close-popup label="Close" />
-          <q-btn flat label="Save" @click="save" />
+          <q-btn flat v-close-popup label="Close"  aria-label="button"/>
+          <q-btn flat label="Save" @click="save"  aria-label="button"/>
         </q-card-actions>
       </q-card>
     </q-dialog>

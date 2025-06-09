@@ -9,7 +9,7 @@
       @click="start"
       :disable="!pubkey.trim()"
       dense
-    />
+     aria-label="button"/>
   </div>
 </template>
 

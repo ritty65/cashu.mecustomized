@@ -51,14 +51,14 @@
             color="primary"
             @click="toggleUnit()"
             :label="activeUnitLabel"
-          />
+           aria-label="button"/>
         </q-input>
         <div class="row items-center no-wrap q-my-sm q-py-none">
           <q-btn
             color="primary"
             rounded
             @click="requestMintButton"
-            :disable="!(invoiceData.amount > 0) || createInvoiceButtonBlocked"
+            :disable="!(invoiceData.amount  aria-label="button"> 0) || createInvoiceButtonBlocked"
             :label="
               createInvoiceButtonBlocked
                 ? $t('InvoiceDetailDialog.actions.create.label_blocked')
@@ -71,7 +71,7 @@
               {{ $t("InvoiceDetailDialog.actions.create.in_progress") }}
             </template>
           </q-btn>
-          <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto">{{
+          <q-btn v-close-popup rounded flat color="grey" class="q-ml-auto" aria-label="button">{{
             $t("InvoiceDetailDialog.actions.close.label")
           }}</q-btn>
         </div>
@@ -157,9 +157,9 @@
             size="md"
             flat
             @click="copyText(invoiceData.bolt11)"
-            >{{ $t("InvoiceDetailDialog.invoice.actions.copy.label") }}</q-btn
+             aria-label="button">{{ $t("InvoiceDetailDialog.invoice.actions.copy.label") }}</q-btn
           >
-          <q-btn v-close-popup flat color="grey" class="q-ml-auto">{{
+          <q-btn v-close-popup flat color="grey" class="q-ml-auto" aria-label="button">{{
             $t("InvoiceDetailDialog.invoice.actions.close.label")
           }}</q-btn>
         </div>
