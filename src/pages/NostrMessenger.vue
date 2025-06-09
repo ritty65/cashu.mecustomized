@@ -50,15 +50,6 @@
       <ActiveChatHeader :pubkey="selected" />
       <MessageList :messages="messages" class="col" />
       <MessageInput @send="sendMessage" />
-      <q-expansion-item
-        class="q-mt-md"
-        dense
-        dense-toggle
-        label="Event Log"
-        v-model="showEventLog"
-      >
-        <EventLog :events="eventLog" />
-      </q-expansion-item>
     </div>
   </q-page>
 </template>
@@ -76,7 +67,6 @@ import ConversationList from "components/ConversationList.vue";
 import ActiveChatHeader from "components/ActiveChatHeader.vue";
 import MessageList from "components/MessageList.vue";
 import MessageInput from "components/MessageInput.vue";
-import EventLog from "components/EventLog.vue";
 
 const messenger = useMessengerStore();
 messenger.loadIdentity();
@@ -100,11 +90,6 @@ const drawer = computed({
 });
 const selected = ref("");
 const messages = computed(() => messenger.conversations[selected.value] || []);
-const eventLog = computed(() => messenger.eventLog);
-const showEventLog = useLocalStorage<boolean>(
-  "cashu.messenger.showEventLog",
-  false,
-);
 const showRelays = useLocalStorage<boolean>("cashu.messenger.showRelays", true);
 
 watch(
