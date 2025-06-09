@@ -1352,4 +1352,11 @@ timelock: {
     invalid_swap_data_error_text: "Μη έγκυρα δεδομένα ανταλλαγής",
     swap_error_text: "Σφάλμα κατά την ανταλλαγή",
   },
+  SubscriptionsOverview: {
+    claim: "Claim",
+    notifications: {
+      claim_success: "Tokens claimed",
+      claim_error: "Failed to claim tokens"
+    },
+  },
 };

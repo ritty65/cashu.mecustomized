@@ -1342,4 +1342,11 @@ timelock: {
     invalid_swap_data_error_text: "بيانات تبديل غير صالحة",
     swap_error_text: "خطأ في التبديل",
   },
+  SubscriptionsOverview: {
+    claim: "Claim",
+    notifications: {
+      claim_success: "Tokens claimed",
+      claim_error: "Failed to claim tokens"
+    },
+  },
 };

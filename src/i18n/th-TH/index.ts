@@ -1329,4 +1329,11 @@ timelock: {
     invalid_swap_data_error_text: "ข้อมูลการแลกเปลี่ยนไม่ถูกต้อง",
     swap_error_text: "ข้อผิดพลาดในการแลกเปลี่ยน",
   },
+  SubscriptionsOverview: {
+    claim: "Claim",
+    notifications: {
+      claim_success: "Tokens claimed",
+      claim_error: "Failed to claim tokens"
+    },
+  },
 };

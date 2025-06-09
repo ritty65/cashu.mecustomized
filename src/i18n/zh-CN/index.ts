@@ -1322,4 +1322,11 @@ timelock: {
     invalid_swap_data_error_text: "无效的兑换数据",
     swap_error_text: "兑换错误",
   },
+  SubscriptionsOverview: {
+    claim: "Claim",
+    notifications: {
+      claim_success: "Tokens claimed",
+      claim_error: "Failed to claim tokens"
+    },
+  },
 };

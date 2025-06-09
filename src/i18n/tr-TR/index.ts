@@ -1334,4 +1334,11 @@ timelock: {
     invalid_swap_data_error_text: "Geçersiz takas verisi",
     swap_error_text: "Takas hatası",
   },
+  SubscriptionsOverview: {
+    claim: "Claim",
+    notifications: {
+      claim_success: "Tokens claimed",
+      claim_error: "Failed to claim tokens"
+    },
+  },
 };

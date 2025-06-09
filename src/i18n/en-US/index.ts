@@ -1500,6 +1500,7 @@ export default {
     empty: "No subscriptions",
     discover: "Discover creators",
     view: "View",
+    claim: "Claim",
     message: "Message",
     extend: "Extend",
     export: "Export",
@@ -1511,6 +1512,8 @@ export default {
     notifications: {
       cancel_success: "Subscription canceled",
       extend_success: "Subscription extended",
+      claim_success: "Tokens claimed",
+      claim_error: "Failed to claim tokens",
     },
   },
   LockedTokensTable: {

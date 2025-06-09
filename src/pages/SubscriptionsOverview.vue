@@ -131,6 +131,16 @@
           dense
           size="sm"
           class="q-ml-xs"
+          v-if="props.row.hasUnlocked"
+          @click="claimUnlocked(props.row.creator)"
+        >
+          {{ $t('SubscriptionsOverview.claim') }}
+        </q-btn>
+        <q-btn
+          flat
+          dense
+          size="sm"
+          class="q-ml-xs"
           :to="`/creator/${pubkeyNpub(props.row.creator)}`"
         >
           {{ $t('FindCreators.actions.view_profile') }}
@@ -282,6 +292,8 @@ import { notifySuccess, notifyError } from 'src/js/notify';
 import type { Proof } from '@cashu/cashu-ts';
 import { useProofsStore } from 'stores/proofs';
 import { useSendTokensStore } from 'stores/sendTokensStore';
+import { useWalletStore } from 'stores/wallet';
+import { useReceiveTokensStore } from 'stores/receiveTokensStore';
 import token from 'src/js/token';
 
 const lockedStore = useLockedTokensStore();
@@ -290,6 +302,8 @@ const mintsStore = useMintsStore();
 const uiStore = useUiStore();
 const proofsStore = useProofsStore();
 const sendTokensStore = useSendTokensStore();
+const walletStore = useWalletStore();
+const receiveTokensStore = useReceiveTokensStore();
 const { activeUnit } = storeToRefs(mintsStore);
 
 function pubkeyNpub(hex: string): string {
@@ -500,6 +514,35 @@ function extendSubscription(pubkey: string) {
       notifyError(e.message);
     }
   });
+}
+
+async function claimUnlocked(pubkey: string) {
+  const row = rows.value.find((r) => r.creator === pubkey);
+  if (!row) return;
+  const now = Math.floor(Date.now() / 1000);
+  const unlockedTokens = row.tokens.filter(
+    (t) => !t.locktime || t.locktime <= now,
+  );
+  if (!unlockedTokens.length) return;
+  const proofs = unlockedTokens.flatMap((t) => {
+    const decoded = token.decode(t.token);
+    return decoded ? (token.getProofs(decoded) as Proof[]) : [];
+  });
+  if (!proofs.length) return;
+  const tokenStr = proofsStore.serializeProofs(proofs);
+  receiveTokensStore.receiveData.tokensBase64 = tokenStr;
+  receiveTokensStore.receiveData.bucketId = unlockedTokens[0].bucketId;
+  try {
+    await walletStore.redeem(unlockedTokens[0].bucketId);
+    notifySuccess(t('SubscriptionsOverview.notifications.claim_success'));
+  } catch (e: any) {
+    sendTokensStore.clearSendData();
+    sendTokensStore.sendData.tokensBase64 = tokenStr;
+    sendTokensStore.showSendTokens = true;
+    notifyError(
+      e?.message || t('SubscriptionsOverview.notifications.claim_error'),
+    );
+  }
 }
 
 function exportTokens(pubkey: string) {

@@ -1332,4 +1332,11 @@ timelock: {
     invalid_swap_data_error_text: "無効なスワップデータ",
     swap_error_text: "スワップエラー",
   },
+  SubscriptionsOverview: {
+    claim: "Claim",
+    notifications: {
+      claim_success: "Tokens claimed",
+      claim_error: "Failed to claim tokens"
+    },
+  },
 };

@@ -1350,4 +1350,11 @@ timelock: {
     invalid_swap_data_error_text: "Datos de intercambio inválidos",
     swap_error_text: "Error al intercambiar",
   },
+  SubscriptionsOverview: {
+    claim: "Claim",
+    notifications: {
+      claim_success: "Tokens claimed",
+      claim_error: "Failed to claim tokens"
+    },
+  },
 };
