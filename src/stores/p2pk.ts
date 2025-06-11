@@ -3,7 +3,8 @@ import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { generateSecretKey, getPublicKey, nip19 } from "nostr-tools";
 import { bytesToHex, hexToBytes } from "@noble/hashes/utils"; // already an installed dependency
-import { Point } from "@noble/curves/secp256k1";
+import { secp256k1 } from "@noble/curves/secp256k1";
+const { Point } = secp256k1;
 import { WalletProof } from "stores/mints";
 import token from "src/js/token";
 
