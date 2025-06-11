@@ -1,5 +1,5 @@
 import { date } from "quasar";
-import * as nobleSecp256k1 from "@noble/secp256k1";
+import { bytesToHex } from "@noble/hashes/utils";
 
 function splitAmount(value) {
   const chunks = [];
@@ -11,7 +11,7 @@ function splitAmount(value) {
 }
 
 function bytesToNumber(bytes) {
-  return hexToNumber(nobleSecp256k1.etc.bytesToHex(bytes));
+  return hexToNumber(bytesToHex(bytes));
 }
 
 function bigIntStringify(key, value) {
