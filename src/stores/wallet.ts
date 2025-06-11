@@ -589,7 +589,11 @@ export const useWalletStore = defineStore("wallet", {
         // redeem
         const keysetId = this.getKeyset(historyToken.mint, historyToken.unit);
         const counter = this.keysetCounter(keysetId);
-        const privkey = receiveStore.receiveData.p2pkPrivateKey;
+        let privkey = receiveStore.receiveData.p2pkPrivateKey;
+        if (!privkey) {
+          privkey = useNostrStore().activePrivkeyHex;
+        }
+        if (!privkey) throw new Error("No private key available for P2PK unlock");
         let proofs: Proof[];
         try {
           proofs = await mintWallet.receive(

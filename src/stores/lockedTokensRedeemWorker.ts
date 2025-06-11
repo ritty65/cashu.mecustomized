@@ -3,6 +3,8 @@ import { cashuDb } from './dexie'
 import { useWalletStore } from './wallet'
 import { useReceiveTokensStore } from './receiveTokensStore'
 import { useSettingsStore } from './settings'
+import { useNostrStore } from './nostr'
+import { notifyWarning } from '../js/notify'
 
 export const useLockedTokensRedeemWorker = defineStore('lockedTokensRedeemWorker', {
   state: () => ({
@@ -37,10 +39,23 @@ export const useLockedTokensRedeemWorker = defineStore('lockedTokensRedeemWorker
         try {
           receiveStore.receiveData.tokensBase64 = entry.tokenString
           receiveStore.receiveData.bucketId = entry.tierId
+          let privkey = receiveStore.receiveData.p2pkPrivateKey
+          if (!privkey) {
+            privkey = useNostrStore().activePrivkeyHex
+          }
+          if (!privkey) throw new Error('No private key available for P2PK unlock')
+          receiveStore.receiveData.p2pkPrivateKey = privkey
           await wallet.redeem(entry.tierId)
           await cashuDb.lockedTokens.delete(entry.id)
-        } catch (e) {
-          console.error('Failed to auto-redeem locked token', e)
+        } catch (err: any) {
+          if (
+            err?.response?.data?.code === 10003 ||
+            err?.response?.data?.code === 11001
+          ) {
+            notifyWarning('These tokens are already spent or invalid.')
+            continue
+          }
+          console.error('Failed to auto-redeem locked token', err)
         }
       }
     },
