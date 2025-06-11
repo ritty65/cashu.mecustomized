@@ -275,3 +275,5 @@ export const useP2PKStore = defineStore("p2pk", {
     },
   },
 });
+
+export { ensureCompressed };
