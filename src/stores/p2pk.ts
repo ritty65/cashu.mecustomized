@@ -2,7 +2,7 @@ import { debug } from "src/js/logger";
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { generateSecretKey, getPublicKey, nip19 } from "nostr-tools";
-import { bytesToHex } from "@noble/hashes/utils"; // already an installed dependency
+import { bytesToHex, hexToBytes } from "@noble/hashes/utils"; // already an installed dependency
 import { WalletProof } from "stores/mints";
 import token from "src/js/token";
 
@@ -96,6 +96,23 @@ export const useP2PKStore = defineStore("p2pk", {
         usedCount: 0,
       };
       this.p2pkKeys = this.p2pkKeys.concat(keyPair);
+    },
+    addKeyPair: function (privateKeyHex: string) {
+      try {
+        const publicKey = "02" + getPublicKey(hexToBytes(privateKeyHex));
+        if (this.haveThisKey(publicKey)) {
+          return;
+        }
+        const keyPair: P2PKKey = {
+          publicKey,
+          privateKey: privateKeyHex,
+          used: false,
+          usedCount: 0,
+        };
+        this.p2pkKeys = this.p2pkKeys.concat(keyPair);
+      } catch (e) {
+        console.error(e);
+      }
     },
     getSecretP2PKInfo: function (
       secret: string,

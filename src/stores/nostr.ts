@@ -211,6 +211,9 @@ export const useNostrStore = defineStore("nostr", {
       this.ndk = new NDK(opts);
       this.ndk.connect();
       this.connected = true;
+      if (this.activePrivkeyHex) {
+        useP2PKStore().addKeyPair(this.activePrivkeyHex);
+      }
     },
     initSignerIfNotSet: async function () {
       if (!this.initialized) {
