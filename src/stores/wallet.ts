@@ -7,7 +7,7 @@ import { useProofsStore } from "./proofs";
 import { HistoryToken, useTokensStore } from "./tokens";
 import { useReceiveTokensStore } from "./receiveTokensStore";
 import { useUiStore } from "src/stores/ui";
-import { useP2PKStore } from "src/stores/p2pk";
+import { useP2PKStore, ensureCompressed } from "src/stores/p2pk";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { usePRStore } from "./payment-request";
 import { useWorkersStore } from "./workers";
@@ -562,6 +562,15 @@ export const useWalletStore = defineStore("wallet", {
         throw new Error("no tokens provided.");
       }
       let proofs = token.getProofs(tokenJson);
+      // Normalize legacy P2PK secrets
+      proofs = proofs.map((p) => {
+        if (typeof p.secret === "string" && p.secret.startsWith("[\"P2PK")) {
+          const sec = JSON.parse(p.secret);
+          sec[1].data = ensureCompressed(sec[1].data);
+          p.secret = JSON.stringify(sec);
+        }
+        return p;
+      });
       if (proofs.length == 0) {
         throw new Error("no proofs found.");
       }
