@@ -122,6 +122,15 @@ function bech32ToHex(pubkey: string): string {
   }
 }
 
+function pubkeyNpub(hex: string): string {
+  try {
+    if (!hex) return "";
+    return nip19.npubEncode(hex);
+  } catch {
+    return hex;
+  }
+}
+
 function formatTs(ts: number): string {
   const d = new Date(ts * 1000);
   return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${("0" + d.getDate()).slice(-2)} ${("0" + d.getHours()).slice(-2)}:${("0" + d.getMinutes()).slice(-2)}`;
@@ -165,7 +174,7 @@ async function confirmSubscribe({
     const receipts = (await donationStore.createDonationPreset(
       months,
       amount,
-      dialogPubkey.value,
+      pubkeyNpub(dialogPubkey.value),
       bucketId,
       startDate,
       true,
@@ -231,7 +240,7 @@ function handleDonate({
     donationStore.createDonationPreset(
       months,
       amount,
-      selectedPubkey.value,
+      pubkeyNpub(selectedPubkey.value),
       bucketId
     );
     showDonateDialog.value = false;
