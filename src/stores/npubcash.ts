@@ -19,6 +19,7 @@ import { WalletProof, useMintsStore } from "./mints";
 import { useTokensStore } from "../stores/tokens";
 import { useNostrStore } from "../stores/nostr";
 import { DEFAULT_BUCKET_ID } from "./buckets";
+import { useP2PKStore } from "./p2pk";
 // type NPCConnection = {
 //   walletPublicKey: string,
 //   walletPrivateKey: string,
@@ -169,6 +170,8 @@ export const useNPCStore = defineStore("npc", {
           // add token to history first
           this.addPendingTokenToHistory(token);
           receiveStore.receiveData.tokensBase64 = token;
+          receiveStore.receiveData.p2pkPrivateKey =
+            useP2PKStore().getPrivateKeyForP2PKEncodedToken(token);
           if (this.automaticClaim) {
             try {
               // redeem token automatically

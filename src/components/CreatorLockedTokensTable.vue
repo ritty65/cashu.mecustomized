@@ -51,6 +51,7 @@ import { useReceiveTokensStore } from 'stores/receiveTokensStore'
 import { useWalletStore } from 'stores/wallet'
 import { useNostrStore } from 'stores/nostr'
 import { useUiStore } from 'stores/ui'
+import { useP2PKStore } from 'stores/p2pk'
 
 export default defineComponent({
   name: 'CreatorLockedTokensTable',
@@ -91,8 +92,11 @@ export default defineComponent({
     async redeem(token) {
       const receiveStore = useReceiveTokensStore()
       const wallet = useWalletStore()
+      const p2pkStore = useP2PKStore()
       receiveStore.receiveData.tokensBase64 = token.tokenString
       receiveStore.receiveData.bucketId = token.tierId
+      receiveStore.receiveData.p2pkPrivateKey =
+        p2pkStore.getPrivateKeyForP2PKEncodedToken(token.tokenString)
       await wallet.redeem(token.tierId)
       await useDexieLockedTokensStore().deleteLockedToken(token.id)
     }
