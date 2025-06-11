@@ -1,6 +1,7 @@
 import { type Token, getDecodedToken } from "@cashu/cashu-ts";
 import { useMintsStore, WalletProof } from "src/stores/mints";
 import { useProofsStore } from "src/stores/proofs";
+import { ensureCompressed } from "src/stores/p2pk";
 export default { decode, getProofs, getMint, getUnit, getMemo };
 
 /**
@@ -18,7 +19,18 @@ function getProofs(decoded_token: Token): WalletProof[] {
   if (!(decoded_token.proofs.length > 0)) {
     throw new Error("Token format wrong");
   }
-  const proofs = decoded_token.proofs.flat();
+  const proofs = decoded_token.proofs.flat().map((p) => {
+    if (typeof p.secret === "string" && p.secret.startsWith('["P2PK"')) {
+      try {
+        const sec = JSON.parse(p.secret);
+        if (sec[1]?.data && typeof sec[1].data === "string" && sec[1].data.length === 64) {
+          sec[1].data = ensureCompressed(sec[1].data);
+          p.secret = JSON.stringify(sec);
+        }
+      } catch {}
+    }
+    return p;
+  });
   return useProofsStore().proofsToWalletProofs(proofs, undefined, "unassigned", "");
 }
 
