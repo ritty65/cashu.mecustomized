@@ -565,7 +565,7 @@ export const useWalletStore = defineStore("wallet", {
       if (tokenJson == undefined) {
         throw new Error("no tokens provided.");
       }
-      const proofs = token.getProofs(tokenJson);
+      let proofs = token.getProofs(tokenJson);
       if (proofs.length == 0) {
         throw new Error("no proofs found.");
       }
