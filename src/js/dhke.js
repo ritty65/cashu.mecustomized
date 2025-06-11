@@ -1,30 +1,32 @@
 import { bytesToNumber } from "./utils";
-import * as nobleSecp256k1 from "@noble/secp256k1";
+import { secp256k1 } from "@noble/curves/secp256k1";
+import { sha256 } from "@noble/hashes/sha256";
+import { bytesToHex } from "@noble/hashes/utils";
 
 async function hashToCurve(secretMessage) {
   let point;
   while (!point) {
-    const hash = await nobleSecp256k1.utils.sha256(secretMessage);
-    const hashHex = nobleSecp256k1.utils.bytesToHex(hash);
+    const hash = await sha256(secretMessage);
+    const hashHex = bytesToHex(hash);
     const pointX = "02" + hashHex;
     try {
-      point = nobleSecp256k1.Point.fromHex(pointX);
+      point = secp256k1.ProjectivePoint.fromHex(pointX);
     } catch (error) {
-      secretMessage = await nobleSecp256k1.utils.sha256(secretMessage);
+      secretMessage = await sha256(secretMessage);
     }
   }
   return point;
 }
 
 async function step1Alice(secretMessage) {
-  secretMessage = nobleSecp256k1.utils.bytesToHex(secretMessage);
+  secretMessage = bytesToHex(secretMessage);
   secretMessage = new TextEncoder().encode(secretMessage);
   const Y = await hashToCurve(secretMessage);
-  const r_bytes = nobleSecp256k1.utils.randomPrivateKey();
+  const r_bytes = secp256k1.utils.randomPrivateKey();
   const r = bytesToNumber(r_bytes);
-  const P = nobleSecp256k1.Point.fromPrivateKey(r);
+  const P = secp256k1.ProjectivePoint.fromPrivateKey(r);
   const B_ = Y.add(P);
-  return { B_: B_.toHex(true), r: nobleSecp256k1.utils.bytesToHex(r_bytes) };
+  return { B_: B_.toHex(true), r: bytesToHex(r_bytes) };
 }
 
 function step3Alice(C_, r, A) {
