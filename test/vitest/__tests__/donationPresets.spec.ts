@@ -2,19 +2,31 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useDonationPresetsStore } from "../../../src/stores/donationPresets";
 import { useWalletStore } from "../../../src/stores/wallet";
 import { useProofsStore } from "../../../src/stores/proofs";
-import { useLockedTokensStore } from "../../../src/stores/lockedTokens";
 import { useMintsStore } from "../../../src/stores/mints";
 
 beforeEach(() => {
   localStorage.clear();
 });
 
-vi.mock("../../../src/stores/wallet", () => ({
-  useWalletStore: () => ({
-    wallet: {},
-    sendToLock: vi.fn(async () => ({ sendProofs: [] })),
-  }),
-}));
+vi.mock("../../../src/stores/wallet", () => {
+  let call = 0;
+  return {
+    useWalletStore: () => ({
+      wallet: {},
+      sendToLock: vi.fn(async () => ({
+        sendProofs: [],
+        lockedToken: {
+          id: `id${++call}`,
+          amount: 1,
+          token: "tok",
+          pubkey: "pk",
+          bucketId: "b",
+          date: "d",
+        },
+      })),
+    }),
+  };
+});
 
 vi.mock("../../../src/stores/proofs", () => ({
   useProofsStore: () => ({
@@ -23,11 +35,6 @@ vi.mock("../../../src/stores/proofs", () => ({
   }),
 }));
 
-vi.mock("../../../src/stores/lockedTokens", () => ({
-  useLockedTokensStore: () => ({
-    addLockedToken: vi.fn((d: any) => ({ id: "id", date: "d", ...d })),
-  }),
-}));
 
 vi.mock("../../../src/stores/mints", () => ({
   useMintsStore: () => ({
@@ -81,12 +88,6 @@ describe("Donation presets", () => {
 
   it("returns locked token data when detailed is true", async () => {
     const store = useDonationPresetsStore();
-    const locked = useLockedTokensStore();
-    (locked.addLockedToken as any).mockImplementation((d: any) => ({
-      id: "id" + (locked.addLockedToken as any).mock.calls.length,
-      date: "d",
-      ...d,
-    }));
     const res = (await store.createDonationPreset(
       2,
       1,

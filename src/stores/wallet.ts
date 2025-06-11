@@ -409,6 +409,7 @@ export const useWalletStore = defineStore("wallet", {
       bucketId: string = DEFAULT_BUCKET_ID,
       locktime?: number,
       refundPubkey?: string,
+      label?: string,
     ) {
       const mintStore = useMintsStore();
       const info = mintStore.activeInfo || {};
@@ -443,15 +444,17 @@ export const useWalletStore = defineStore("wallet", {
       const creatorBucketId = bucketsStore.ensureCreatorBucket(receiverPubkey);
 
       const tokenStr = useProofsStore().serializeProofs(sendProofs);
-      lockedStore.addLockedToken({
+      const lockedToken = lockedStore.addLockedToken({
         amount,
         token: tokenStr,
         pubkey: receiverPubkey,
         bucketId: creatorBucketId,
         locktime,
+        refundPubkey,
+        label,
       });
       await proofsStore.addProofs(keepProofs, undefined, bucketId, "");
-      return { keepProofs, sendProofs };
+      return { keepProofs, sendProofs, lockedToken };
     },
     send: async function (
       proofs: WalletProof[],
