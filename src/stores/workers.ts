@@ -5,6 +5,10 @@ import { useUiStore } from "src/stores/ui"; // showInvoiceDetails
 import { useSendTokensStore } from "src/stores/sendTokensStore"; // showSendTokens and sendData
 import { useSettingsStore } from "./settings";
 import { HistoryToken, useTokensStore } from "./tokens";
+import { useNostrStore, SignerType } from "./nostr";
+import { sha256 } from "@noble/hashes/sha256";
+import { bytesToHex } from "@noble/hashes/utils";
+import { Proof } from "@cashu/cashu-ts";
 export const useWorkersStore = defineStore("workers", {
   state: () => {
     return {
@@ -89,6 +93,34 @@ export const useWorkersStore = defineStore("workers", {
           this.clearAllWorkers();
         }
       }, this.checkInterval);
+    },
+
+    signWithRemote: async function (proofs: Proof[]): Promise<Proof[]> {
+      const nostr = useNostrStore();
+      await nostr.initSignerIfNotSet();
+      if (
+        nostr.signerType !== SignerType.NIP07 &&
+        nostr.signerType !== SignerType.NIP46
+      ) {
+        return proofs;
+      }
+      const signFn =
+        (nostr.signer as any)?.signSchnorr ||
+        (window as any)?.nostr?.signSchnorr;
+      if (!signFn) {
+        throw new Error("Remote signer does not support signing");
+      }
+      const out: Proof[] = [];
+      for (const p of proofs) {
+        if (typeof p.secret === "string" && p.secret.startsWith("P2PK")) {
+          const digest = sha256(new TextEncoder().encode(p.secret));
+          const sig = await signFn(bytesToHex(digest));
+          out.push({ ...p, witness: { signatures: [sig] } });
+        } else {
+          out.push(p);
+        }
+      }
+      return out;
     },
   },
 });
