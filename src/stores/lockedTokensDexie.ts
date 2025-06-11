@@ -24,5 +24,9 @@ export const useDexieLockedTokensStore = defineStore('dexieLockedTokens', () => 
     await cashuDb.lockedTokens.delete(id)
   }
 
-  return { lockedTokens, addLockedToken, deleteLockedToken }
+  function getLockedByBucket(bucketId: string) {
+    return lockedTokens.value.filter(t => t.bucketId === bucketId)
+  }
+
+  return { lockedTokens, addLockedToken, deleteLockedToken, getLockedByBucket }
 })

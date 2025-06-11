@@ -57,13 +57,15 @@ export default defineComponent({
   props: { bucketId: { type: String, required: true } },
   data() { return { currentPage: 1, pageSize: 5 } },
   computed: {
-    ...mapState(useDexieLockedTokensStore, ['lockedTokens']),
     ...mapState(useMintsStore, ['activeUnit']),
     filteredTokens() {
+      const store = useDexieLockedTokensStore()
       const nostrPubkey = useNostrStore().pubkey
-      return this.lockedTokens.filter(
-        t => t.owner === 'creator' && t.creatorNpub === nostrPubkey && t.tierId === this.bucketId
-      )
+      return store
+        .getLockedByBucket(this.bucketId)
+        .filter(
+          t => t.owner === 'creator' && t.creatorNpub === nostrPubkey && t.tierId === this.bucketId
+        )
     },
     maxPages() { return Math.ceil(this.filteredTokens.length / this.pageSize) },
     paginatedTokens() {
