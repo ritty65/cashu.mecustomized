@@ -14,9 +14,9 @@ export function ensureCompressed(pk: string): string {
     return pk;
   if (/^[0-9a-f]{64}$/.test(pk)) {
     try {
-      return Point.fromHex("02" + pk).toRawBytes(true).toString("hex");
+      return bytesToHex(Point.fromHex("02" + pk).toRawBytes(true));
     } catch {
-      return Point.fromHex("03" + pk).toRawBytes(true).toString("hex");
+      return bytesToHex(Point.fromHex("03" + pk).toRawBytes(true));
     }
   }
   throw new Error("invalid pubkey format");
