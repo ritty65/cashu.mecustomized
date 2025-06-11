@@ -3,7 +3,7 @@ import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { generateSecretKey, getPublicKey, nip19 } from "nostr-tools";
 import { bytesToHex, hexToBytes } from "@noble/hashes/utils"; // already an installed dependency
-import { Point } from "@noble/secp256k1";
+import { Point } from "@noble/curves/secp256k1";
 import { WalletProof } from "stores/mints";
 import token from "src/js/token";
 
@@ -49,10 +49,17 @@ export const useP2PKStore = defineStore("p2pk", {
     },
     maybeConvertNpub: function (key: string) {
       if (!key) return key;
+
+      // npub → 32-byte hex
       if (key.startsWith("npub1")) {
         const { data } = nip19.decode(key);
-        key = typeof data === "string" ? data : bytesToHex(data as Uint8Array);
+        key =
+          typeof data === "string"
+            ? data.toLowerCase()
+            : bytesToHex(data as Uint8Array);
       }
+
+      // Always return compressed SEC format
       return ensureCompressed(key);
     },
     isValidPubkey: function (key: string) {
