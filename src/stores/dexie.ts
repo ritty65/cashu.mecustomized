@@ -66,6 +66,16 @@ export interface LockedToken {
   status: "pending" | "unlockable" | "claimed" | "expired";
   subscriptionEventId: string | null;
   label?: string;
+  bucketId: string;
+}
+
+export interface BucketDexie {
+  id: string;
+  name: string;
+  color?: string;
+  description?: string;
+  goal?: number | null;
+  creatorPubkey?: string | null;
 }
 
 // export interface Proof {
@@ -83,6 +93,7 @@ export class CashuDexie extends Dexie {
   creatorsTierDefinitions!: Table<CreatorTierDefinition, string>;
   subscriptions!: Table<Subscription, string>;
   lockedTokens!: Table<LockedToken, string>;
+  buckets!: Table<BucketDexie, string>;
 
   constructor() {
     super("cashuDatabase");
@@ -130,6 +141,35 @@ export class CashuDexie extends Dexie {
       lockedTokens:
         "&id, owner, tierId, intervalKey, unlockTs, refundUnlockTs, status, subscriptionEventId",
     });
+    this.version(6)
+      .stores({
+        proofs: "secret, id, C, amount, reserved, quote, bucketId, label",
+        profiles: "pubkey",
+        creatorsTierDefinitions: "&creatorNpub, eventId, updatedAt",
+        subscriptions:
+          "&id, creatorNpub, tierId, status, createdAt, updatedAt",
+        lockedTokens:
+          "&id, owner, tierId, intervalKey, unlockTs, refundUnlockTs, status, subscriptionEventId, bucketId",
+        buckets: "&id, name, creatorPubkey",
+      })
+      .upgrade(async (tx) => {
+        await tx
+          .table("lockedTokens")
+          .toCollection()
+          .modify((t: any) => {
+            if (t.bucketId === undefined) {
+              t.bucketId = "";
+            }
+          });
+        await tx
+          .table("buckets")
+          .toCollection()
+          .modify((b: any) => {
+            if (b.creatorPubkey === undefined) {
+              b.creatorPubkey = null;
+            }
+          });
+      });
   }
 }
 
