@@ -151,7 +151,12 @@ export const useP2PKStore = defineStore("p2pk", {
         }
         // Get all the p2pk secret data
         const now = Math.floor(Date.now() / 1000); // unix TS
-        const { data, tags } = secretObject[1];
+        let { data, tags } = secretObject[1];
+        if (typeof data === "string" && data.length === 64) {
+          try {
+            data = ensureCompressed(data);
+          } catch {}
+        }
         const locktimeTag = tags && tags.find((tag) => tag[0] === "locktime");
         const locktime = locktimeTag ? parseInt(locktimeTag[1], 10) : undefined; // Permanent lock if not set
         const refundTag = tags && tags.find((tag) => tag[0] === "refund");
@@ -160,6 +165,12 @@ export const useP2PKStore = defineStore("p2pk", {
         const pubkeysTag = tags && tags.find((tag) => tag[0] === "pubkeys");
         const pubkeys =
           pubkeysTag && pubkeysTag.length > 1 ? pubkeysTag.slice(1) : [];
+        const normalizedRefund = refundKeys.map((pk: string) =>
+          pk.length === 64 ? ensureCompressed(pk) : pk
+        );
+        const normalizedPubkeys = pubkeys.map((pk: string) =>
+          pk.length === 64 ? ensureCompressed(pk) : pk
+        );
         const n_sigsTag = tags && tags.find((tag) => tag[0] === "n_sigs");
         const n_sigs = n_sigsTag ? parseInt(n_sigsTag[1], 10) : undefined;
         // If locktime is in the future, return first owned additional 'pubkeys'
@@ -167,22 +178,22 @@ export const useP2PKStore = defineStore("p2pk", {
         if (locktime > now) {
           debug("p2pk token - locktime is active");
           if (n_sigs && n_sigs >= 1) {
-            for (const pk of pubkeys) {
+            for (const pk of normalizedPubkeys) {
               if (this.haveThisKey(pk))
-                return { pubkey: pk, locktime, refundKeys };
+                return { pubkey: pk, locktime, refundKeys: normalizedRefund };
             }
           }
-          return { pubkey: data, locktime, refundKeys };
+          return { pubkey: data, locktime, refundKeys: normalizedRefund };
         }
         // If locktime expired, return first owned 'refund' key match or
         // or just return the first refund key to show token is locked
-        if (refundKeys.length > 0) {
+        if (normalizedRefund.length > 0) {
           debug("p2pk token - locked to refund keys");
-          for (const pk of refundKeys) {
+          for (const pk of normalizedRefund) {
             if (this.haveThisKey(pk))
-              return { pubkey: pk, locktime, refundKeys };
+              return { pubkey: pk, locktime, refundKeys: normalizedRefund };
           }
-          return { pubkey: refundKeys[0], locktime, refundKeys };
+          return { pubkey: normalizedRefund[0], locktime, refundKeys: normalizedRefund };
         }
         debug("p2pk token - lock has expired");
       } catch {}
