@@ -5,6 +5,7 @@ import { useMintsStore, WalletProof } from "./mints";
 import { cashuDb, CashuDexie, useDexieStore } from "./dexie";
 import { useBucketsStore, DEFAULT_BUCKET_ID } from "./buckets";
 import { useTokensStore } from "./tokens";
+import { ensureCompressed } from "./p2pk";
 import {
   Proof,
   getEncodedToken,
@@ -67,7 +68,23 @@ export const useProofsStore = defineStore("proofs", {
       return proofs.reduce((s, t) => (s += t.amount), 0);
     },
     getProofs: async function (): Promise<WalletProof[]> {
-      return await cashuDb.proofs.toArray();
+      const proofs = await cashuDb.proofs.toArray();
+      return proofs.map((p) => {
+        if (typeof p.secret === "string" && p.secret.startsWith('["P2PK"')) {
+          try {
+            const sec = JSON.parse(p.secret);
+            if (
+              sec[1]?.data &&
+              typeof sec[1].data === "string" &&
+              sec[1].data.length === 64
+            ) {
+              sec[1].data = ensureCompressed(sec[1].data);
+              p.secret = JSON.stringify(sec);
+            }
+          } catch {}
+        }
+        return p;
+      });
     },
     setReserved: async function (
       proofs: Proof[],
