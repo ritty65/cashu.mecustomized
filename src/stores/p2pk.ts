@@ -26,17 +26,24 @@ export const useP2PKStore = defineStore("p2pk", {
   getters: {},
   actions: {
     haveThisKey: function (key: string) {
-      return this.p2pkKeys.filter((m) => m.publicKey == key).length > 0;
+      const lcKey = key.toLowerCase();
+      return (
+        this.p2pkKeys.filter((m) => m.publicKey.toLowerCase() === lcKey).length >
+        0
+      );
     },
     maybeConvertNpub: function (key: string) {
-      // Check and convert npub to P2PK
-      if (key && key.startsWith("npub1")) {
+      if (!key) return key;
+      if (key.startsWith("npub1")) {
         const { type, data } = nip19.decode(key);
-        if (type === "npub" && data.length === 64) {
-          key = "02" + data;
+        if (type === "npub" && typeof data === "string" && data.length === 64) {
+          return "02" + data.toLowerCase();
         }
       }
-      return key;
+      if (/^[0-9a-fA-F]{64}$/.test(key)) {
+        return "02" + key.toLowerCase();
+      }
+      return key.toLowerCase();
     },
     isValidPubkey: function (key: string) {
       key = this.maybeConvertNpub(key);
@@ -99,13 +106,14 @@ export const useP2PKStore = defineStore("p2pk", {
     },
     addKeyPair: function (privateKeyHex: string) {
       try {
-        const publicKey = "02" + getPublicKey(hexToBytes(privateKeyHex));
+        const skHex = privateKeyHex.toLowerCase();
+        const publicKey = ("02" + getPublicKey(hexToBytes(skHex))).toLowerCase();
         if (this.haveThisKey(publicKey)) {
           return;
         }
         const keyPair: P2PKKey = {
           publicKey,
-          privateKey: privateKeyHex,
+          privateKey: skHex,
           used: false,
           usedCount: 0,
         };
