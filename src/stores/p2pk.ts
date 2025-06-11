@@ -3,8 +3,23 @@ import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { generateSecretKey, getPublicKey, nip19 } from "nostr-tools";
 import { bytesToHex, hexToBytes } from "@noble/hashes/utils"; // already an installed dependency
+import { Point } from "@noble/secp256k1";
 import { WalletProof } from "stores/mints";
 import token from "src/js/token";
+
+export function ensureCompressed(pk: string): string {
+  pk = pk.toLowerCase();
+  if (pk.length === 66 && (pk.startsWith("02") || pk.startsWith("03")))
+    return pk;
+  if (/^[0-9a-f]{64}$/.test(pk)) {
+    try {
+      return Point.fromHex("02" + pk).toRawBytes(true).toString("hex");
+    } catch {
+      return Point.fromHex("03" + pk).toRawBytes(true).toString("hex");
+    }
+  }
+  throw new Error("invalid pubkey format");
+}
 
 type P2PKKey = {
   publicKey: string;
@@ -35,15 +50,10 @@ export const useP2PKStore = defineStore("p2pk", {
     maybeConvertNpub: function (key: string) {
       if (!key) return key;
       if (key.startsWith("npub1")) {
-        const { type, data } = nip19.decode(key);
-        if (type === "npub" && typeof data === "string" && data.length === 64) {
-          return "02" + data.toLowerCase();
-        }
+        const { data } = nip19.decode(key);
+        key = typeof data === "string" ? data : bytesToHex(data as Uint8Array);
       }
-      if (/^[0-9a-fA-F]{64}$/.test(key)) {
-        return "02" + key.toLowerCase();
-      }
-      return key.toLowerCase();
+      return ensureCompressed(key);
     },
     isValidPubkey: function (key: string) {
       key = this.maybeConvertNpub(key);
