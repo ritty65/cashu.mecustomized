@@ -168,6 +168,19 @@ export const useNostrStore = defineStore("nostr", {
           return "";
       }
     },
+    activePrivkeyHex(state): string | null {
+      switch (state.signerType) {
+        case SignerType.PRIVATEKEY:
+          return state.privateKeySignerPrivateKey || null;
+        case SignerType.SEED:
+          return state.seedSignerPrivateKey || null;
+        default:
+          return null; // NIP-07/46 keep keys remote
+      }
+    },
+    activePubkeyHex(state): string | null {
+      return state.pubkey || null;
+    },
   },
   actions: {
     initNdkReadOnly: function () {
