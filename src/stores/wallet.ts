@@ -40,6 +40,7 @@ import {
   decodePaymentRequest,
   MintQuoteResponse,
   ProofState,
+  getEncodedToken,
 } from "@cashu/cashu-ts";
 import { getSignedProofs } from "@cashu/crypto/modules/client/NUT11";
 import { hashToCurve } from "@cashu/crypto/modules/common";
@@ -57,7 +58,7 @@ import { wordlist } from "@scure/bip39/wordlists/english";
 import { useSettingsStore } from "./settings";
 import { usePriceStore } from "./price";
 import { i18n } from "src/boot/i18n";
-import { useNostrStore } from "./nostr";
+import { useNostrStore, SignerType } from "./nostr";
 // HACK: this is a workaround so that the catch block in the melt function does not throw an error when the user exits the app
 // before the payment is completed. This is necessary because the catch block in the melt function would otherwise remove all
 // quotes from the invoiceHistory and the user would not be able to pay the invoice again after reopening the app.
@@ -598,37 +599,48 @@ export const useWalletStore = defineStore("wallet", {
         // redeem
         const keysetId = this.getKeyset(historyToken.mint, historyToken.unit);
         const counter = this.keysetCounter(keysetId);
+        const nostrStore = useNostrStore();
         let privkey = receiveStore.receiveData.p2pkPrivateKey;
         if (!privkey) {
-          privkey = useNostrStore().activePrivkeyHex;
+          privkey = nostrStore.activePrivkeyHex;
         }
-        if (!privkey) throw new Error("No private key available for P2PK unlock");
-        let proofs: Proof[];
+        if (!privkey && (nostrStore.signerType === SignerType.NIP07 || nostrStore.signerType === SignerType.NIP46)) {
+          proofs = await useWorkersStore().signWithRemote(proofs);
+        }
+        if (!privkey && proofs.some((p) => typeof p.secret === "string" && p.secret.startsWith("P2PK"))) {
+          throw new Error("No private key available for P2PK unlock");
+        }
+        let receivedProofs: Proof[];
+        const tokenToRedeem =
+          !privkey &&
+          (nostrStore.signerType === SignerType.NIP07 ||
+            nostrStore.signerType === SignerType.NIP46)
+            ? getEncodedToken({ mint: mintInToken, proofs, unit: unitInToken })
+            : receiveStore.receiveData.tokensBase64;
         try {
-          proofs = await mintWallet.receive(
-            receiveStore.receiveData.tokensBase64,
-            {
-              counter,
-              privkey,
-              proofsWeHave: mintStore.mintUnitProofs(mint, historyToken.unit),
-            },
-          );
+          receivedProofs = await mintWallet.receive(tokenToRedeem, {
+            counter,
+            privkey,
+            proofsWeHave: mintStore.mintUnitProofs(mint, historyToken.unit),
+          });
           await proofsStore.addProofs(
-            proofs,
+            receivedProofs,
             undefined,
             bucketId,
             receiveStore.receiveData.label ?? "",
           );
-          this.increaseKeysetCounter(keysetId, proofs.length);
+          this.increaseKeysetCounter(keysetId, receivedProofs.length);
         } catch (error: any) {
           console.error(error);
           this.handleOutputsHaveAlreadyBeenSignedError(keysetId, error);
           throw new Error("Error receiving tokens: " + error);
         }
 
-        p2pkStore.setPrivateKeyUsed(privkey);
+        if (privkey) {
+          p2pkStore.setPrivateKeyUsed(privkey);
+        }
 
-        const outputAmount = proofs.reduce((s, t) => (s += t.amount), 0);
+        const outputAmount = receivedProofs.reduce((s, t) => (s += t.amount), 0);
 
         // if token is already in history, set to paid, else add to history
         if (
