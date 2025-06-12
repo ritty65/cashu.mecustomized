@@ -6,7 +6,6 @@
   "author": "cashu.me",
   "private": true,
   "overrides": {
-    // Force any attempted install of the non-existent 0.0.0 version  
     "fake-indexeddb@0.0.0": "6.0.1"
   },
   "scripts": {
