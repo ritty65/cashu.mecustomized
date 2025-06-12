@@ -3,6 +3,7 @@ import { useDonationPresetsStore } from "../../../src/stores/donationPresets";
 import { useWalletStore } from "../../../src/stores/wallet";
 import { useProofsStore } from "../../../src/stores/proofs";
 import { useMintsStore } from "../../../src/stores/mints";
+import { useSignerStore } from "../../../src/stores/signer";
 
 beforeEach(() => {
   localStorage.clear();
@@ -41,6 +42,9 @@ describe("Donation presets", () => {
   it("calls sendToLock with sequential locktimes", async () => {
     const store = useDonationPresetsStore();
     const wallet = useWalletStore();
+    const signer = useSignerStore();
+    signer.method = 'local';
+    signer.nsec = 'nsec123';
     const spy = wallet.sendToLock as any;
     await store.createDonationPreset(3, 1, "pk", "b");
     expect(spy).toHaveBeenCalledTimes(3);
@@ -54,6 +58,9 @@ describe("Donation presets", () => {
   it("skips schedule when months is 0 and returns token", async () => {
     const store = useDonationPresetsStore();
     const wallet = useWalletStore();
+    const signer = useSignerStore();
+    signer.method = 'local';
+    signer.nsec = 'nsec123';
     const spy = wallet.sendToLock as any;
     const token = await store.createDonationPreset(0, 5, "pk", "b");
     expect(spy).toHaveBeenCalledTimes(1);
@@ -64,6 +71,9 @@ describe("Donation presets", () => {
   it("uses provided startDate for locktimes", async () => {
     const store = useDonationPresetsStore();
     const wallet = useWalletStore();
+    const signer = useSignerStore();
+    signer.method = 'local';
+    signer.nsec = 'nsec123';
     const spy = wallet.sendToLock as any;
     const start = 1000;
     await store.createDonationPreset(3, 1, "pk", "b", start);
@@ -75,6 +85,9 @@ describe("Donation presets", () => {
 
   it("returns locked token data when detailed is true", async () => {
     const store = useDonationPresetsStore();
+    const signer = useSignerStore();
+    signer.method = 'local';
+    signer.nsec = 'nsec123';
     const res = (await store.createDonationPreset(
       2,
       1,

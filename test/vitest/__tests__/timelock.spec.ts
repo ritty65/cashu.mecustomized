@@ -3,6 +3,7 @@ import { useSendTokensStore } from '../../src/stores/sendTokensStore'
 import { useWalletStore } from '../../src/stores/wallet'
 import { useProofsStore } from '../../src/stores/proofs'
 import { useP2PKStore } from '../../src/stores/p2pk'
+import { useSignerStore } from '../../src/stores/signer'
 
 beforeEach(() => {
   localStorage.clear()
@@ -22,6 +23,10 @@ describe('Timelock', () => {
     const proofsStore = useProofsStore()
     vi.spyOn(proofsStore, 'removeProofs').mockResolvedValue()
     vi.spyOn(proofsStore, 'addProofs').mockResolvedValue()
+
+    const signer = useSignerStore()
+    signer.method = 'local'
+    signer.nsec = 'nsec123'
 
     walletStore.spendableProofs = vi.fn(() => [{ secret: 's', amount: 1, id: 'a', C: 'c' } as any])
     walletStore.coinSelect = vi.fn(() => [{ secret: 's', amount: 1, id: 'a', C: 'c' } as any])
