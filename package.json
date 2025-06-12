@@ -55,6 +55,7 @@
     "@quasar/app-vite": "^1.9.3",
     "@types/node": "^20.12.11",
     "@types/underscore": "^1.11.15",
+    "@types/debug": "^4.1.12",
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
