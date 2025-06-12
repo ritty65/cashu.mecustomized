@@ -40,6 +40,8 @@
     "light-bolt11-decoder": "^3.1.1",
     "lucide-vue-next": "^0.453.0",
     "nostr-tools": "^2.5.2",
+    "@cashu/token": "^0.8.0",
+    "@noble/secp256k1": "^2.3.0",
     "pinia": "^2.1.7",
     "qr-scanner": "^1.4.2",
     "qrcode": "^1.5.3",

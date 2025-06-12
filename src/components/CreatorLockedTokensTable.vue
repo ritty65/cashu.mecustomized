@@ -116,8 +116,11 @@ export default defineComponent({
       await useDexieLockedTokensStore().deleteLockedToken(token.id)
     },
     async redeemP2PK(token) {
-      const wallet = useWalletStore()
-      await wallet.redeemP2PK(token)
+      await useP2PKStore().redeemP2PKTokenInteractive({
+        id: token.id,
+        token: token.tokenString,
+        bucketId: token.tierId
+      })
     }
   }
 })
