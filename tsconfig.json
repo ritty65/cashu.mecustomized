@@ -3,6 +3,9 @@
   "compilerOptions": {
     "baseUrl": ".",
     "target": "ES2020",
+    "moduleResolution": "nodenext",
+    "types": ["node"],
+    "skipLibCheck": true,
     "paths": {
       "src/*": ["src/*"],
       "app/*": ["*"],
@@ -14,5 +17,6 @@
       "stores/*": ["src/stores/*"],
       "vue$": ["node_modules/vue/dist/vue.runtime.esm-bundler.js"]
     }
-  }
+  },
+  "exclude": ["node_modules", "test"]
 }
