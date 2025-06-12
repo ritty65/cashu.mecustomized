@@ -4,6 +4,7 @@ import { useWalletStore } from '../../src/stores/wallet'
 import { useProofsStore } from '../../src/stores/proofs'
 import { generateSecretKey, getPublicKey, nip19 } from 'nostr-tools'
 import { bytesToHex } from '@noble/hashes/utils'
+import { useSignerStore } from '../../src/stores/signer'
 
 beforeEach(() => {
   localStorage.clear()
@@ -40,6 +41,10 @@ describe('P2PK store', () => {
     vi.spyOn(proofsStore, 'removeProofs').mockResolvedValue()
     vi.spyOn(proofsStore, 'addProofs').mockResolvedValue()
 
+    const signer = useSignerStore()
+    signer.method = 'local'
+    signer.nsec = 'nsec123'
+
     walletStore.spendableProofs = vi.fn(() => [{ secret: 's', amount: 1, id: 'a', C: 'c' } as any])
     walletStore.coinSelect = vi.fn(() => [{ secret: 's', amount: 1, id: 'a', C: 'c' } as any])
     walletStore.getKeyset = vi.fn(() => 'kid')
@@ -73,6 +78,10 @@ describe('P2PK store', () => {
     const proofsStore = useProofsStore()
     vi.spyOn(proofsStore, 'removeProofs').mockResolvedValue()
     vi.spyOn(proofsStore, 'addProofs').mockResolvedValue()
+
+    const signer = useSignerStore()
+    signer.method = 'local'
+    signer.nsec = 'nsec123'
 
     walletStore.spendableProofs = vi.fn(() => [{ secret: 's', amount: 1, id: 'a', C: 'c' } as any])
     walletStore.coinSelect = vi.fn(() => [{ secret: 's', amount: 1, id: 'a', C: 'c' } as any])
