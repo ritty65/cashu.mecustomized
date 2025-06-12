@@ -14,6 +14,8 @@ import { useWorkersStore } from "./workers";
 import { useInvoicesWorkerStore } from "./invoicesWorker";
 import { DEFAULT_BUCKET_ID, useBucketsStore } from "./buckets";
 import { useLockedTokensStore } from "./lockedTokens";
+import { useDexieLockedTokensStore } from "./lockedTokensDexie";
+import type { LockedToken as DexieLockedToken } from "./dexie";
 import { v4 as uuidv4 } from "uuid";
 import { ensureCompressed } from "src/utils/ecash";
 
@@ -740,6 +742,14 @@ export const useWalletStore = defineStore("wallet", {
         const res = await this.attemptRedeem(bucketId);
         if (res) break;
       }
+    },
+
+    redeemP2PK: async function (token: DexieLockedToken) {
+      const receiveStore = useReceiveTokensStore();
+      receiveStore.receiveData.tokensBase64 = token.tokenString;
+      receiveStore.receiveData.bucketId = token.tierId;
+      await this.redeem(token.tierId);
+      await useDexieLockedTokensStore().deleteLockedToken(token.id);
     },
 
     // /mint
