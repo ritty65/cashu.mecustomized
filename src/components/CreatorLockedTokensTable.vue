@@ -18,8 +18,19 @@
           <q-btn
             flat
             dense
+            icon="key"
+            v-if="isP2PK(token) && canRedeem(token)"
+            @click="redeemP2PK(token)"
+            :aria-label="$t('LockedTokensTable.actions.unlock.tooltip_text')"
+            :title="$t('LockedTokensTable.actions.unlock.tooltip_text')"
+          >
+            <q-tooltip>{{ $t('LockedTokensTable.actions.unlock.tooltip_text') }}</q-tooltip>
+          </q-btn>
+          <q-btn
+            flat
+            dense
             icon="download"
-            v-if="canRedeem(token)"
+            v-else-if="canRedeem(token)"
             @click="redeem(token)"
           />
         </q-item-section>
@@ -51,6 +62,7 @@ import { useReceiveTokensStore } from 'stores/receiveTokensStore'
 import { useWalletStore } from 'stores/wallet'
 import { useNostrStore } from 'stores/nostr'
 import { useUiStore } from 'stores/ui'
+import { useP2PKStore } from 'stores/p2pk'
 
 export default defineComponent({
   name: 'CreatorLockedTokensTable',
@@ -88,6 +100,13 @@ export default defineComponent({
       const now = Math.floor(Date.now() / 1000)
       return !token.unlockTs || token.unlockTs <= now
     },
+    isP2PK(token) {
+      try {
+        return !!useP2PKStore().getTokenPubkey(token.tokenString)
+      } catch {
+        return false
+      }
+    },
     async redeem(token) {
       const receiveStore = useReceiveTokensStore()
       const wallet = useWalletStore()
@@ -95,6 +114,10 @@ export default defineComponent({
       receiveStore.receiveData.bucketId = token.tierId
       await wallet.redeem(token.tierId)
       await useDexieLockedTokensStore().deleteLockedToken(token.id)
+    },
+    async redeemP2PK(token) {
+      const wallet = useWalletStore()
+      await wallet.redeemP2PK(token)
     }
   }
 })

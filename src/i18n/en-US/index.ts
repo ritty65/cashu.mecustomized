@@ -1537,6 +1537,7 @@ export default {
     },
     actions: {
       copy: { tooltip_text: "Copy" },
+      unlock: { tooltip_text: "Unlock" },
     },
   },
   restore: {
