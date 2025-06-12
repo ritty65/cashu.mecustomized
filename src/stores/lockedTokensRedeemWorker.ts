@@ -5,6 +5,7 @@ import { useReceiveTokensStore } from './receiveTokensStore'
 import { useSettingsStore } from './settings'
 import token from 'src/js/token'
 import { ensureCompressed } from 'src/utils/ecash'
+import { debug } from 'src/js/logger'
 
 export const useLockedTokensRedeemWorker = defineStore('lockedTokensRedeemWorker', {
   state: () => ({
@@ -45,6 +46,14 @@ export const useLockedTokensRedeemWorker = defineStore('lockedTokensRedeemWorker
       for (const entry of entries) {
         try {
           const decoded = token.decode(entry.tokenString)
+          if (
+            decoded.proofs.some(
+              (p) => typeof p.secret === 'string' && p.secret.startsWith('["P2PK"')
+            )
+          ) {
+            debug('Skipping auto-redeem for P2PK token')
+            continue
+          }
           // normalise secret before redeem
           decoded.proofs.forEach(p => {
             if (typeof p.secret === 'string' && p.secret.startsWith('["P2PK"')) {
