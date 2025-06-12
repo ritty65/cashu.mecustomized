@@ -45,16 +45,6 @@ export const useLockedTokensRedeemWorker = defineStore('lockedTokensRedeemWorker
       for (const entry of entries) {
         try {
           const decoded = token.decode(entry.tokenString)
-          if (
-            decoded.proofs.some(
-              p => typeof p.secret === 'string' && p.secret.startsWith('["P2PK"')
-            )
-          ) {
-            console.debug(
-              `lockedTokensRedeemWorker: skip P2PK token ${entry.id}`
-            )
-            continue
-          }
           // normalise secret before redeem
           decoded.proofs.forEach(p => {
             if (typeof p.secret === 'string' && p.secret.startsWith('["P2PK"')) {

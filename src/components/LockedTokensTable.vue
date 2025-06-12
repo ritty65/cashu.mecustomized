@@ -55,17 +55,6 @@
               $t("LockedTokensTable.actions.copy.tooltip_text")
             }}</q-tooltip>
           </q-btn>
-          <q-btn
-            flat
-            dense
-            icon="lock_open"
-            v-if="isP2PK(token.token)"
-            @click="unlockP2PKToken(token)"
-            aria-label="Unlock"
-            title="Unlock"
-          >
-            <q-tooltip>Unlock</q-tooltip>
-          </q-btn>
         </q-item-section>
       </q-item>
     </q-list>
@@ -94,9 +83,6 @@ import { formatDistanceToNow, parseISO } from "date-fns";
 import { shortenString } from "src/js/string-utils";
 import { useLockedTokensStore } from "stores/lockedTokens";
 import { useMintsStore } from "stores/mints";
-import { useReceiveTokensStore } from "stores/receiveTokensStore";
-import { useWalletStore } from "stores/wallet";
-import { useP2PKStore } from "stores/p2pk";
 import { nip19 } from "nostr-tools";
 
 export default defineComponent({
@@ -140,18 +126,6 @@ export default defineComponent({
       } catch (e) {
         return hex;
       }
-    },
-    isP2PK(tokenStr) {
-      return !!useP2PKStore().getTokenPubkey(tokenStr)
-    },
-    async unlockP2PKToken(token) {
-      const receiveStore = useReceiveTokensStore()
-      const wallet = useWalletStore()
-      const lockedStore = useLockedTokensStore()
-      receiveStore.receiveData.tokensBase64 = token.token
-      receiveStore.receiveData.bucketId = token.bucketId
-      await wallet.redeem(token.bucketId)
-      lockedStore.deleteLockedToken(token.id)
     },
   },
 });
