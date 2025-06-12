@@ -684,7 +684,7 @@ import {
 } from "src/js/notify.ts";
 import { Dialog } from "quasar";
 import { useDmChatsStore } from "src/stores/dmChats";
-import { getEncodedTokenV3 } from "@cashu/cashu-ts/dist/lib/es5/utils";
+import { getEncodedTokenV3 } from "@cashu/cashu-ts/dist/lib/es5/utils.js";
 export default defineComponent({
   name: "SendTokenDialog",
   mixins: [windowMixin],
