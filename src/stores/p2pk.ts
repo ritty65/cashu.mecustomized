@@ -6,6 +6,12 @@ import { ensureCompressed } from "src/utils/ecash";
 import { bytesToHex } from "@noble/hashes/utils"; // already an installed dependency
 import { WalletProof } from "stores/mints";
 import token from "src/js/token";
+import { getEncodedToken, decodeToken } from "@cashu/token";
+import { useSignerStore } from "./signer";
+import { useWalletStore } from "./wallet";
+import { useReceiveTokensStore } from "./receiveTokensStore";
+import { useDexieLockedTokensStore } from "./lockedTokensDexie";
+import { notifySuccess } from "src/js/notify";
 
 type P2PKKey = {
   publicKey: string;
@@ -258,6 +264,40 @@ export const useP2PKStore = defineStore("p2pk", {
         return undefined;
       }
       return Math.max(...times);
+    },
+
+    redeemP2PKTokenInteractive: async function (entry: {
+      id: string;
+      token: string;
+      bucketId: string;
+    }) {
+      const signerStore = useSignerStore();
+      const walletStore = useWalletStore();
+      const dexieStore = useDexieLockedTokensStore();
+
+      const decoded = decodeToken(entry.token);
+      if (!decoded) return;
+
+      const witness = await signerStore.createP2PKWitness(entry.token);
+      if (!witness) return;
+
+      const proofs = decoded.token[0].proofs.map((p: any) => ({
+        ...p,
+        witness,
+      }));
+
+      const encoded = getEncodedToken({
+        mint: decoded.token[0].mint,
+        unit: decoded.unit,
+        proofs,
+      });
+
+      const receiveStore = useReceiveTokensStore();
+      receiveStore.receiveData.tokensBase64 = encoded;
+      receiveStore.receiveData.bucketId = entry.bucketId;
+      await walletStore.redeem(entry.bucketId);
+      await dexieStore.deleteLockedToken(entry.id);
+      notifySuccess("Token unlocked");
     },
   },
 });

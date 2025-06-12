@@ -16,7 +16,7 @@
           <q-item-label caption>
             {{
               $t("LockedTokensTable.row.receiver_label", {
-                value: shortenString(pubkeyNpub(token.pubkey), 15, 6),
+                value: shortenString(pubkeyNpub(getPK(token)), 15, 6),
               })
             }}
           </q-item-label>
@@ -55,6 +55,19 @@
               $t("LockedTokensTable.actions.copy.tooltip_text")
             }}</q-tooltip>
           </q-btn>
+          <q-btn
+            flat
+            dense
+            icon="key"
+            v-if="getPK(token)"
+            @click="unlock(token)"
+            :aria-label="$t('LockedTokensTable.actions.unlock.tooltip_text')"
+            :title="$t('LockedTokensTable.actions.unlock.tooltip_text')"
+          >
+            <q-tooltip>{{
+              $t('LockedTokensTable.actions.unlock.tooltip_text')
+            }}</q-tooltip>
+          </q-btn>
         </q-item-section>
       </q-item>
     </q-list>
@@ -84,6 +97,7 @@ import { shortenString } from "src/js/string-utils";
 import { useLockedTokensStore } from "stores/lockedTokens";
 import { useMintsStore } from "stores/mints";
 import { nip19 } from "nostr-tools";
+import { useP2PKStore } from "stores/p2pk";
 
 export default defineComponent({
   name: "LockedTokensTable",
@@ -126,6 +140,20 @@ export default defineComponent({
       } catch (e) {
         return hex;
       }
+    },
+    getPK(token) {
+      try {
+        return useP2PKStore().getTokenPubkey(token.token);
+      } catch {
+        return token.pubkey;
+      }
+    },
+    async unlock(token) {
+      await useP2PKStore().redeemP2PKTokenInteractive({
+        id: token.id,
+        token: token.token,
+        bucketId: token.bucketId,
+      });
     },
   },
 });
