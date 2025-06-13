@@ -1,32 +1,50 @@
+# System files
 .DS_Store
 .thumbs.db
-node_modules
 
-# Quasar core related directories
-.quasar
-/dist
+# Dependency directories
+node_modules/
+.pnpm-store/
 
-# Cordova related directories and files
-/src-cordova/node_modules
-/src-cordova/platforms
-/src-cordova/plugins
-/src-cordova/www
-
-# Capacitor related directories and files
-/src-capacitor/www
-/src-capacitor/node_modules
-
-# BEX related directories and files
-/src-bex/www
-/src-bex/js/core
+# Lockfiles from other package managers
+package-lock.json
+yarn.lock
 
 # Log files
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+
+# Quasar core & build output
+.quasar/
+/dist*
+/dist/
+/src-bex/www/
+/src-bex/js/core/
+
+# Capacitor related directories and files
+/src-capacitor/www/
+/src-capacitor/node_modules/
+/src-capacitor/ios/Pods/
+/src-capacitor/ios/App/Pods/
+/src-capacitor/android/app/build/
+
+# Cordova related directories and files
+/src-cordova/node_modules/
+/src-cordova/platforms/
+/src-cordova/plugins/
+/src-cordova/www/
+
+# Misc
+.npm
+.eslintcache
+*.zip
+*.rar
 
 # Editor directories and files
-.idea
+.idea/
+.vscode/
 *.suo
 *.ntvs*
 *.njsproj
