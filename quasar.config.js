@@ -9,6 +9,7 @@
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js
 
 const { configure } = require("quasar/wrappers");
+const path = require('path');
 
 module.exports = configure(function (/* ctx */) {
   return {
@@ -61,7 +62,15 @@ module.exports = configure(function (/* ctx */) {
       // polyfillModulePreload: true,
       // distDir
 
-      // extendViteConf (viteConf) {},
+      extendViteConf(viteConf) {
+        viteConf.resolve = viteConf.resolve || {};
+        const alias = viteConf.resolve.alias || [];
+        alias.push({
+          find: '@cashu/cashu-ts',
+          replacement: path.resolve(__dirname, 'src/compat/cashu-ts.ts'),
+        });
+        viteConf.resolve.alias = alias;
+      },
       // viteVuePluginOptions: {},
 
       // vitePlugins: [
