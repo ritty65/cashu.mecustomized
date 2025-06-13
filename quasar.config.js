@@ -70,6 +70,13 @@ module.exports = configure(function (/* ctx */) {
           replacement: path.resolve(__dirname, 'src/compat/cashu-ts.ts'),
         });
         viteConf.resolve.alias = alias;
+
+        // Exclude the package from dependency pre-bundling so the alias takes effect
+        viteConf.optimizeDeps = viteConf.optimizeDeps || {};
+        viteConf.optimizeDeps.exclude = [
+          ...(viteConf.optimizeDeps.exclude || []),
+          '@cashu/cashu-ts',
+        ];
       },
       // viteVuePluginOptions: {},
 
