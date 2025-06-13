@@ -66,7 +66,7 @@ module.exports = configure(function (/* ctx */) {
         viteConf.resolve = viteConf.resolve || {};
         const alias = viteConf.resolve.alias || [];
         alias.push({
-          find: '@cashu/cashu-ts',
+          find: /^@cashu\/cashu-ts$/,
           replacement: path.resolve(__dirname, 'src/compat/cashu-ts.ts'),
         });
         viteConf.resolve.alias = alias;

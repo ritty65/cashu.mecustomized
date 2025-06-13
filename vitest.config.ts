@@ -23,17 +23,17 @@ export default defineConfig({
     ],
   },
   resolve: {
-    alias: {
-      src: path.resolve(__dirname, 'src'),
-      app: path.resolve(__dirname),
-      components: path.resolve(__dirname, 'src/components'),
-      layouts: path.resolve(__dirname, 'src/layouts'),
-      pages: path.resolve(__dirname, 'src/pages'),
-      assets: path.resolve(__dirname, 'src/assets'),
-      boot: path.resolve(__dirname, 'src/boot'),
-      stores: path.resolve(__dirname, 'src/stores'),
-      '@cashu/cashu-ts': path.resolve(__dirname, 'src/compat/cashu-ts.ts'),
-    },
+    alias: [
+      { find: /^@cashu\/cashu-ts$/, replacement: path.resolve(__dirname, 'src/compat/cashu-ts.ts') },
+      { find: 'src', replacement: path.resolve(__dirname, 'src') },
+      { find: 'app', replacement: path.resolve(__dirname) },
+      { find: 'components', replacement: path.resolve(__dirname, 'src/components') },
+      { find: 'layouts', replacement: path.resolve(__dirname, 'src/layouts') },
+      { find: 'pages', replacement: path.resolve(__dirname, 'src/pages') },
+      { find: 'assets', replacement: path.resolve(__dirname, 'src/assets') },
+      { find: 'boot', replacement: path.resolve(__dirname, 'src/boot') },
+      { find: 'stores', replacement: path.resolve(__dirname, 'src/stores') },
+    ],
   },
   plugins: [
     vue({
