@@ -569,9 +569,9 @@ export default defineComponent({
     addPendingTokenToHistory: function (tokenStr) {
       if (this.tokenAlreadyInHistory(tokenStr)) {
         this.notifySuccess(
-          this.$i18n.t(
-            "ReceiveTokenDialog.actions.later.already_in_history_success_text"
-          )
+        this.$t(
+          "ReceiveTokenDialog.actions.later.already_in_history_success_text"
+        )
         );
         this.showReceiveTokens = false;
         return;
@@ -597,7 +597,7 @@ export default defineComponent({
       this.showReceiveTokens = false;
       // show success notification
       this.notifySuccess(
-        this.$i18n.t(
+        this.$t(
           "ReceiveTokenDialog.actions.later.added_to_history_success_text"
         )
       );

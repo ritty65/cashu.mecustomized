@@ -186,7 +186,7 @@ export default defineComponent({
   data() {
     return {
       mnemonicError: "",
-      restoreAllMintsText: this.$i18n.t(
+      restoreAllMintsText: this.$t(
         "RestoreView.actions.restore_all_mints.label"
       ),
     };
@@ -221,7 +221,7 @@ export default defineComponent({
       // Simple validation: check if mnemonicToRestore has at least 12 words
       const words = this.mnemonicToRestore.trim().split(/\s+/);
       if (words.length < 12) {
-        this.mnemonicError = this.$i18n.t("RestoreView.actions.validate.error");
+        this.mnemonicError = this.$t("RestoreView.actions.validate.error");
         return false;
       }
       this.mnemonicError = "";
@@ -232,19 +232,19 @@ export default defineComponent({
         return;
       }
       try {
-        this.restoreAllMintsText = this.$i18n.t(
+        this.restoreAllMintsText = this.$t(
           "RestoreView.actions.restore.in_progress"
         );
         await this.restoreMint(mintUrl);
       } catch (error) {
         console.error("Error restoring mint:", error);
         notifyError(
-          this.$i18n.t("RestoreView.actions.restore.error", {
+          this.$t("RestoreView.actions.restore.error", {
             error: error.message || error,
           })
         );
       } finally {
-        this.restoreAllMintsText = this.$i18n.t(
+        this.restoreAllMintsText = this.$t(
           "RestoreView.actions.restore_all_mints.label"
         );
       }
@@ -254,7 +254,7 @@ export default defineComponent({
         const text = await this.pasteFromClipboard();
         this.mnemonicToRestore = text.trim();
       } catch (error) {
-        notifyError(this.$i18n.t("RestoreView.actions.paste.error"));
+        notifyError(this.$t("RestoreView.actions.paste.error"));
       }
     },
     async restoreAllMints() {
@@ -264,7 +264,7 @@ export default defineComponent({
       }
       try {
         for (const mint of this.mints) {
-          this.restoreAllMintsText = this.$i18n.t(
+          this.restoreAllMintsText = this.$t(
             "RestoreView.actions.restore_all_mints.in_progress",
             {
               index: ++i,
@@ -274,17 +274,17 @@ export default defineComponent({
           await this.restoreMint(mint.url);
         }
         notifySuccess(
-          this.$i18n.t("RestoreView.actions.restore_all_mints.success")
+          this.$t("RestoreView.actions.restore_all_mints.success")
         );
       } catch (error) {
         console.error("Error restoring mints:", error);
         notifyError(
-          this.$i18n.t("RestoreView.actions.restore_all_mints.error", {
+          this.$t("RestoreView.actions.restore_all_mints.error", {
             error: error.message || error,
           })
         );
       } finally {
-        this.restoreAllMintsText = this.$i18n.t(
+        this.restoreAllMintsText = this.$t(
           "RestoreView.actions.restore_all_mints.label"
         );
       }

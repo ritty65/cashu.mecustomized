@@ -263,7 +263,7 @@ export default defineComponent({
     },
     showTokenDialog: function (historyToken) {
       if (historyToken.token === undefined) {
-        notify(this.$i18n.t("HistoryTable.old_token_not_found_error_text"));
+        notify(this.$t("HistoryTable.old_token_not_found_error_text"));
         return;
       }
       const tokensBase64 = historyToken.token;

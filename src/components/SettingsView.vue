@@ -1774,6 +1774,7 @@ import { useReceiveTokensStore } from "../stores/receiveTokensStore";
 import { useWelcomeStore } from "src/stores/welcome";
 import { useStorageStore } from "src/stores/storage";
 import { useI18n } from "vue-i18n";
+import { i18n } from "src/boot/i18n";
 
 export default defineComponent({
   name: "SettingsView",
@@ -2092,7 +2093,7 @@ export default defineComponent({
         locale = "en-US";
       }
       // Set the i18n locale
-      this.$i18n.locale = locale;
+      i18n.global.locale = locale;
 
       // Store the selected language in localStorage
       localStorage.setItem("cashu.language", locale);
@@ -2108,7 +2109,7 @@ export default defineComponent({
     debug("Nip07 signer available", this.nip07SignerAvailable);
     // Set the initial selected language based on the current locale
     const currentLocale =
-      this.$i18n.locale === "en" ? "en-US" : this.$i18n.locale;
+      i18n.global.locale === "en" ? "en-US" : i18n.global.locale;
     this.selectedLanguage = currentLocale;
   },
 });

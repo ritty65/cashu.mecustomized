@@ -605,7 +605,7 @@ export default defineComponent({
       }
       if (!this.validateMintUrl(this.addMintData.url)) {
         notifyError(
-          this.$i18n.t("MintSettings.add.actions.add_mint.error_invalid_url")
+          this.$t("MintSettings.add.actions.add_mint.error_invalid_url")
         );
         return;
       }
@@ -670,11 +670,11 @@ export default defineComponent({
       }
       if (mintUrls.length == 0) {
         this.notifyError(
-          this.$i18n.t("MintSettings.discover.actions.discover.error_no_mints")
+          this.$t("MintSettings.discover.actions.discover.error_no_mints")
         );
       } else {
         this.notifySuccess(
-          this.$i18n.t("MintSettings.discover.actions.discover.success", {
+          this.$t("MintSettings.discover.actions.discover.success", {
             length: mintUrls.length,
           })
         );
