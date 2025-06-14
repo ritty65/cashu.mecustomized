@@ -136,7 +136,7 @@ export default defineComponent({
     ToggleUnit,
   },
   data() {
-    const amountLabelDefault = this.$i18n.t(
+    const amountLabelDefault = this.$t(
       "PaymentRequestDialog.actions.add_amount.label"
     );
     return {
@@ -145,7 +145,7 @@ export default defineComponent({
       amountInputValue: "",
       amountLabelDefault,
       amountLabel: amountLabelDefault,
-      defaultAnyMint: this.$i18n.t(
+      defaultAnyMint: this.$t(
         "PaymentRequestDialog.actions.use_active_mint.label"
       ),
       chosenMintUrl: undefined,
