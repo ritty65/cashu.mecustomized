@@ -273,9 +273,7 @@ export default defineComponent({
           );
           await this.restoreMint(mint.url);
         }
-        notifySuccess(
-          this.$t("RestoreView.actions.restore_all_mints.success")
-        );
+        notifySuccess(this.$t("RestoreView.actions.restore_all_mints.success"));
       } catch (error) {
         console.error("Error restoring mints:", error);
         notifyError(

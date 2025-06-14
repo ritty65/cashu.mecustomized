@@ -154,9 +154,7 @@ export default defineComponent({
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     showParseDialog: function () {
       if (!this.canMakePayments) {
-        notifyWarning(
-          this.$t("SendDialog.actions.lightning.error_no_mints")
-        );
+        notifyWarning(this.$t("SendDialog.actions.lightning.error_no_mints"));
         this.showSendDialog = false;
         return;
       }
