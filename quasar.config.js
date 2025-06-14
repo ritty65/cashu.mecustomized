@@ -64,12 +64,18 @@ module.exports = configure(function (/* ctx */) {
 
       extendViteConf(viteConf) {
         viteConf.resolve = viteConf.resolve || {};
-        const alias = viteConf.resolve.alias || [];
-        alias.push({
-          find: /^@cashu\/cashu-ts$/,
-          replacement: path.resolve(__dirname, 'src/compat/cashu-ts.ts'),
-        });
-        viteConf.resolve.alias = alias;
+        const replacement = path.resolve(__dirname, 'src/compat/cashu-ts.ts');
+        if (Array.isArray(viteConf.resolve.alias)) {
+          viteConf.resolve.alias.push({
+            find: /^@cashu\/cashu-ts$/,
+            replacement,
+          });
+        } else {
+          viteConf.resolve.alias = {
+            ...(viteConf.resolve.alias || {}),
+            '@cashu/cashu-ts': replacement,
+          };
+        }
 
         // Exclude the package from dependency pre-bundling so the alias takes effect
         viteConf.optimizeDeps = viteConf.optimizeDeps || {};
