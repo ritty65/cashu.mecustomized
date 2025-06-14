@@ -131,6 +131,17 @@ Start a development server:
 npm run dev
 ```
 
+## Troubleshooting
+
+If you modify Vite aliases or `optimizeDeps` and encounter errors when running
+`quasar dev`, remove the Quasar cache:
+
+```bash
+rm -rf node_modules/.q-cache
+```
+
+Quasar will rebuild the cache the next time you run `quasar dev`.
+
 ## Contributing
 Contributions are welcome! Open an issue or pull request to discuss your ideas. Bug reports and feature requests are encouraged. Help with translation and documentation is always appreciated.
 
