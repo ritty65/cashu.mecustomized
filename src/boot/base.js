@@ -36,12 +36,9 @@ window.windowMixin = {
     },
     copyText: function (text, message, position) {
       let notify = this.$q.notify;
-      copyToClipboard(text).then(function () {
+      copyToClipboard(text).then(() => {
         notify({
-          message:
-            message ||
-            i18n.global.t("global.copy_to_clipboard.success") ||
-            "Copied to clipboard!",
+          message: i18n.global.t("global.copy_to_clipboard.success"),
           position: position || "bottom",
         });
       });
