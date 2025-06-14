@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - Phase5
-  pull_request:  # no branches filter ⇒ all PRs
+  pull_request: # no branches filter ⇒ all PRs
 
 jobs:
   build-check:
