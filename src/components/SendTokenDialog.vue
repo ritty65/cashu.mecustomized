@@ -688,6 +688,7 @@ import {
 } from "src/js/notify.ts";
 import { Dialog } from "quasar";
 import { useDmChatsStore } from "src/stores/dmChats";
+import { useMessengerStore } from "src/stores/messenger";
 
 const VueQrcode = defineAsyncComponent(
   () => import("@chenfengyuan/vue-qrcode")
@@ -707,6 +708,7 @@ export default defineComponent({
   props: {},
   data: function () {
     return {
+      messengerStore: useMessengerStore(),
       baseURL: location.protocol + "//" + location.host + location.pathname,
       showAnimatedQR: false,
       qrCodeFragment: "",
@@ -1312,139 +1314,28 @@ export default defineComponent({
       }
     },
     sendTokens: async function () {
-      /*
-      calls send, displays token and kicks off the spendableWorker
-      */
-      this.showNumericKeyboard = false;
-      const p2pkInput = this.sendData.p2pkPubkey;
-      let nostrDm = false;
-      if (
-        p2pkInput &&
-        (p2pkInput.startsWith("npub1") || p2pkInput.startsWith("nprofile1"))
-      ) {
-        try {
-          const decoded = nip19.decode(p2pkInput);
-          if (decoded.type === "npub") {
-            this.recipientPubkey = decoded.data as string;
-          } else if (decoded.type === "nprofile") {
-            this.recipientPubkey = (decoded.data as ProfilePointer).pubkey;
-          }
-          this.sendViaNostr = true;
-          nostrDm = true;
-        } catch (e) {
-          console.error(e);
-        }
+      if (!this.sendData.amount || !this.sendData.p2pkPubkey) {
+        notifyError("Amount and recipient pubkey required");
+        return;
       }
-      if (!nostrDm) {
-        this.sendData.p2pkPubkey = this.maybeConvertNpub(
-          this.sendData.p2pkPubkey
-        );
-        if (
-          this.sendData.p2pkPubkey &&
-          this.isValidPubkey(this.sendData.p2pkPubkey)
-        ) {
-          await this.lockTokens();
-          return;
-        }
-      }
+
+      // Convert npub → hex if needed; messengerStore handles both
+      const creatorNpub = this.sendData.p2pkPubkey.trim();
 
       try {
-        let sendAmount = Math.floor(
-          this.sendData.amount * this.activeUnitCurrencyMultiplyer
-        );
-        const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
-        const bucketId = this.sendData.bucketId;
-        let { _, sendProofs } = await this.send(
-          this.activeProofs,
-          mintWallet,
-          sendAmount,
-          true,
-          this.includeFeesInSendAmount,
-          bucketId
+        await this.messengerStore.sendToken(
+          creatorNpub,
+          Math.floor(this.sendData.amount * this.activeUnitCurrencyMultiplyer),
+          this.sendData.bucketId,
+          this.sendData.memo.trim() || undefined
         );
 
-        // update UI
-        this.sendData.tokens = sendProofs;
-        this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
-        if (this.sendViaNostr && this.recipientPubkey) {
-          try {
-            let recipient = this.recipientPubkey;
-            if (
-              recipient.startsWith("npub") ||
-              recipient.startsWith("nprofile")
-            ) {
-              try {
-                const decoded = nip19.decode(recipient);
-                recipient =
-                  decoded.type === "npub"
-                    ? (decoded.data as string)
-                    : (decoded.data as ProfilePointer).pubkey;
-              } catch (e) {
-                console.error(e);
-              }
-            }
-            const payload2 = {
-              token: this.sendData.tokensBase64,
-              amount: this.sendData.amount * this.activeUnitCurrencyMultiplyer,
-              unlockTime: this.sendData.locktime || null,
-              bucketId: this.sendData.bucketId,
-              referenceId: this.sendData.historyToken?.id || "",
-            };
-            const dmContent2 = JSON.stringify(payload2);
-            const { success, event } =
-              await useNostrStore().sendNip04DirectMessage(
-                recipient,
-                dmContent2
-              );
-            if (success && event) {
-              useDmChatsStore().addOutgoing(event);
-              Dialog.create({
-                message: this.$t(
-                  "wallet.notifications.nostr_dm_sent"
-                ) as string,
-              });
-            } else {
-              Dialog.create({
-                message: this.$t(
-                  "wallet.notifications.nostr_dm_failed"
-                ) as string,
-              });
-            }
-          } catch (e) {
-            console.error(e);
-            Dialog.create({
-              message: this.$t(
-                "wallet.notifications.nostr_dm_failed"
-              ) as string,
-            });
-          } finally {
-            this.recipientPubkey = "";
-            this.sendViaNostr = false;
-            this.sendData.memo = "";
-          }
-        }
-        this.sendData.historyAmount =
-          -this.sendData.amount * this.activeUnitCurrencyMultiplyer;
-
-        const historyToken = {
-          amount: -sendAmount,
-          token: this.sendData.tokensBase64,
-          unit: this.activeUnit,
-          mint: this.activeMintUrl,
-          paymentRequest: this.sendData.paymentRequest,
-          status: "pending",
-          label: "",
-          bucketId,
-        };
-        this.addPendingToken(historyToken);
-        this.sendData.historyToken = historyToken;
-
-        if (!this.g.offline) {
-          this.onTokenPaid(historyToken);
-        }
-      } catch (error) {
-        console.error(error);
-        notifyError("Failed to send tokens");
+        // show pending chip / close dialog
+        this.showSendTokens = false;
+        notifySuccess("Token sent!");
+      } catch (e) {
+        console.error(e);
+        notifyError("Failed to send token");
       }
     },
     pasteToP2PKField: async function () {
