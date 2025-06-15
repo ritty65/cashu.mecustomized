@@ -74,7 +74,7 @@
 </template>
 
 <script>
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
 import { useWelcomeStore } from "src/stores/welcome";
 import { useStorageStore } from "src/stores/storage";
 import WelcomeSlidePrivacy from "./welcome/WelcomeSlidePrivacy.vue";
@@ -153,9 +153,6 @@ export default {
       if (file) readFile(file);
     };
 
-    onMounted(() => {
-      welcomeStore.initializeWelcome();
-    });
 
     return {
       welcomeStore,
@@ -165,6 +162,16 @@ export default {
     };
   },
 };
+</script>
+<script setup>
+import { onMounted } from "vue";
+import { useWelcomeStore } from "src/stores/welcome";
+
+const welcomeStoreSetup = useWelcomeStore();
+
+onMounted(() => {
+  welcomeStoreSetup.initializeWelcome();
+});
 </script>
 
 <style scoped>
