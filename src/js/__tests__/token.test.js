@@ -1,5 +1,8 @@
-import token from "../token";
+import token, { buildP2PKSecret } from "../token";
 import { describe, expect, it } from "vitest";
+import { generateSecretKey, getPublicKey, nip19 } from "nostr-tools";
+import { Buffer } from "buffer";
+import { ensureCompressed } from "src/utils/ecash";
 
 const VALID_V3_TOKEN =
   "cashuAeyJ0b2tlbiI6W3sicHJvb2ZzIjpbeyJpZCI6IkkyeU4raVJZZmt6VCIsImFtb3VudCI6MSwiQyI6IjAyZTRkYmJmMGZmNDI4YTU4ZDZjNjZjMTljNjI0YWRlY2MxNzg0YzdlNTU5ODZhNGVmNDQ4NDM5MzZhM2M4ZjM1OSIsInNlY3JldCI6ImZHWVpzSlVjME1mU1orVlhGandEZXNsNkJScW5wNmRSblZpUGQ2L00yQ0k9In1dLCJtaW50IjoiaHR0cHM6Ly84MzMzLnNwYWNlOjMzMzgifV19";
@@ -25,5 +28,20 @@ describe("token", () => {
 
   it("should throw if the token is invalid", () => {
     expect(() => token.decode("invalid")).toThrow();
+  });
+
+  it("builds a P2PK secret", () => {
+    const sk = generateSecretKey();
+    const pk = getPublicKey(sk);
+    const npub = nip19.npubEncode(pk);
+    const refundSk = generateSecretKey();
+    const refundPk = ensureCompressed(getPublicKey(refundSk, true));
+    const locktime = 1700000000;
+    const secret = buildP2PKSecret(npub, locktime, refundPk);
+    const parsed = JSON.parse(secret);
+    expect(parsed[0]).toBe("P2PK");
+    expect(parsed[1].data).toBe(ensureCompressed(pk));
+    expect(parsed[1].tags).toContainEqual(["locktime", String(locktime)]);
+    expect(parsed[1].tags).toContainEqual(["refund", refundPk]);
   });
 });
