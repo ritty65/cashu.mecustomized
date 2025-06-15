@@ -18,7 +18,7 @@ import { v4 as uuidv4 } from "uuid";
 import { ensureCompressed } from "src/utils/ecash";
 
 import * as _ from "underscore";
-import token from "src/js/token";
+import token, { buildP2PKSecret } from "src/js/token";
 import {
   notifyApiError,
   notifyError,
@@ -587,6 +587,23 @@ export const useWalletStore = defineStore("wallet", {
       }
     },
     /**
+     * Supporter-side helper: build secret ➜ split ➜ encode token
+     */
+    async sendP2PK(
+      amountSat: number,
+      creatorNpub: string,
+      locktime: number
+    ): Promise<string> {
+      const { activeMintUrl, activeUnit } = useMintsStore();
+      const mintWallet = this.mintWallet(activeMintUrl, activeUnit);
+      const nostrStore = useNostrStore();
+      const refundPubHex = nostrStore.activePubkeyHex; // supporter’s own secp pub
+      const secret = buildP2PKSecret(creatorNpub, locktime, refundPubHex);
+      const proofs = await mintWallet.split(amountSat, secret);
+      const tokenStr = useTokensStore().serializeProofs(proofs);
+      return tokenStr;
+    },
+    /**
      *
      *
      * @param {array} proofs
@@ -660,56 +677,18 @@ export const useWalletStore = defineStore("wallet", {
           return;
         }
 
-        /* ---------- P2PK remote-sign fall-back ------------ */
         const needsSig = proofs.some(
           (p) => typeof p.secret === "string" && p.secret.startsWith('["P2PK"')
         );
 
-        let remoteSigned = false;
         if (!privkey && needsSig) {
-          const signed = await useWorkersStore().signWithRemote(proofs);
-          // did we actually get any witness back?
-          if (signed.some((p) => (p as any).witness?.signatures?.length > 0)) {
-            proofs = signed;
-            remoteSigned = true;
-          }
-        }
-
-        if (!privkey && needsSig && !remoteSigned) {
-          const signerStore = useSignerStore();
-          signerStore.reset();
-          const dlg = Dialog.create({
-            component: MissingSignerModal,
-          });
-          const ok = await new Promise<boolean>((resolve) => {
-            dlg.onOk(() => resolve(true));
-            dlg.onCancel(() => resolve(false));
-            dlg.onDismiss(() => resolve(false));
-          });
-          if (ok) {
-            return false;
-          }
-          throw new Error(
-            "No private key or remote signer available for P2PK unlock"
-          );
-        }
-
-        /* Re-encode token if we mutated proofs with a witness */
-        const tokenToRedeem = remoteSigned
-          ? getEncodedToken({
-              mint: mintInToken,
-              unit: unitInToken,
-              proofs,
-            })
-          : receiveStore.receiveData.tokensBase64;
-
-        // Guard against redeeming a P2PK token without the witness key.
-        if (!privkey && this.needsP2PKSignature(tokenToRedeem)) {
           notifyError(
-            "Cannot redeem: this token is P2PK-locked and no matching private key is loaded."
+            "P2PK token cannot be redeemed – no matching private key."
           );
           return false;
         }
+
+        const tokenToRedeem = receiveStore.receiveData.tokensBase64;
 
         debug("redeem: sending proofs", proofs);
 
