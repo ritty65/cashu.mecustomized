@@ -19,11 +19,11 @@
   },
   "husky": {
     "hooks": {
-      "pre-commit": "lint-staged"
+      "pre-commit": "npx lint-staged"
     }
   },
   "lint-staged": {
-    "*.{js,ts,vue,css,scss,md,yml,yaml,json}": [
+    "*.{js,ts,vue,css,scss,md,yml,yaml,json,html}": [
       "prettier --write",
       "eslint --fix",
       "git add"
