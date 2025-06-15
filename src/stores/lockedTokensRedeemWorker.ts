@@ -7,6 +7,7 @@ import { useMintsStore } from "./mints";
 import token from "src/js/token";
 import { ensureCompressed } from "src/utils/ecash";
 import { debug } from "src/js/logger";
+import { getEncodedToken } from "@cashu/cashu-ts";
 
 export const useLockedTokensRedeemWorker = defineStore(
   "lockedTokensRedeemWorker",
@@ -91,7 +92,12 @@ export const useLockedTokensRedeemWorker = defineStore(
                 p.secret = JSON.stringify(s);
               }
             });
-            receiveStore.receiveData.tokensBase64 = entry.tokenString;
+            const normalized = getEncodedToken({
+              mint: mintUrl,
+              unit,
+              proofs: decoded.proofs,
+            });
+            receiveStore.receiveData.tokensBase64 = normalized;
             receiveStore.receiveData.bucketId = entry.tierId;
             debug("locked token redeem: sending proofs", proofs);
             try {
