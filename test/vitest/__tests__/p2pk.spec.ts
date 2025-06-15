@@ -146,4 +146,20 @@ describe("P2PK store", () => {
       "cashuA" + Buffer.from(JSON.stringify(tokenObj)).toString("base64");
     expect(p2pk.getPrivateKeyForP2PKEncodedToken(encoded)).toBe(skHex);
   });
+
+  it("returns refund privkey when expired", () => {
+    const sk = generateSecretKey();
+    const pk = getPublicKey(sk);
+    const skHex = bytesToHex(sk);
+    const npub = nip19.npubEncode(pk);
+
+    const p2pk = useP2PKStore();
+    const pubHex = p2pk.maybeConvertNpub(npub);
+    p2pk.p2pkKeys = [
+      { publicKey: pubHex, privateKey: skHex, used: false, usedCount: 0 },
+    ];
+
+    const result = p2pk.getRefundPrivateKey(true, [pubHex, "02aa"], p2pk.p2pkKeys);
+    expect(result).toBe(skHex);
+  });
 });
