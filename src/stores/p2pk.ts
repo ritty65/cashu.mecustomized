@@ -176,6 +176,34 @@ export const useP2PKStore = defineStore("p2pk", {
       } catch {}
       return { pubkey: "", locktime: undefined, refundKeys: [] }; // Token is not locked / secret is not P2PK
     },
+    /**
+     * Return the *private* key we own that can unlock the given proofs,
+     * or empty string if none.
+     */
+    extractUnlockPrivkey: function (proofs: WalletProof[]): string {
+      const now = Math.floor(Date.now() / 1000);
+      for (const p of proofs) {
+        if (typeof p.secret !== "string") continue;
+        const { pubkey, locktime, refundKeys } = this.getSecretP2PKInfo(
+          p.secret as string
+        );
+        // case 1 – before expiry and we own creator key
+        if (pubkey && (!locktime || now < locktime) && this.haveThisKey(pubkey)) {
+          const match = this.p2pkKeys.find((k) => k.publicKey === pubkey);
+          if (match) return match.privateKey;
+        }
+        // case 2 – after expiry and we own any refund key
+        if (locktime && now >= locktime) {
+          for (const rpk of refundKeys) {
+            if (this.haveThisKey(rpk)) {
+              const match = this.p2pkKeys.find((k) => k.publicKey === rpk);
+              if (match) return match.privateKey;
+            }
+          }
+        }
+      }
+      return "";
+    },
     getSecretP2PKPubkey: function (secret: string): {
       pubkey: string;
       locktime?: number;
