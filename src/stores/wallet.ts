@@ -262,6 +262,23 @@ export const useWalletStore = defineStore("wallet", {
         return proofs;
       }
     },
+    needsP2PKSignature: function (encodedToken: string): boolean {
+      try {
+        const decoded = token.decode(encodedToken);
+        if (!decoded) return false;
+        const proofs = token.getProofs(decoded);
+        return proofs.some((p: any) => {
+          const isP2pk =
+            typeof p.secret === "string" &&
+            (p.secret.startsWith("P2PK:") || p.secret.startsWith('["P2PK"'));
+          if (!isP2pk) return false;
+          const sigs = (p.witness as any)?.signatures;
+          return !sigs || sigs.length === 0;
+        });
+      } catch {
+        return false;
+      }
+    },
     getKeyset(
       mintUrl: string | null = null,
       unit: string | null = null
@@ -678,6 +695,14 @@ export const useWalletStore = defineStore("wallet", {
               proofs,
             })
           : receiveStore.receiveData.tokensBase64;
+
+        // Guard against redeeming a P2PK token without the witness key.
+        if (!privkey && this.needsP2PKSignature(tokenToRedeem)) {
+          notifyError(
+            "Cannot redeem: this token is P2PK-locked and no matching private key is loaded."
+          );
+          return false;
+        }
 
         debug("redeem: sending proofs", proofs);
 
