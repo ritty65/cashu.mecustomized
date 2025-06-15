@@ -17,11 +17,15 @@ import { useSwapStore } from "./swap";
 import { Clipboard } from "@capacitor/clipboard";
 import { DEFAULT_BUCKET_ID } from "./buckets";
 
-function isValidTokenString(tokenStr: string): boolean {
-  // allow any Cashu token prefix (e.g. cashuA, cashuB, ...)
-  // and accept base64/base64url characters in the body
-  const prefixRegex = /^cashu[A-Za-z0-9][A-Za-z0-9_\-+=\/]*$/;
-  return prefixRegex.test(tokenStr);
+const prefixRegex = /^cashu[A-Za-z0-9][A-Za-z0-9_\-+=\/]*$/;
+
+export function isValidTokenString(tokenStr: string): boolean {
+  if (!tokenStr) return false;
+
+  // Drop whitespace or line-breaks that can appear in copy/paste.
+  const cleaned = tokenStr.replace(/\s+/g, "");
+
+  return prefixRegex.test(cleaned);
 }
 
 export const useReceiveTokensStore = defineStore("receiveTokensStore", {
