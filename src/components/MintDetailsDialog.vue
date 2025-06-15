@@ -474,7 +474,7 @@ export default defineComponent({
     copyText(text) {
       navigator.clipboard.writeText(text);
       this.$q.notify({
-        message: this.$i18n.t("global.copy_to_clipboard.success"),
+        message: this.$t("global.copy_to_clipboard.success"),
         color: "positive",
         position: "top",
         timeout: 1000,

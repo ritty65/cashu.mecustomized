@@ -84,7 +84,7 @@ export default defineComponent({
       this.useNumericKeyboard = false;
       this.showNumericKeyboard = false;
       notify(
-        this.$i18n.t("NumericKeyboard.actions.close.closed_info_text"),
+        this.$t("NumericKeyboard.actions.close.closed_info_text"),
         "bottom"
       );
     },
