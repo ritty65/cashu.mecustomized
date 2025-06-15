@@ -1,6 +1,10 @@
 import { type Token, getDecodedToken } from "@cashu/cashu-ts";
 import { useMintsStore, WalletProof } from "src/stores/mints";
 import { useProofsStore } from "src/stores/proofs";
+import { Buffer } from "buffer";
+import { nip19 } from "nostr-tools";
+import { ensureCompressed } from "src/utils/ecash";
+import { randomBytes } from "@noble/hashes/utils";
 export default { decode, getProofs, getMint, getUnit, getMemo };
 
 /**
@@ -61,4 +65,34 @@ function getMemo(decoded_token: Token) {
   } else {
     return "";
   }
+}
+
+/**
+ * Build a P2PK+timelock secret that mints understand (NUT-10/11)
+ * @param creatorNpub  bech32 npub of the creator
+ * @param locktime     unix seconds in the future
+ * @param refundPubHex compressed secp256k1 pubkey of supporter
+ */
+export function buildP2PKSecret(
+  creatorNpub: string,
+  locktime: number,
+  refundPubHex: string
+): string {
+  const decoded = nip19.decode(creatorNpub);
+  if (decoded.type !== "npub") throw new Error("invalid npub");
+  const creatorPubHex = ensureCompressed(
+    Buffer.from(decoded.data as Uint8Array).toString("hex")
+  );
+  const secret = [
+    "P2PK",
+    {
+      nonce: Buffer.from(randomBytes(16)).toString("hex"),
+      data: creatorPubHex,
+      tags: [
+        ["locktime", String(locktime)],
+        ["refund", refundPubHex],
+      ],
+    },
+  ];
+  return JSON.stringify(secret);
 }
