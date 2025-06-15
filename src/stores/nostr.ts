@@ -52,6 +52,14 @@ import { cashuDb, type LockedToken } from "./dexie";
 import { v4 as uuidv4 } from "uuid";
 import { useRouter } from "vue-router";
 import { useP2PKStore } from "./p2pk";
+import { schnorr } from "@noble/secp256k1";
+import { ref, computed } from "vue";
+
+export const nip07Signer = ref<any>(null);
+export let fallbackPrivHex = "";
+export const activePrivkeyHex = computed(
+  () => nip07Signer.value?.privateKeyHex || fallbackPrivHex
+);
 
 type MintRecommendation = {
   url: string;
@@ -1005,5 +1013,24 @@ export function subscribeToNostr(filter: any, cb: (ev: NostrEvent) => void) {
     pool.subscribeMany(relays, [filter], { onevent: cb });
   } catch (e) {
     console.error("Failed to subscribe", e);
+  }
+}
+
+export function importNsec(nsecBech32: string) {
+  const { type, data } = nip19.decode(nsecBech32);
+  if (type !== "nsec") {
+    throw new Error("invalid nsec");
+  }
+  const bytes = data as Uint8Array;
+  fallbackPrivHex = bytesToHex(bytes);
+  const p2pkStore = useP2PKStore();
+  const pk = ensureCompressed("02" + getPublicKey(bytes));
+  if (!p2pkStore.haveThisKey(pk)) {
+    p2pkStore.p2pkKeys = p2pkStore.p2pkKeys.concat({
+      publicKey: pk,
+      privateKey: fallbackPrivHex,
+      used: false,
+      usedCount: 0,
+    });
   }
 }
