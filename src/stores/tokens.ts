@@ -241,7 +241,6 @@ function currentDateStr() {
   return date.formatDate(new Date(), "YYYY-MM-DD HH:mm:ss");
 }
 
-function isValidTokenString(tokenStr: string): boolean {
-  const prefixRegex = /^cashu[A-Za-z0-9][A-Za-z0-9_\-+=\/]*$/;
-  return prefixRegex.test(tokenStr);
+function isValidTokenString(str: string) {
+  return /^cashu[A-Za-z0-9]/.test(str.replace(/\s+/g, ""));
 }
