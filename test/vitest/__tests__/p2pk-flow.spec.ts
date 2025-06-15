@@ -17,7 +17,9 @@ describe("P2PK flow", () => {
   it("locks and redeems a token", async () => {
     const { useWalletStore } = await import("src/stores/wallet");
     const { useProofsStore } = await import("src/stores/proofs");
-    const { useReceiveTokensStore } = await import("src/stores/receiveTokensStore");
+    const { useReceiveTokensStore } = await import(
+      "src/stores/receiveTokensStore"
+    );
     const { useMintsStore } = await import("src/stores/mints");
     const { useP2PKStore } = await import("src/stores/p2pk");
 
@@ -93,4 +95,3 @@ describe("P2PK flow", () => {
     );
   });
 });
-
