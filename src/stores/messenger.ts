@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { watch } from "vue";
-import { Event as NostrEvent } from "nostr-tools";
+import { Event as NostrEvent, nip19 } from "nostr-tools";
 import { useNostrStore, SignerType } from "./nostr";
 import { v4 as uuidv4 } from "uuid";
 import { useSettingsStore } from "./settings";
@@ -75,67 +75,35 @@ export const useMessengerStore = defineStore("messenger", {
       return { success, event } as any;
     },
     async sendToken(
-      recipient: string,
-      amount: number,
-      bucketId: string,
+      creatorNpub: string,
+      amountSat: number,
+      bucketId = "",
       memo?: string
     ) {
-      try {
-        const wallet = useWalletStore();
-        const mints = useMintsStore();
-        const proofsStore = useProofsStore();
-        const settings = useSettingsStore();
-        const tokens = useTokensStore();
+      const wallet = useWalletStore();
+      const tokenStr = await wallet.sendP2PK(
+        amountSat,
+        creatorNpub,
+        Math.floor(Date.now() / 1000) + 3600
+      );
 
-        const sendAmount = Math.floor(
-          amount * mints.activeUnitCurrencyMultiplyer
-        );
-
-        const mintWallet = wallet.mintWallet(
-          mints.activeMintUrl,
-          mints.activeUnit
-        );
-        const proofsForBucket = mints.activeProofs.filter(
-          (p) => p.bucketId === bucketId
-        );
-
-        const { sendProofs } = await wallet.send(
-          proofsForBucket,
-          mintWallet,
-          sendAmount,
-          true,
-          settings.includeFeesInSendAmount,
-          bucketId
-        );
-
-        const tokenStr = proofsStore.serializeProofs(sendProofs);
-        const payload = {
-          token: tokenStr,
-          amount: sendAmount,
-          unlockTime: null,
-          bucketId,
-          referenceId: uuidv4(),
-        };
-
-        const { success } = await this.sendDm(
-          recipient,
-          JSON.stringify(payload)
-        );
-        if (success) {
-          tokens.addPendingToken({
-            amount: -sendAmount,
-            token: tokenStr,
-            unit: mints.activeUnit,
-            mint: mints.activeMintUrl,
-            bucketId,
-          });
-        }
-        return success;
-      } catch (e) {
-        console.error(e);
-        notifyError("Failed to send token");
-        return false;
+      // publish NIP-04 DM
+      let recipientHex = creatorNpub;
+      if (creatorNpub.startsWith("npub") || creatorNpub.startsWith("nprofile")) {
+        const dec = nip19.decode(creatorNpub);
+        recipientHex =
+          dec.type === "npub" ? (dec.data as string) : (dec.data as any).pubkey;
       }
+      await this.sendDm(
+        recipientHex,
+        JSON.stringify({
+          token: tokenStr,
+          amount: amountSat,
+          bucketId,
+          memo,
+          unlockTime: Math.floor(Date.now() / 1000) + 3600,
+        })
+      );
     },
     addOutgoingMessage(
       pubkey: string,

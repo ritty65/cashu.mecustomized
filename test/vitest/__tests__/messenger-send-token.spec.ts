@@ -1,10 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 var sendDm: any;
-var walletSend: any;
-var walletMintWallet: any;
-var serializeProofs: any;
-var addPending: any;
+var walletSendP2PK: any;
 
 vi.mock("../../../src/stores/nostr", () => {
   sendDm = vi.fn(async () => ({
@@ -29,12 +26,9 @@ vi.mock("../../../src/stores/nostr", () => {
 });
 
 vi.mock("../../../src/stores/wallet", () => {
-  walletSend = vi.fn(async () => ({
-    sendProofs: [{ secret: "s1", amount: 1 }],
-  }));
-  walletMintWallet = vi.fn(() => ({}));
+  walletSendP2PK = vi.fn(async () => "TOKEN");
   return {
-    useWalletStore: () => ({ send: walletSend, mintWallet: walletMintWallet }),
+    useWalletStore: () => ({ sendP2PK: walletSendP2PK }),
   };
 });
 
@@ -46,20 +40,6 @@ vi.mock("../../../src/stores/mints", () => ({
     activeProofs: [{ secret: "a", amount: 1, id: "id", bucketId: "b" }],
   }),
 }));
-
-vi.mock("../../../src/stores/proofs", () => {
-  serializeProofs = vi.fn(() => "TOKEN");
-  return { useProofsStore: () => ({ serializeProofs }) };
-});
-
-vi.mock("../../../src/stores/settings", () => ({
-  useSettingsStore: () => ({ includeFeesInSendAmount: false }),
-}));
-
-vi.mock("../../../src/stores/tokens", () => {
-  addPending = vi.fn();
-  return { useTokensStore: () => ({ addPendingToken: addPending }) };
-});
 
 vi.mock("../../../src/js/message-utils", () => ({
   sanitizeMessage: vi.fn((s: string) => s),
@@ -74,24 +54,24 @@ beforeEach(() => {
 
 describe("messenger.sendToken", () => {
   it("sends token DM and logs message", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(0);
     const store = useMessengerStore();
-    const success = await store.sendToken("receiver", 1, "b", "note");
-    expect(success).toBe(true);
-    expect(walletMintWallet).toHaveBeenCalledWith("mint", "sat");
-    expect(walletSend).toHaveBeenCalled();
+    await store.sendToken("receiver", 1, "b", "note");
+    expect(walletSendP2PK).toHaveBeenCalledWith(1, "receiver", 3600);
     expect(sendDm).toHaveBeenCalledWith(
       "receiver",
-      "note\nTOKEN",
+      JSON.stringify({
+        token: "TOKEN",
+        amount: 1,
+        bucketId: "b",
+        memo: "note",
+        unlockTime: 3600,
+      }),
       "priv",
       "pub"
     );
-    expect(addPending).toHaveBeenCalledWith({
-      amount: -1,
-      token: "TOKEN",
-      unit: "sat",
-      mint: "mint",
-      bucketId: "b",
-    });
     expect(store.conversations.receiver.length).toBe(1);
+    vi.useRealTimers();
   });
 });
