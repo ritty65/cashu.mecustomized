@@ -227,6 +227,18 @@ export const useP2PKStore = defineStore("p2pk", {
       }
       return undefined;
     },
+    getRefundPrivateKey: function (
+      isExpired: boolean,
+      refundKeys: string[],
+      keys: P2PKKey[]
+    ): string {
+      if (!isExpired || !refundKeys.length) return "";
+      for (const rk of refundKeys) {
+        const match = keys.find((k) => k.publicKey === rk);
+        if (match) return match.privateKey;
+      }
+      return "";
+    },
     getPrivateKeyForP2PKEncodedToken: function (encodedToken: string): string {
       const decodedToken = token.decode(encodedToken);
       if (!decodedToken) {
@@ -238,13 +250,21 @@ export const useP2PKStore = defineStore("p2pk", {
       }
 
       const secrets = proofs.map((p) => p.secret);
+      const now = Math.floor(Date.now() / 1000);
       for (const secret of secrets) {
-        const { pubkey } = this.getSecretP2PKPubkey(secret);
+        const { pubkey, locktime, refundKeys } = this.getSecretP2PKInfo(secret);
         if (pubkey && this.haveThisKey(pubkey)) {
           // NOTE: we assume all tokens are locked to the same key here!
           return this.p2pkKeys.filter((m) => m.publicKey == pubkey)[0]
             .privateKey;
         }
+        const isExpired = !!locktime && locktime <= now;
+        const refund = this.getRefundPrivateKey(
+          isExpired,
+          refundKeys,
+          this.p2pkKeys
+        );
+        if (refund) return refund;
       }
       return "";
     },
