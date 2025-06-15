@@ -655,7 +655,7 @@ import { useWorkersStore } from "src/stores/workers";
 import { usePriceStore } from "src/stores/price";
 import { useNostrStore } from "src/stores/nostr";
 import token from "src/js/token";
-import { Buffer } from "buffer";
+import { uint8ToBase64 } from "src/js/base64";
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import { nip19, ProfilePointer } from "nostr-tools";
@@ -1003,7 +1003,7 @@ export default defineComponent({
       if (this.sendData.tokensBase64.length == 0) {
         return;
       }
-      const messageBuffer = Buffer.from(this.sendData.tokensBase64);
+      const messageBuffer = uint8ToBase64.decode(this.sendData.tokensBase64);
       const ur = UR.fromBuffer(messageBuffer);
       const firstSeqNum = 0;
       this.encoder = new UREncoder(ur, this.currentFragmentLength, firstSeqNum);
