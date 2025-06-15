@@ -1,7 +1,8 @@
 import token, { buildP2PKSecret } from "../token";
 import { describe, expect, it } from "vitest";
 import { generateSecretKey, getPublicKey, nip19 } from "nostr-tools";
-import { Buffer } from "buffer";
+import buffer from "buffer";
+const { Buffer } = buffer;
 import { ensureCompressed } from "src/utils/ecash";
 
 const VALID_V3_TOKEN =

@@ -3,9 +3,6 @@
 // Runs once on app start.
 
 import { boot } from 'quasar/wrappers';
-import { setupAxios } from '@cashu/cashu-ts';
 
-export default boot(() => {
-  // 15-second network timeout for all Cashu mint requests.
-  setupAxios({ timeout: 15_000 });
-});
+// Nothing needed – cashu-ts ships with its own fetch-based client now.
+export default boot(() => {});

@@ -1,7 +1,8 @@
 import { type Token, getDecodedToken } from "@cashu/cashu-ts";
 import { useMintsStore, WalletProof } from "src/stores/mints";
 import { useProofsStore } from "src/stores/proofs";
-import { Buffer } from "buffer";
+import buffer from "buffer";
+const { Buffer } = buffer;
 import { nip19 } from "nostr-tools";
 import { ensureCompressed } from "src/utils/ecash";
 import { randomBytes } from "@noble/hashes/utils";
