@@ -442,13 +442,21 @@ export const useWalletStore = defineStore("wallet", {
         bucketId
       );
       const keysetId = this.getKeyset(wallet.mint.mintUrl, wallet.unit);
+      // Ensure locktime is safely in the future to avoid "lock has expired"
+      // errors when the user does not explicitly provide one.
+      let safeLock = locktime;
+      const nowSec = Math.floor(Date.now() / 1000);
+      if (!safeLock || safeLock <= nowSec) {
+        safeLock = nowSec + 60; // default safety buffer of 60s
+      }
+
       const { keep: keepProofs, send: sendProofs } = await wallet.send(
         amount,
         proofsToSend,
         {
           keysetId,
           pubkey: ensureCompressed(receiverPubkey),
-          locktime,
+          locktime: safeLock,
           refund: refundPubkey,
         }
       );
