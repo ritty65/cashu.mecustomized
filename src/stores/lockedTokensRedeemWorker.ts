@@ -83,13 +83,20 @@ export const useLockedTokensRedeemWorker = defineStore(
 
             // normalise secret before redeem
             decoded.proofs.forEach((p) => {
-              if (
-                typeof p.secret === "string" &&
-                p.secret.startsWith('["P2PK"')
-              ) {
+              if (typeof p.secret !== "string") return;
+
+              if (p.secret.startsWith('["P2PK"')) {
                 const s = JSON.parse(p.secret);
                 if (s[1]?.data) s[1].data = ensureCompressed(s[1].data);
                 p.secret = JSON.stringify(s);
+              } else if (p.secret.startsWith("P2PK:")) {
+                const parts = p.secret.split(":");
+                if (parts.length >= 2) {
+                  try {
+                    parts[1] = ensureCompressed(parts[1]);
+                  } catch {}
+                  p.secret = parts.join(":");
+                }
               }
             });
             const normalized = getEncodedToken({
