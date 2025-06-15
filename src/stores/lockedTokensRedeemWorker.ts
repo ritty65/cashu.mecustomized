@@ -113,7 +113,19 @@ export const useLockedTokensRedeemWorker = defineStore(
                   tokenId: entry.id,
                 });
               } else {
-                throw err;
+                if (
+                  typeof err?.message === "string" &&
+                  err.message.includes("proofs could not be verified")
+                ) {
+                  console.error(
+                    "Removing invalid locked token",
+                    entry.id,
+                    err.message
+                  );
+                  await cashuDb.lockedTokens.delete(entry.id);
+                } else {
+                  throw err;
+                }
               }
             }
           } catch (e) {
