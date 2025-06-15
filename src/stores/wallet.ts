@@ -653,6 +653,13 @@ export const useWalletStore = defineStore("wallet", {
           receiveStore.receiveData.p2pkPrivateKey ||
           nostrStore.activePrivkeyHex;
 
+        if (!privkey) {
+          notifyError(
+            'Cannot redeem – no matching P2PK key (unlock or import one)'
+          );
+          return;
+        }
+
         /* ---------- P2PK remote-sign fall-back ------------ */
         const needsSig = proofs.some(
           (p) => typeof p.secret === "string" && p.secret.startsWith('["P2PK"')
