@@ -7,8 +7,22 @@ export default boot(() => {
   if ((window as any).__NDK_READY) return;
   (window as any).__NDK_READY = true;
 
+  const RELAYS = [
+    "wss://relay.damus.io",
+    "wss://relay.primal.net",
+    "wss://nos.lol",
+    "wss://nostr.wine",
+    "wss://purplepag.es",
+    "wss://relay.nostr.band",
+  ];
+
   const settings = useSettingsStore();
-  const ndk = new NDK({ explicitRelayUrls: settings.defaultNostrRelays });
+  const ndk = new NDK({
+    explicitRelayUrls:
+      settings.defaultNostrRelays.length > 0
+        ? settings.defaultNostrRelays
+        : RELAYS,
+  });
   ndk.connect();
   (window as any).ndk = ndk;
 });
