@@ -95,7 +95,10 @@ export const useWorkersStore = defineStore("workers", {
 
       return Promise.all(
         proofs.map(async (p) => {
-          if (typeof p.secret === "string" && p.secret.startsWith('["P2PK"')) {
+          if (
+            typeof p.secret === "string" &&
+            (p.secret.startsWith('["P2PK"') || p.secret.startsWith("P2PK:"))
+          ) {
             const h = sha256(new TextEncoder().encode(p.secret));
             const sig = await signSchnorr(bytesToHex(h));
             return { ...p, witness: { signatures: [sig] } } as Proof;
