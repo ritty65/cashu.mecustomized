@@ -1,18 +1,35 @@
-import { debug } from "src/js/logger";
+/* ------------------------------------------------------------------
+ *  src/stores/p2pk.ts           Fundstr – P2PK key manager (compat v2)
+ * ------------------------------------------------------------------ */
+
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { generateSecretKey, getPublicKey, nip19 } from "nostr-tools";
+import { bytesToHex } from "@noble/hashes/utils";
+import { sha256 } from "@noble/hashes/sha256";
 import { ensureCompressed } from "src/utils/ecash";
-import { bytesToHex } from "@noble/hashes/utils"; // already an installed dependency
-import { WalletProof } from "stores/mints";
-import token from "src/js/token";
+import token from "src/js/token";                          // <- needed by wrappers
 
-type P2PKKey = {
-  publicKey: string;
-  privateKey: string;
+/* ------------------------------------------------------------------ */
+/* Types                                                               */
+/* ------------------------------------------------------------------ */
+
+export interface P2PKKey {
+  publicKey: string;   // 33‑byte hex (02/03…)
+  privateKey: string;  // 32‑byte hex
   used: boolean;
   usedCount: number;
-};
+}
+
+export interface P2PKInfo {
+  pubkey: string;
+  locktime?: number;
+  refundKeys: string[];
+}
+
+/* ------------------------------------------------------------------ */
+/* Store                                                                */
+/* ------------------------------------------------------------------ */
 
 export const useP2PKStore = defineStore("p2pk", {
   state: () => ({
@@ -24,244 +41,184 @@ export const useP2PKStore = defineStore("p2pk", {
     showP2PKDialog: false,
     showP2PKData: {} as P2PKKey,
   }),
-  getters: {},
+
+  getters: {
+    haveAny: (state) => (keys: string[]): boolean =>
+      keys.some(
+        (k) => state.p2pkKeys.findIndex((kp) => kp.publicKey === k) !== -1
+      ),
+  },
+
   actions: {
-    haveThisKey: function (key: string) {
-      return this.p2pkKeys.filter((m) => m.publicKey == key).length > 0;
+    /* -------------------------------------------------- */
+    /*   IMPORT / GENERATE KEYS                           */
+    /* -------------------------------------------------- */
+
+    haveThisKey(key: string) {
+      return this.p2pkKeys.some((m) => m.publicKey === key);
     },
-    maybeConvertNpub: function (key: string) {
-      // Check and convert npub to P2PK.
-      // Always normalise with ensureCompressed() before use.
+
+    maybeConvertNpub(key: string): string {
       if (!key) return "";
       if (key.startsWith("npub1")) {
         const { type, data } = nip19.decode(key);
-        if (type === "npub" && data.length === 64) {
-          key = "02" + data;
-        }
+        if (type === "npub" && data.length === 64) key = "02" + data;
       }
       return ensureCompressed(key);
     },
-    isValidPubkey: function (key: string) {
+
+    isValidPubkey(key: string) {
       try {
-        return this.maybeConvertNpub(key).length === 66;
+        return !!this.maybeConvertNpub(key);
       } catch {
         return false;
       }
     },
-    setPrivateKeyUsed: function (key: string) {
-      const thisKeys = this.p2pkKeys.filter((k) => k.privateKey == key);
-      if (thisKeys.length) {
-        thisKeys[0].used = true;
-        thisKeys[0].usedCount += 1;
-      }
-    },
-    showKeyDetails: function (key: string) {
-      const thisKeys = this.p2pkKeys.filter((k) => k.publicKey == key);
-      if (thisKeys.length) {
-        this.showP2PKData = JSON.parse(JSON.stringify(thisKeys[0]));
-        this.showP2PKDialog = true;
-      }
-    },
-    showLastKey: function () {
-      if (this.p2pkKeys.length) {
-        this.showP2PKData = JSON.parse(
-          JSON.stringify(this.p2pkKeys[this.p2pkKeys.length - 1])
-        );
-        this.showP2PKDialog = true;
-      }
-    },
-    importNsec: async function () {
-      const nsec = (await prompt("Enter your nsec")) as string;
-      if (!nsec || !nsec.startsWith("nsec1")) {
-        debug("input was not an nsec");
-        return;
-      }
-      let sk = nip19.decode(nsec).data as Uint8Array; // `sk` is a Uint8Array
-      // ensureCompressed() so future code can't bypass compression checks
-      let pk = ensureCompressed("02" + getPublicKey(sk));
-      let skHex = bytesToHex(sk);
-      if (this.haveThisKey(pk)) {
-        debug("nsec already exists in p2pk keystore");
-        return;
-      }
-      const keyPair: P2PKKey = {
-        publicKey: pk,
-        privateKey: skHex,
+
+    addPrivateKey(keyOrNsec: string) {
+      const privHex =
+        keyOrNsec.startsWith("nsec1")
+          ? bytesToHex(nip19.decode(keyOrNsec).data as Uint8Array)
+          : keyOrNsec.replace(/^0x/, "").toLowerCase();
+
+      const pubHex = ensureCompressed("02" + getPublicKey(privHex));
+      if (this.haveThisKey(pubHex)) return;
+
+      this.p2pkKeys.push({
+        publicKey: pubHex,
+        privateKey: privHex,
         used: false,
         usedCount: 0,
-      };
-      this.p2pkKeys = this.p2pkKeys.concat(keyPair);
+      });
     },
-    generateKeypair: function () {
-      let sk = generateSecretKey(); // `sk` is a Uint8Array
-      // ensureCompressed() so future code can't bypass compression checks
-      let pk = ensureCompressed("02" + getPublicKey(sk));
-      let skHex = bytesToHex(sk);
-      const keyPair: P2PKKey = {
+
+    generateKeypair() {
+      const sk = generateSecretKey();
+      const pk = ensureCompressed("02" + getPublicKey(sk));
+      this.p2pkKeys.push({
         publicKey: pk,
-        privateKey: skHex,
+        privateKey: bytesToHex(sk),
         used: false,
         usedCount: 0,
-      };
-      this.p2pkKeys = this.p2pkKeys.concat(keyPair);
+      });
     },
-    getSecretP2PKInfo: function (secret: string): {
-      pubkey: string;
-      locktime?: number;
-      refundKeys: string[];
-    } {
+
+    setPrivateKeyUsed(privHex: string) {
+      const k = this.p2pkKeys.find((x) => x.privateKey === privHex);
+      if (k) {
+        k.used = true;
+        k.usedCount += 1;
+      }
+    },
+
+    /* -------------------------------------------------- */
+    /*   CORE HELPERS                                     */
+    /* -------------------------------------------------- */
+
+    hashSecret(secret: string): string {
+      return bytesToHex(sha256(new TextEncoder().encode(secret)));
+    },
+
+    /** modern parser – single source of truth */
+    getSecretP2PKInfo(secret: string): P2PKInfo {
       try {
-        let secretObject = JSON.parse(secret);
-        if (secretObject[0] != "P2PK" || secretObject[1]["data"] == undefined) {
-          debug("not p2pk locked");
-          return { pubkey: "", locktime: undefined, refundKeys: [] }; // not p2pk locked
+        const obj = JSON.parse(secret);
+        if (!Array.isArray(obj) || obj[0] !== "P2PK") {
+          return { pubkey: "", refundKeys: [] };
         }
-        // Get all the p2pk secret data
-        const now = Math.floor(Date.now() / 1000); // unix TS
-        const { data, tags } = secretObject[1];
-        let mainKey: string;
-        try {
-          mainKey = ensureCompressed(data);
-        } catch {
-          mainKey = data;
-        }
-        const locktimeTag = tags && tags.find((tag) => tag[0] === "locktime");
-        const locktime = locktimeTag ? parseInt(locktimeTag[1], 10) : undefined; // Permanent lock if not set
-        const refundTag = tags && tags.find((tag) => tag[0] === "refund");
-        const refundKeys =
-          refundTag && refundTag.length > 1
-            ? refundTag.slice(1).map((k: string) => {
-                try {
-                  return ensureCompressed(k);
-                } catch {
-                  return k;
-                }
-              })
-            : [];
-        const pubkeysTag = tags && tags.find((tag) => tag[0] === "pubkeys");
-        const pubkeys =
-          pubkeysTag && pubkeysTag.length > 1
-            ? pubkeysTag.slice(1).map((k: string) => {
-                try {
-                  return ensureCompressed(k);
-                } catch {
-                  return k;
-                }
-              })
-            : [];
-        const n_sigsTag = tags && tags.find((tag) => tag[0] === "n_sigs");
-        const n_sigs = n_sigsTag ? parseInt(n_sigsTag[1], 10) : undefined;
-        // If locktime is in the future, return first owned additional 'pubkeys'
-        // match if multisig ('n_sigs'), otherwise return the main key ('data')
-        if (locktime > now) {
-          debug("p2pk token - locktime is active");
-          if (n_sigs && n_sigs >= 1) {
-            for (const pk of pubkeys) {
-              if (this.haveThisKey(pk))
-                return { pubkey: pk, locktime, refundKeys };
-            }
-          }
-          return { pubkey: mainKey, locktime, refundKeys };
-        }
-        // If locktime expired, return first owned 'refund' key match or
-        // or just return the first refund key to show token is locked
-        if (refundKeys.length > 0) {
-          debug("p2pk token - locked to refund keys");
-          for (const pk of refundKeys) {
-            if (this.haveThisKey(pk))
-              return { pubkey: pk, locktime, refundKeys };
+
+        const { data, tags = [] } = obj[1] || {};
+        const mainKey = ensureCompressed(data);
+
+        const findTag = (n: string) =>
+          (tags as string[][]).find((t) => t[0] === n);
+
+        const locktime = findTag("locktime")
+          ? parseInt(findTag("locktime")![1], 10)
+          : undefined;
+
+        const refundKeys: string[] = findTag("refund")
+          ? findTag("refund")!.slice(1).map((k) => this.maybeConvertNpub(k))
+          : [];
+
+        const now = Math.floor(Date.now() / 1000);
+
+        /* decide active key */
+        if (locktime && now > locktime && refundKeys.length) {
+          for (const r of refundKeys) {
+            if (this.haveThisKey(r)) return { pubkey: r, locktime, refundKeys };
           }
           return { pubkey: refundKeys[0], locktime, refundKeys };
         }
-        debug("p2pk token - lock has expired");
-      } catch {}
-      return { pubkey: "", locktime: undefined, refundKeys: [] }; // Token is not locked / secret is not P2PK
+        return { pubkey: mainKey, locktime, refundKeys };
+      } catch {
+        return { pubkey: "", refundKeys: [] };
+      }
     },
-    getSecretP2PKPubkey: function (secret: string): {
-      pubkey: string;
-      locktime?: number;
-    } {
+
+    /* -------------------------------------------------- */
+    /*   ***  Back‑compat layer for old code  ***          */
+    /* -------------------------------------------------- */
+
+    /** old name kept for ReceiveTokenDialog.vue */
+    getSecretP2PKPubkey(secret: string): { pubkey: string; locktime?: number } {
       const { pubkey, locktime } = this.getSecretP2PKInfo(secret);
       return { pubkey, locktime };
     },
-    isLocked: function (proofs: WalletProof[]) {
-      const secrets = proofs.map((p) => p.secret);
-      for (const secret of secrets) {
-        try {
-          if (this.getSecretP2PKPubkey(secret).pubkey) {
-            return true;
-          }
-        } catch {}
-      }
-      return false;
+
+    isLocked(proofs: { secret: string }[]): boolean {
+      return proofs.some((p) => this.getSecretP2PKInfo(p.secret).pubkey);
     },
-    isLockedToUs: function (proofs: WalletProof[]) {
-      const secrets = proofs.map((p) => p.secret);
-      for (const secret of secrets) {
-        const { pubkey } = this.getSecretP2PKPubkey(secret);
-        if (pubkey) {
-          return this.haveThisKey(pubkey);
-        }
-      }
+
+    isLockedToUs(proofs: { secret: string }[]): boolean {
+      return proofs.every((p) => {
+        const { pubkey } = this.getSecretP2PKInfo(p.secret);
+        return pubkey ? this.haveThisKey(pubkey) : true;
+      });
     },
-    getTokenPubkey: function (encodedToken: string): string | undefined {
-      const decodedToken = token.decode(encodedToken);
-      if (!decodedToken) {
-        return undefined;
-      }
-      const proofs = token.getProofs(decodedToken);
-      for (const p of proofs) {
+
+    /** helpers that inspect a *whole token string* (used by dialogs) */
+    getTokenPubkey(encodedToken: string): string | undefined {
+      const dec = token.decode(encodedToken);
+      if (!dec) return;
+      for (const p of token.getProofs(dec)) {
         const { pubkey } = this.getSecretP2PKInfo(p.secret);
         if (pubkey) return pubkey;
       }
-      return undefined;
     },
-    getTokenRefundPubkey: function (encodedToken: string): string | undefined {
-      const decodedToken = token.decode(encodedToken);
-      if (!decodedToken) {
-        return undefined;
-      }
-      const proofs = token.getProofs(decodedToken);
-      for (const p of proofs) {
+
+    getTokenRefundPubkey(encodedToken: string): string | undefined {
+      const dec = token.decode(encodedToken);
+      if (!dec) return;
+      for (const p of token.getProofs(dec)) {
         const { refundKeys } = this.getSecretP2PKInfo(p.secret);
         if (refundKeys.length) return refundKeys[0];
       }
-      return undefined;
     },
-    getPrivateKeyForP2PKEncodedToken: function (encodedToken: string): string {
-      const decodedToken = token.decode(encodedToken);
-      if (!decodedToken) {
-        return "";
-      }
-      const proofs = token.getProofs(decodedToken);
-      if (!this.isLocked(proofs) || !this.isLockedToUs(proofs)) {
-        return "";
-      }
 
-      const secrets = proofs.map((p) => p.secret);
-      for (const secret of secrets) {
-        const { pubkey } = this.getSecretP2PKPubkey(secret);
+    getPrivateKeyForP2PKEncodedToken(encodedToken: string): string {
+      const dec = token.decode(encodedToken);
+      if (!dec) return "";
+      const proofs = token.getProofs(dec);
+      if (!this.isLocked(proofs) || !this.isLockedToUs(proofs)) return "";
+
+      for (const p of proofs) {
+        const { pubkey } = this.getSecretP2PKInfo(p.secret);
         if (pubkey && this.haveThisKey(pubkey)) {
-          // NOTE: we assume all tokens are locked to the same key here!
-          return this.p2pkKeys.filter((m) => m.publicKey == pubkey)[0]
-            .privateKey;
+          return this.p2pkKeys.find((k) => k.publicKey === pubkey)!.privateKey;
         }
       }
       return "";
     },
-    getTokenLocktime: function (encodedToken: string): number | undefined {
-      const decodedToken = token.decode(encodedToken);
-      if (!decodedToken) {
-        return undefined;
-      }
-      const proofs = token.getProofs(decodedToken);
-      const times = proofs
-        .map((p) => this.getSecretP2PKPubkey(p.secret).locktime)
+
+    getTokenLocktime(encodedToken: string): number | undefined {
+      const dec = token.decode(encodedToken);
+      if (!dec) return;
+      const times = token
+        .getProofs(dec)
+        .map((p) => this.getSecretP2PKInfo(p.secret).locktime)
         .filter((t) => t !== undefined) as number[];
-      if (!times.length) {
-        return undefined;
-      }
-      return Math.max(...times);
+      return times.length ? Math.max(...times) : undefined;
     },
   },
 });

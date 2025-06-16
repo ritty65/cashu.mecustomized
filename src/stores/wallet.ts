@@ -1,3 +1,4 @@
+import { unlockProofs, ensureCompressed } from "src/utils/ecash";
 import { debug } from "src/js/logger";
 import { defineStore } from "pinia";
 import { currentDateStr } from "src/js/utils";
@@ -15,7 +16,6 @@ import { useInvoicesWorkerStore } from "./invoicesWorker";
 import { DEFAULT_BUCKET_ID, useBucketsStore } from "./buckets";
 import { useLockedTokensStore } from "./lockedTokens";
 import { v4 as uuidv4 } from "uuid";
-import { ensureCompressed } from "src/utils/ecash";
 
 import * as _ from "underscore";
 import token from "src/js/token";
@@ -240,27 +240,32 @@ export const useWalletStore = defineStore("wallet", {
         this.keysetCounters.push(newCounter);
       }
     },
-    signP2PKIfNeeded: function <T extends Proof>(proofs: T[]): T[] {
+    /** ------------------------------------------------------------------
+     * Add Schnorr witnesses to **any** P2PK‑locked proofs               *
+     * (no‑ops if nothing is P2PK‑locked, or if no signer is available)  *
+     * ------------------------------------------------------------------ */
+    signP2PKIfNeeded: async function <T extends Proof>(proofs: T[]): Promise<T[]> {
+      const signer = useSignerStore();
+
+      /* fast exit – none of the proofs are locked */
       if (
         !proofs.some(
-          (p) => typeof p.secret === "string" && p.secret.startsWith("P2PK:")
+          (p) => typeof p.secret === 'string' && p.secret.startsWith('["P2PK"')
         )
       ) {
         return proofs;
       }
-      const privKey = useNostrStore().privKeyHex;
-      if (!privKey) return proofs;
-      try {
-        const signed = getSignedProofs(proofs as unknown as Proof[], privKey);
-        return proofs.map((p, idx) => ({
-          ...(p as any),
-          ...(signed[idx] as any),
-        })) as T[];
-      } catch (e) {
-        console.error(e);
-        return proofs;
-      }
+
+      /* UI will later pop MissingSignerModal if we still have no signer */
+      if (!signer.hasSigner) return proofs;
+
+      const signed = await unlockProofs(
+        proofs as unknown as Proof[],
+        async (hash) => signer.signData(hash)
+      );
+      return signed as T[];
     },
+
     getKeyset(
       mintUrl: string | null = null,
       unit: string | null = null
@@ -423,42 +428,49 @@ export const useWalletStore = defineStore("wallet", {
       locktime?: number,
       refundPubkey?: string
     ) {
-      const mintStore = useMintsStore();
-      const info = mintStore.activeInfo || {};
+      const mints = useMintsStore();
+      const info = mints.activeInfo || {};
       const nuts = Array.isArray(info.nut_supports)
         ? info.nut_supports
         : Object.keys(info.nuts || {}).map((n) => Number(n));
+
       if (!(nuts.includes(10) && nuts.includes(11))) {
         notifyError(this.t("wallet.notifications.lock_not_supported"));
-        throw new Error("Mint does not support timelocks or P2PK");
+        throw new Error("Mint does not support P2PK or timelocks");
       }
-      const spendableProofs = this.spendableProofs(proofs, amount);
+
+      /* ----------- pick and lock proofs ------------ */
+      const spendable = this.spendableProofs(proofs, amount);
       const proofsToSend = this.coinSelect(
-        spendableProofs,
+        spendable,
         wallet,
         amount,
         true,
         bucketId
       );
-      const keysetId = this.getKeyset(wallet.mint.mintUrl, wallet.unit);
+
+      /* Cast locktime / refund to **string** per NUT‑10 */
+      const sendOpts = {
+        keysetId: this.getKeyset(wallet.mint.mintUrl, wallet.unit),
+        pubkey: ensureCompressed(receiverPubkey),
+        locktime: locktime ? String(locktime) : undefined,
+        refund: refundPubkey ? ensureCompressed(refundPubkey) : undefined,
+      };
+
       const { keep: keepProofs, send: sendProofs } = await wallet.send(
         amount,
         proofsToSend,
-        {
-          keysetId,
-          pubkey: ensureCompressed(receiverPubkey),
-          locktime,
-          refund: refundPubkey,
-        }
+        sendOpts
       );
+
+      /* ----------- persist results ------------ */
       const proofsStore = useProofsStore();
       await proofsStore.removeProofs(proofsToSend);
-      // note: we do not store sendProofs in the proofs store but
-      // expect from the caller to store it in the history
-      // --- NEW: persist locked proofs to creator bucket ---
-      const bucketsStore = useBucketsStore();
+      await proofsStore.addProofs(keepProofs, undefined, bucketId, "");
 
-      const tokenStr = useProofsStore().serializeProofs(sendProofs);
+      /* Store locked token for UI */
+      const bucketsStore = useBucketsStore();
+      const tokenStr = proofsStore.serializeProofs(sendProofs);
       const locked = useLockedTokensStore().addLockedToken({
         id: uuidv4(),
         amount,
@@ -467,10 +479,10 @@ export const useWalletStore = defineStore("wallet", {
         pubkey: receiverPubkey,
         locktime,
       });
-      await proofsStore.addProofs(keepProofs, undefined, bucketId, "");
-      useSignerStore().reset();
+
       return { keepProofs, sendProofs, locked };
     },
+
     send: async function (
       proofs: WalletProof[],
       wallet: CashuWallet,
@@ -501,7 +513,7 @@ export const useWalletStore = defineStore("wallet", {
           includeFees,
           bucketId
         );
-        proofsToSend = this.signP2PKIfNeeded(proofsToSend);
+        proofsToSend = await this.signP2PKIfNeeded(proofsToSend);
         const totalAmount = proofsToSend.reduce((s, t) => (s += t.amount), 0);
         const fees = includeFees ? wallet.getFeesForProofs(proofsToSend) : 0;
         const targetAmount = amount + fees;
@@ -518,7 +530,7 @@ export const useWalletStore = defineStore("wallet", {
             true,
             bucketId
           );
-          proofsToSend = this.signP2PKIfNeeded(proofsToSend);
+          proofsToSend = await this.signP2PKIfNeeded(proofsToSend);
           ({ keep: keepProofs, send: sendProofs } = await wallet.send(
             targetAmount,
             proofsToSend,
@@ -540,7 +552,7 @@ export const useWalletStore = defineStore("wallet", {
           await proofsStore.removeProofs(proofsToSendNotReturned);
         } else if (totalAmount == targetAmount) {
           keepProofs = [];
-          sendProofs = this.signP2PKIfNeeded(proofsToSend);
+          sendProofs = await this.signP2PKIfNeeded(proofsToSend);
         } else {
           throw new Error("could not split proofs.");
         }
@@ -565,185 +577,114 @@ export const useWalletStore = defineStore("wallet", {
      *
      * @param {array} proofs
      */
+    /** ------------------------------------------------------------------
+     * NEW  –  replaces the whole old attemptRedeem() function
+     * ------------------------------------------------------------------ */
     attemptRedeem: async function (
       bucketId: string = DEFAULT_BUCKET_ID
     ): Promise<boolean> {
-      /*
-      Receives a token that is prepared in the receiveToken – it is not yet in the history
-      */
-      const uIStore = useUiStore();
-      const mintStore = useMintsStore();
-      const p2pkStore = useP2PKStore();
+      const ui = useUiStore();
+      const mints = useMintsStore();
+      const proofsStore = useProofsStore();
+      const receiveStore = useReceiveTokensStore();
+      const signer = useSignerStore();
+      const p2pk = useP2PKStore();
 
-      receiveStore.showReceiveTokens = false;
+      /* ---------- basic checks ---------- */
+      const encToken = receiveStore.receiveData.tokensBase64;
+      if (!encToken) throw new Error("no tokens provided");
 
-      if (receiveStore.receiveData.tokensBase64.length == 0) {
-        throw new Error("no tokens provided.");
-      }
-      const tokenJson = token.decode(receiveStore.receiveData.tokensBase64);
-      if (tokenJson == undefined) {
-        throw new Error("no tokens provided.");
-      }
-      let proofs = token.getProofs(tokenJson).map((p) => {
-        if (typeof p.secret === "string" && p.secret.startsWith('["P2PK"')) {
-          const s = JSON.parse(p.secret);
-          if (s[1]?.data) s[1].data = ensureCompressed(s[1].data);
-          p.secret = JSON.stringify(s);
-        }
-        return p;
-      });
-      if (proofs.length == 0) {
-        throw new Error("no proofs found.");
-      }
-      const inputAmount = proofs.reduce((s, t) => (s += t.amount), 0);
-      let fee = 0;
-      let mintInToken = token.getMint(tokenJson);
-      let unitInToken = token.getUnit(tokenJson);
+      const tokenJson = token.decode(encToken);
+      if (!tokenJson) throw new Error("token decode failed");
 
-      const historyToken = {
-        amount: inputAmount,
-        token: receiveStore.receiveData.tokensBase64,
-        unit: unitInToken,
-        mint: mintInToken,
-        label: receiveStore.receiveData.label ?? "",
-        fee: fee,
-        bucketId,
-      } as HistoryToken;
-      const mintWallet = this.mintWallet(historyToken.mint, historyToken.unit);
-      const mint = mintStore.mints.find((m) => m.url === historyToken.mint);
-      if (!mint) {
-        throw new Error("mint not found");
-      }
-      if (!proofs.every((p) => mint.keysets.some((k) => k.id === p.id))) {
-        throw new Error("Keyset mismatch for token proofs");
-      }
-      await uIStore.lockMutex();
+      let proofs = token.getProofs(tokenJson);
+      if (!proofs.length) throw new Error("no proofs");
+
+      /* ---------- auto‑sign if locked ---------- */
       try {
-        // redeem
-        const keysetId = this.getKeyset(historyToken.mint, historyToken.unit);
-        const counter = this.keysetCounter(keysetId);
-        const nostrStore = useNostrStore();
-        let privkey =
-          receiveStore.receiveData.p2pkPrivateKey ||
-          nostrStore.activePrivkeyHex;
-
-        /* ---------- P2PK remote-sign fall-back ------------ */
-        const needsSig = proofs.some(
-          (p) => typeof p.secret === "string" && p.secret.startsWith('["P2PK"')
-        );
-
-        let remoteSigned = false;
-        if (!privkey && needsSig) {
-          const signed = await useWorkersStore().signWithRemote(proofs);
-          // did we actually get any witness back?
-          if (signed.some((p) => (p as any).witness?.signatures?.length > 0)) {
-            proofs = signed;
-            remoteSigned = true;
-          }
-        }
-
-        if (!privkey && needsSig && !remoteSigned) {
-          const signerStore = useSignerStore();
-          signerStore.reset();
-          const dlg = Dialog.create({
-            component: MissingSignerModal,
-          });
-          const ok = await new Promise<boolean>((resolve) => {
-            dlg.onOk(() => resolve(true));
-            dlg.onCancel(() => resolve(false));
-            dlg.onDismiss(() => resolve(false));
-          });
-          if (ok) {
-            return false;
-          }
-          throw new Error(
-            "No private key or remote signer available for P2PK unlock"
-          );
-        }
-
-        /* Re-encode token if we mutated proofs with a witness */
-        const tokenToRedeem = remoteSigned
-          ? getEncodedToken({
-              mint: mintInToken,
-              unit: unitInToken,
-              proofs,
-            })
-          : receiveStore.receiveData.tokensBase64;
-
-        debug("redeem: sending proofs", proofs);
-
-        let receivedProofs: Proof[];
-        try {
-          receivedProofs = await mintWallet.receive(tokenToRedeem, {
-            counter,
-            privkey,
-            proofsWeHave: mintStore.mintUnitProofs(mint, historyToken.unit),
-          });
-          await proofsStore.addProofs(
-            receivedProofs,
-            undefined,
-            bucketId,
-            receiveStore.receiveData.label ?? ""
-          );
-          useSignerStore().reset();
-          this.increaseKeysetCounter(keysetId, receivedProofs.length);
-        } catch (error: any) {
-          console.error(error);
-          this.handleOutputsHaveAlreadyBeenSignedError(keysetId, error);
-          throw new Error("Error receiving tokens: " + error);
-        }
-
-        p2pkStore.setPrivateKeyUsed(privkey);
-
-        const outputAmount = receivedProofs.reduce(
-          (s, t) => (s += t.amount),
-          0
-        );
-
-        // if token is already in history, set to paid, else add to history
-        if (
-          tokenStore.historyTokens.find(
-            (t) =>
-              t.token === receiveStore.receiveData.tokensBase64 && t.amount > 0
-          )
-        ) {
-          tokenStore.setTokenPaid(receiveStore.receiveData.tokensBase64);
-        } else {
-          // if this is a self-sent token, we will find an outgoing token with the inverse amount
-          if (
-            tokenStore.historyTokens.find(
-              (t) =>
-                t.token === receiveStore.receiveData.tokensBase64 &&
-                t.amount < 0
-            )
-          ) {
-            tokenStore.setTokenPaid(receiveStore.receiveData.tokensBase64);
-          }
-          fee = inputAmount - outputAmount;
-          historyToken.fee = fee;
-          historyToken.amount = outputAmount;
-          tokenStore.addPaidToken(historyToken);
-        }
-        useUiStore().vibrate();
-        let message = this.t("wallet.notifications.received", {
-          amount: uIStore.formatCurrency(outputAmount, historyToken.unit),
-        });
-        if (fee > 0) {
-          message += this.t("wallet.notifications.fee", {
-            fee: uIStore.formatCurrency(fee, historyToken.unit),
-          });
-        }
-        notifySuccess(message);
-        return true;
-      } catch (error: any) {
-        console.error(error);
-        notifyApiError(error);
-        throw error;
-      } finally {
-        uIStore.unlockMutex();
+        proofs = await unlockProofs(proofs, async (h) => signer.signData(h));
+      } catch {
+        /* we will fall back on MissingSignerModal below */
       }
-      // }
+
+      /* ---------- find mint / wallet ---------- */
+      const mintUrl = token.getMint(tokenJson);
+      const unit = token.getUnit(tokenJson);
+      const mintWallet = this.mintWallet(mintUrl, unit);
+
+      const keysetId = this.getKeyset(mintUrl, unit);
+      const counter = this.keysetCounter(keysetId);
+
+      /* ---------- prompt user for signature if still needed ---------- */
+      if (
+        proofs.some(
+          (p) =>
+            typeof p.secret === "string" &&
+            p.secret.startsWith('[\"P2PK\"') &&
+            !(p as any).witness
+        )
+      ) {
+        const dlg = Dialog.create({ component: MissingSignerModal });
+        const ok = await new Promise<boolean>((r) => {
+          dlg.onOk(() => r(true));
+          dlg.onCancel(() => r(false));
+          dlg.onDismiss(() => r(false));
+        });
+        if (!ok) return false;
+
+        /* ➊ NEW – load the pasted nsec from the dialog into the signer‑store */
+        const pasted = receiveStore.receiveData.p2pkPrivateKey;
+        if (pasted) signer.setLocalPrivkey(pasted);
+        /* END NEW */
+
+        /* try signing again */
+        proofs = await unlockProofs(proofs, async (h) => signer.signData(h));
+      }
+
+      /* ---------- re‑encode token if we added witness ---------- */
+      const tokenToRedeem = getEncodedToken({
+        mint: mintUrl,
+        unit,
+        proofs,
+      });
+
+      /* ---------- redeem at mint ---------- */
+      try {
+        const received = await mintWallet.receive(tokenToRedeem, {
+          counter,
+          proofsWeHave: mints.mintUnitProofs(
+            mints.mints.find((m) => m.url === mintUrl)!,
+            unit
+          ),
+        });
+
+        await proofsStore.addProofs(
+          received,
+          undefined,
+          bucketId,
+          receiveStore.receiveData.label ?? ""
+        );
+        this.increaseKeysetCounter(keysetId, received.length);
+
+        if (signer.method === "local") p2pk.setPrivateKeyUsed(signer.privkeyHex);
+
+        ui.vibrate();
+        notifySuccess(
+          this.t("wallet.notifications.received", {
+            amount: ui.formatCurrency(
+              proofsStore.sumProofs(received),
+              unit
+            ),
+          })
+        );
+        return true;
+      } catch (e: any) {
+        console.error(e);
+        notifyApiError(e);
+        return false;
+      }
     },
+    /* ------------------------------------------------------------------ */
 
     redeem: async function (bucketId: string = DEFAULT_BUCKET_ID) {
       while (true) {
@@ -990,7 +931,7 @@ export const useWalletStore = defineStore("wallet", {
 
         // NOTE: if the user exits the app while we're in the API call, JS will emit an error that we would catch below!
         // We have to handle that case in the catch block below
-        sendProofs = this.signP2PKIfNeeded(sendProofs);
+        sendProofs = await this.signP2PKIfNeeded(sendProofs);
         const data = await mintWallet.meltProofs(quote, sendProofs, {
           keysetId,
           counter,
