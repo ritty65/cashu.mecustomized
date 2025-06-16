@@ -32,7 +32,8 @@ export const useP2PKStore = defineStore("p2pk", {
     maybeConvertNpub: function (key: string) {
       // Check and convert npub to P2PK.
       // Always normalise with ensureCompressed() before use.
-      if (key && key.startsWith("npub1")) {
+      if (!key) return "";
+      if (key.startsWith("npub1")) {
         const { type, data } = nip19.decode(key);
         if (type === "npub" && data.length === 64) {
           key = "02" + data;
