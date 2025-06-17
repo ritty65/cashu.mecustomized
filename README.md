@@ -157,6 +157,21 @@ npm install
 npm test
 ```
 
+## Handling CORS Issues
+
+Some mints do not enable CORS which can prevent the wallet from
+redeeming tokens when running in a browser.  A small proxy is provided
+to work around this during development:
+
+```bash
+npm run proxy
+```
+
+The proxy forwards requests to `https://mint.minibits.cash` with CORS
+headers enabled.  When using the proxy, configure your mint URL as
+`http://localhost:3001/Bitcoin`.
+
+
 ## License
 
 This project is licensed under the [MIT License](LICENSE.md).

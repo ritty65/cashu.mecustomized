@@ -14,7 +14,8 @@
     "format": "prettier --write .",
     "checkformat": "prettier --check .",
     "test": "vitest",
-    "test:ci": "vitest run"
+    "test:ci": "vitest run",
+    "proxy": "node proxy.js"
   },
   "dependencies": {
     "@capacitor/android": "^6.2.0",
