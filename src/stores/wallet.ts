@@ -475,6 +475,11 @@ export const useWalletStore = defineStore("wallet", {
         sendOpts
       );
 
+      /* sendProofs currently unsigned → add witness */
+      sendProofs = await this.signP2PKIfNeeded(sendProofs);
+      if (sendProofs.some((p) => !(p as any).witness))
+        throw new Error("P2PK witness missing after signing");
+
       /* ----------- persist results ------------ */
       const proofsStore = useProofsStore();
       await proofsStore.removeProofs(proofsToSend);
@@ -594,7 +599,7 @@ export const useWalletStore = defineStore("wallet", {
      * ------------------------------------------------------------------ */
     attemptRedeem: async function (
       bucketId: string = DEFAULT_BUCKET_ID
-    ): Promise<boolean> {
+    ): Promise<boolean | null> {
       const ui = useUiStore();
       const mints = useMintsStore();
       const proofsStore = useProofsStore();
@@ -645,12 +650,15 @@ export const useWalletStore = defineStore("wallet", {
         )
       ) {
         const dlg = Dialog.create({ component: MissingSignerModal });
-        const ok = await new Promise<boolean>((r) => {
+        // register ONLY one handler per event
+        const ok = await new Promise<boolean | null>((r) => {
           dlg.onOk(() => r(true));
-          dlg.onCancel(() => r(false));
-          dlg.onDismiss(() => r(false));
+          dlg.onCancel(() => r(null));
+          dlg.onDismiss(() => r(null));
         });
-        if (!ok) return false;
+        // distinguish explicit outcomes
+        if (ok === null) return null; // user cancelled ⇒ abort loop
+        if (ok !== true) return false; // should never happen, keeps TS happy
 
         /* ➊ NEW – load the pasted nsec from the dialog into the signer‑store */
         const pasted = receiveStore.receiveData.p2pkPrivateKey;
@@ -717,7 +725,8 @@ export const useWalletStore = defineStore("wallet", {
     redeem: async function (bucketId: string = DEFAULT_BUCKET_ID) {
       while (true) {
         const res = await this.attemptRedeem(bucketId);
-        if (res) break;
+        if (res === true) break; // success
+        if (res === null) break; // user aborted
       }
     },
 
