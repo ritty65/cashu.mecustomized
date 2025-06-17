@@ -39,8 +39,8 @@ export const useSignerStore = defineStore("signer", {
     hasSigner(state): boolean {
       return (
         !!state.privkeyHex ||
-        (typeof window !== "undefined" &&
-          !!(window as any).nostr?.signSchnorr)
+        typeof window !== "undefined" &&
+        !!(window as any)?.nostr?.signSchnorr
       );
     },
   },
@@ -73,7 +73,13 @@ export const useSignerStore = defineStore("signer", {
         throw new Error("signData expects 32‑byte hash");
 
       /* 1️⃣ NIP‑07 browser extension */
-      const ext = typeof window !== "undefined" && (window as any).nostr;
+      let ext: any = undefined;
+      if (
+        typeof window !== "undefined" &&
+        (window as any)?.nostr?.signSchnorr
+      ) {
+        ext = (window as any).nostr;
+      }
       if (ext?.signSchnorr) {
         try {
           const sig: string = await ext.signSchnorr(bytesToHex(bytes));
