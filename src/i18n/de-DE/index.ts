@@ -1227,6 +1227,7 @@ export default {
       },
       processing_info_text: "Wird verarbeitet…",
       balance_too_low_warning_text: "Guthaben zu niedrig",
+      expired_warning_text: "Invoice expired"
       actions: {
         close: {
           label: "@:global.actions.close.label",

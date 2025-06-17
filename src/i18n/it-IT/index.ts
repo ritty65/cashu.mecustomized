@@ -1220,6 +1220,7 @@ export default {
       },
       processing_info_text: "Elaborazione…",
       balance_too_low_warning_text: "Saldo troppo basso",
+      expired_warning_text: "Invoice expired"
       actions: {
         close: {
           label: "@:global.actions.close.label",

@@ -91,7 +91,9 @@
             rounded
             color="primary"
             :disabled="
-              payInvoiceData.blocking || payInvoiceData.meltQuote.error != ''
+              payInvoiceData.blocking ||
+              payInvoiceData.meltQuote.error != '' ||
+              payInvoiceData.invoice.expired
             "
             @click="handleMeltButton"
             :label="
@@ -108,6 +110,21 @@
               <q-spinner-hourglass />
             </template>
           </q-btn>
+          <q-btn v-close-popup flat color="grey" class="q-ml-auto">{{
+            $t("PayInvoiceDialog.invoice.actions.close.label")
+          }}</q-btn>
+        </div>
+        <div v-else-if="payInvoiceData.invoice.expired" class="row q-mt-lg">
+          <q-btn
+            unelevated
+            rounded
+            disabled
+            color="yellow"
+            text-color="black"
+            >{{
+              $t("PayInvoiceDialog.invoice.expired_warning_text")
+            }}</q-btn
+          >
           <q-btn v-close-popup flat color="grey" class="q-ml-auto">{{
             $t("PayInvoiceDialog.invoice.actions.close.label")
           }}</q-btn>
