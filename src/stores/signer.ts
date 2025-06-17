@@ -47,13 +47,13 @@ export const useSignerStore = defineStore("signer", {
 
   actions: {
     /* -------- key management -------- */
-    setLocalPrivkey(keyOrNsec: string | null) {
-      if (!keyOrNsec) {
-        this.privkeyHex = "";
-        this.method = null;
-        return;
-      }
-      this.privkeyHex = nsecToPrivHex(keyOrNsec);
+    /**
+     * Store the given private key for local Schnorr signing. Accepts either a
+     * bech32 encoded `nsec` string or a raw hex key. The decoded hex key is
+     * persisted and the signer method switched to `"local"`.
+     */
+    setLocalPrivkey(raw: string) {
+      this.privkeyHex = nsecToPrivHex(raw);
       this.method = "local";
     },
 

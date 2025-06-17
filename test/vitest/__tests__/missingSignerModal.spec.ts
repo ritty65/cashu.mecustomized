@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { mount } from "@vue/test-utils";
 import MissingSignerModal from "../../../src/components/MissingSignerModal.vue";
 import { useSignerStore } from "../../../src/stores/signer";
+import { bytesToHex } from "@noble/hashes/utils";
 
 vi.mock("../../../src/js/notify", () => ({
   notifyError: vi.fn(),
@@ -30,14 +31,15 @@ beforeEach(() => {
 
 describe("MissingSignerModal", () => {
   it("chooses local signer", () => {
-    (nip19.decode as any).mockReturnValue({ type: "nsec", data: "d" });
+    const bytes = new Uint8Array(32).fill(13);
+    (nip19.decode as any).mockReturnValue({ type: "nsec", data: bytes });
     const wrapper = mount(MissingSignerModal);
     const vm: any = wrapper.vm;
     vm.nsec = "nsec123";
     vm.chooseLocal();
     const store = useSignerStore();
     expect(store.method).toBe("local");
-    expect(store.nsec).toBe("nsec123");
+    expect(store.privkeyHex).toBe(bytesToHex(bytes));
     expect(notifyError).not.toHaveBeenCalled();
   });
 
