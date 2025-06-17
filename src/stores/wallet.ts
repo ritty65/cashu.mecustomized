@@ -263,6 +263,13 @@ export const useWalletStore = defineStore("wallet", {
         proofs as unknown as Proof[],
         async (hash) => signer.signData(hash)
       );
+      for (const p of signed) {
+        debug("signP2PKIfNeeded proof", p);
+        if (!(p as any).witness) {
+          debug("missing witness after signing", p);
+          throw new Error("P2PK witness missing");
+        }
+      }
       return signed as T[];
     },
 
@@ -647,6 +654,13 @@ export const useWalletStore = defineStore("wallet", {
 
         /* try signing again */
         proofs = await unlockProofs(proofs, async (h) => signer.signData(h));
+        for (const p of proofs) {
+          debug("attemptRedeem signed proof", p);
+          if (!(p as any).witness) {
+            debug("missing witness after second sign", p);
+            throw new Error("P2PK witness missing");
+          }
+        }
       }
 
       /* ---------- re‑encode token if we added witness ---------- */
