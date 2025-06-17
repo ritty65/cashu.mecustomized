@@ -21,6 +21,7 @@
 <script lang="ts" setup>
 import { ref } from "vue";
 import { useSignerStore } from "src/stores/signer";
+import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { nip19 } from "nostr-tools";
 import { notifyError } from "src/js/notify";
 
@@ -32,6 +33,7 @@ function onDialogHide() {
   emit("hide");
 }
 const signer = useSignerStore();
+const receiveTokensStore = useReceiveTokensStore();
 const nsec = ref("");
 
 function chooseLocal() {
@@ -45,8 +47,8 @@ function chooseLocal() {
     notifyError("Invalid nsec");
     return;
   }
-  signer.method = "local";
-  signer.nsec = key;
+  signer.setLocalPrivkey(key);
+  receiveTokensStore.receiveData.p2pkPrivateKey = signer.privkeyHex;
   emit("ok");
   dialogRef.value?.hide();
 }
