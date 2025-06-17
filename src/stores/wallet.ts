@@ -708,6 +708,7 @@ export const useWalletStore = defineStore("wallet", {
       } catch (e: any) {
         console.error(e);
         notifyApiError(e);
+        notifyError(e.message ?? "Redeem failed");
         return false;
       }
     },
