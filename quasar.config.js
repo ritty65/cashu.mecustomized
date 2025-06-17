@@ -71,6 +71,13 @@ module.exports = configure(function (/* ctx */) {
       https: true,
       open: true, // opens browser window automatically
       port: 8080,
+      proxy: {
+        '^/Bitcoin': {
+          target: 'https://mint.minibits.cash',
+          changeOrigin: true,
+          secure: false,
+        },
+      },
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework
