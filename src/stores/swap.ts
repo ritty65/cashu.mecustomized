@@ -2,7 +2,7 @@ import { useLocalStorage } from "@vueuse/core";
 import { date } from "quasar";
 import { defineStore } from "pinia";
 import { PaymentRequest, Proof, Token } from "@cashu/cashu-ts";
-import { Mint, useMintsStore } from "./mints";
+import { Mint, useMintsStore, devAlias } from "./mints";
 import { useWalletStore } from "./wallet";
 import { DEFAULT_BUCKET_ID } from "./buckets";
 import { useProofsStore } from "./proofs";
@@ -73,7 +73,7 @@ export const useSwapStore = defineStore("swap", {
           mintQuote.request
         );
         const mint = mintStore.mints.find(
-          (m) => m.url === swapAmountData.fromUrl
+          (m) => devAlias(m.url) === devAlias(swapAmountData.fromUrl)
         );
         if (!mint) {
           throw new Error("mint not found");

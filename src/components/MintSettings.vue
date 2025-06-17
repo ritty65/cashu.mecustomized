@@ -15,7 +15,7 @@
         <!-- <q-item-label header>Your mints</q-item-label> -->
         <div v-for="mint in mints" :key="mint.url" class="q-px-md">
           <q-item
-            :active="mint.url == activeMintUrl"
+            :active="devAlias(mint.url) == devAlias(activeMintUrl)"
             active-class="text-weight-bold text-primary"
             clickable
             @click="activateMintUrlInternal(mint.url)"
@@ -23,7 +23,7 @@
             :style="{
               'border-radius': '10px',
               border:
-                mint.url == activeMintUrl
+                devAlias(mint.url) == devAlias(activeMintUrl)
                   ? '1px solid var(--q-primary)'
                   : '1px solid rgba(128, 128, 128, 0.2)',
               padding: '0px',
@@ -460,7 +460,7 @@ import { debug } from "src/js/logger";
 import { ref, defineComponent, onMounted, onBeforeUnmount } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState, mapWritableState } from "pinia";
-import { useMintsStore, MintClass } from "src/stores/mints";
+import { useMintsStore, MintClass, devAlias } from "src/stores/mints";
 import { useWalletStore } from "src/stores/wallet";
 import { useCameraStore } from "src/stores/camera";
 import { map } from "underscore";
@@ -696,7 +696,9 @@ export default defineComponent({
 
       this.fetchMintInfo(mint).then((newMintInfo) => {
         this.triggerMintInfoMotdChanged(newMintInfo, mint);
-        this.mints.filter((m) => m.url === mint.url)[0].info = newMintInfo;
+        this.mints.filter(
+          (m) => devAlias(m.url) === devAlias(mint.url)
+        )[0].info = newMintInfo;
         this.showMintInfoData = mint;
       });
     },

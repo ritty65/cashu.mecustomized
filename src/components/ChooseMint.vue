@@ -25,7 +25,9 @@
                 <q-item-label
                   class="text-body1 q-pt-xs"
                   :style="
-                    activeMintUrl === scope.opt.url ? 'font-weight: bold' : ''
+                    devAlias(activeMintUrl) === devAlias(scope.opt.url)
+                      ? 'font-weight: bold'
+                      : ''
                   "
                   >{{ scope.opt.nickname || scope.opt.shorturl }}</q-item-label
                 >
@@ -40,7 +42,9 @@
                     v-for="unit in scope.opt.units"
                     :key="unit"
                     :color="
-                      scope.opt.url === activeMintUrl ? 'primary' : 'grey'
+                      devAlias(scope.opt.url) === devAlias(activeMintUrl)
+                        ? 'primary'
+                        : 'grey'
                     "
                     :label="formatCurrency(scope.opt.balances[unit], unit)"
                     class="q-mr-xs q-mb-xs"
@@ -93,8 +97,7 @@
 import { defineComponent } from "vue";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { mapActions, mapState, mapWritableState } from "pinia";
-import { useMintsStore } from "stores/mints";
-import { MintClass } from "stores/mints";
+import { useMintsStore, MintClass, devAlias } from "stores/mints";
 import { i18n } from "../boot/i18n";
 import { title } from "process";
 
@@ -121,7 +124,9 @@ export default defineComponent({
     };
   },
   mounted() {
-    const m = this.mints.find((m) => m.url === this.activeMintUrl);
+    const m = this.mints.find(
+      (m) => devAlias(m.url) === devAlias(this.activeMintUrl)
+    );
     const mint = new MintClass(m);
     this.chosenMint = {
       url: this.activeMintUrl,

@@ -260,7 +260,7 @@
               rounded
               class="q-pr-md"
               :loading="swapBlocking"
-              :disabled="activeMintUrl == tokenMint"
+              :disabled="devAlias(activeMintUrl) == devAlias(tokenMint)"
             >
               <q-icon name="swap_horiz" class="q-pr-sm" />
               {{ $t("ReceiveTokenDialog.actions.confirm_swap.label") }}
@@ -298,7 +298,7 @@ import { defineComponent } from "vue";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
-import { useMintsStore } from "src/stores/mints";
+import { useMintsStore, devAlias } from "src/stores/mints";
 import { useTokensStore } from "src/stores/tokens";
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";

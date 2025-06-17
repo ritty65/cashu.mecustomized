@@ -1,5 +1,5 @@
 import { type Token, getDecodedToken } from "@cashu/cashu-ts";
-import { useMintsStore, WalletProof } from "src/stores/mints";
+import { useMintsStore, WalletProof, devAlias } from "src/stores/mints";
 import { useProofsStore } from "src/stores/proofs";
 export default { decode, getProofs, getMint, getUnit, getMemo };
 
@@ -46,7 +46,7 @@ function getUnit(decoded_token: Token) {
     const mintStore = useMintsStore();
     const mint = getMint(decoded_token);
     const keysets = mintStore.mints
-      .filter((m) => m.url === mint)
+      .filter((m) => devAlias(m.url) === devAlias(mint))
       .flatMap((m) => m.keysets);
     if (keysets.length > 0) {
       return keysets[0].unit;

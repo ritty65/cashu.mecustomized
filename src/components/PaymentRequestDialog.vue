@@ -123,7 +123,7 @@ const VueQrcode = defineAsyncComponent(() =>
 );
 
 import { usePRStore } from "src/stores/payment-request";
-import { useMintsStore } from "../stores/mints";
+import { useMintsStore, devAlias } from "../stores/mints";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { useUiStore } from "../stores/ui";
 import ToggleUnit from "./ToggleUnit.vue";
@@ -186,7 +186,7 @@ export default defineComponent({
       return getShortUrl(url);
     },
     setActiveMintUrl() {
-      if (this.activeMintUrl == this.chosenMintUrl) {
+      if (devAlias(this.activeMintUrl) == devAlias(this.chosenMintUrl)) {
         return;
       }
       this.chosenMintUrl = this.activeMintUrl;
