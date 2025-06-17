@@ -1209,7 +1209,7 @@ export default {
       },
       processing_info_text: "正在处理…",
       balance_too_low_warning_text: "余额不足",
-      expired_warning_text: "Invoice expired"
+      expired_warning_text: "Invoice expired",
       actions: {
         close: {
           label: "@:global.actions.close.label",
