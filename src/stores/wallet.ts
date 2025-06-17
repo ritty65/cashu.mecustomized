@@ -2,7 +2,7 @@ import { unlockProofs, ensureCompressed } from "src/utils/ecash";
 import { debug } from "src/js/logger";
 import { defineStore } from "pinia";
 import { currentDateStr } from "src/js/utils";
-import { useMintsStore, WalletProof, MintClass, Mint } from "./mints";
+import { useMintsStore, WalletProof, MintClass, Mint, devAlias } from "./mints";
 import { useLocalStorage } from "@vueuse/core";
 import { useProofsStore } from "./proofs";
 import { HistoryToken, useTokensStore } from "./tokens";
@@ -166,10 +166,7 @@ export const useWalletStore = defineStore("wallet", {
   getters: {
     wallet() {
       const mints = useMintsStore();
-      let url = mints.activeMintUrl;
-      if (import.meta.env.DEV && url === "https://mint.minibits.cash/Bitcoin") {
-        url = "/Bitcoin";
-      }
+      const url = devAlias(mints.activeMintUrl);
       const mint = new CashuMint(url);
       if (this.mnemonic == "") {
         this.mnemonic = generateMnemonic(wordlist);
@@ -195,15 +192,14 @@ export const useWalletStore = defineStore("wallet", {
       // note: the unit of the wallet will be activeUnit by default,
       // overwrite wallet.unit if needed
       const mints = useMintsStore();
-      const storedMint = mints.mints.find((m) => m.url === url);
+      const storedMint = mints.mints.find(
+        (m) => devAlias(m.url) === devAlias(url)
+      );
       if (!storedMint) {
         throw new Error("mint not found");
       }
       const unitKeysets = mints.mintUnitKeysets(storedMint, unit);
-      if (import.meta.env.DEV && url === "https://mint.minibits.cash/Bitcoin") {
-        url = "/Bitcoin";
-      }
-      const mint = new CashuMint(url);
+      const mint = new CashuMint(devAlias(url));
       if (this.mnemonic == "") {
         this.mnemonic = generateMnemonic(wordlist);
       }
@@ -285,14 +281,10 @@ export const useWalletStore = defineStore("wallet", {
       unit: string | null = null
     ): string {
       unit = unit || useMintsStore().activeUnit;
-      mintUrl = mintUrl || useMintsStore().activeMintUrl;
-      if (
-        import.meta.env.DEV &&
-        mintUrl === "https://mint.minibits.cash/Bitcoin"
-      ) {
-        mintUrl = "/Bitcoin";
-      }
-      const mint = useMintsStore().mints.find((m) => m.url === mintUrl);
+      mintUrl = devAlias(mintUrl || useMintsStore().activeMintUrl);
+      const mint = useMintsStore().mints.find(
+        (m) => devAlias(m.url) === mintUrl
+      );
       if (!mint) {
         throw new Error("mint not found");
       }
@@ -688,7 +680,7 @@ export const useWalletStore = defineStore("wallet", {
         const received = await mintWallet.receive(tokenToRedeem, {
           counter,
           proofsWeHave: mints.mintUnitProofs(
-            mints.mints.find((m) => m.url === mintUrl)!,
+            mints.mints.find((m) => devAlias(m.url) === devAlias(mintUrl))!,
             unit
           ),
         });
@@ -778,7 +770,9 @@ export const useWalletStore = defineStore("wallet", {
       const uIStore = useUiStore();
       const keysetId = this.getKeyset(invoice.mint, invoice.unit);
       const mintWallet = this.mintWallet(invoice.mint, invoice.unit);
-      const mint = mintStore.mints.find((m) => m.url === invoice.mint);
+      const mint = mintStore.mints.find(
+        (m) => devAlias(m.url) === devAlias(invoice.mint)
+      );
       if (!mint) {
         throw new Error("mint not found");
       }
@@ -1120,7 +1114,9 @@ export const useWalletStore = defineStore("wallet", {
       const proofs = token.getProofs(tokenJson);
       const mintWallet = this.mintWallet(historyToken.mint, historyToken.unit);
 
-      const mint = mintStore.mints.find((m) => m.url === historyToken.mint);
+      const mint = mintStore.mints.find(
+        (m) => devAlias(m.url) === devAlias(historyToken.mint)
+      );
       if (!mint) {
         throw new Error("mint not found");
       }
@@ -1200,7 +1196,9 @@ export const useWalletStore = defineStore("wallet", {
         throw new Error("invoice not found");
       }
       const mintWallet = this.mintWallet(invoice.mint, invoice.unit);
-      const mint = mintStore.mints.find((m) => m.url === invoice.mint);
+      const mint = mintStore.mints.find(
+        (m) => devAlias(m.url) === devAlias(invoice.mint)
+      );
       if (!mint) {
         throw new Error("mint not found");
       }
@@ -1245,7 +1243,9 @@ export const useWalletStore = defineStore("wallet", {
         throw new Error("invoice not found");
       }
       const mintWallet = this.mintWallet(invoice.mint, invoice.unit);
-      const mint = mintStore.mints.find((m) => m.url === invoice.mint);
+      const mint = mintStore.mints.find(
+        (m) => devAlias(m.url) === devAlias(invoice.mint)
+      );
       if (!mint) {
         throw new Error("mint not found");
       }
@@ -1308,7 +1308,9 @@ export const useWalletStore = defineStore("wallet", {
         );
         return;
       }
-      const mint = mintStore.mints.find((m) => m.url === historyToken.mint);
+      const mint = mintStore.mints.find(
+        (m) => devAlias(m.url) === devAlias(historyToken.mint)
+      );
       if (!mint) {
         throw new Error("mint not found");
       }
@@ -1382,7 +1384,9 @@ export const useWalletStore = defineStore("wallet", {
         throw new Error("invoice not found");
       }
       const mintWallet = this.mintWallet(invoice.mint, invoice.unit);
-      const mint = mintStore.mints.find((m) => m.url === invoice.mint);
+      const mint = mintStore.mints.find(
+        (m) => devAlias(m.url) === devAlias(invoice.mint)
+      );
 
       if (!mint) {
         throw new Error("mint not found");

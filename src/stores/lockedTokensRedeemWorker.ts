@@ -3,7 +3,7 @@ import { cashuDb } from "./dexie";
 import { useWalletStore } from "./wallet";
 import { useReceiveTokensStore } from "./receiveTokensStore";
 import { useSettingsStore } from "./settings";
-import { useMintsStore } from "./mints";
+import { useMintsStore, devAlias } from "./mints";
 import token from "src/js/token";
 import { ensureCompressed } from "src/utils/ecash";
 import { debug } from "src/js/logger";
@@ -61,7 +61,9 @@ export const useLockedTokensRedeemWorker = defineStore(
             const mintUrl = token.getMint(decoded);
             const unit = token.getUnit(decoded);
             const proofs = token.getProofs(decoded);
-            const mint = mintStore.mints.find((m) => m.url === mintUrl);
+            const mint = mintStore.mints.find(
+              (m) => devAlias(m.url) === devAlias(mintUrl)
+            );
             if (
               !mint ||
               !proofs.every((p) => mint.keysets.some((k) => k.id === p.id))

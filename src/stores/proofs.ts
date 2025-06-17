@@ -1,7 +1,7 @@
 import { debug } from "src/js/logger";
 import { ref } from "vue";
 import { defineStore } from "pinia";
-import { useMintsStore, WalletProof } from "./mints";
+import { useMintsStore, WalletProof, devAlias } from "./mints";
 import { cashuDb, CashuDexie, useDexieStore } from "./dexie";
 import { useBucketsStore, DEFAULT_BUCKET_ID } from "./buckets";
 import { useTokensStore } from "./tokens";
@@ -31,7 +31,7 @@ export const useProofsStore = defineStore("proofs", {
     const updateActiveProofs = async () => {
       const mintStore = useMintsStore();
       const currentMint = mintStore.mints.find(
-        (m) => m.url === mintStore.activeMintUrl
+        (m) => devAlias(m.url) === devAlias(mintStore.activeMintUrl)
       );
       if (!currentMint) {
         mintStore.activeProofs = [];

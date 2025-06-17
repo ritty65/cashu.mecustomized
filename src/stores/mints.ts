@@ -26,6 +26,12 @@ import { useProofsStore } from "./proofs";
 import { useI18n } from "vue-i18n";
 import { i18n } from "src/boot/i18n";
 
+export function devAlias(u: string) {
+  return import.meta.env.DEV && u === "https://mint.minibits.cash/Bitcoin"
+    ? "/Bitcoin"
+    : u;
+}
+
 export type Mint = {
   url: string;
   keys: MintKeys[];
@@ -174,7 +180,7 @@ export const useMintsStore = defineStore("mints", {
     },
     activeKeysets({ activeMintUrl, activeUnit }): MintKeyset[] {
       const unitKeysets = this.mints
-        .find((m) => m.url === activeMintUrl)
+        .find((m) => devAlias(m.url) === devAlias(activeMintUrl))
         ?.keysets?.filter((k) => k.unit === activeUnit);
       if (!unitKeysets) {
         return [];
@@ -183,7 +189,7 @@ export const useMintsStore = defineStore("mints", {
     },
     activeKeys({ activeMintUrl, activeUnit }): MintKeys[] {
       const unitKeys = this.mints
-        .find((m) => m.url === activeMintUrl)
+        .find((m) => devAlias(m.url) === devAlias(activeMintUrl))
         ?.keys?.filter((k) => k.unit === activeUnit);
       if (!unitKeys) {
         return [];
@@ -192,8 +198,8 @@ export const useMintsStore = defineStore("mints", {
     },
     activeInfo({ activeMintUrl }): GetInfoResponse {
       return (
-        this.mints.find((m) => m.url === activeMintUrl)?.info ||
-        ({} as GetInfoResponse)
+        this.mints.find((m) => devAlias(m.url) === devAlias(activeMintUrl))?.
+          info || ({} as GetInfoResponse)
       );
     },
     activeUnitLabel({ activeUnit }): string {
@@ -221,7 +227,9 @@ export const useMintsStore = defineStore("mints", {
   },
   actions: {
     activeMint() {
-      const mint = this.mints.find((m) => m.url === this.activeMintUrl);
+      const mint = this.mints.find(
+        (m) => devAlias(m.url) === devAlias(this.activeMintUrl)
+      );
       if (mint) {
         return new MintClass(mint);
       } else {
@@ -262,11 +270,15 @@ export const useMintsStore = defineStore("mints", {
       }
     },
     updateMint(oldMint: Mint, newMint: Mint) {
-      const index = this.mints.findIndex((m) => m.url === oldMint.url);
+      const index = this.mints.findIndex(
+        (m) => devAlias(m.url) === devAlias(oldMint.url)
+      );
       this.mints[index] = newMint;
     },
     getKeysForKeyset: async function (keyset_id: string): Promise<MintKeys> {
-      const mint = this.mints.find((m) => m.url === this.activeMintUrl);
+      const mint = this.mints.find(
+        (m) => devAlias(m.url) === devAlias(this.activeMintUrl)
+      );
       if (mint) {
         const keys = mint.keys?.find((k) => k.id === keyset_id);
         if (keys) {
@@ -329,7 +341,10 @@ export const useMintsStore = defineStore("mints", {
         // we have no mints at all
         if (this.mints.length === 0) {
           this.mints = [mintToAdd];
-        } else if (this.mints.filter((m) => m.url === url).length === 0) {
+        } else if (
+          this.mints.filter((m) => devAlias(m.url) === devAlias(url)).length ===
+          0
+        ) {
           // we don't have this mint yet
           // add mint to this.mints so it can be activated in
           this.mints.push(mintToAdd);
@@ -347,7 +362,9 @@ export const useMintsStore = defineStore("mints", {
         return mintToAdd;
       } catch (error) {
         // activation failed, we remove the mint again from local storage
-        this.mints = this.mints.filter((m) => m.url !== url);
+        this.mints = this.mints.filter(
+          (m) => devAlias(m.url) !== devAlias(url)
+        );
         throw error;
       } finally {
         this.showAddMintDialog = false;
@@ -360,7 +377,9 @@ export const useMintsStore = defineStore("mints", {
       force = false,
       unit: string | undefined = undefined
     ) {
-      const mint = this.mints.filter((m) => m.url === url)[0];
+      const mint = this.mints.filter(
+        (m) => devAlias(m.url) === devAlias(url)
+      )[0];
       if (mint) {
         await this.activateMint(mint, verbose, force);
         if (unit) {
@@ -380,7 +399,9 @@ export const useMintsStore = defineStore("mints", {
       const uIStore = useUiStore();
       await uIStore.lockMutex();
       try {
-        const mint = this.mints.find((m) => m.url === this.activeMintUrl);
+        const mint = this.mints.find(
+          (m) => devAlias(m.url) === devAlias(this.activeMintUrl)
+        );
         if (!mint) {
           notifyError(
             this.t("wallet.mint.notifications.no_active_mint"),
@@ -404,7 +425,7 @@ export const useMintsStore = defineStore("mints", {
       worker.clearAllWorkers();
     },
     activateMint: async function (mint: Mint, verbose = false, force = false) {
-      if (mint.url === this.activeMintUrl && !force) {
+      if (devAlias(mint.url) === devAlias(this.activeMintUrl) && !force) {
         return;
       }
       const workers = useWorkersStore();
@@ -427,7 +448,8 @@ export const useMintsStore = defineStore("mints", {
         if (verbose) {
           await notifySuccess(this.t("wallet.mint.notifications.activated"));
         }
-        this.mints.filter((m) => m.url === mint.url)[0].errored = false;
+        this.mints.filter((m) => devAlias(m.url) === devAlias(mint.url))[0].
+          errored = false;
         debug("### activateMint: Mint activated: ", this.activeMintUrl);
       } catch (error: any) {
         // restore previous values because the activation errored
@@ -440,7 +462,8 @@ export const useMintsStore = defineStore("mints", {
           err_msg,
           this.t("wallet.mint.notifications.activation_failed")
         );
-        this.mints.filter((m) => m.url === mint.url)[0].errored = true;
+        this.mints.filter((m) => devAlias(m.url) === devAlias(mint.url))[0].
+          errored = true;
         throw error;
       } finally {
         await uIStore.unlockMutex();
@@ -448,11 +471,15 @@ export const useMintsStore = defineStore("mints", {
     },
     checkMintInfoMotdChanged(newMintInfo: GetInfoResponse, mint: Mint) {
       // if mint doesn't have info yet, we don't need to trigger the motd change
-      if (!this.mints.find((m) => m.url === mint.url)?.info) {
+      if (!this.mints.find((m) => devAlias(m.url) === devAlias(mint.url))?.info) {
         return false;
       }
       const motd = newMintInfo.motd;
-      if (motd !== this.mints.filter((m) => m.url === mint.url)[0].info?.motd) {
+      if (
+        motd !==
+        this.mints.filter((m) => devAlias(m.url) === devAlias(mint.url))[0].info
+          ?.motd
+      ) {
         return true;
       }
       return false;
@@ -462,7 +489,8 @@ export const useMintsStore = defineStore("mints", {
         return;
       }
       // set motd_viewed to false
-      this.mints.filter((m) => m.url === mint.url)[0].motd_viewed = false;
+      this.mints.filter((m) => devAlias(m.url) === devAlias(mint.url))[0].
+        motd_viewed = false;
       // set the mintinfo data
       this.showMintInfoData = mint;
       // open mint info dialog
@@ -488,17 +516,23 @@ export const useMintsStore = defineStore("mints", {
         if (keysets.length > 0) {
           // store keysets in mint and update local storage
           // TODO: do not overwrite anykeyset, but append new keysets and update existing ones
-          this.mints.filter((m) => m.url === mint.url)[0].keysets = keysets;
+          this.mints.filter(
+            (m) => devAlias(m.url) === devAlias(mint.url)
+          )[0].keysets = keysets;
         }
 
         // if we do not have any keys yet, fetch them
         if (mint.keys.length === 0 || mint.keys.length == undefined) {
           const keys = await mintClass.api.getKeys();
           // store keys in mint and update local storage
-          this.mints.filter((m) => m.url === mint.url)[0].keys = keys.keysets;
+          this.mints.filter(
+            (m) => devAlias(m.url) === devAlias(mint.url)
+          )[0].keys = keys.keysets;
         }
         // reload mint from local storage
-        mint = this.mints.filter((m) => m.url === mint.url)[0];
+        mint = this.mints.filter(
+          (m) => devAlias(m.url) === devAlias(mint.url)
+        )[0];
 
         // for each keyset we do not have keys for, fetch keys
         for (const keyset of keysets) {
@@ -506,13 +540,15 @@ export const useMintsStore = defineStore("mints", {
             const keys = await mintClass.api.getKeys(keyset.id);
             // store keys in mint and update local storage
             this.mints
-              .filter((m) => m.url === mint.url)[0]
+              .filter((m) => devAlias(m.url) === devAlias(mint.url))[0]
               .keys.push(keys.keysets[0]);
           }
         }
 
         // return the mint with keys set
-        return this.mints.filter((m) => m.url === mint.url)[0];
+        return this.mints.filter(
+          (m) => devAlias(m.url) === devAlias(mint.url)
+        )[0];
       } catch (error: any) {
         console.error(error);
         try {
@@ -536,8 +572,10 @@ export const useMintsStore = defineStore("mints", {
       }
     },
     removeMint: async function (url: string) {
-      this.mints = this.mints.filter((m) => m.url !== url);
-      if (url === this.activeMintUrl) {
+      this.mints = this.mints.filter(
+        (m) => devAlias(m.url) !== devAlias(url)
+      );
+      if (devAlias(url) === devAlias(this.activeMintUrl)) {
         this.activeMintUrl = "";
       }
       // todo: we always reset to the first mint, improve this
@@ -558,7 +596,9 @@ export const useMintsStore = defineStore("mints", {
       }
     },
     setMintMotdViewed(mintUrl: string) {
-      const mintIndex = this.mints.findIndex((mint) => mint.url === mintUrl);
+      const mintIndex = this.mints.findIndex(
+        (mint) => devAlias(mint.url) === devAlias(mintUrl)
+      );
       if (mintIndex !== -1) {
         this.mints[mintIndex].motd_viewed = true;
       }
