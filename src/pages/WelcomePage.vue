@@ -74,7 +74,7 @@
 </template>
 
 <script>
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
 import { useWelcomeStore } from "src/stores/welcome";
 import { useStorageStore } from "src/stores/storage";
 import WelcomeSlidePrivacy from "./welcome/WelcomeSlidePrivacy.vue";
@@ -128,6 +128,9 @@ export default {
       stored || this.$i18n.locale || navigator.language || "en-US";
     this.selectedLanguage = initLocale === "en" ? "en-US" : initLocale;
   },
+  mounted() {
+    this.welcomeStore.initializeWelcome();
+  },
   setup() {
     const welcomeStore = useWelcomeStore();
     const storageStore = useStorageStore();
@@ -152,9 +155,6 @@ export default {
       if (file) readFile(file);
     };
 
-    onMounted(() => {
-      welcomeStore.initializeWelcome();
-    });
 
     return {
       welcomeStore,

@@ -1,5 +1,4 @@
 <script lang="ts">
-import { onMounted, getCurrentInstance } from "vue";
 import { useCameraStore } from "src/stores/camera";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useUiStore } from "src/stores/ui";
@@ -20,29 +19,26 @@ export default {
       urDecoderProgress: 0,
     };
   },
-  setup() {
-    const instance = getCurrentInstance();
-    onMounted(async () => {
-      QrScanner = (await import("qr-scanner")).default;
-      URDecoder = (await import("@gandlaf21/bc-ur")).URDecoder;
+  async mounted() {
+    QrScanner = (await import("qr-scanner")).default;
+    URDecoder = (await import("@gandlaf21/bc-ur")).URDecoder;
 
-      if (!instance) return;
-      const vm: any = instance.proxy;
-      vm.qrScanner = new QrScanner(
-        vm.$refs.cameraEl as HTMLVideoElement,
-        (result: any) => {
-          vm.handleResult(result);
-        },
-        {
-          returnDetailedScanResult: true,
-          highlightScanRegion: true,
-          highlightCodeOutline: true,
-          onDecodeError: () => {},
-        }
-      );
-      vm.qrScanner.start();
-      vm.urDecoder = new URDecoder();
-    });
+    this.qrScanner = new QrScanner(
+      this.$refs.cameraEl as HTMLVideoElement,
+      (result: any) => {
+        this.handleResult(result);
+      },
+      {
+        returnDetailedScanResult: true,
+        highlightScanRegion: true,
+        highlightCodeOutline: true,
+        onDecodeError: () => {},
+      }
+    );
+    this.qrScanner.start();
+    this.urDecoder = new URDecoder();
+  },
+  setup() {
     return {};
   },
   computed: {
