@@ -1220,6 +1220,7 @@ export default {
       },
       processing_info_text: "処理中…",
       balance_too_low_warning_text: "残高不足",
+      expired_warning_text: "Invoice expired"
       actions: {
         close: {
           label: "@:global.actions.close.label",

@@ -1510,6 +1510,7 @@ export const useWalletStore = defineStore("wallet", {
         expireDate: "",
         expired: false,
       };
+      let expiry = 3600;
       _.each(invoice.sections, (tag) => {
         if (_.isObject(tag) && _.has(tag, "name")) {
           if (tag.name === "amount") {
@@ -1523,17 +1524,18 @@ export const useWalletStore = defineStore("wallet", {
           } else if (tag.name === "timestamp") {
             cleanInvoice.timestamp = tag.value;
           } else if (tag.name === "expiry") {
-            var expireDate = new Date(
-              (cleanInvoice.timestamp + tag.value) * 1000
-            );
-            cleanInvoice.expireDate = date.formatDate(
-              expireDate,
-              "YYYY-MM-DDTHH:mm:ss.SSSZ"
-            );
-            cleanInvoice.expired = false; // TODO
+            expiry = tag.value;
           }
         }
       });
+      if (cleanInvoice.timestamp) {
+        const expDate = new Date((cleanInvoice.timestamp + expiry) * 1000);
+        cleanInvoice.expireDate = date.formatDate(
+          expDate,
+          "YYYY-MM-DDTHH:mm:ss.SSSZ"
+        );
+        cleanInvoice.expired = Date.now() > expDate.getTime();
+      }
 
       this.payInvoiceData.invoice = Object.freeze(cleanInvoice);
       // get quote for this request
