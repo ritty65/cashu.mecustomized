@@ -469,7 +469,7 @@ export const useWalletStore = defineStore("wallet", {
         refund: refundPubkey ? ensureCompressed(refundPubkey) : undefined,
       };
 
-      const { keep: keepProofs, send: sendProofs } = await wallet.send(
+      let { keep: keepProofs, send: sendProofs } = await wallet.send(
         amount,
         proofsToSend,
         sendOpts
