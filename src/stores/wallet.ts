@@ -166,7 +166,11 @@ export const useWalletStore = defineStore("wallet", {
   getters: {
     wallet() {
       const mints = useMintsStore();
-      const mint = new CashuMint(mints.activeMintUrl);
+      let url = mints.activeMintUrl;
+      if (import.meta.env.DEV && url === "https://mint.minibits.cash/Bitcoin") {
+        url = "/Bitcoin";
+      }
+      const mint = new CashuMint(url);
       if (this.mnemonic == "") {
         this.mnemonic = generateMnemonic(wordlist);
       }
@@ -196,6 +200,9 @@ export const useWalletStore = defineStore("wallet", {
         throw new Error("mint not found");
       }
       const unitKeysets = mints.mintUnitKeysets(storedMint, unit);
+      if (import.meta.env.DEV && url === "https://mint.minibits.cash/Bitcoin") {
+        url = "/Bitcoin";
+      }
       const mint = new CashuMint(url);
       if (this.mnemonic == "") {
         this.mnemonic = generateMnemonic(wordlist);
@@ -279,6 +286,12 @@ export const useWalletStore = defineStore("wallet", {
     ): string {
       unit = unit || useMintsStore().activeUnit;
       mintUrl = mintUrl || useMintsStore().activeMintUrl;
+      if (
+        import.meta.env.DEV &&
+        mintUrl === "https://mint.minibits.cash/Bitcoin"
+      ) {
+        mintUrl = "/Bitcoin";
+      }
       const mint = useMintsStore().mints.find((m) => m.url === mintUrl);
       if (!mint) {
         throw new Error("mint not found");

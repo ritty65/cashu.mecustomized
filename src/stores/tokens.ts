@@ -242,6 +242,6 @@ function currentDateStr() {
 }
 
 function isValidTokenString(tokenStr: string): boolean {
-  const prefixRegex = /^cashu[A-Za-z0-9][A-Za-z0-9_\-+=\/]*$/;
+  const prefixRegex = /^cashu[A-Za-z0-9][A-Za-z0-9_\-+=\/.~]*$/;
   return prefixRegex.test(tokenStr);
 }
