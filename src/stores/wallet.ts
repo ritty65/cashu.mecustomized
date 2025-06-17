@@ -600,6 +600,14 @@ export const useWalletStore = defineStore("wallet", {
       let proofs = token.getProofs(tokenJson);
       if (!proofs.length) throw new Error("no proofs");
 
+      /* ---------- ensure signer has local key if available ---------- */
+      if (
+        receiveStore.receiveData.p2pkPrivateKey &&
+        !signer.privkeyHex
+      ) {
+        signer.setLocalPrivkey(receiveStore.receiveData.p2pkPrivateKey);
+      }
+
       /* ---------- auto‑sign if locked ---------- */
       try {
         proofs = await unlockProofs(proofs, async (h) => signer.signData(h));
