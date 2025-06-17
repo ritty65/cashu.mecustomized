@@ -38,7 +38,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
   }),
   actions: {
     decodeToken: function (encodedToken: string) {
-      encodedToken = encodedToken.trim();
+      encodedToken = encodedToken.replace(/\s+/g, "").trim();
       if (!isValidTokenString(encodedToken)) {
         console.error("Invalid token string");
         return undefined;

@@ -216,7 +216,7 @@ export const useTokensStore = defineStore("tokens", {
       return this.historyTokens.find((t) => t.token === tokenStr);
     },
     decodeToken(encodedToken: string): Token | undefined {
-      encodedToken = encodedToken.trim();
+      encodedToken = encodedToken.replace(/\s+/g, "").trim();
       if (!isValidTokenString(encodedToken)) {
         console.error("Invalid token string");
         return undefined;
