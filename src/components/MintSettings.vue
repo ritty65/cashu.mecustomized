@@ -592,6 +592,9 @@ export default defineComponent({
     },
     validateMintUrl: function (url) {
       try {
+        if (url.startsWith("/")) {
+          return true;
+        }
         new URL(url);
         return true;
       } catch (e) {
@@ -599,8 +602,11 @@ export default defineComponent({
       }
     },
     sanitizeMintUrlAndShowAddDialog: function () {
-      // if no protocol is given, add https
-      if (!this.addMintData.url.match(/^[a-zA-Z]+:\/\//)) {
+      // if no protocol is given and not relative, add https
+      if (
+        !this.addMintData.url.match(/^[a-zA-Z]+:\/\//) &&
+        !this.addMintData.url.startsWith("/")
+      ) {
         this.addMintData.url = "https://" + this.addMintData.url;
       }
       if (!this.validateMintUrl(this.addMintData.url)) {
@@ -609,10 +615,12 @@ export default defineComponent({
         );
         return;
       }
-      let urlObj = new URL(this.addMintData.url);
-      urlObj.hostname = urlObj.hostname.toLowerCase();
-      this.addMintData.url = urlObj.toString();
-      this.addMintData.url = this.addMintData.url.replace(/\/$/, "");
+      if (!this.addMintData.url.startsWith("/")) {
+        let urlObj = new URL(this.addMintData.url);
+        urlObj.hostname = urlObj.hostname.toLowerCase();
+        this.addMintData.url = urlObj.toString();
+        this.addMintData.url = this.addMintData.url.replace(/\/$/, "");
+      }
       this.showAddMintDialog = true;
     },
     addMintInternal: function (mintToAdd, verbose) {

@@ -288,6 +288,9 @@ export const useMintsStore = defineStore("mints", {
         // sanitize url
         const sanitizeUrl = (url: string): string | null => {
           try {
+            if (url.startsWith("/")) {
+              return url;
+            }
             if (!/^[a-zA-Z]+:\/\//.test(url)) {
               url = "https://" + url;
             }
