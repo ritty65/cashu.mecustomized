@@ -1230,7 +1230,7 @@ export default {
       },
       processing_info_text: "Επεξεργασία…",
       balance_too_low_warning_text: "Το υπόλοιπο είναι πολύ χαμηλό",
-      expired_warning_text: "Invoice expired"
+      expired_warning_text: "Invoice expired",
       actions: {
         close: {
           label: "@:global.actions.close.label",

@@ -1222,7 +1222,7 @@ export default {
       },
       processing_info_text: "İşleniyor…",
       balance_too_low_warning_text: "Bakiye yetersiz",
-      expired_warning_text: "Invoice expired"
+      expired_warning_text: "Invoice expired",
       actions: {
         close: {
           label: "@:global.actions.close.label",
