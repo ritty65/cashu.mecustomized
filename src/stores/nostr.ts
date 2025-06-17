@@ -512,10 +512,11 @@ export const useNostrStore = defineStore("nostr", {
       if (
         (!privKey || privKey.length === 0) &&
         (this.signerType === SignerType.NIP07 ||
-          this.signerType === SignerType.NIP46) &&
-        (window as any)?.nostr?.nip04?.encrypt
+          this.signerType === SignerType.NIP46)
       ) {
-        return await (window as any).nostr.nip04.encrypt(recipient, message);
+        if ((window as any)?.nostr?.nip04?.encrypt) {
+          return await (window as any).nostr.nip04.encrypt(recipient, message);
+        }
       }
       if (!privKey) {
         throw new Error("No private key for encryption");
@@ -530,10 +531,11 @@ export const useNostrStore = defineStore("nostr", {
       if (
         (!privKey || privKey.length === 0) &&
         (this.signerType === SignerType.NIP07 ||
-          this.signerType === SignerType.NIP46) &&
-        (window as any)?.nostr?.nip04?.decrypt
+          this.signerType === SignerType.NIP46)
       ) {
-        return await (window as any).nostr.nip04.decrypt(sender, content);
+        if ((window as any)?.nostr?.nip04?.decrypt) {
+          return await (window as any).nostr.nip04.decrypt(sender, content);
+        }
       }
       if (!privKey) {
         throw new Error("No private key for decryption");

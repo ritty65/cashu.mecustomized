@@ -82,9 +82,14 @@ export const useWorkersStore = defineStore("workers", {
         const key = nip19.decode(signerStore.nsec).data as Uint8Array;
         signSchnorr = async (h: string) => schnorr.sign(h, key);
       } else if (method === "nip07") {
-        signSchnorr =
-          (window as any)?.nostr?.signSchnorr ||
-          (nostr.signer as any)?.signSchnorr;
+        if (
+          typeof window !== "undefined" &&
+          (window as any)?.nostr?.signSchnorr
+        ) {
+          signSchnorr = (window as any).nostr.signSchnorr;
+        } else {
+          signSchnorr = (nostr.signer as any)?.signSchnorr;
+        }
       } else if (method === "nip46") {
         signSchnorr = (nostr.signer as any)?.signSchnorr;
       }
