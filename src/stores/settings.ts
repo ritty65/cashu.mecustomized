@@ -1,6 +1,8 @@
 import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 
+// Default set of public relays the wallet will fall back to when no
+// other writable relays are available.
 const defaultNostrRelays = [
   "wss://relay.f7z.io/",
   "wss://relay.primal.net/",
