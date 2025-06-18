@@ -688,6 +688,8 @@ import {
 } from "src/js/notify.ts";
 import { Dialog } from "quasar";
 import { useDmChatsStore } from "src/stores/dmChats";
+import { useSignerStore } from "src/stores/signer";
+import MissingSignerModal from "src/components/MissingSignerModal.vue";
 
 const VueQrcode = defineAsyncComponent(
   () => import("@chenfengyuan/vue-qrcode")
@@ -929,6 +931,7 @@ export default defineComponent({
       "onTokenPaid",
       "mintWallet",
       "checkTokenSpendable",
+      "signP2PKIfNeeded",
     ]),
     ...mapActions(useProofsStore, ["serializeProofs"]),
     ...mapActions(useTokensStore, [
@@ -1215,6 +1218,25 @@ export default defineComponent({
         // update UI
         this.sendData.tokens = sendProofs;
 
+        if (
+          sendProofs.some(
+            (p) =>
+              typeof p.secret === "string" && p.secret.startsWith('["P2PK"')
+          ) &&
+          !useSignerStore().hasSigner
+        ) {
+          const dlg = Dialog.create({ component: MissingSignerModal });
+          const ok = await new Promise<boolean | null>((r) => {
+            dlg.onOk(() => r(true));
+            dlg.onCancel(() => r(null));
+            dlg.onDismiss(() => r(null));
+          });
+          if (ok !== true) {
+            return;
+          }
+          sendProofs = await this.signP2PKIfNeeded(sendProofs);
+        }
+
         this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
         if (this.sendViaNostr && this.recipientPubkey) {
           try {
@@ -1365,6 +1387,24 @@ export default defineComponent({
 
         // update UI
         this.sendData.tokens = sendProofs;
+        if (
+          sendProofs.some(
+            (p) =>
+              typeof p.secret === "string" && p.secret.startsWith('["P2PK"')
+          ) &&
+          !useSignerStore().hasSigner
+        ) {
+          const dlg = Dialog.create({ component: MissingSignerModal });
+          const ok = await new Promise<boolean | null>((r) => {
+            dlg.onOk(() => r(true));
+            dlg.onCancel(() => r(null));
+            dlg.onDismiss(() => r(null));
+          });
+          if (ok !== true) {
+            return;
+          }
+          sendProofs = await this.signP2PKIfNeeded(sendProofs);
+        }
         this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
         if (this.sendViaNostr && this.recipientPubkey) {
           try {
