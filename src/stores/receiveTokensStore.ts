@@ -37,6 +37,12 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
     scanningCard: false,
   }),
   actions: {
+    clearReceiveData() {
+      this.receiveData.tokensBase64 = "";
+      this.receiveData.p2pkPrivateKey = "";
+      this.receiveData.bucketId = DEFAULT_BUCKET_ID;
+      this.receiveData.label = "";
+    },
     decodeToken: function (encodedToken: string) {
       encodedToken = encodedToken.replace(/\s+/g, "").trim();
       if (!isValidTokenString(encodedToken)) {

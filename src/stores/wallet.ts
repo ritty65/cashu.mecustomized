@@ -42,6 +42,7 @@ import {
   decodePaymentRequest,
   MintQuoteResponse,
   ProofState,
+  MintOperationError,
   getEncodedToken,
 } from "@cashu/cashu-ts";
 import { getSignedProofs } from "@cashu/crypto/modules/client/NUT11";
@@ -716,6 +717,15 @@ export const useWalletStore = defineStore("wallet", {
         return true;
       } catch (e: any) {
         console.error(e);
+        const spent =
+          (e instanceof MintOperationError && e.status === "spent") ||
+          (typeof e.message === "string" &&
+            e.message.includes("Token already spent"));
+        if (spent) {
+          notifyError(e.message ?? "Token already spent");
+          useReceiveTokensStore().clearReceiveData();
+          return null;
+        }
         notifyApiError(e);
         notifyError(e.message ?? "Redeem failed");
         return false;
