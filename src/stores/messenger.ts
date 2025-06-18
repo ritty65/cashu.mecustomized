@@ -6,7 +6,7 @@ import { useNostrStore, SignerType } from "./nostr";
 import { v4 as uuidv4 } from "uuid";
 import { useSettingsStore } from "./settings";
 import { sanitizeMessage } from "src/js/message-utils";
-import { notifySuccess, notifyError } from "src/js/notify";
+import { notifySuccess, notifyError, notify } from "src/js/notify";
 import { useWalletStore } from "./wallet";
 import { useMintsStore } from "./mints";
 import { useProofsStore } from "./proofs";
@@ -14,6 +14,9 @@ import { useTokensStore } from "./tokens";
 import { useReceiveTokensStore } from "./receiveTokensStore";
 import { useBucketsStore } from "./buckets";
 import { useLockedTokensStore } from "./lockedTokens";
+import { useSendTokensStore } from "./sendTokensStore";
+import { MintOperationError } from "@cashu/cashu-ts";
+import { i18n } from "../boot/i18n";
 import token from "src/js/token";
 
 function isOperationError(e: unknown): boolean {
@@ -139,8 +142,13 @@ export const useMessengerStore = defineStore("messenger", {
           });
         }
         return success;
-      } catch (e) {
+      } catch (e: any) {
         console.error(e);
+        if (e instanceof MintOperationError && e.message.includes("spent")) {
+          notify({ message: i18n.global.t("send.spent"), color: "negative" });
+          useSendTokensStore().clearSendData();
+          return false;
+        }
         notifyError("Failed to send token");
         return false;
       }
