@@ -39,6 +39,7 @@
     "dexie": "^4.0.9",
     "light-bolt11-decoder": "^3.1.1",
     "lucide-vue-next": "^0.453.0",
+    "buffer": "^6.0.3",
     "nostr-tools": "^2.5.2",
     "pinia": "^2.1.7",
     "qr-scanner": "^1.4.2",
@@ -52,6 +53,7 @@
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "^6.2.0",
+    "vite-plugin-node-polyfills": "^0.23.0",
     "@quasar/app-vite": "^1.9.3",
     "@types/node": "^20.12.11",
     "@types/underscore": "^1.11.15",
