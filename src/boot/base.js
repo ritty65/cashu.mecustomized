@@ -2,6 +2,7 @@ import { copyToClipboard } from "quasar";
 import { useUiStore } from "stores/ui";
 import { Clipboard } from "@capacitor/clipboard";
 import { SafeArea } from "capacitor-plugin-safe-area";
+import { i18n } from "./i18n";
 
 window.LOCALE = "en";
 // window.EventHub = new Vue();
@@ -35,12 +36,11 @@ window.windowMixin = {
     },
     copyText: function (text, message, position) {
       let notify = this.$q.notify;
-      let i18n = this.$i18n;
       copyToClipboard(text).then(function () {
         notify({
           message:
             message ||
-            (i18n && i18n.t("global.copy_to_clipboard.success")) ||
+            i18n.global.t("global.copy_to_clipboard.success") ||
             "Copied to clipboard!",
           position: position || "bottom",
         });
@@ -229,7 +229,7 @@ window.windowMixin = {
 
     const language = this.$q.localStorage.getItem("cashu.language");
     if (language) {
-      this.$i18n.locale = language === "en" ? "en-US" : language;
+      i18n.global.locale.value = language === "en" ? "en-US" : language;
     }
 
     // only for iOS

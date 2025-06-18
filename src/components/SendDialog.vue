@@ -88,6 +88,7 @@ import { useCameraStore } from "src/stores/camera";
 import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { useSettingsStore } from "../stores/settings";
 import { useMintsStore } from "src/stores/mints";
+import { i18n } from "../boot/i18n";
 import {
   X as XIcon,
   Banknote as BanknoteIcon,
@@ -155,7 +156,7 @@ export default defineComponent({
     showParseDialog: function () {
       if (!this.canMakePayments) {
         notifyWarning(
-          this.$i18n.t("SendDialog.actions.lightning.error_no_mints")
+          i18n.global.t("SendDialog.actions.lightning.error_no_mints")
         );
         this.showSendDialog = false;
         return;
@@ -174,7 +175,7 @@ export default defineComponent({
     showSendTokensDialog: function () {
       debug("##### showSendTokensDialog");
       if (!this.canMakePayments) {
-        notifyWarning(this.$i18n.t("SendDialog.actions.ecash.error_no_mints"));
+        notifyWarning(i18n.global.t("SendDialog.actions.ecash.error_no_mints"));
         this.showSendDialog = false;
         return;
       }
