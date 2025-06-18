@@ -1200,12 +1200,16 @@ export default defineComponent({
             console.error(e);
           }
         }
-        this.sendData.p2pkPubkey = this.maybeConvertNpub(
-          this.sendData.p2pkPubkey
-        );
-        this.sendData.refundPubkey = this.maybeConvertNpub(
-          this.sendData.refundPubkey
-        );
+        if (this.sendData.p2pkPubkey) {
+          this.sendData.p2pkPubkey = this.maybeConvertNpub(
+            this.sendData.p2pkPubkey
+          );
+        }
+        if (this.sendData.refundPubkey) {
+          this.sendData.refundPubkey = this.maybeConvertNpub(
+            this.sendData.refundPubkey
+          );
+        }
         let { _, sendProofs } = await this.sendToLock(
           proofsForBucket,
           mintWallet,
@@ -1339,15 +1343,16 @@ export default defineComponent({
         }
       }
       if (!nostrDm) {
-        this.sendData.p2pkPubkey = this.maybeConvertNpub(
-          this.sendData.p2pkPubkey
-        );
-        if (
-          this.sendData.p2pkPubkey &&
-          this.isValidPubkey(this.sendData.p2pkPubkey)
-        ) {
-          await this.lockTokens();
-          return;
+        if (this.sendData.p2pkPubkey) {
+          this.sendData.p2pkPubkey = this.maybeConvertNpub(
+            this.sendData.p2pkPubkey
+          );
+          if (
+            this.isValidPubkey(this.sendData.p2pkPubkey)
+          ) {
+            await this.lockTokens();
+            return;
+          }
         }
       }
 
