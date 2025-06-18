@@ -660,6 +660,15 @@ export const useNostrStore = defineStore("nostr", {
           } as NDKFilter,
           { closeOnEose: false, groupable: false }
         );
+        let resolved = false;
+        const finalize = () => {
+          if (resolved) return;
+          resolved = true;
+          try {
+            sub.stop();
+          } catch {}
+          resolve(nip04DirectMessageEvents);
+        };
         sub.on("event", (event: NDKEvent) => {
           debug("event");
           this.decryptNip04(privKey, event.pubkey, event.content)
@@ -680,8 +689,10 @@ export const useNostrStore = defineStore("nostr", {
               }
               console.error("Failed to decrypt NIP-04 DM", e);
               notifyError("Failed to decrypt NIP-04 message");
-            });
+            })
+            .finally(finalize);
         });
+        sub.on("eose", finalize);
       });
       try {
         nip04DirectMessageEvents = await fetchEventsPromise;
