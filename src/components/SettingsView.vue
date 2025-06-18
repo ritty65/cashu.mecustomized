@@ -1768,6 +1768,7 @@ import { useUiStore } from "../stores/ui";
 import { useWorkersStore } from "src/stores/workers";
 import { useProofsStore } from "src/stores/proofs";
 import { usePRStore } from "../stores/payment-request";
+import { i18n } from "../boot/i18n";
 import { useRestoreStore } from "src/stores/restore";
 import { useDexieStore } from "../stores/dexie";
 import { useReceiveTokensStore } from "../stores/receiveTokensStore";
@@ -2092,7 +2093,7 @@ export default defineComponent({
         locale = "en-US";
       }
       // Set the i18n locale
-      this.$i18n.locale = locale;
+      i18n.global.locale.value = locale;
 
       // Store the selected language in localStorage
       localStorage.setItem("cashu.language", locale);
@@ -2108,7 +2109,7 @@ export default defineComponent({
     debug("Nip07 signer available", this.nip07SignerAvailable);
     // Set the initial selected language based on the current locale
     const currentLocale =
-      this.$i18n.locale === "en" ? "en-US" : this.$i18n.locale;
+      i18n.global.locale.value === "en" ? "en-US" : i18n.global.locale.value;
     this.selectedLanguage = currentLocale;
   },
 });

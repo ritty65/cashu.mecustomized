@@ -179,6 +179,7 @@ import { useRestoreStore } from "src/stores/restore";
 import { useWalletStore } from "src/stores/wallet";
 import { useUiStore } from "src/stores/ui";
 import { notifyError, notifySuccess } from "src/js/notify";
+import { i18n } from "../boot/i18n";
 
 export default defineComponent({
   name: "RestoreView",
@@ -186,7 +187,7 @@ export default defineComponent({
   data() {
     return {
       mnemonicError: "",
-      restoreAllMintsText: this.$i18n.t(
+      restoreAllMintsText: i18n.global.t(
         "RestoreView.actions.restore_all_mints.label"
       ),
     };
@@ -221,7 +222,7 @@ export default defineComponent({
       // Simple validation: check if mnemonicToRestore has at least 12 words
       const words = this.mnemonicToRestore.trim().split(/\s+/);
       if (words.length < 12) {
-        this.mnemonicError = this.$i18n.t("RestoreView.actions.validate.error");
+        this.mnemonicError = i18n.global.t("RestoreView.actions.validate.error");
         return false;
       }
       this.mnemonicError = "";
@@ -232,19 +233,19 @@ export default defineComponent({
         return;
       }
       try {
-        this.restoreAllMintsText = this.$i18n.t(
+        this.restoreAllMintsText = i18n.global.t(
           "RestoreView.actions.restore.in_progress"
         );
         await this.restoreMint(mintUrl);
       } catch (error) {
         console.error("Error restoring mint:", error);
         notifyError(
-          this.$i18n.t("RestoreView.actions.restore.error", {
+          i18n.global.t("RestoreView.actions.restore.error", {
             error: error.message || error,
           })
         );
       } finally {
-        this.restoreAllMintsText = this.$i18n.t(
+        this.restoreAllMintsText = i18n.global.t(
           "RestoreView.actions.restore_all_mints.label"
         );
       }
@@ -254,7 +255,7 @@ export default defineComponent({
         const text = await this.pasteFromClipboard();
         this.mnemonicToRestore = text.trim();
       } catch (error) {
-        notifyError(this.$i18n.t("RestoreView.actions.paste.error"));
+        notifyError(i18n.global.t("RestoreView.actions.paste.error"));
       }
     },
     async restoreAllMints() {
@@ -264,7 +265,7 @@ export default defineComponent({
       }
       try {
         for (const mint of this.mints) {
-          this.restoreAllMintsText = this.$i18n.t(
+          this.restoreAllMintsText = i18n.global.t(
             "RestoreView.actions.restore_all_mints.in_progress",
             {
               index: ++i,
@@ -274,17 +275,17 @@ export default defineComponent({
           await this.restoreMint(mint.url);
         }
         notifySuccess(
-          this.$i18n.t("RestoreView.actions.restore_all_mints.success")
+          i18n.global.t("RestoreView.actions.restore_all_mints.success")
         );
       } catch (error) {
         console.error("Error restoring mints:", error);
         notifyError(
-          this.$i18n.t("RestoreView.actions.restore_all_mints.error", {
+          i18n.global.t("RestoreView.actions.restore_all_mints.error", {
             error: error.message || error,
           })
         );
       } finally {
-        this.restoreAllMintsText = this.$i18n.t(
+        this.restoreAllMintsText = i18n.global.t(
           "RestoreView.actions.restore_all_mints.label"
         );
       }

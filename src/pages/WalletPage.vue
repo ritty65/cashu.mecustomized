@@ -246,6 +246,7 @@ import ActivityOrb from "components/ActivityOrb.vue";
 import BucketManager from "components/BucketManager.vue";
 import MissingSignerModal from "src/components/MissingSignerModal.vue";
 import { Dialog } from "quasar";
+import { i18n } from "../boot/i18n";
 
 // pinia stores
 import { mapActions, mapState, mapWritableState } from "pinia";
@@ -712,7 +713,9 @@ export default {
       await this.initNip07Signer();
     } else {
       await this.initSigner();
-      this.notifyWarning(this.$t("settings.nostr.signing_extension.not_found"));
+      this.notifyWarning(
+        i18n.global.t("settings.nostr.signing_extension.not_found")
+      );
     }
 
     // show welcome dialog
