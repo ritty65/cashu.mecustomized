@@ -73,6 +73,8 @@ export default {
       please_try_again: "Παρακαλώ προσπαθήστε ξανά.",
       nostr_dm_sent: "Το Nostr DM στάλθηκε",
       nostr_dm_failed: "Αποτυχία αποστολής Nostr DM",
+      proofs_spent_refresh_token:
+        "Some proofs in this token were already spent. Ask the sender for a refreshed token",
     },
     mint: {
       notifications: {
