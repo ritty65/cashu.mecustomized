@@ -64,6 +64,9 @@ The app includes a built-in Nostr messenger for private chat.
 4. Press **Save**, then use **Connect** under _Relays_.
 5. The messenger connects to the relays defined in Settings and shows an
    **Online/Offline** badge in the header.
+   By default the wallet falls back to the following public relays when no
+   writable relays are available: `wss://relay.f7z.io/`,
+   `wss://relay.primal.net/` and `wss://relay.nostr.band/`.
 
 ## Technology Stack
 
