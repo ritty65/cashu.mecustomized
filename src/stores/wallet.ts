@@ -48,7 +48,7 @@ import {
 import { getSignedProofs } from "@cashu/crypto/modules/client/NUT11";
 import { hashToCurve } from "@cashu/crypto/modules/common";
 import { Notify } from "quasar";
-import { db } from "src/boot/db";
+import { db } from "src/stores/dexie";
 // @ts-ignore
 import * as bolt11Decoder from "light-bolt11-decoder";
 import { bech32 } from "bech32";
