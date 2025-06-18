@@ -469,11 +469,12 @@ export const useWalletStore = defineStore("wallet", {
         refund: refundPubkey ? ensureCompressed(refundPubkey) : undefined,
       };
 
-      const { keep: keepProofs, send: sendProofs } = await wallet.send(
+      const { keep: keepProofs, send: sendProofsTmp } = await wallet.send(
         amount,
         proofsToSend,
         sendOpts
       );
+      let sendProofs = sendProofsTmp;
 
       /* sendProofs currently unsigned → add witness */
       sendProofs = await this.signP2PKIfNeeded(sendProofs);
