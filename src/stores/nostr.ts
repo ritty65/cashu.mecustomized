@@ -22,6 +22,14 @@ import {
   getEventHash as ntGetEventHash,
   finalizeEvent,
 } from "nostr-tools";
+
+function isOperationError(e: unknown): boolean {
+  return (
+    e instanceof Error &&
+    typeof e.message === "string" &&
+    e.message.toLowerCase().includes("operation")
+  );
+}
 import { bytesToHex, hexToBytes } from "@noble/hashes/utils"; // already an installed dependency
 import { ensureCompressed } from "src/utils/ecash";
 import { useWalletStore } from "./wallet";
@@ -571,13 +579,21 @@ export const useNostrStore = defineStore("nostr", {
           this.signerType === SignerType.NIP46)
       ) {
         if ((window as any)?.nostr?.nip04?.decrypt) {
-          return await (window as any).nostr.nip04.decrypt(sender, content);
+          try {
+            return await (window as any).nostr.nip04.decrypt(sender, content);
+          } catch (e) {
+            throw e;
+          }
         }
       }
       if (!privKey) {
         throw new Error("No private key for decryption");
       }
-      return await nip04.decrypt(privKey, sender, content);
+      try {
+        return await nip04.decrypt(privKey, sender, content);
+      } catch (e) {
+        throw e;
+      }
     },
     sendNip04DirectMessage: async function (
       recipient: string,
@@ -647,8 +663,8 @@ export const useNostrStore = defineStore("nostr", {
         );
         sub.on("event", (event: NDKEvent) => {
           debug("event");
-          this.decryptNip04(privKey, event.pubkey, event.content).then(
-            (content) => {
+          this.decryptNip04(privKey, event.pubkey, event.content)
+            .then((content) => {
               debug("NIP-04 DM from", event.pubkey);
               debug("Content:", content);
               nip04DirectMessageEvents.add(event);
@@ -658,8 +674,14 @@ export const useNostrStore = defineStore("nostr", {
                 const chatStore = useDmChatsStore();
                 chatStore.addIncoming(event);
               } catch {}
-            }
-          );
+            })
+            .catch((e) => {
+              if (isOperationError(e)) {
+                return;
+              }
+              console.error("Failed to decrypt NIP-04 DM", e);
+              notifyError("Failed to decrypt NIP-04 message");
+            });
         });
       });
       try {
@@ -692,14 +714,22 @@ export const useNostrStore = defineStore("nostr", {
         groupable: false,
       });
       sub.on("event", async (ev: NDKEvent) => {
-        const decrypted = await this.decryptNip04(
-          privKey,
-          ev.pubkey,
-          ev.content
-        );
-        const raw = await ev.toNostrEvent();
-        this.lastEventTimestamp = Math.floor(Date.now() / 1000);
-        cb(raw, decrypted);
+        try {
+          const decrypted = await this.decryptNip04(
+            privKey,
+            ev.pubkey,
+            ev.content
+          );
+          const raw = await ev.toNostrEvent();
+          this.lastEventTimestamp = Math.floor(Date.now() / 1000);
+          cb(raw, decrypted);
+        } catch (e) {
+          if (isOperationError(e)) {
+            return;
+          }
+          console.error("Failed to decrypt NIP-04 DM", e);
+          notifyError("Failed to decrypt NIP-04 message");
+        }
       });
     },
     sendNip17DirectMessageToNprofile: async function (

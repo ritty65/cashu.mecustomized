@@ -16,6 +16,14 @@ import { useBucketsStore } from "./buckets";
 import { useLockedTokensStore } from "./lockedTokens";
 import token from "src/js/token";
 
+function isOperationError(e: unknown): boolean {
+  return (
+    e instanceof Error &&
+    typeof e.message === "string" &&
+    e.message.toLowerCase().includes("operation")
+  );
+}
+
 export type MessengerMessage = {
   id: string;
   pubkey: string;
@@ -168,11 +176,20 @@ export const useMessengerStore = defineStore("messenger", {
         privKey = nostr.privKeyHex;
         if (!privKey) return;
       }
-      const decrypted = await nostr.decryptNip04(
-        privKey,
-        event.pubkey,
-        event.content
-      );
+      let decrypted: string;
+      try {
+        decrypted = await nostr.decryptNip04(
+          privKey,
+          event.pubkey,
+          event.content
+        );
+      } catch (e) {
+        if (isOperationError(e)) {
+          return;
+        }
+        console.error("Failed to decrypt incoming message", e);
+        return;
+      }
       try {
         const payload = JSON.parse(decrypted);
         if (payload && payload.token) {

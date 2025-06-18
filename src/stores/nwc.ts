@@ -526,13 +526,24 @@ export const useNWCStore = defineStore("nwc", {
 
         debug("### NWC request!");
         debug("### event", event);
-        const decryptedContent = await nip04.decrypt(
-          conn.connectionSecret,
-          conn.walletPublicKey,
-          event.content
-        );
-        // debug("### decryptedContent", decryptedContent)
-        await this.parseNWCCommand(decryptedContent, event, conn);
+        try {
+          const decryptedContent = await nip04.decrypt(
+            conn.connectionSecret,
+            conn.walletPublicKey,
+            event.content
+          );
+          // debug("### decryptedContent", decryptedContent)
+          await this.parseNWCCommand(decryptedContent, event, conn);
+        } catch (e) {
+          if (
+            e instanceof Error &&
+            e.message.toLowerCase().includes("operation")
+          ) {
+            return;
+          }
+          console.error("Failed to decrypt NWC request", e);
+          notifyError("Failed to decrypt NWC request");
+        }
       });
     },
     unsubscribeNWC: function () {
