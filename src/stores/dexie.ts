@@ -129,6 +129,17 @@ export class CashuDexie extends Dexie {
       lockedTokens:
         "&id, owner, tierId, intervalKey, unlockTs, refundUnlockTs, status, subscriptionEventId",
     });
+    this.version(6).stores({
+      proofs: "secret, id, C, amount, reserved, quote, bucketId, label, status", // Added 'status'
+      // Re-declare other tables as they are
+      profiles: "pubkey",
+      creatorsTierDefinitions: "&creatorNpub, eventId, updatedAt",
+      subscriptions: "&id, creatorNpub, tierId, status, createdAt, updatedAt",
+      lockedTokens:
+        "&id, owner, tierId, intervalKey, unlockTs, refundUnlockTs, status, subscriptionEventId",
+    });
+    // No specific upgrade function needed for adding an optional 'status' field,
+    // as undefined will be handled by application logic.
   }
 }
 

@@ -443,9 +443,12 @@ export const useWalletStore = defineStore("wallet", {
       locktime?: number,
       refundPubkey?: string
     ) {
-      const mints = useMintsStore();
-      const info = mints.activeInfo || {};
-      const nuts = Array.isArray(info.nut_supports)
+      const uIStore = useUiStore();
+      await uIStore.lockMutex();
+      try {
+        const mints = useMintsStore();
+        const info = mints.activeInfo || {};
+        const nuts = Array.isArray(info.nut_supports)
         ? info.nut_supports
         : Object.keys(info.nuts || {}).map((n) => Number(n));
 
@@ -522,6 +525,9 @@ export const useWalletStore = defineStore("wallet", {
       console.error("Error in sendToLock:", error);
       notifyApiError(error, "Failed to create locked tokens");
       throw error;
+    }
+    } finally {
+      uIStore.unlockMutex();
     }
     },
 
@@ -677,9 +683,11 @@ export const useWalletStore = defineStore("wallet", {
     attemptRedeem: async function (
       bucketId: string = DEFAULT_BUCKET_ID
     ): Promise<boolean | null> {
-      const ui = useUiStore();
-      const mints = useMintsStore();
-      const proofsStore = useProofsStore();
+      const ui = useUiStore(); // uiStore is already declared here, good.
+      await ui.lockMutex(); // Renamed from uIStore to ui to match existing variable.
+      try {
+        const mints = useMintsStore();
+        const proofsStore = useProofsStore();
       const receiveStore = useReceiveTokensStore();
       const signer = useSignerStore();
       const p2pk = useP2PKStore();
@@ -805,6 +813,9 @@ export const useWalletStore = defineStore("wallet", {
         notifyError(e.message ?? "Redeem failed");
         return false;
       }
+    } finally {
+      ui.unlockMutex(); // Release lock, matching variable name 'ui'.
+    }
     },
     /* ------------------------------------------------------------------ */
 

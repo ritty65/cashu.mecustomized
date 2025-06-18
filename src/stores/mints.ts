@@ -100,6 +100,7 @@ export type WalletProof = Proof & {
   quote?: string;
   bucketId?: string;
   label?: string;
+  status?: string; // Added field
 };
 
 export type Balances = {

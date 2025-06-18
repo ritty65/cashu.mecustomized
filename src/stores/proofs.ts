@@ -50,11 +50,12 @@ export const useProofsStore = defineStore("proofs", {
       const activeProofs = await cashuDb.proofs
         .where("id")
         .anyOf(keysetIds)
-        .toArray()
-        .then((proofs) => {
-          return proofs.filter((p) => !p.reserved);
-        });
-      mintStore.activeProofs = activeProofs;
+        .toArray();
+      // Filter for both not reserved AND status not pending
+      const filteredActiveProofs = activeProofsRaw.filter(
+        (p: WalletProof) => !p.reserved && p.status !== "pending"
+      );
+      mintStore.activeProofs = filteredActiveProofs;
     };
 
     return {

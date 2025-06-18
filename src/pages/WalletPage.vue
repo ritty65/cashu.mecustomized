@@ -619,17 +619,8 @@ export default {
   },
   watch: {},
 
-  mounted: function () {
-    // generate NPC connection
-    this.generateNPCConnection();
-    this.claimAllTokens();
-  },
-
-  unmounted: function () {
-    window.removeEventListener("message", this.handleLockedTokenMessage);
-  },
-
-  created: async function () {
+  mounted: async function () {
+    // Moved from created
     window.addEventListener("message", this.handleLockedTokenMessage);
     // Initialize and run migrations
     const migrationsStore = useMigrationsStore();
@@ -738,6 +729,23 @@ export default {
 
     // reconnect all websockets
     this.checkPendingInvoices();
+
+    // Original mounted content (if any significant logic, integrate carefully)
+    // For now, assuming original mounted content was simple or can be appended/prepended.
+    // Original mounted:
+    // this.generateNPCConnection();
+    // this.claimAllTokens();
+    // Re-adding them here:
+    this.generateNPCConnection();
+    this.claimAllTokens();
+  },
+
+  unmounted: function () {
+    window.removeEventListener("message", this.handleLockedTokenMessage);
+  },
+
+  created: async function () {
+    // Content moved to mounted
   },
 };
 </script>
