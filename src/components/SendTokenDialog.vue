@@ -656,6 +656,8 @@ import { usePriceStore } from "src/stores/price";
 import { useNostrStore } from "src/stores/nostr";
 import token from "src/js/token";
 import { Buffer } from "buffer";
+// Ensure Buffer is globally available for dependencies
+globalThis.Buffer = globalThis.Buffer || Buffer;
 import { useCameraStore } from "src/stores/camera";
 import { useP2PKStore } from "src/stores/p2pk";
 import { nip19, ProfilePointer } from "nostr-tools";
