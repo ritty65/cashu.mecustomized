@@ -152,7 +152,8 @@ export const useProofsStore = defineStore("proofs", {
       return await cashuDb.proofs.where("quote").equals(quote).toArray();
     },
     getUnreservedProofs: function (proofs: WalletProof[]) {
-      return proofs.filter((p) => !p.reserved);
+      // Also filter out proofs that are marked as 'pending'
+      return proofs.filter((p) => !p.reserved && p.status !== "pending");
     },
     serializeProofs: function (proofs: Proof[]): string {
       const mintStore = useMintsStore();

@@ -88,6 +88,39 @@
       </q-list>
     </div>
 
+    <!-- WALLET SYNCHRONIZATION SECTION -->
+    <div class="section-divider q-my-md">
+      <div class="divider-line"></div>
+      <div class="divider-text">
+        {{ $t("Settings.sections.wallet_synchronization") }}
+      </div>
+      <div class="divider-line"></div>
+    </div>
+    <div class="q-py-sm q-px-xs text-left">
+      <q-list padding>
+        <q-item>
+          <q-item-section>
+            <q-item-label overline class="text-weight-bold">{{
+              $t("Settings.wallet_synchronization.manual_sync.title")
+            }}</q-item-label>
+            <q-item-label caption>{{
+              $t("Settings.wallet_synchronization.manual_sync.description")
+            }}</q-item-label>
+          </q-item-section>
+          <q-item-section side>
+            <q-btn
+              :label="$t('Settings.wallet_synchronization.manual_sync.button')"
+              icon="sync"
+              color="primary"
+              @click="handleSyncWallet"
+              :loading="isLoadingSync"
+              :disable="isLoadingSync"
+            />
+          </q-item-section>
+        </q-item>
+      </q-list>
+    </div>
+
     <!-- LIGHTNING ADDRESS SECTION -->
     <div class="section-divider q-my-md">
       <div class="divider-line"></div>
@@ -1767,6 +1800,7 @@ import { useNWCStore } from "src/stores/nwc";
 import { useUiStore } from "../stores/ui";
 import { useWorkersStore } from "src/stores/workers";
 import { useProofsStore } from "src/stores/proofs";
+import { Notify } from "quasar";
 import { usePRStore } from "../stores/payment-request";
 import { useRestoreStore } from "src/stores/restore";
 import { useDexieStore } from "../stores/dexie";
@@ -1820,6 +1854,7 @@ export default defineComponent({
       nip07SignerAvailable: false,
       newRelay: "",
       newNostrRelay: "",
+      isLoadingSync: false,
     };
   },
   computed: {
@@ -1953,6 +1988,7 @@ export default defineComponent({
       "decodeRequest",
       "checkProofsSpendable",
       "increaseKeysetCounter",
+      "reconcileProofsWithMint", // Added the new action here
     ]),
     ...mapActions(useProofsStore, ["serializeProofs"]),
     ...mapActions(useNPCStore, ["generateNPCConnection"]),
@@ -2101,6 +2137,29 @@ export default defineComponent({
       // setTimeout(() => {
       //   window.location.reload();
       // }, 300);
+    },
+    async handleSyncWallet() {
+      if (this.isLoadingSync) return; // Prevent multiple clicks
+
+      this.isLoadingSync = true;
+      try {
+        // Use the mapped action directly
+        await this.reconcileProofsWithMint();
+        // The reconcileProofsWithMint action itself handles notifications for success/specific outcomes
+        // However, we might want a generic success message here if the action doesn't always notify
+        // For now, assuming the action handles its own detailed notifications.
+      } catch (error) {
+        console.error("Error during manual sync:", error);
+        Notify.create({
+          type: "negative",
+          message:
+            this.$t(
+              "Settings.wallet_synchronization.manual_sync.error_generic"
+            ) + (error.message ? `: ${error.message}` : this.$t("global.unknown_error_message")),
+        });
+      } finally {
+        this.isLoadingSync = false;
+      }
     },
   },
   created: async function () {

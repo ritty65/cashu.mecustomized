@@ -8,11 +8,13 @@
     />
     <DonateDialog v-model="showDonateDialog" @confirm="handleDonate" />
     <SubscribeDialog
+      v-if="showSubscribeDialog && selectedTier"
       v-model="showSubscribeDialog"
       :tier="selectedTier"
       :supporter-pubkey="nostr.pubkey"
       :creator-pubkey="dialogPubkey.value"
       @confirm="confirmSubscribe"
+      @close="handleDialogClose"
     />
     <SubscriptionReceipt v-model="showReceiptDialog" :receipts="receiptList" />
     <SendTokenDialog />
@@ -108,6 +110,11 @@ const showSubscribeDialog = ref(false);
 const showReceiptDialog = ref(false);
 const receiptList = ref<any[]>([]);
 const selectedTier = ref<any>(null);
+
+const handleDialogClose = () => {
+  showSubscribeDialog.value = false;
+  // selectedTier.value = null; // Optional: reset if needed, v-if handles it being null for rendering
+};
 
 function getPrice(t: any): number {
   return t.price_sats ?? t.price ?? 0;
