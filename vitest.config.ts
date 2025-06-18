@@ -3,6 +3,7 @@ import vue from "@vitejs/plugin-vue";
 import { quasar, transformAssetUrls } from "@quasar/vite-plugin";
 import jsconfigPaths from "./vitest-jsconfig-paths";
 import path from "path";
+import polyfillNode from "rollup-plugin-polyfill-node";
 
 export default defineConfig({
   build: {
@@ -41,6 +42,7 @@ export default defineConfig({
     quasar({
       sassVariables: "src/quasar-variables.scss",
     }),
+    polyfillNode(),
     jsconfigPaths(),
   ],
 });

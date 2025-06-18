@@ -9,7 +9,6 @@
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js
 
 const { configure } = require("quasar/wrappers");
-const { nodePolyfills } = require("vite-plugin-node-polyfills");
 
 module.exports = configure(function (/* ctx */) {
   return {
@@ -59,15 +58,10 @@ module.exports = configure(function (/* ctx */) {
       // polyfillModulePreload: true,
       // distDir
 
-      extendViteConf(viteConf) {
-        viteConf.plugins = viteConf.plugins || [];
-        viteConf.plugins.push(nodePolyfills());
-      },
       // viteVuePluginOptions: {},
 
-      // vitePlugins: [
-      //   [ 'package-name', { ..options.. } ]
-      // ]
+      // Use rollup-plugin-polyfill-node to provide Node.js globals
+      vitePlugins: [require("rollup-plugin-polyfill-node")()],
     },
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#devServer
