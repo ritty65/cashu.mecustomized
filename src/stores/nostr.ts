@@ -180,6 +180,19 @@ export const useNostrStore = defineStore("nostr", {
         this.ndk = new NDK({ explicitRelayUrls: relayList });
         try {
           await this.ndk.connect();
+          const activeRelays = Array.from(this.ndk.pool.relays.values()).filter(
+            (r: any) => r.status === 1
+          );
+          if (activeRelays.length === 0 && !this.triedDefaultRelays) {
+            this.triedDefaultRelays = true;
+            const defaults = [
+              "wss://relay.damus.io",
+              "wss://relay.snort.social",
+            ];
+            this.relays = defaults as any;
+            this.ndk = new NDK({ explicitRelayUrls: defaults });
+            await this.ndk.connect();
+          }
         } catch (e) {
           notifyError("Failed to connect to Nostr relays");
         }
@@ -187,16 +200,6 @@ export const useNostrStore = defineStore("nostr", {
       };
 
       await connectRelays(this.relays as any);
-
-      if (
-        (!this.ndk.pool || this.ndk.pool.relays.size === 0) &&
-        !this.triedDefaultRelays
-      ) {
-        this.triedDefaultRelays = true;
-        const defaults = ["wss://relay.damus.io", "wss://relay.snort.social"];
-        this.relays = defaults as any;
-        await connectRelays(defaults);
-      }
     },
     disconnect: function () {
       if (this.ndk && (this.ndk as any).pool) {
@@ -218,24 +221,20 @@ export const useNostrStore = defineStore("nostr", {
       this.ndk = new NDK(opts);
       try {
         await this.ndk.connect();
+        let activeRelays = Array.from(this.ndk.pool.relays.values()).filter(
+          (r: any) => r.status === 1
+        );
+        if (activeRelays.length === 0 && !this.triedDefaultRelays) {
+          this.triedDefaultRelays = true;
+          const defaults = ["wss://relay.damus.io", "wss://relay.snort.social"];
+          this.relays = defaults as any;
+          this.ndk = new NDK({ explicitRelayUrls: defaults, signer: this.signer });
+          await this.ndk.connect();
+        }
       } catch (e) {
         notifyError("Failed to connect to Nostr relays");
       }
       this.connected = true;
-      if (
-        (!this.ndk.pool || this.ndk.pool.relays.size === 0) &&
-        !this.triedDefaultRelays
-      ) {
-        this.triedDefaultRelays = true;
-        const defaults = ["wss://relay.damus.io", "wss://relay.snort.social"];
-        this.relays = defaults as any;
-        this.ndk = new NDK({ explicitRelayUrls: defaults, signer: this.signer });
-        try {
-          await this.ndk.connect();
-        } catch (e) {
-          notifyError("Failed to connect to default Nostr relays");
-        }
-      }
     },
     initSignerIfNotSet: async function () {
       if (!this.initialized) {
