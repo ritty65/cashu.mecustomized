@@ -102,6 +102,7 @@ import {
   notify,
   notifyWarning,
 } from "src/js/notify.ts";
+import { i18n } from "../boot/i18n";
 import {
   X as XIcon,
   Coins as CoinsIcon,
@@ -187,7 +188,7 @@ export default defineComponent({
     showInvoiceCreateDialog: async function () {
       if (!this.canReceivePayments) {
         notifyWarning(
-          this.$i18n.t("ReceiveDialog.actions.lightning.error_no_mints")
+          i18n.global.t("ReceiveDialog.actions.lightning.error_no_mints")
         );
         this.showReceiveDialog = false;
         return;

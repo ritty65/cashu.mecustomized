@@ -350,6 +350,7 @@ import EditMintDialog from "src/components/EditMintDialog.vue";
 import RemoveMintDialog from "src/components/RemoveMintDialog.vue";
 import MintMotdMessage from "src/components/MintMotdMessage.vue";
 import MintAuditInfo from "src/components/MintAuditInfo.vue";
+import { i18n } from "../boot/i18n";
 import {
   X as CloseIcon,
   QrCode as QrCodeIcon,
@@ -474,7 +475,7 @@ export default defineComponent({
     copyText(text) {
       navigator.clipboard.writeText(text);
       this.$q.notify({
-        message: this.$i18n.t("global.copy_to_clipboard.success"),
+        message: i18n.global.t("global.copy_to_clipboard.success"),
         color: "positive",
         position: "top",
         timeout: 1000,

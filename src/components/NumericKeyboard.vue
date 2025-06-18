@@ -49,6 +49,7 @@ import { useUiStore } from "../stores/ui";
 import { mapWritableState } from "pinia";
 import { useSettingsStore } from "../stores/settings";
 import { notify } from "src/js/notify";
+import { i18n } from "../boot/i18n";
 
 export default defineComponent({
   name: "NumericKeyboard",
@@ -84,7 +85,7 @@ export default defineComponent({
       this.useNumericKeyboard = false;
       this.showNumericKeyboard = false;
       notify(
-        this.$i18n.t("NumericKeyboard.actions.close.closed_info_text"),
+        i18n.global.t("NumericKeyboard.actions.close.closed_info_text"),
         "bottom"
       );
     },

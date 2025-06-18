@@ -333,6 +333,7 @@ import {
   notifyWarning,
   notify,
 } from "../js/notify";
+import { i18n } from "../boot/i18n";
 import MintSettings from "./MintSettings.vue";
 
 export default defineComponent({
@@ -569,7 +570,7 @@ export default defineComponent({
     addPendingTokenToHistory: function (tokenStr) {
       if (this.tokenAlreadyInHistory(tokenStr)) {
         this.notifySuccess(
-          this.$i18n.t(
+          i18n.global.t(
             "ReceiveTokenDialog.actions.later.already_in_history_success_text"
           )
         );
@@ -597,7 +598,7 @@ export default defineComponent({
       this.showReceiveTokens = false;
       // show success notification
       this.notifySuccess(
-        this.$i18n.t(
+        i18n.global.t(
           "ReceiveTokenDialog.actions.later.added_to_history_success_text"
         )
       );
