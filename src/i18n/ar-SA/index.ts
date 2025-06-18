@@ -72,6 +72,8 @@ export default {
       please_try_again: "يرجى المحاولة مرة أخرى.",
       nostr_dm_sent: "تم إرسال رسالة Nostr",
       nostr_dm_failed: "فشل إرسال رسالة Nostr",
+      proofs_spent_refresh_token:
+        "Some proofs in this token were already spent. Ask the sender for a refreshed token",
     },
     mint: {
       notifications: {

@@ -73,6 +73,8 @@ export default {
       please_try_again: "Bitte versuchen Sie es erneut.",
       nostr_dm_sent: "Nostr-DM gesendet",
       nostr_dm_failed: "Nostr-DM konnte nicht gesendet werden",
+      proofs_spent_refresh_token:
+        "Some proofs in this token were already spent. Ask the sender for a refreshed token",
     },
     mint: {
       notifications: {

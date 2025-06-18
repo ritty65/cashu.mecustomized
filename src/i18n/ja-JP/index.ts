@@ -73,6 +73,8 @@ export default {
       please_try_again: "もう一度お試しください。",
       nostr_dm_sent: "Nostr DMを送信しました",
       nostr_dm_failed: "Nostr DMの送信に失敗しました",
+      proofs_spent_refresh_token:
+        "Some proofs in this token were already spent. Ask the sender for a refreshed token",
     },
     mint: {
       notifications: {

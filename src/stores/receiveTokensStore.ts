@@ -12,7 +12,7 @@ import {
   notify,
   notifyWarning,
 } from "../js/notify";
-import { Token } from "@cashu/cashu-ts";
+import { Token, CheckStateEnum } from "@cashu/cashu-ts";
 import { useSwapStore } from "./swap";
 import { Clipboard } from "@capacitor/clipboard";
 import { DEFAULT_BUCKET_ID } from "./buckets";
@@ -72,7 +72,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
     },
     receiveToken: async function (
       encodedToken: string,
-      bucketId: string = DEFAULT_BUCKET_ID
+      bucketId: string = DEFAULT_BUCKET_ID,
     ) {
       const mintStore = useMintsStore();
       const walletStore = useWalletStore();
@@ -87,7 +87,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
       // get the private key for the token we want to receive if it is locked with P2PK
       receiveStore.receiveData.p2pkPrivateKey =
         useP2PKStore().getPrivateKeyForP2PKEncodedToken(
-          receiveStore.receiveData.tokensBase64
+          receiveStore.receiveData.tokensBase64,
         );
 
       const tokenJson = this.decodeToken(receiveStore.receiveData.tokensBase64);
@@ -107,13 +107,38 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
     receiveIfDecodes: async function () {
       try {
         const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
-        if (decodedToken) {
-          await this.receiveToken(
-            this.receiveData.tokensBase64,
-            this.receiveData.bucketId
-          );
-          return true;
+        if (!decodedToken) return false;
+
+        const walletStore = useWalletStore();
+        const mintUrl = token.getMint(decodedToken);
+        const unit = token.getUnit(decodedToken);
+        const mintWallet = walletStore.mintWallet(mintUrl, unit);
+        const proofs = token.getProofs(decodedToken);
+
+        try {
+          const states = await mintWallet.checkProofsStates(proofs);
+          const spent = states.filter((s) => s.state === CheckStateEnum.SPENT);
+          if (spent.length > 0) {
+            const t = walletStore.t;
+            if (spent.length < proofs.length) {
+              notifyWarning(
+                t("wallet.notifications.proofs_spent_refresh_token"),
+              );
+            } else {
+              notifyError(t("wallet.notifications.proofs_spent_refresh_token"));
+            }
+            return false;
+          }
+        } catch (e) {
+          console.error(e);
+          // If check fails we still fall through to attempt redeem
         }
+
+        await this.receiveToken(
+          this.receiveData.tokensBase64,
+          this.receiveData.bucketId,
+        );
+        return true;
       } catch (error) {
         console.error(error);
         return false;
@@ -189,7 +214,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
                         const text = new TextDecoder().decode(record.data);
                         if (!text.startsWith("cashu")) {
                           throw new Error(
-                            "text does not contain a cashu token"
+                            "text does not contain a cashu token",
                           );
                         }
                         tokenStr = text;
@@ -210,12 +235,12 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
                         const prefix = String.fromCharCode(...data.slice(0, 4));
                         if (prefix !== "craw") {
                           throw new Error(
-                            "binary data does not contain a cashu token"
+                            "binary data does not contain a cashu token",
                           );
                         }
                         // TODO: decode the binary token from data
                         throw new Error(
-                          "binary token parsing not implemented yet"
+                          "binary token parsing not implemented yet",
                         );
                         break;
                       default:
@@ -236,7 +261,7 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
                   }
                   this.controller.abort();
                   this.scanningCard = false;
-                }
+                },
               );
               this.scanningCard = true;
             })

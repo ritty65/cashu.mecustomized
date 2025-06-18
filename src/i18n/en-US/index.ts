@@ -79,6 +79,8 @@ export default {
       lock_not_supported: "Mint does not support locking (NUT-10/11)",
       nostr_dm_sent: "Nostr DM sent",
       nostr_dm_failed: "Failed to send Nostr DM",
+      proofs_spent_refresh_token:
+        "Some proofs in this token were already spent. Ask the sender for a refreshed token",
     },
     mint: {
       notifications: {

@@ -73,6 +73,8 @@ export default {
       please_try_again: "โปรดลองอีกครั้ง",
       nostr_dm_sent: "ส่ง Nostr DM แล้ว",
       nostr_dm_failed: "ส่ง Nostr DM ไม่สำเร็จ",
+      proofs_spent_refresh_token:
+        "Some proofs in this token were already spent. Ask the sender for a refreshed token",
     },
     mint: {
       notifications: {

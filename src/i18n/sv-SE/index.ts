@@ -72,6 +72,8 @@ export default {
       please_try_again: "Försök igen.",
       nostr_dm_sent: "Nostr-DM skickat",
       nostr_dm_failed: "Kunde inte skicka Nostr-DM",
+      proofs_spent_refresh_token:
+        "Some proofs in this token were already spent. Ask the sender for a refreshed token",
     },
     mint: {
       notifications: {
