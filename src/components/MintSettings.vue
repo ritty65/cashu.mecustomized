@@ -472,6 +472,7 @@ import { useWorkersStore } from "src/stores/workers";
 import { useSwapStore } from "src/stores/swap";
 import { useUiStore } from "src/stores/ui";
 import { notifyError, notifyWarning } from "src/js/notify";
+import { i18n } from "../boot/i18n";
 import MintDetailsDialog from "src/components/MintDetailsDialog.vue";
 import { EventBus } from "../js/eventBus";
 import AddMintDialog from "src/components/AddMintDialog.vue";
@@ -605,7 +606,7 @@ export default defineComponent({
       }
       if (!this.validateMintUrl(this.addMintData.url)) {
         notifyError(
-          this.$i18n.t("MintSettings.add.actions.add_mint.error_invalid_url")
+          i18n.global.t("MintSettings.add.actions.add_mint.error_invalid_url")
         );
         return;
       }
@@ -670,11 +671,11 @@ export default defineComponent({
       }
       if (mintUrls.length == 0) {
         this.notifyError(
-          this.$i18n.t("MintSettings.discover.actions.discover.error_no_mints")
+          i18n.global.t("MintSettings.discover.actions.discover.error_no_mints")
         );
       } else {
         this.notifySuccess(
-          this.$i18n.t("MintSettings.discover.actions.discover.success", {
+          i18n.global.t("MintSettings.discover.actions.discover.success", {
             length: mintUrls.length,
           })
         );

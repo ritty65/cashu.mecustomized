@@ -656,6 +656,7 @@ import { usePriceStore } from "src/stores/price";
 import { useNostrStore } from "src/stores/nostr";
 import token from "src/js/token";
 import { Buffer } from "buffer";
+import { i18n } from "../boot/i18n";
 // Ensure Buffer is globally available for dependencies
 globalThis.Buffer = globalThis.Buffer || Buffer;
 import { useCameraStore } from "src/stores/camera";
@@ -1251,13 +1252,13 @@ export default defineComponent({
             if (success && event) {
               useDmChatsStore().addOutgoing(event);
               Dialog.create({
-                message: this.$t(
+                message: i18n.global.t(
                   "wallet.notifications.nostr_dm_sent"
                 ) as string,
               });
             } else {
               Dialog.create({
-                message: this.$t(
+                message: i18n.global.t(
                   "wallet.notifications.nostr_dm_failed"
                 ) as string,
               });
@@ -1265,7 +1266,7 @@ export default defineComponent({
           } catch (e) {
             console.error(e);
             Dialog.create({
-              message: this.$t(
+              message: i18n.global.t(
                 "wallet.notifications.nostr_dm_failed"
               ) as string,
             });
@@ -1294,11 +1295,11 @@ export default defineComponent({
         this.addPendingToken(historyToken);
         this.sendData.historyToken = historyToken;
         Dialog.create({
-          message: this.$t(
+          message: i18n.global.t(
             "FindCreators.notifications.donation_sent"
           ) as string,
           ok: {
-            label: this.$t("FindCreators.actions.back_to_search") as string,
+            label: i18n.global.t("FindCreators.actions.back_to_search") as string,
           },
         }).onOk(() => {
           this.showSendTokens = false;
@@ -1401,13 +1402,13 @@ export default defineComponent({
             if (success && event) {
               useDmChatsStore().addOutgoing(event);
               Dialog.create({
-                message: this.$t(
+                message: i18n.global.t(
                   "wallet.notifications.nostr_dm_sent"
                 ) as string,
               });
             } else {
               Dialog.create({
-                message: this.$t(
+                message: i18n.global.t(
                   "wallet.notifications.nostr_dm_failed"
                 ) as string,
               });
@@ -1415,7 +1416,7 @@ export default defineComponent({
           } catch (e) {
             console.error(e);
             Dialog.create({
-              message: this.$t(
+              message: i18n.global.t(
                 "wallet.notifications.nostr_dm_failed"
               ) as string,
             });

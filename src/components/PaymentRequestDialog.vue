@@ -127,6 +127,7 @@ import { useMintsStore } from "../stores/mints";
 import { getShortUrl } from "src/js/wallet-helpers";
 import { useUiStore } from "../stores/ui";
 import ToggleUnit from "./ToggleUnit.vue";
+import { i18n } from "../boot/i18n";
 
 export default defineComponent({
   name: "PRDialog",
@@ -136,7 +137,7 @@ export default defineComponent({
     ToggleUnit,
   },
   data() {
-    const amountLabelDefault = this.$i18n.t(
+    const amountLabelDefault = i18n.global.t(
       "PaymentRequestDialog.actions.add_amount.label"
     );
     return {
@@ -145,7 +146,7 @@ export default defineComponent({
       amountInputValue: "",
       amountLabelDefault,
       amountLabel: amountLabelDefault,
-      defaultAnyMint: this.$i18n.t(
+      defaultAnyMint: i18n.global.t(
         "PaymentRequestDialog.actions.use_active_mint.label"
       ),
       chosenMintUrl: undefined,

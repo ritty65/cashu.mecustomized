@@ -180,6 +180,7 @@ import { useSendTokensStore } from "src/stores/sendTokensStore";
 import token from "../js/token";
 import { notify } from "src/js/notify";
 import { DEFAULT_COLOR } from "src/js/constants";
+import { i18n } from "../boot/i18n";
 
 export default defineComponent({
   name: "HistoryTable",
@@ -263,7 +264,7 @@ export default defineComponent({
     },
     showTokenDialog: function (historyToken) {
       if (historyToken.token === undefined) {
-        notify(this.$i18n.t("HistoryTable.old_token_not_found_error_text"));
+        notify(i18n.global.t("HistoryTable.old_token_not_found_error_text"));
         return;
       }
       const tokensBase64 = historyToken.token;
