@@ -177,9 +177,38 @@ export async function publishNutzapProfile(opts: {
   if (!nostr.signer) {
     throw new Error("Signer required to publish Nutzap profile");
   }
+  let p2pkHex = opts.p2pkPub.trim();
+  if (p2pkHex.startsWith("npub")) {
+    const decoded = npubToHex(p2pkHex);
+    if (!decoded) throw new Error("Invalid npub for p2pkPub");
+    p2pkHex = ensureCompressed(decoded);
+  } else {
+    try {
+      p2pkHex = ensureCompressed(p2pkHex);
+    } catch {
+      throw new Error("p2pkPub must be a 66-character hex string or npub");
+    }
+    if (!/^(02|03)[0-9a-f]{64}$/.test(p2pkHex)) {
+      throw new Error("p2pkPub must be a 66-character hex string");
+    }
+  }
+
+  const mintUrls: string[] = [];
+  for (const m of opts.mints) {
+    try {
+      const u = new URL(m);
+      if (!/^https?:$/.test(u.protocol)) throw new Error();
+      mintUrls.push(u.toString());
+    } catch {
+      throw new Error(`Invalid mint URL: ${m}`);
+    }
+  }
+  if (mintUrls.length === 0) {
+    throw new Error("At least one mint URL required");
+  }
   await nostr.ensureNdkConnected(opts.relays);
-  const tags: NDKTag[] = [["pubkey", opts.p2pkPub]];
-  for (const url of opts.mints) tags.push(["mint", url]);
+  const tags: NDKTag[] = [["pubkey", p2pkHex]];
+  for (const url of mintUrls) tags.push(["mint", url]);
   if (opts.relays)
     for (const r of opts.relays) tags.push(["relay", r]);
 
