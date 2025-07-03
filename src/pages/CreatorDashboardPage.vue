@@ -42,7 +42,7 @@
     <q-card class="q-mt-md q-mb-md" flat bordered>
       <q-card-section>
         <div class="text-h6">Nutzap receiving profile</div>
-        <q-input v-model="profilePub" label="P2PK pubkey (hex, start with 02…)" dense />
+        <q-input v-model="profilePub" label="P2PK pubkey (hex or npub)" dense />
         <q-input v-model="profileMints" label="Trusted mints (comma-separated URLs)" dense />
         <q-input v-model="profileRelays" label="Relay hints (comma-separated wss://…)" dense />
       </q-card-section>
@@ -214,7 +214,10 @@ export default defineComponent({
     const profileRelays = ref("");
 
     const canSaveNutzap = computed(
-      () => profilePub.value.startsWith("02") && profileMints.value.length > 0
+      () =>
+        (/^(02|03)/.test(profilePub.value.trim()) ||
+          profilePub.value.trim().startsWith("npub")) &&
+        profileMints.value.length > 0
     );
 
     const p2pkStore = useP2PKStore();
