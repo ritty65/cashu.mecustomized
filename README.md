@@ -137,6 +137,22 @@ mint URLs to use.
 6. Creators claim the tokens as they arrive, unlocking them when the timelock
    expires.
 
+### P2PK Keys & Locked Tokens
+
+Fundstr lets you lock Cashu tokens to any SEC-compressed public key. A creator
+can either generate a key locally or import the secret from an existing Nostr
+account.
+
+- **Generate a key** – use `useP2PKStore.generateKeypair()` to create a new
+  P2PK keypair saved in local storage. No Nostr account is required.
+- **Import a Nostr key** – call `useP2PKStore.importNsec()` and paste your
+  `nsec` to load the matching 66‑character pubkey.
+
+Tokens can then be **locked** to the pubkey via Cashu's P2PK mechanism. To
+spend the locked tokens, the owner proves knowledge of the corresponding private
+key when calling `claimLockedToken`. If the key only exists locally, you can use
+these features without registering a Nostr account.
+
 ## Roadmap & Future Ideas
 
 - Advanced creator discovery with search, filters and Nostr recommendations
