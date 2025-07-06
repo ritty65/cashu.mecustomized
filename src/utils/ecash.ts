@@ -1,25 +1,21 @@
-import { secp256k1 } from "@noble/curves/secp256k1";
-import { bytesToHex } from "@noble/hashes/utils";
-const Point = secp256k1.ProjectivePoint;
+import { Point } from "@noble/secp256k1";
 
 /**
- * Ensure a hex pubkey is 33-byte SEC-compressed (66 hex chars 02/03…).
- * Accepts raw 32-byte hex, 65-byte uncompressed hex (prefix 04), or
- * already-compressed hex. Always run user-provided keys through this
- * helper before they are stored or used in P2PK operations.
+ * Converts a public key in any format (64-byte hex, 65-byte uncompressed hex,
+ * or 33-byte compressed hex) into the standard 33-byte compressed hex format.
+ *
+ * @param hex The public key to compress.
+ * @returns The compressed public key as a hex string starting with `02` or `03`.
  */
 export function ensureCompressed(hex: string): string {
   hex = hex.toLowerCase().replace(/^0x/, "");
-  if (/^(02|03)[0-9a-f]{64}$/.test(hex)) return hex; // already good
-  if (/^[0-9a-f]{64}$/.test(hex)) {
-    try {
-      return bytesToHex(Point.fromHex("02" + hex).toRawBytes(true));
-    } catch {
-      return bytesToHex(Point.fromHex("03" + hex).toRawBytes(true));
-    }
+
+  // nostr-tools' `getPublicKey` returns a 64 byte x-only key.
+  // Prepend `02` to convert it into a point on the curve.
+  if (hex.length === 64) {
+    hex = "02" + hex;
   }
-  if (/^04[0-9a-f]{128}$/.test(hex)) {
-    return bytesToHex(Point.fromHex(hex).toRawBytes(true));
-  }
-  throw new Error(`invalid pubkey format: ${hex}`);
+
+  const point = Point.fromHex(hex);
+  return point.toHex(true);
 }
