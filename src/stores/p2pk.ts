@@ -3,7 +3,8 @@ import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { generateSecretKey, getPublicKey, nip19 } from "nostr-tools";
 import { ensureCompressed } from "src/utils/ecash";
-import { bytesToHex } from "@noble/hashes/utils";
+import { randomBytes } from "@noble/hashes/utils";
+import { sha256 } from "@noble/hashes/sha256";
 import { WalletProof } from "stores/mints";
 import token from "src/js/token";
 import { useWalletStore } from "./wallet";
@@ -13,6 +14,10 @@ import { useTokensStore } from "./tokens";
 import { DEFAULT_BUCKET_ID } from "./buckets";
 import { cashuDb } from "./dexie";
 import { maybeRepublishNutzapProfile } from "./creatorHub";
+
+function bytesToHex(u8: Uint8Array): string {
+  return [...u8].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
 
 /** Return `{ pub, priv }` where `pub` is SEC-compressed hex. */
 export function generateP2pkKeyPair(): { pub: string; priv: string } {
@@ -156,6 +161,11 @@ export const useP2PKStore = defineStore("p2pk", {
         usedCount: 0,
       };
       this.p2pkKeys = this.p2pkKeys.concat(keyPair);
+    },
+    generateRefundSecret: function () {
+      const pre = randomBytes(32);
+      const hash = sha256(pre);
+      return { preimage: bytesToHex(pre), hash: bytesToHex(hash) };
     },
     async createAndSelectNewKey() {
       const { pub, priv } = generateP2pkKeyPair();
