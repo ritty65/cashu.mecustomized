@@ -282,7 +282,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
-import Draggable from 'vuedraggable';
+import Draggable from 'vuedraggable/src/vuedraggable';
 import { useCreatorHubStore, type Tier } from 'stores/creatorHub';
 import { useNostrStore, fetchNutzapProfile, publishDiscoveryProfile, RelayConnectionError } from 'stores/nostr';
 import { useP2PKStore } from 'stores/p2pk';
