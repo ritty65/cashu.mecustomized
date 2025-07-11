@@ -1610,7 +1610,6 @@ export const messages = {
     publish: "Publish Profile",
     saveDraft: "Save Draft",
     profileHeader: "Profile details",
-    endpointsHeader: "Endpoints",
   },
   swap: {
     in_progress_warning_text: "Swap in progress",
