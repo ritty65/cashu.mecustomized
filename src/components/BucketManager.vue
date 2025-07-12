@@ -8,7 +8,7 @@
       debounce="200"
       :placeholder="$t('bucket.search')"
       clearable
-      class="q-mb-md"
+      class="q-mb-md bg-grey-8"
     >
       <template #prepend><q-icon name="search" /></template>
     </q-input>
@@ -16,7 +16,7 @@
       v-model="sortBy"
       :options="['name', 'balance']"
       dense
-      class="q-mb-md"
+      class="q-mb-md bg-grey-8"
     />
     <q-list padding>
       <template v-if="filteredBuckets.length">
