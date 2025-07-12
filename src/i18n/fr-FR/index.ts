@@ -1398,8 +1398,12 @@ export default {
     },
   },
   bucketManager: {
-    actions: { add: "Add bucket" },
+    actions: { add: "Add bucket", delete: "Delete" },
     addDialog: { title: "Create new bucket" },
+    tooltips: {
+      edit_button: "Edit bucket",
+      delete_button: "Delete bucket",
+    },
   },
   bucket: {
     name: "Name",

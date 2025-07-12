@@ -1,7 +1,7 @@
 <template>
   <q-card
-    class="shadow-2 rounded-borders bg-grey-8 text-white"
-    :class="{ 'drag-hover': isDrag }"
+    class="shadow-2 rounded-borders bg-grey-9 text-white"
+    :class="[{ 'drag-hover': isDrag }]"
     :style="{ borderLeft: '4px solid ' + (bucket.color || 'var(--q-primary)') }"
     @dragenter="onDragEnter"
     @dragleave="onDragLeave"
@@ -92,6 +92,7 @@ export default defineComponent({
   props: {
     bucket: { type: Object as () => any, required: true },
     balance: { type: Number, default: 0 },
+    /* Pinia hydrates after mount – provide sane fallback to stop warnings */
     activeUnit: {
       type: String,
       default: 'sat'
