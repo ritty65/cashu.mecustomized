@@ -27,6 +27,8 @@ export type BucketRule = {
 export const DEFAULT_BUCKET_ID = "unassigned";
 export const DEFAULT_BUCKET_NAME = "Default";
 
+// The "unassigned" bucket is permanent. Users cannot delete or rename it
+// because it holds tokens not explicitly allocated.
 function ensureDefaultBucket(buckets: { value: Bucket[] }) {
   if (!buckets.value.find((b) => b.id === DEFAULT_BUCKET_ID)) {
     buckets.value.unshift({ id: DEFAULT_BUCKET_ID, name: DEFAULT_BUCKET_NAME });
