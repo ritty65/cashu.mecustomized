@@ -1,5 +1,6 @@
 <template>
-  <div class="column q-gutter-md q-pa-lg">
+  <!-- guaranteed flex box with height -->
+  <div class="column fit q-gutter-y-md" style="max-width: 980px; margin:0 auto">
     <div class="text-body2 q-mb-md">{{ $t("BucketManager.helper.intro") }}</div>
     <q-input
       v-model="search"
@@ -186,6 +187,9 @@ export default defineComponent({
     const search = ref('');
     const sortBy = ref('name');
     const filteredBuckets = computed(() => {
+      /* pinia may hydrate after first render – guard against undefined/empty */
+      if (!bucketList.value?.length) return [];
+
       const term = search.value.toLowerCase();
       let arr = bucketList.value.filter((b) =>
         b.name.toLowerCase().includes(term)
