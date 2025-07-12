@@ -932,9 +932,6 @@ export default {
       label: {
         label: "Label",
       },
-    search: "Search buckets",
-    empty: "No buckets yet. Tap + to add your first one.",
-    moved: "Tokens moved to bucket",
     },
     errors: {
       invalid_token: {
@@ -1384,6 +1381,9 @@ export default {
     color: "Color",
     goal: "Monthly goal",
     description: "Description",
+    search: "Search buckets",
+    empty: "No buckets yet. Tap + to add your first one.",
+    moved: "Tokens moved to bucket",
   },
   SubscriptionsOverview: {
     export_csv: "Export CSV",

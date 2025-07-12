@@ -24,6 +24,7 @@ export default defineConfig({
     include: [
       "src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
       "test/vitest/__tests__/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+      "test/vitest/**/*.spec.{js,ts}",
     ],
   },
   resolve: {
