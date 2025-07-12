@@ -20,20 +20,26 @@
       class="q-mb-md"
     />
     <q-list padding>
-      <template v-if="filteredBuckets.length">
-        <div
-          v-for="bucket in filteredBuckets"
-          :key="bucket.id"
-          class="q-mb-md"
-        >
-          <BucketCard
-            :bucket="bucket"
-            :balance="bucketBalances[bucket.id] || 0"
-            :activeUnit="activeUnit.value"
-            @edit="openEdit"
-            @delete="openDelete"
-            @drop="handleDrop($event, bucket.id)"
-          />
+      <template v-if="hasUserBuckets">
+        <template v-if="filteredBuckets.length">
+          <div
+            v-for="bucket in filteredBuckets"
+            :key="bucket.id"
+            class="q-mb-md"
+            v-show="!(onlyDefaultBucket && bucket.id === DEFAULT_BUCKET_ID && (bucketBalances[bucket.id] || 0) === 0)"
+          >
+            <BucketCard
+              :bucket="bucket"
+              :balance="bucketBalances[bucket.id] || 0"
+              :activeUnit="activeUnit.value"
+              @edit="openEdit"
+              @delete="openDelete"
+              @drop="handleDrop($event, bucket.id)"
+            />
+          </div>
+        </template>
+        <div v-else class="text-grey-5 text-center q-pa-md">
+          {{ $t('bucket.no_results') }}
         </div>
       </template>
       <BucketsEmptyState v-else @add="openAdd" />
@@ -206,6 +212,23 @@ export default defineComponent({
       return arr;
     });
 
+    const hasUserBuckets = computed(() =>
+      bucketList.value.some((b) => b.id !== DEFAULT_BUCKET_ID)
+    );
+
+    const onlyDefaultBucket = computed(
+      () =>
+        bucketList.value.length === 1 &&
+        bucketList.value[0].id === DEFAULT_BUCKET_ID
+    );
+
+    const noResults = computed(
+      () =>
+        hasUserBuckets.value &&
+        filteredBuckets.value.length === 0 &&
+        search.value.trim().length > 0
+    );
+
     const formatCurrency = (amount, unit) => {
       return uiStore.formatCurrency(amount, unit);
     };
@@ -288,6 +311,9 @@ export default defineComponent({
       search,
       sortBy,
       filteredBuckets,
+      hasUserBuckets,
+      onlyDefaultBucket,
+      noResults,
       activeUnit,
       showForm,
       dialogOpen,
