@@ -1,6 +1,6 @@
 <template>
   <q-card
-    class="shadow-2 rounded-borders bg-grey-9 text-white"
+    class="shadow-2 rounded-borders bg-grey-8 text-white"
     :class="{ 'drag-hover': isDrag }"
     :style="{ borderLeft: '4px solid ' + (bucket.color || 'var(--q-primary)') }"
     @dragenter="onDragEnter"
@@ -92,7 +92,10 @@ export default defineComponent({
   props: {
     bucket: { type: Object as () => any, required: true },
     balance: { type: Number, default: 0 },
-    activeUnit: { type: String, required: true }
+    activeUnit: {
+      type: String,
+      default: 'sat'
+    }
   },
   emits: ['edit', 'delete', 'drop'],
   setup(props, { emit }) {
