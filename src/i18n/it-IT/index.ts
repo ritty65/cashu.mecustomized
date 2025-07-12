@@ -1304,8 +1304,15 @@ export default {
     },
   },
   BucketManager: {
+    actions: {
+      add: "Add",
+      edit: "Edit",
+      delete: "Delete",
+    },
     tooltips: {
       description: "I bucket servono per categorizzare i token",
+      edit_button: "Edit this bucket",
+      delete_button: "Remove this bucket",
     },
   },
   BucketDetail: {

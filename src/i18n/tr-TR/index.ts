@@ -1306,9 +1306,16 @@ export default {
     },
   },
   BucketManager: {
+    actions: {
+      add: "Add",
+      edit: "Edit",
+      delete: "Delete",
+    },
     tooltips: {
       description:
         "Bucket'lar tokenleri kategorize etmek i\u00e7in kullan\u0131l\u0131r",
+      edit_button: "Edit this bucket",
+      delete_button: "Remove this bucket",
     },
   },
   BucketDetail: {

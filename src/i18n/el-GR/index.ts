@@ -1321,9 +1321,16 @@ export default {
     },
   },
   BucketManager: {
+    actions: {
+      add: "Add",
+      edit: "Edit",
+      delete: "Delete",
+    },
     tooltips: {
       description:
         "Τα buckets χρησιμοποιούνται για την κατηγοριοποίηση των token",
+      edit_button: "Edit this bucket",
+      delete_button: "Remove this bucket"
     },
   },
   BucketDetail: {
