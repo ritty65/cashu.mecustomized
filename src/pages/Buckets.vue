@@ -1,12 +1,12 @@
 <template>
-  <div
-    :class="[
-      $q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark',
-      'text-center q-pa-md flex flex-center',
-    ]"
-  >
-    <BucketManager />
-  </div>
+  <q-page class="column full-height">
+    <q-scroll-area
+      class="fit bg-grey-10"
+      :class="$q.screen.gt.md ? 'q-mx-xl' : 'q-mx-sm'"
+    >
+      <BucketManager class="q-pa-lg" />
+    </q-scroll-area>
+  </q-page>
 </template>
 
 <script>

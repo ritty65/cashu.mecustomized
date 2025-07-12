@@ -952,6 +952,9 @@ export default {
       label: {
         label: "Label",
       },
+    search: "Search buckets",
+    empty: "No buckets yet. Tap + to add your first one.",
+    moved: "Tokens moved to bucket",
     },
     errors: {
       invalid_token: {

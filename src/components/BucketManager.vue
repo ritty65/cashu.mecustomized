@@ -1,48 +1,51 @@
 <template>
-  <div style="max-width: 800px; margin: 0 auto">
+  <div>
     <div class="text-body2 q-mb-md">{{ $t("BucketManager.helper.intro") }}</div>
+    <q-input
+      v-model="search"
+      dense
+      outlined
+      debounce="200"
+      :placeholder="$t('bucket.search')"
+      clearable
+      class="q-mb-md"
+    >
+      <template #prepend><q-icon name="search" /></template>
+    </q-input>
+    <q-select
+      v-model="sortBy"
+      :options="['name', 'balance']"
+      dense
+      class="q-mb-md"
+    />
     <q-list padding>
-      <div
-        v-for="bucket in bucketList"
-        :key="bucket.id"
-        class="q-mb-md"
-        @dragover.prevent
-        @drop="handleDrop($event, bucket.id)"
-      >
-        <BucketCard
-          :bucket="bucket"
-          :balance="bucketBalances[bucket.id] || 0"
-          :activeUnit="activeUnit.value"
-          @edit="openEdit"
-          @delete="openDelete"
-        />
-      </div>
-      <q-item>
-        <q-item-section>
-          <q-btn
-            color="primary"
-            icon="add"
-            outline
-            @click="openAdd"
-            :label="$t('bucketManager.actions.add')"
-          >
-            <q-tooltip>{{ $t("BucketManager.tooltips.add_button") }}</q-tooltip>
-          </q-btn>
-        </q-item-section>
-      </q-item>
-      <q-item>
-        <q-item-section>
-          <router-link to="/move-tokens" style="text-decoration: none">
-            <q-btn color="primary" outline>
-              {{ $t("BucketDetail.move") }}
-              <q-tooltip>{{
-                $t("BucketManager.tooltips.move_button")
-              }}</q-tooltip>
-            </q-btn>
-          </router-link>
-        </q-item-section>
-      </q-item>
+      <template v-if="filteredBuckets.length">
+        <div
+          v-for="bucket in filteredBuckets"
+          :key="bucket.id"
+          class="q-mb-md"
+        >
+          <BucketCard
+            :bucket="bucket"
+            :balance="bucketBalances[bucket.id] || 0"
+            :activeUnit="activeUnit.value"
+            @edit="openEdit"
+            @delete="openDelete"
+            @drop="handleDrop($event, bucket.id)"
+          />
+        </div>
+      </template>
+      <BucketsEmptyState v-else @add="openAdd" />
     </q-list>
+    <q-btn
+      fab
+      icon="add"
+      color="primary"
+      glossy
+      unelevated
+      class="fab-add-bucket"
+      @click="openAdd"
+    />
   </div>
 
   <q-dialog v-model="showForm">
@@ -144,6 +147,7 @@
 
 <script>
 import { defineComponent, ref, computed } from "vue";
+import { useQuasar } from "quasar";
 import { useI18n } from "vue-i18n";
 import { useBucketsStore, DEFAULT_BUCKET_ID } from "stores/buckets";
 import { useMintsStore } from "stores/mints";
@@ -154,11 +158,13 @@ import { notifyError } from "src/js/notify";
 import { DEFAULT_COLOR } from "src/js/constants";
 import BucketCard from "./BucketCard.vue";
 import BucketDialog from "./BucketDialog.vue";
+import BucketsEmptyState from "./BucketsEmptyState.vue";
 
 export default defineComponent({
   name: "BucketManager",
-  components: { BucketCard, BucketDialog },
+  components: { BucketCard, BucketDialog, BucketsEmptyState },
   setup() {
+    const $q = useQuasar();
     const bucketsStore = useBucketsStore();
     const uiStore = useUiStore();
     const { t } = useI18n();
@@ -178,6 +184,24 @@ export default defineComponent({
 
     const bucketList = computed(() => bucketsStore.bucketList);
     const bucketBalances = computed(() => bucketsStore.bucketBalances);
+    const search = ref('');
+    const sortBy = ref('name');
+    const filteredBuckets = computed(() => {
+      const term = search.value.toLowerCase();
+      let arr = bucketList.value.filter((b) =>
+        b.name.toLowerCase().includes(term)
+      );
+      arr = arr.slice().sort((a, b) => {
+        if (sortBy.value === 'balance') {
+          return (
+            (bucketBalances.value[b.id] || 0) -
+            (bucketBalances.value[a.id] || 0)
+          );
+        }
+        return a.name.localeCompare(b.name);
+      });
+      return arr;
+    });
 
     const formatCurrency = (amount, unit) => {
       return uiStore.formatCurrency(amount, unit);
@@ -226,6 +250,10 @@ export default defineComponent({
       }
       if (Array.isArray(secrets) && secrets.length) {
         await proofsStore.moveProofs(secrets, id);
+        if (ev.target && ev.target.classList) {
+          ev.target.classList.remove('drag-hover');
+        }
+        $q.notify({ type: 'positive', message: t('bucket.moved') });
       }
     };
 
@@ -254,6 +282,9 @@ export default defineComponent({
       DEFAULT_BUCKET_ID,
       bucketList,
       bucketBalances,
+      search,
+      sortBy,
+      filteredBuckets,
       activeUnit,
       showForm,
       dialogOpen,
@@ -275,3 +306,18 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+.fab-add-bucket {
+  position: fixed;
+  right: 32px;
+  bottom: 80px;
+  z-index: 1101;
+}
+@media (max-width: 599px) {
+  .fab-add-bucket {
+    right: 16px;
+    bottom: 70px;
+  }
+}
+</style>
