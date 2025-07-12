@@ -42,18 +42,18 @@ const routes = [
   {
     path: "/creator/:npub",
     name: "PublicCreatorProfile",
-    component: () => import("pages/PublicCreatorProfilePage.vue"),
+    component: () => import("src/pages/PublicCreatorProfilePage.vue"),
   },
   {
     path: "/buckets",
     component: () => import("layouts/FullscreenLayout.vue"),
-    children: [{ path: "", component: () => import("pages/Buckets.vue") }],
+    children: [{ path: "", component: () => import("src/pages/Buckets.vue") }],
   },
   {
     path: "/move-tokens",
     component: () => import("layouts/FullscreenLayout.vue"),
     children: [
-      { path: "", component: () => import("pages/MoveTokens.vue") },
+      { path: "", component: () => import("src/pages/MoveTokens.vue") },
     ],
   },
   {
@@ -62,7 +62,7 @@ const routes = [
     children: [
       {
         path: "",
-        component: () => import("pages/SubscriptionsOverview.vue"),
+        component: () => import("src/pages/SubscriptionsOverview.vue"),
       },
     ],
   },
@@ -70,54 +70,54 @@ const routes = [
     path: "/nostr-messenger",
     component: () => import("layouts/MainLayout.vue"),
     children: [
-      { path: "", component: () => import("pages/NostrMessenger.vue") },
+      { path: "", component: () => import("src/pages/NostrMessenger.vue") },
     ],
   },
   {
     path: "/buckets/:id",
     component: () => import("layouts/FullscreenLayout.vue"),
     children: [
-      { path: "", component: () => import("pages/BucketDetail.vue") },
+      { path: "", component: () => import("src/pages/BucketDetail.vue") },
     ],
   },
   {
     path: "/restore",
     component: () => import("layouts/FullscreenLayout.vue"),
-    children: [{ path: "", component: () => import("pages/Restore.vue") }],
+    children: [{ path: "", component: () => import("src/pages/Restore.vue") }],
   },
   {
     path: "/already-running",
     component: () => import("layouts/BlankLayout.vue"),
     children: [
-      { path: "", component: () => import("pages/AlreadyRunning.vue") },
+      { path: "", component: () => import("src/pages/AlreadyRunning.vue") },
     ],
   },
   {
     path: "/welcome",
     component: () => import("layouts/BlankLayout.vue"),
     children: [
-      { path: "", component: () => import("pages/WelcomePage.vue") },
+      { path: "", component: () => import("src/pages/WelcomePage.vue") },
     ],
   },
   {
     path: "/terms",
     component: () => import("layouts/FullscreenLayout.vue"),
     children: [
-      { path: "", component: () => import("pages/TermsPage.vue") },
+      { path: "", component: () => import("src/pages/TermsPage.vue") },
     ],
   },
   {
     path: "/about",
     component: () => import("layouts/FullscreenLayout.vue"),
     children: [
-      { path: "", component: () => import("pages/AboutPage.vue") },
+      { path: "", component: () => import("src/pages/AboutPage.vue") },
     ],
   },
   {
     path: "/nostr-login",
     component: () => import("layouts/FullscreenLayout.vue"),
     children: [
-      { path: "", component: () => import("pages/NostrLogin.vue") },
+      { path: "", component: () => import("src/pages/NostrLogin.vue") },
     ],
   },
 
@@ -127,7 +127,7 @@ const routes = [
     path: "/:pathMatch(.*)*",
     component: () => import("layouts/FullscreenLayout.vue"),
     children: [
-      { path: "", component: () => import("pages/ErrorNotFound.vue") },
+      { path: "", component: () => import("src/pages/ErrorNotFound.vue") },
     ],
   },
 ];
