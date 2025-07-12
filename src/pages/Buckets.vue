@@ -5,11 +5,16 @@
       :class="$q.screen.gt.md ? 'q-mx-xl' : 'q-mx-sm'"
     >
       <!-- Manager must stretch so the inner search / empty-state is visible -->
-      <BucketManager
-        class="q-pa-lg column fit"
-        :class="$q.screen.gt.xl ? 'self-center' : ''"
-        style="max-width: 1100px"
-      />
+      <div
+        class="column q-gutter-y-md"
+        style="min-height:200px;max-width:980px;margin:0 auto"
+      >
+        <BucketManager
+          class="q-pa-lg column fit"
+          :class="$q.screen.gt.xl ? 'self-center' : ''"
+          style="max-width: 1100px"
+        />
+      </div>
     </q-scroll-area>
   </q-page>
 </template>
