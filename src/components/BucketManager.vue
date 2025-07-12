@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="column q-gutter-md q-pa-lg">
     <div class="text-body2 q-mb-md">{{ $t("BucketManager.helper.intro") }}</div>
     <q-input
       v-model="search"
@@ -46,9 +46,7 @@
       class="fab-add-bucket"
       @click="openAdd"
     />
-  </div>
-
-  <q-dialog v-model="showForm">
+    <q-dialog v-model="showForm">
     <q-card class="q-pa-lg" style="max-width: 500px">
       <h6 class="q-mt-none q-mb-md">{{ formTitle }}</h6>
       <q-form ref="bucketForm">
@@ -121,9 +119,9 @@
         </div>
       </q-form>
     </q-card>
-  </q-dialog>
+    </q-dialog>
 
-  <q-dialog v-model="showDelete">
+    <q-dialog v-model="showDelete">
     <q-card class="q-pa-md" style="max-width: 400px">
       <q-card-section class="row items-center">
         <q-icon name="warning" color="red" size="2rem" />
@@ -140,9 +138,10 @@
         }}</q-btn>
       </q-card-actions>
     </q-card>
-  </q-dialog>
+    </q-dialog>
 
-  <BucketDialog v-model="dialogOpen" />
+    <BucketDialog v-model="dialogOpen" />
+  </div>
 </template>
 
 <script>
