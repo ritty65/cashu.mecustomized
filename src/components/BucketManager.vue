@@ -1,6 +1,6 @@
 <template>
   <!-- guaranteed flex box with height -->
-  <div class="column fit q-gutter-y-md" style="max-width: 980px; margin:0 auto">
+  <div  class="column q-gutter-y-md"  style="min-height:200px;max-width:980px;margin:0 auto">
     <div class="text-body2 q-mb-md">{{ $t("BucketManager.helper.intro") }}</div>
     <q-input
       v-model="search"
@@ -9,7 +9,7 @@
       debounce="200"
       :placeholder="$t('bucket.search')"
       clearable
-      class="q-mb-md bg-grey-8"
+      class="q-mb-md"
     >
       <template #prepend><q-icon name="search" /></template>
     </q-input>
@@ -17,7 +17,7 @@
       v-model="sortBy"
       :options="['name', 'balance']"
       dense
-      class="q-mb-md bg-grey-8"
+      class="q-mb-md"
     />
     <q-list padding>
       <template v-if="filteredBuckets.length">

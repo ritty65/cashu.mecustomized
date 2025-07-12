@@ -1645,6 +1645,6 @@ export const messages = {
 export default {
   ...(defaultLang as any),
   ...messages,
-  BucketManager: { helper: { intro: "" } },
-  MoveTokens: { title: "", helper: "" },
+  BucketManager: { ...messages.BucketManager, helper: { intro: "" } },
+  MoveTokens: { ...messages.MoveTokens, title: "", helper: "" },
 };
