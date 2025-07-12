@@ -64,7 +64,22 @@ module.exports = configure(function (/* ctx */) {
         viteConf.resolve.alias = {
           ...(viteConf.resolve.alias || {}),
           '@': path.resolve(__dirname, 'src'),
-          "@cashu/cashu-ts": path.resolve(__dirname, "src/lib/cashu-ts/src/index.ts"),
+          '@cashu/cashu-ts': path.resolve(
+            __dirname,
+            'src/lib/cashu-ts/src/index.ts'
+          ),
+          app: path.resolve(__dirname),
+          src: path.resolve(__dirname, 'src'),
+          components: path.resolve(__dirname, 'src/components'),
+          layouts: path.resolve(__dirname, 'src/layouts'),
+          pages: path.resolve(__dirname, 'src/pages'),
+          assets: path.resolve(__dirname, 'src/assets'),
+          boot: path.resolve(__dirname, 'src/boot'),
+          stores: path.resolve(__dirname, 'src/stores'),
+          'vue$': path.resolve(
+            __dirname,
+            'node_modules/vue/dist/vue.runtime.esm-bundler.js'
+          ),
         };
       },
       // viteVuePluginOptions: {},
