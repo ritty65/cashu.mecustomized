@@ -1,5 +1,13 @@
 <template>
-  <q-card class="shadow-2 rounded-borders bg-grey-9 text-white">
+  <q-card
+    class="shadow-2 rounded-borders bg-grey-9 text-white"
+    :class="{ 'drag-hover': dragHover }"
+    :style="{ borderLeft: '4px solid ' + (bucket.color || 'var(--q-primary)') }"
+    @dragenter="onDragEnter"
+    @dragleave="onDragLeave"
+    @drop="onDrop"
+    @dragover.prevent
+  >
     <router-link
       :to="`/buckets/${bucket.id}`"
       style="text-decoration: none; display: block"
@@ -7,7 +15,12 @@
     >
       <q-item clickable class="q-pa-md">
         <q-item-section avatar>
-          <q-avatar square size="32px" class="bg-primary text-white">
+          <q-avatar
+            square
+            size="32px"
+            class="text-white"
+            :style="{ backgroundColor: bucket.color || 'var(--q-primary)' }"
+          >
             {{ bucket.name.charAt(0).toUpperCase() }}
           </q-avatar>
         </q-item-section>
@@ -67,7 +80,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import InfoTooltip from './InfoTooltip.vue';
 import { DEFAULT_BUCKET_ID } from 'stores/buckets';
@@ -81,10 +94,11 @@ export default defineComponent({
     balance: { type: Number, default: 0 },
     activeUnit: { type: String, required: true }
   },
-  emits: ['edit', 'delete'],
+  emits: ['edit', 'delete', 'drop'],
   setup(props, { emit }) {
     const uiStore = useUiStore();
     const { t } = useI18n();
+    const dragHover = ref(false);
 
     const formatCurrency = (amount: number, unit: string) => {
       return uiStore.formatCurrency(amount, unit);
@@ -93,14 +107,33 @@ export default defineComponent({
     const emitEdit = () => emit('edit', props.bucket);
     const emitDelete = () => emit('delete', props.bucket.id);
 
+    const onDragEnter = () => {
+      dragHover.value = true;
+    };
+    const onDragLeave = () => {
+      dragHover.value = false;
+    };
+    const onDrop = (e: DragEvent) => {
+      dragHover.value = false;
+      emit('drop', e);
+    };
+
     return {
       formatCurrency,
       emitEdit,
       emitDelete,
       DEFAULT_BUCKET_ID,
       t,
+      dragHover,
+      onDragEnter,
+      onDragLeave,
+      onDrop,
     };
   }
 });
 </script>
+
+<style lang="scss" scoped>
+@import '@/css/buckets.scss';
+</style>
 

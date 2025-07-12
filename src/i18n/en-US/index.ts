@@ -1632,6 +1632,9 @@ export const messages = {
     color: "Color",
     goal: "Monthly goal",
     description: "Description",
+    search: "Search buckets",
+    empty: "No buckets yet. Tap + to add your first one.",
+    moved: "Tokens moved to bucket",
   },
 };
 
