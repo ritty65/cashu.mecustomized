@@ -289,6 +289,7 @@ import { useNPCStore } from "src/stores/npubcash";
 import { useNostrStore, SignerType } from "src/stores/nostr";
 import { usePRStore } from "src/stores/payment-request";
 import { useDexieStore } from "src/stores/dexie";
+import { useSignerStore } from "src/stores/signer";
 
 import { useStorageStore } from "src/stores/storage";
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
