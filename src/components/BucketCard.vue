@@ -134,6 +134,6 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import '@/css/buckets.scss';
+@import '../css/buckets.scss';
 </style>
 
