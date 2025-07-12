@@ -1,7 +1,7 @@
 <template>
   <q-card
     class="shadow-2 rounded-borders bg-grey-9 text-white"
-    :class="{ 'drag-hover': dragHover }"
+    :class="{ 'drag-hover': isDrag }"
     :style="{ borderLeft: '4px solid ' + (bucket.color || 'var(--q-primary)') }"
     @dragenter="onDragEnter"
     @dragleave="onDragLeave"
@@ -98,7 +98,7 @@ export default defineComponent({
   setup(props, { emit }) {
     const uiStore = useUiStore();
     const { t } = useI18n();
-    const dragHover = ref(false);
+    const isDrag = ref(false);
 
     const formatCurrency = (amount: number, unit: string) => {
       return uiStore.formatCurrency(amount, unit);
@@ -108,13 +108,13 @@ export default defineComponent({
     const emitDelete = () => emit('delete', props.bucket.id);
 
     const onDragEnter = () => {
-      dragHover.value = true;
+      isDrag.value = true;
     };
     const onDragLeave = () => {
-      dragHover.value = false;
+      isDrag.value = false;
     };
     const onDrop = (e: DragEvent) => {
-      dragHover.value = false;
+      isDrag.value = false;
       emit('drop', e);
     };
 
@@ -124,7 +124,7 @@ export default defineComponent({
       emitDelete,
       DEFAULT_BUCKET_ID,
       t,
-      dragHover,
+      isDrag,
       onDragEnter,
       onDragLeave,
       onDrop,
