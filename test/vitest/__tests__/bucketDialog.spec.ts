@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { mount } from "@vue/test-utils";
-import BucketDialog from "../../../src/components/BucketDialog.vue";
 import BucketManager from "../../../src/components/BucketManager.vue";
 import { createI18n } from "vue-i18n";
 
@@ -37,19 +36,6 @@ beforeEach(() => {
   addBucketMock.mockReset();
 });
 
-describe("BucketDialog", () => {
-  it("adds bucket and closes dialog", async () => {
-    const wrapper = mount(BucketDialog, { props: { modelValue: true } });
-    const vm: any = wrapper.vm;
-    vm.form.name = "Test bucket";
-    await wrapper.vm.$nextTick();
-
-    await vm.save();
-
-    expect(addBucketMock).toHaveBeenCalled();
-    expect(wrapper.emitted()["update:modelValue"][0]).toEqual([false]);
-  });
-});
 
 describe("BucketManager", () => {
   it("renders add button label", () => {

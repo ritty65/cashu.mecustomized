@@ -118,7 +118,7 @@
         </q-input>
         <div class="row q-mt-md">
           <q-btn color="primary" rounded @click="saveBucket">{{
-            $t("global.actions.update.label")
+            editId ? $t('global.actions.update.label') : $t('global.actions.save.label')
           }}</q-btn>
           <q-btn flat rounded color="grey" class="q-ml-auto" v-close-popup>{{
             $t("global.actions.cancel.label")
@@ -147,7 +147,6 @@
     </q-card>
     </q-dialog>
 
-    <BucketDialog v-model="dialogOpen" />
   </div>
 </template>
 
@@ -163,19 +162,17 @@ import { useUiStore } from "stores/ui";
 import { notifyError } from "src/js/notify";
 import { DEFAULT_COLOR } from "src/js/constants";
 import BucketCard from "./BucketCard.vue";
-import BucketDialog from "./BucketDialog.vue";
 import BucketsEmptyState from "./BucketsEmptyState.vue";
 
 export default defineComponent({
   name: "BucketManager",
-  components: { BucketCard, BucketDialog, BucketsEmptyState },
+  components: { BucketCard, BucketsEmptyState },
   setup() {
     const $q = useQuasar();
     const bucketsStore = useBucketsStore();
     const uiStore = useUiStore();
     const { t } = useI18n();
     const showForm = ref(false);
-    const dialogOpen = ref(false);
     const bucketForm = ref(null);
     const showDelete = ref(false);
     const editId = ref(null);
@@ -237,7 +234,15 @@ export default defineComponent({
     const { activeUnit } = storeToRefs(mintsStore);
 
     const openAdd = () => {
-      dialogOpen.value = true;
+      editId.value = null;
+      form.value = {
+        name: '',
+        color: DEFAULT_COLOR,
+        description: '',
+        goal: null,
+        creatorPubkey: '',
+      };
+      showForm.value = true;
     };
 
     const openEdit = (bucket) => {
@@ -252,13 +257,17 @@ export default defineComponent({
       showForm.value = true;
     };
 
-    const nameRules = [(val) => !!val || t("BucketManager.validation.name")];
+    const nameRules = [
+      (val) =>
+        !!val && val.trim().length > 0 && val.trim().length <= 32 ||
+        t("BucketManager.validation.name"),
+    ];
 
     const goalRules = [
       (val) =>
         val === null ||
         val === undefined ||
-        val >= 0 ||
+        (typeof val === 'number' && !Number.isNaN(val) && val >= 0) ||
         t("BucketManager.validation.goal"),
     ];
 
@@ -284,12 +293,24 @@ export default defineComponent({
     };
 
     const saveBucket = async () => {
-      if (!(await bucketForm.value.validate())) {
+      const name = form.value.name.trim();
+      const goal = form.value.goal;
+      if (!name || name.length > 32) {
+        notifyError(t("BucketManager.validation.error"));
+        return;
+      }
+      if (
+        goal !== null &&
+        goal !== undefined &&
+        (typeof goal !== 'number' || Number.isNaN(goal) || goal < 0)
+      ) {
         notifyError(t("BucketManager.validation.error"));
         return;
       }
       if (editId.value) {
-        bucketsStore.editBucket(editId.value, { ...form.value });
+        bucketsStore.editBucket(editId.value, { ...form.value, name });
+      } else {
+        bucketsStore.addBucket({ ...form.value, name });
       }
       showForm.value = false;
     };
@@ -316,13 +337,14 @@ export default defineComponent({
       noResults,
       activeUnit,
       showForm,
-      dialogOpen,
       showDelete,
       form,
       bucketForm,
       nameRules,
       goalRules,
-      formTitle: computed(() => t('BucketManager.actions.edit')),
+      formTitle: computed(() =>
+        editId.value ? t('BucketManager.actions.edit') : t('BucketManager.actions.add')
+      ),
       openAdd,
       openEdit,
       saveBucket,
