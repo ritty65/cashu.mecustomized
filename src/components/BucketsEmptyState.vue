@@ -3,7 +3,8 @@
      <q-icon name="inventory_2" size="72px" />
      <div class="text-subtitle2 q-mt-md">{{ $t('bucket.empty') }}</div>
      <q-btn color="primary" icon="add" class="q-mt-md"
-            @click="$emit('add')" label="Add bucket"/>
+            :label="$t('BucketManager.actions.add')"
+            @click="$emit('add')" />
   </div>
 </template>
 

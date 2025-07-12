@@ -20,39 +20,38 @@
       class="q-mb-md"
     />
     <q-list padding>
-      <template v-if="hasUserBuckets">
-        <template v-if="filteredBuckets.length">
-          <div
-            v-for="bucket in filteredBuckets"
-            :key="bucket.id"
-            class="q-mb-md"
-            v-show="!(onlyDefaultBucket && bucket.id === DEFAULT_BUCKET_ID && (bucketBalances[bucket.id] || 0) === 0)"
-          >
-            <BucketCard
-              :bucket="bucket"
-              :balance="bucketBalances[bucket.id] || 0"
-              :activeUnit="activeUnit.value"
-              @edit="openEdit"
-              @delete="openDelete"
-              @drop="handleDrop($event, bucket.id)"
-            />
-          </div>
-        </template>
-        <div v-else class="text-grey-5 text-center q-pa-md">
-          {{ $t('bucket.no_results') }}
+      <template v-if="!hasUserBuckets">
+        <BucketsEmptyState @add="openAdd" />
+      </template>
+
+      <template v-else-if="noResults">
+        <div class="column items-center text-grey-5 q-pa-md">
+          <q-icon name="search_off" size="32px" class="q-mb-xs"/>
+          <div class="text-caption">{{ $t('bucket.no_results') }}</div>
         </div>
       </template>
-      <BucketsEmptyState v-else @add="openAdd" />
+
+      <template v-else>
+        <div v-for="bucket in filteredBuckets"
+             :key="bucket.id"
+             class="q-mb-md">
+          <BucketCard
+            :bucket="bucket"
+            :balance="bucketBalances[bucket.id] || 0"
+            :activeUnit="activeUnit.value"
+            @edit="openEdit"
+            @delete="openDelete"
+            @drop="handleDrop($event, bucket.id)"
+          />
+        </div>
+      </template>
     </q-list>
-    <q-btn
-      fab
-      icon="add"
-      color="primary"
-      glossy
-      unelevated
-      class="fab-add-bucket"
-      @click="openAdd"
-    />
+
+    <q-page-sticky position="bottom-right" :offset="[32,32]">
+      <q-btn fab icon="add" color="primary" glossy unelevated
+             :aria-label="$t('BucketManager.actions.add')"
+             @click="openAdd"/>
+    </q-page-sticky>
     <q-dialog v-model="showForm">
     <q-card class="q-pa-lg" style="max-width: 500px">
       <h6 class="q-mt-none q-mb-md">{{ formTitle }}</h6>
@@ -358,17 +357,3 @@ export default defineComponent({
 });
 </script>
 
-<style scoped>
-.fab-add-bucket {
-  position: fixed;
-  right: 32px;
-  bottom: 80px;
-  z-index: 1101;
-}
-@media (max-width: 599px) {
-  .fab-add-bucket {
-    right: 16px;
-    bottom: 70px;
-  }
-}
-</style>
