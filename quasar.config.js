@@ -63,6 +63,7 @@ module.exports = configure(function (/* ctx */) {
         viteConf.resolve = viteConf.resolve || {};
         viteConf.resolve.alias = {
           ...(viteConf.resolve.alias || {}),
+          '@': path.resolve(__dirname, 'src'),
           "@cashu/cashu-ts": path.resolve(__dirname, "src/lib/cashu-ts/src/index.ts"),
         };
       },
