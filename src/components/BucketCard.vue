@@ -80,17 +80,17 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, type PropType } from 'vue';
 import { useI18n } from 'vue-i18n';
 import InfoTooltip from './InfoTooltip.vue';
-import { DEFAULT_BUCKET_ID } from 'stores/buckets';
+import { DEFAULT_BUCKET_ID, type Bucket } from 'stores/buckets';
 import { useUiStore } from 'stores/ui';
 
 export default defineComponent({
   name: 'BucketCard',
   components: { InfoTooltip },
   props: {
-    bucket: { type: Object as () => any, required: true },
+    bucket: { type: Object as PropType<Bucket>, required: true },
     balance: { type: Number, default: 0 },
     /* Pinia hydrates after mount – provide sane fallback to stop warnings */
     activeUnit: {
