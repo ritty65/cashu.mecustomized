@@ -1402,6 +1402,7 @@ export default {
     description: "Description",
     search: "Search buckets",
     empty: "No buckets yet. Tap + to add your first one.",
+    no_results: "No buckets match your search.",
     moved: "Tokens moved to bucket",
   },
   SubscriptionsOverview: {
