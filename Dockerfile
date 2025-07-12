@@ -20,6 +20,8 @@ FROM nginx
 
 # Copy the built PWA files from the builder stage
 COPY --from=builder /app/dist/pwa /usr/share/nginx/html
+# Replace default nginx configuration with SPA friendly config
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expose the port your app will run on
 EXPOSE 80
