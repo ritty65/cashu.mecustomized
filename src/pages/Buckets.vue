@@ -4,7 +4,10 @@
       class="fit bg-grey-10"
       :class="$q.screen.gt.md ? 'q-mx-xl' : 'q-mx-sm'"
     >
-      <BucketManager class="q-pa-lg" />
+      <BucketManager
+        :class="$q.screen.gt.xl ? 'self-center' : ''"
+        style="max-width: 1100px"
+      />
     </q-scroll-area>
   </q-page>
 </template>
