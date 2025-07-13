@@ -1,6 +1,11 @@
 <template>
   <q-dialog v-model="showLocal" persistent>
     <q-card class="q-pa-lg" style="max-width: 90vw">
+      <q-card-section>
+        <h6 class="q-mt-none q-mb-md">
+          {{ t('bucketManager.addDialog.title') }}
+        </h6>
+      </q-card-section>
       <q-form ref="formRef" @submit.prevent="save">
         <q-input
           v-model="form.name"
