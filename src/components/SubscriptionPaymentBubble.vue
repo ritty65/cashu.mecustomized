@@ -9,28 +9,66 @@
       </div>
       <div class="q-mt-xs">{{ formattedAmount }}</div>
       <q-expansion-item dense expand-separator class="q-mt-sm" label="Token">
-        <div class="token-string">{{ payload.token }}</div>
-        <div class="row q-gutter-sm q-mt-sm">
-          <q-btn flat dense color="primary" @click.stop="redeemToken"
-            >Redeem</q-btn
+        <template v-if="carouselTokens.length > 1">
+          <q-carousel
+            v-model="carouselSlide"
+            animated
+            control-color="primary"
           >
-          <q-btn flat dense color="primary" @click.stop="copyToken"
-            >Copy token</q-btn
-          >
-        </div>
+            <q-carousel-slide
+              v-for="token in carouselTokens"
+              :key="token.monthIndex"
+              :name="token.monthIndex"
+            >
+              <div class="text-weight-bold q-mb-xs">
+                Month {{ token.monthIndex }} –
+                {{ token.status === 'claimed' ? 'claimed' : 'unlockable' }}
+              </div>
+              <div class="token-string">{{ token.tokenString }}</div>
+              <div class="row q-gutter-sm q-mt-sm">
+                <q-btn
+                  flat
+                  dense
+                  color="primary"
+                  @click.stop="redeemToken(token.tokenString)"
+                  >Redeem</q-btn
+                >
+                <q-btn
+                  flat
+                  dense
+                  color="primary"
+                  @click.stop="copyToken(token.tokenString)"
+                  >Copy token</q-btn
+                >
+              </div>
+            </q-carousel-slide>
+          </q-carousel>
+        </template>
+        <template v-else>
+          <div class="token-string">{{ payload.token }}</div>
+          <div class="row q-gutter-sm q-mt-sm">
+            <q-btn flat dense color="primary" @click.stop="redeemToken"
+              >Redeem</q-btn
+            >
+            <q-btn flat dense color="primary" @click.stop="copyToken"
+              >Copy token</q-btn
+            >
+          </div>
+        </template>
       </q-expansion-item>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { computed } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useQuasar } from 'quasar';
 import token from 'src/js/token';
 import { useClipboard } from 'src/composables/useClipboard';
 import { useReceiveTokensStore } from 'src/stores/receiveTokensStore';
 import { DEFAULT_BUCKET_ID } from 'src/stores/buckets';
 import { useUiStore } from 'src/stores/ui';
+import { cashuDb, type LockedToken } from 'src/stores/dexie';
 
 const props = defineProps<{
   payload: any;
@@ -41,6 +79,21 @@ const $q = useQuasar();
 const { copy } = useClipboard();
 const receiveStore = useReceiveTokensStore();
 const uiStore = useUiStore();
+
+const carouselSlide = ref(0);
+const carouselTokens = ref<LockedToken[]>([]);
+
+onMounted(async () => {
+  if (props.payload.total_months > 1 && props.payload.subscription_id) {
+    const rows = await cashuDb.lockedTokens
+      .where('subscriptionId')
+      .equals(props.payload.subscription_id)
+      .toArray();
+    carouselTokens.value = rows.sort(
+      (a, b) => (a.monthIndex ?? 0) - (b.monthIndex ?? 0),
+    );
+  }
+});
 
 const decodedToken = computed(() => token.decode(props.payload.token));
 const amount = computed(() => {
@@ -71,12 +124,12 @@ const receivedStyle = computed(() => ({
 
 const bubbleStyle = computed(() => (props.outgoing ? {} : receivedStyle.value));
 
-function redeemToken() {
-  receiveStore.receiveToken(props.payload.token, DEFAULT_BUCKET_ID);
+function redeemToken(tokenStr: string = props.payload.token) {
+  receiveStore.receiveToken(tokenStr, DEFAULT_BUCKET_ID);
 }
 
-function copyToken() {
-  copy(props.payload.token);
+function copyToken(tokenStr: string = props.payload.token) {
+  copy(tokenStr);
 }
 </script>
 
