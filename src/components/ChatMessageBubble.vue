@@ -4,7 +4,18 @@
     :class="message.outgoing ? 'items-end' : 'items-start'"
   >
     <div :class="message.outgoing ? 'sent' : 'received'" :style="bubbleStyle">
-      {{ message.content }}
+      <template v-if="messageType === 'cashu_subscription_payment'">
+        <SubscriptionPaymentBubble
+          :payload="payload"
+          :outgoing="message.outgoing"
+        />
+      </template>
+      <template v-else-if="message.content.startsWith('data:')">
+        <AttachmentBubble :payload="payload" />
+      </template>
+      <template v-else>
+        {{ message.content }}
+      </template>
     </div>
     <div
       class="text-caption q-mt-xs row items-center"
@@ -31,6 +42,8 @@ import { computed } from "vue";
 import { useQuasar } from "quasar";
 import { mdiCheck, mdiCheckAll } from "@quasar/extras/mdi-v6";
 import type { MessengerMessage } from "src/stores/messenger";
+import SubscriptionPaymentBubble from "./SubscriptionPaymentBubble.vue";
+import AttachmentBubble from "./AttachmentBubble.vue";
 
 const props = defineProps<{
   message: MessengerMessage;
@@ -49,6 +62,16 @@ const receivedStyle = computed(() => ({
 const bubbleStyle = computed(() =>
   props.message.outgoing ? {} : receivedStyle.value,
 );
+
+const payload = computed(() => {
+  try {
+    return JSON.parse(props.message.content);
+  } catch {
+    return null;
+  }
+});
+
+const messageType = computed(() => payload.value?.type);
 
 const time = computed(() =>
   new Date(props.message.created_at * 1000).toLocaleString(),
