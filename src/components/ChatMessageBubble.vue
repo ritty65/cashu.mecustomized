@@ -11,7 +11,10 @@
         />
       </template>
       <template v-else-if="message.content.startsWith('data:')">
-        <AttachmentBubble :payload="payload" />
+        <AttachmentBubble
+          :src="message.content"
+          :outgoing="message.outgoing"
+        />
       </template>
       <template v-else>
         {{ message.content }}
