@@ -185,9 +185,10 @@ export default defineComponent({
       selected.value = pubkey;
     };
 
-    const sendMessage = (text: string) => {
+    const sendMessage = (payload: string | Record<string, any>) => {
       if (!selected.value) return;
-      messenger.sendDm(selected.value, text);
+      const msg = typeof payload === "string" ? payload : JSON.stringify(payload);
+      messenger.sendDm(selected.value, msg);
     };
 
     function openSendTokenDialog() {

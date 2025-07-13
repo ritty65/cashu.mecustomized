@@ -10,11 +10,12 @@
           :outgoing="message.outgoing"
         />
       </template>
+      <template v-else-if="messageType === 'attachment'">
+        <div v-if="payload?.text" class="q-mb-sm">{{ payload.text }}</div>
+        <AttachmentBubble :src="payload?.data" :outgoing="message.outgoing" />
+      </template>
       <template v-else-if="message.content.startsWith('data:')">
-        <AttachmentBubble
-          :src="message.content"
-          :outgoing="message.outgoing"
-        />
+        <AttachmentBubble :src="message.content" :outgoing="message.outgoing" />
       </template>
       <template v-else>
         {{ message.content }}

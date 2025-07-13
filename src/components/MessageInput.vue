@@ -39,8 +39,13 @@ const fileInput = ref<HTMLInputElement>();
 const send = () => {
   const m = text.value.trim();
   if (m || attachment.value) {
-    emit("send", m);
-    if (attachment.value) {
+    if (m && attachment.value) {
+      const payload = { type: "attachment", text: m, data: attachment.value };
+      emit("send", JSON.stringify(payload));
+      attachment.value = null;
+    } else if (m) {
+      emit("send", m);
+    } else if (attachment.value) {
       emit("send", attachment.value);
       attachment.value = null;
     }
