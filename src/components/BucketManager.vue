@@ -62,12 +62,10 @@
           :label="$t('bucket.name')"
           class="q-mb-sm"
         />
-        <q-input
+        <q-color
           v-model="form.color"
-          outlined
-          :label="$t('bucket.color')"
+          format="hex"
           class="q-mb-sm"
-          type="color"
         />
         <q-input
           v-model="form.description"
@@ -150,6 +148,7 @@
 
 <script>
 import { defineComponent, ref, computed } from "vue";
+import { QColor } from "quasar";
 import { useI18n } from "vue-i18n";
 import { useBucketsStore, DEFAULT_BUCKET_ID } from "stores/buckets";
 import { useMintsStore } from "stores/mints";
@@ -163,7 +162,7 @@ import BucketDialog from "./BucketDialog.vue";
 
 export default defineComponent({
   name: "BucketManager",
-  components: { BucketCard, BucketDialog },
+  components: { QColor, BucketCard, BucketDialog },
   setup() {
     const bucketsStore = useBucketsStore();
     const uiStore = useUiStore();
