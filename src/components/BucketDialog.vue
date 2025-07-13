@@ -1,10 +1,11 @@
 <template>
   <q-dialog v-model="showLocal" persistent>
     <q-card class="q-pa-lg" style="max-width: 90vw">
-      <q-form @submit.prevent="save">
+      <q-form ref="formRef" @submit.prevent="save">
         <q-input
           v-model="form.name"
           :label="t('bucket.name')"
+          :rules="nameRules"
           outlined
           class="q-mb-sm"
         />
@@ -19,6 +20,7 @@
           v-model.number="form.goal"
           :label="t('bucket.goal')"
           type="number"
+          :rules="goalRules"
           outlined
           class="q-mb-sm"
         />
@@ -48,7 +50,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useBucketsStore } from 'stores/buckets'
 import { DEFAULT_COLOR } from 'src/js/constants'
@@ -70,18 +72,33 @@ const form = reactive({
 
 const { t } = useI18n()
 const buckets = useBucketsStore()
+const formRef = ref(null)
 
-const canSave = computed(() => form.name.trim().length > 0)
+const nameRules = [(v: string) => !!v || t('BucketManager.validation.name')]
+const goalRules = [
+  (v: number | null) => v === null || v >= 0 || t('BucketManager.validation.goal')
+]
+
+const canSave = ref(false)
+
+watch(
+  () => [form.name, form.goal],
+  () => {
+    canSave.value = formRef.value ? formRef.value.validate() : false
+  },
+  { immediate: true }
+)
 
 function reset () {
   form.name = ''
   form.color = DEFAULT_COLOR
   form.goal = null
   form.desc = ''
+  formRef.value?.resetValidation()
 }
 
-function save () {
-  if (!canSave.value) return
+async function save () {
+  if (!(await formRef.value?.validate())) return
   buckets.addBucket({
     name: form.name,
     color: form.color,
