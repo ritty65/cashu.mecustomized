@@ -49,6 +49,19 @@ describe("BucketDialog", () => {
     expect(addBucketMock).toHaveBeenCalled();
     expect(wrapper.emitted()["update:modelValue"][0]).toEqual([false]);
   });
+
+  it("displays title when creating new bucket", () => {
+    const i18n = createI18n({
+      legacy: false,
+      locale: "en",
+      messages: { en: { bucketManager: { addDialog: { title: "Create new bucket" } } } },
+    });
+    const wrapper = mount(BucketDialog, {
+      props: { modelValue: true },
+      global: { plugins: [i18n] },
+    });
+    expect(wrapper.text()).toContain("Create new bucket");
+  });
 });
 
 describe("BucketManager", () => {
