@@ -9,11 +9,9 @@
           outlined
           class="q-mb-sm"
         />
-        <q-input
+        <q-color
           v-model="form.color"
-          :label="t('bucket.color')"
-          type="color"
-          outlined
+          format="hex"
           class="q-mb-sm"
         />
         <q-input
@@ -51,6 +49,7 @@
 
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue'
+import { QColor } from 'quasar'
 import { useI18n } from 'vue-i18n'
 import { useBucketsStore } from 'stores/buckets'
 import { DEFAULT_COLOR } from 'src/js/constants'
