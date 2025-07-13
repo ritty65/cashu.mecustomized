@@ -8,11 +8,11 @@
       class="q-mb-md"
       :placeholder="$t('bucketManager.inputs.search.placeholder')"
     />
-    <q-list padding>
+    <div class="row q-col-gutter-md">
       <div
         v-for="bucket in filteredBuckets"
         :key="bucket.id"
-        class="q-mb-md"
+        class="col-12 col-sm-6 col-md-4"
         @dragover.prevent
         @drop="handleDrop($event, bucket.id)"
       >
@@ -22,34 +22,34 @@
           :activeUnit="activeUnit.value"
           @edit="openEdit"
           @delete="openDelete"
+          style="width: 100%"
         />
       </div>
-      <q-item>
-        <q-item-section>
-          <q-btn
-            color="primary"
-            icon="add"
-            outline
-            @click="openAdd"
-            :label="$t('bucketManager.actions.add')"
-          >
-            <q-tooltip>{{ $t("BucketManager.tooltips.add_button") }}</q-tooltip>
+    </div>
+    <div class="row q-col-gutter-md q-mt-md">
+      <div class="col-12 col-sm-6 col-md-4">
+        <q-btn
+          color="primary"
+          icon="add"
+          outline
+          class="full-width"
+          @click="openAdd"
+          :label="$t('bucketManager.actions.add')"
+        >
+          <q-tooltip>{{ $t("BucketManager.tooltips.add_button") }}</q-tooltip>
+        </q-btn>
+      </div>
+      <div class="col-12 col-sm-6 col-md-4">
+        <router-link to="/move-tokens" style="text-decoration: none">
+          <q-btn color="primary" outline class="full-width">
+            {{ $t("BucketDetail.move") }}
+            <q-tooltip>{{
+              $t("BucketManager.tooltips.move_button")
+            }}</q-tooltip>
           </q-btn>
-        </q-item-section>
-      </q-item>
-      <q-item>
-        <q-item-section>
-          <router-link to="/move-tokens" style="text-decoration: none">
-            <q-btn color="primary" outline>
-              {{ $t("BucketDetail.move") }}
-              <q-tooltip>{{
-                $t("BucketManager.tooltips.move_button")
-              }}</q-tooltip>
-            </q-btn>
-          </router-link>
-        </q-item-section>
-      </q-item>
-    </q-list>
+        </router-link>
+      </div>
+    </div>
   </div>
 
   <q-dialog v-model="showForm">
