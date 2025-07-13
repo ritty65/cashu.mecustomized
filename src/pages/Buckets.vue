@@ -1,10 +1,12 @@
 <template>
-  <q-page
-    class="q-pa-md"
-    :class="$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark'"
+  <div
+    :class="[
+      $q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark',
+      'text-center q-pa-md flex flex-center',
+    ]"
   >
     <BucketManager />
-  </q-page>
+  </div>
 </template>
 
 <script>

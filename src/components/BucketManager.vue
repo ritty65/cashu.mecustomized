@@ -1,5 +1,5 @@
 <template>
-  <div class="q-px-md">
+  <div style="max-width: 800px; margin: 0 auto">
     <div class="text-body2 q-mb-md">{{ $t("BucketManager.helper.intro") }}</div>
     <q-input
       v-model="searchTerm"
@@ -28,19 +28,22 @@
         />
       </div>
     </transition-group>
-    <q-page-sticky position="bottom" expand class="bg-grey-1">
-      <div class="row justify-center q-gutter-sm q-pa-sm">
+    <div class="row q-col-gutter-md q-mt-md">
+      <div class="col-12 col-sm-6 col-md-4">
         <q-btn
           color="primary"
           icon="add"
           outline
+          class="full-width"
           @click="openAdd"
           :label="$t('bucketManager.actions.add')"
         >
           <q-tooltip>{{ $t("BucketManager.tooltips.add_button") }}</q-tooltip>
         </q-btn>
+      </div>
+      <div class="col-12 col-sm-6 col-md-4">
         <router-link to="/move-tokens" style="text-decoration: none">
-          <q-btn color="primary" outline>
+          <q-btn color="primary" outline class="full-width">
             {{ $t("BucketDetail.move") }}
             <q-tooltip>{{
               $t("BucketManager.tooltips.move_button")
@@ -48,11 +51,11 @@
           </q-btn>
         </router-link>
       </div>
-    </q-page-sticky>
+    </div>
   </div>
 
   <q-dialog v-model="showForm">
-    <q-card class="q-pa-lg" style="max-width: 90vw">
+    <q-card class="q-pa-lg" style="max-width: 500px">
       <h6 class="q-mt-none q-mb-md">{{ formTitle }}</h6>
       <q-form ref="bucketForm">
         <q-input
@@ -78,7 +81,7 @@
         >
           <template #label>
             <div class="row items-center no-wrap">
-              <span>{{ $t("bucket.description") }}</span>
+              <span>{{ $t('bucket.description') }}</span>
               <InfoTooltip
                 class="q-ml-xs"
                 :text="$t('BucketManager.tooltips.description')"
@@ -95,7 +98,7 @@
         >
           <template #label>
             <div class="row items-center no-wrap">
-              <span>{{ $t("bucket.goal") }}</span>
+              <span>{{ $t('bucket.goal') }}</span>
               <InfoTooltip
                 class="q-ml-xs"
                 :text="$t('BucketManager.tooltips.goal')"
@@ -187,7 +190,7 @@ export default defineComponent({
     const filteredBuckets = computed(() => {
       const term = searchTerm.value.toLowerCase();
       return bucketList.value.filter((b) =>
-        b.name.toLowerCase().includes(term),
+        b.name.toLowerCase().includes(term)
       );
     });
     const bucketBalances = computed(() => bucketsStore.bucketBalances);
@@ -280,7 +283,7 @@ export default defineComponent({
       bucketForm,
       nameRules,
       goalRules,
-      formTitle: computed(() => t("BucketManager.actions.edit")),
+      formTitle: computed(() => t('BucketManager.actions.edit')),
       openAdd,
       openEdit,
       saveBucket,
@@ -298,7 +301,7 @@ export default defineComponent({
 <style scoped>
 .bucket-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 16px;
 }
 
