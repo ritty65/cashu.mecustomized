@@ -93,6 +93,10 @@ watch(
   { immediate: true }
 )
 
+watch(showLocal, val => {
+  if (!val) reset()
+})
+
 function reset () {
   form.name = ''
   form.color = DEFAULT_COLOR
