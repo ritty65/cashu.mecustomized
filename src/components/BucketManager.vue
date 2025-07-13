@@ -52,40 +52,21 @@
   </div>
 
   <q-dialog v-model="showForm">
-    <q-card class="q-pa-lg" style="max-width: 600px; width: 100%">
+    <q-card class="q-pa-lg" style="max-width: 90vw">
       <h6 class="q-mt-none q-mb-md">{{ formTitle }}</h6>
-      <q-form ref="bucketForm" class="q-gutter-sm">
-        <div class="row q-col-gutter-md">
-          <div class="col-6">
-            <q-input
-              v-model="form.name"
-              outlined
-              :rules="nameRules"
-              class="q-mb-sm"
-            >
-              <template #label>
-                <div class="row items-center no-wrap">
-                  <span>{{ $t('bucket.name') }}</span>
-                  <InfoTooltip class="q-ml-xs" :text="$t('BucketManager.tooltips.name')" />
-                </div>
-              </template>
-            </q-input>
-          </div>
-          <div class="col-6">
-            <q-color
-              v-model="form.color"
-              format="hex"
-              class="q-mb-sm"
-            >
-              <template #label>
-                <div class="row items-center no-wrap">
-                  <span>{{ $t('bucket.color') }}</span>
-                  <InfoTooltip class="q-ml-xs" :text="$t('BucketManager.tooltips.color')" />
-                </div>
-              </template>
-            </q-color>
-          </div>
-        </div>
+      <q-form ref="bucketForm">
+        <q-input
+          v-model="form.name"
+          outlined
+          :rules="nameRules"
+          :label="$t('bucket.name')"
+          class="q-mb-sm"
+        />
+        <q-color
+          v-model="form.color"
+          format="hex"
+          class="q-mb-sm"
+        />
         <q-input
           v-model="form.description"
           outlined
@@ -123,7 +104,7 @@
         <q-input v-model="form.creatorPubkey" outlined class="q-mb-sm">
           <template #label>
             <div class="row items-center no-wrap">
-              <span>{{ $t('BucketManager.inputs.creator_pubkey') }}</span>
+              <span>{{ $t("BucketManager.inputs.creator_pubkey") }}</span>
               <InfoTooltip
                 class="q-ml-xs"
                 :text="$t('BucketManager.tooltips.creator_pubkey')"
@@ -131,14 +112,14 @@
             </div>
           </template>
         </q-input>
-        <q-card-actions align="right" class="q-mt-md">
+        <div class="row q-mt-md">
           <q-btn color="primary" rounded @click="saveBucket">{{
-            $t('global.actions.update.label')
+            $t("global.actions.update.label")
           }}</q-btn>
-          <q-btn flat rounded color="grey" v-close-popup>{{
-            $t('global.actions.cancel.label')
+          <q-btn flat rounded color="grey" class="q-ml-auto" v-close-popup>{{
+            $t("global.actions.cancel.label")
           }}</q-btn>
-        </q-card-actions>
+        </div>
       </q-form>
     </q-card>
   </q-dialog>
