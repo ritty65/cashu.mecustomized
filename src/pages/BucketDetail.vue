@@ -13,100 +13,123 @@
       </div>
     </div>
 
-    <q-list bordered>
-      <q-item
-        v-for="group in groupedProofs"
-        :key="group.key"
-        draggable="true"
-        @dragstart="onDragStart($event, group)"
-      >
-        <q-item-section side>
-          <q-checkbox
-            :model-value="
-              group.secrets.every((s) => selectedSecrets.includes(s))
-            "
-            @update:model-value="(val) => toggleGroup(group, val)"
-          />
-        </q-item-section>
-        <q-item-section avatar>
-          <q-icon name="circle" :style="{ color: group.color }" />
-        </q-item-section>
-        <q-item-section>
-          <q-item-label class="text-weight-bold">{{
-            group.label || "(No label)"
-          }}</q-item-label>
-          <q-item-label caption>
-            {{ formatCurrency(group.total, activeUnit) }}
-          </q-item-label>
-        </q-item-section>
-        <q-item-section side v-if="group.tokens.length">
-          <q-btn
-            flat
-            dense
-            icon="edit"
-            @click.stop="openEditGroup(group)"
-            aria-label="Edit"
-            title="Edit"
-          />
-        </q-item-section>
-      </q-item>
-    </q-list>
+    <q-tabs v-model="tab" no-caps align="justify" class="q-mb-md">
+      <q-tab name="tokens" label="Tokens" />
+      <q-tab name="locked" label="Locked Tokens" />
+      <q-tab name="creator" label="Creator Tokens" />
+      <q-tab name="history" label="History" />
+    </q-tabs>
 
-    <div class="q-mt-lg">
-      <q-select
-        dense
-        outlined
-        v-model="targetBucketId"
-        :options="bucketOptions"
-        emit-value
-        map-options
-        class="q-mb-md"
-      >
-        <template #label>
-          <div class="row items-center no-wrap">
-            <span>{{ $t("BucketDetail.inputs.target_bucket.label") }}</span>
-            <InfoTooltip
-              class="q-ml-xs"
-              :text="$t('BucketDetail.inputs.target_bucket.tooltip')"
-            />
+    <q-tab-panels v-model="tab" animated>
+      <q-tab-panel name="tokens">
+        <q-list bordered>
+          <q-item
+            v-for="group in groupedProofs"
+            :key="group.key"
+            draggable="true"
+            @dragstart="onDragStart($event, group)"
+          >
+            <q-item-section side>
+              <q-checkbox
+                :model-value="
+                  group.secrets.every((s) => selectedSecrets.includes(s))
+                "
+                @update:model-value="(val) => toggleGroup(group, val)"
+              />
+            </q-item-section>
+            <q-item-section avatar>
+              <q-icon name="circle" :style="{ color: group.color }" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label class="text-weight-bold">{{
+                group.label || "(No label)"
+              }}</q-item-label>
+              <q-item-label caption>
+                {{ formatCurrency(group.total, activeUnit) }}
+              </q-item-label>
+            </q-item-section>
+            <q-item-section side v-if="group.tokens.length">
+              <q-btn
+                flat
+                dense
+                icon="edit"
+                @click.stop="openEditGroup(group)"
+                aria-label="Edit"
+                title="Edit"
+              />
+            </q-item-section>
+          </q-item>
+        </q-list>
+
+        <div class="q-mt-lg">
+          <q-select
+            dense
+            outlined
+            v-model="targetBucketId"
+            :options="bucketOptions"
+            emit-value
+            map-options
+            class="q-mb-md"
+          >
+            <template #label>
+              <div class="row items-center no-wrap">
+                <span>{{ $t("BucketDetail.inputs.target_bucket.label") }}</span>
+                <InfoTooltip
+                  class="q-ml-xs"
+                  :text="$t('BucketDetail.inputs.target_bucket.tooltip')"
+                />
+              </div>
+            </template>
+          </q-select>
+          <div class="row q-gutter-sm">
+            <q-btn
+              color="primary"
+              :disable="!selectedSecrets.length"
+              @click="moveSelected"
+            >
+              {{ $t("BucketDetail.move") }}
+            </q-btn>
+            <q-btn
+              color="primary"
+              outline
+              :disable="!selectedSecrets.length"
+              @click="sendSelected"
+            >
+              {{ $t("BucketDetail.send") }}
+            </q-btn>
+            <q-btn
+              color="primary"
+              outline
+              :disable="!bucketProofs.length"
+              @click="exportBucket"
+            >
+              {{ $t("BucketDetail.export") }}
+            </q-btn>
+            <q-btn
+              v-if="bucket && bucket.creatorPubkey"
+              color="primary"
+              outline
+              :disable="!bucketLockedTokens.length"
+              @click="sendBucketToCreator"
+            >
+              {{ $t("BucketDetail.send_to_creator") }}
+            </q-btn>
           </div>
-        </template>
-      </q-select>
-      <div class="row q-gutter-sm">
-        <q-btn
-          color="primary"
-          :disable="!selectedSecrets.length"
-          @click="moveSelected"
-        >
-          {{ $t("BucketDetail.move") }}
-        </q-btn>
-        <q-btn
-          color="primary"
-          outline
-          :disable="!selectedSecrets.length"
-          @click="sendSelected"
-        >
-          {{ $t("BucketDetail.send") }}
-        </q-btn>
-        <q-btn
-          color="primary"
-          outline
-          :disable="!bucketProofs.length"
-          @click="exportBucket"
-        >
-          {{ $t("BucketDetail.export") }}
-        </q-btn>
-        <q-btn
-          v-if="bucket && bucket.creatorPubkey"
-          color="primary"
-          outline
-          :disable="!bucketLockedTokens.length"
-          @click="sendBucketToCreator"
-        >
-          {{ $t("BucketDetail.send_to_creator") }}
-        </q-btn>
-      </div>
-    </div>
+        </div>
+      </q-tab-panel>
+
+      <q-tab-panel name="locked">
+        <LockedTokensTable :bucket-id="bucketId" class="q-mt-lg" />
+      </q-tab-panel>
+      <q-tab-panel name="creator">
+        <CreatorLockedTokensTable :bucket-id="bucketId" class="q-mt-lg" />
+      </q-tab-panel>
+      <q-tab-panel name="history">
+        <div class="q-mt-lg">
+          <HistoryTable :bucket-id="bucketId" />
+        </div>
+      </q-tab-panel>
+    </q-tab-panels>
 
     <SendTokenDialog />
     <q-dialog v-model="editDialog.show">
@@ -128,11 +151,6 @@
         </div>
       </q-card>
     </q-dialog>
-    <LockedTokensTable :bucket-id="bucketId" class="q-mt-lg" />
-    <CreatorLockedTokensTable :bucket-id="bucketId" class="q-mt-lg" />
-    <div class="q-mt-lg">
-      <HistoryTable :bucket-id="bucketId" />
-    </div>
   </div>
   <div v-else class="q-pa-md">{{ $t("BucketDetail.not_found") }}</div>
 </template>
@@ -190,6 +208,7 @@ const editDialog = ref({
   color: DEFAULT_COLOR,
   originalLabel: "",
 });
+const tab = ref<'tokens' | 'locked' | 'creator' | 'history'>('tokens');
 
 type ProofGroup = {
   key: string;
