@@ -8,23 +8,19 @@
       class="q-mb-md"
       :placeholder="$t('bucketManager.inputs.search.placeholder')"
     />
-    <div class="row q-col-gutter-md">
-      <div
+    <div class="bucket-grid">
+      <BucketCard
         v-for="bucket in filteredBuckets"
         :key="bucket.id"
-        class="col-12 col-sm-6 col-md-4"
+        :bucket="bucket"
+        :balance="bucketBalances[bucket.id] || 0"
+        :activeUnit="activeUnit.value"
+        @edit="openEdit"
+        @delete="openDelete"
         @dragover.prevent
         @drop="handleDrop($event, bucket.id)"
-      >
-        <BucketCard
-          :bucket="bucket"
-          :balance="bucketBalances[bucket.id] || 0"
-          :activeUnit="activeUnit.value"
-          @edit="openEdit"
-          @delete="openDelete"
-          style="width: 100%"
-        />
-      </div>
+        style="width: 100%"
+      />
     </div>
     <div class="row q-col-gutter-md q-mt-md">
       <div class="col-12 col-sm-6 col-md-4">
@@ -291,3 +287,11 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+.bucket-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+</style>
