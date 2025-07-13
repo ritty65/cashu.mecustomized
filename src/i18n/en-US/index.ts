@@ -1440,6 +1440,8 @@ export const messages = {
       creator_pubkey: "Creator pubkey",
     },
     tooltips: {
+      name: "Unique name for your bucket",
+      color: "Choose a color to help identify this bucket",
       description: "Buckets are for categorizing tokens",
       goal: "Set a target amount for this bucket",
       creator_pubkey: "Nostr pubkey to receive locked tokens",
