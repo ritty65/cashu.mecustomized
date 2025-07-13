@@ -42,11 +42,13 @@
             round
             size="sm"
             @click.stop.prevent="emitEdit"
-            :aria-label="$t('BucketManager.actions.edit')"
-            :title="$t('BucketManager.actions.edit')"
-          >
-            <q-tooltip>{{ $t('BucketManager.tooltips.edit_button') }}</q-tooltip>
-          </q-btn>
+            aria-label="Edit"
+            title="Edit"
+          />
+          <InfoTooltip
+            class="q-ml-xs"
+            :text="$t('BucketManager.tooltips.edit_button')"
+          />
           <q-btn
             icon="delete"
             flat
@@ -55,9 +57,11 @@
             @click.stop.prevent="emitDelete"
             :aria-label="$t('BucketManager.actions.delete')"
             :title="$t('BucketManager.actions.delete')"
-          >
-            <q-tooltip>{{ $t('BucketManager.tooltips.delete_button') }}</q-tooltip>
-          </q-btn>
+          />
+          <InfoTooltip
+            class="q-ml-xs"
+            :text="$t('BucketManager.tooltips.delete_button')"
+          />
         </q-item-section>
       </q-item>
     </router-link>
@@ -67,13 +71,14 @@
 <script lang="ts">
 import { defineComponent, computed } from "vue";
 import { useI18n } from "vue-i18n";
+import InfoTooltip from "./InfoTooltip.vue";
 import { DEFAULT_BUCKET_ID } from "stores/buckets";
 import { useUiStore } from "stores/ui";
 import { DEFAULT_COLOR } from "src/js/constants";
 
 export default defineComponent({
   name: "BucketCard",
-  components: {},
+  components: { InfoTooltip },
   props: {
     bucket: { type: Object as () => any, required: true },
     balance: { type: Number, default: 0 },
