@@ -8,20 +8,26 @@
       class="q-mb-md"
       :placeholder="$t('bucketManager.inputs.search.placeholder')"
     />
-    <div class="bucket-grid">
-      <BucketCard
+    <transition-group name="fade" tag="div" class="bucket-grid">
+      <div
         v-for="bucket in filteredBuckets"
         :key="bucket.id"
-        :bucket="bucket"
-        :balance="bucketBalances[bucket.id] || 0"
-        :activeUnit="activeUnit.value"
-        @edit="openEdit"
-        @delete="openDelete"
-        @dragover.prevent
-        @drop="handleDrop($event, bucket.id)"
-        style="width: 100%"
-      />
-    </div>
+        @dragenter="dragTargetId = bucket.id"
+        @dragleave="dragTargetId = null"
+        :class="{ 'drag-highlight': dragTargetId === bucket.id }"
+      >
+        <BucketCard
+          :bucket="bucket"
+          :balance="bucketBalances[bucket.id] || 0"
+          :activeUnit="activeUnit.value"
+          @edit="openEdit"
+          @delete="openDelete"
+          @dragover.prevent
+          @drop="handleDrop($event, bucket.id)"
+          style="width: 100%"
+        />
+      </div>
+    </transition-group>
     <div class="row q-col-gutter-md q-mt-md">
       <div class="col-12 col-sm-6 col-md-4">
         <q-btn
@@ -189,6 +195,8 @@ export default defineComponent({
     });
     const bucketBalances = computed(() => bucketsStore.bucketBalances);
 
+    const dragTargetId = ref(null);
+
     const formatCurrency = (amount, unit) => {
       return uiStore.formatCurrency(amount, unit);
     };
@@ -237,6 +245,7 @@ export default defineComponent({
       if (Array.isArray(secrets) && secrets.length) {
         await proofsStore.moveProofs(secrets, id);
       }
+      dragTargetId.value = null;
     };
 
     const saveBucket = async () => {
@@ -282,6 +291,7 @@ export default defineComponent({
       deleteBucket,
       formatCurrency,
       handleDrop,
+      dragTargetId,
       DEFAULT_COLOR,
     };
   },
@@ -293,5 +303,19 @@ export default defineComponent({
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 16px;
+}
+
+.drag-highlight {
+  border: 2px dashed var(--q-primary);
+  border-radius: 8px;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
