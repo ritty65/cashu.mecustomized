@@ -153,8 +153,9 @@ export const useLockedTokensRedeemWorker = defineStore(
 
             debug("locked token redeem: sending proofs", proofs);
             try {
-              await receiveStore.enqueue(() =>
-                wallet.redeem(entry.tokenString),
+              await receiveStore.enqueue(
+                () => wallet.redeem(entry.tokenString),
+                entry.tokenString,
               );
               await cashuDb.lockedTokens
                 .where("tokenString")

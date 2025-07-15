@@ -176,7 +176,10 @@ export const useNPCStore = defineStore("npc", {
             try {
               // redeem token automatically
               const walletStore = useWalletStore();
-              await receiveStore.enqueue(() => walletStore.redeem(token));
+              await receiveStore.enqueue(
+                () => walletStore.redeem(token),
+                token,
+              );
             } catch {
               // if it doesn't work, show the receive window
               receiveStore.showReceiveTokens = true;
