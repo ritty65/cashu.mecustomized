@@ -221,7 +221,7 @@
                 />
                 <q-input
                   v-model="sendData.refundPubkey"
-                  :label="$t('SendTokenDialog.inputs.refund_pubkey.label')"
+                  label="Refund public key"
                   outlined
                   dense
                   class="col-12"
