@@ -17,6 +17,8 @@ import { useSwapStore } from "./swap";
 import { Clipboard } from "@capacitor/clipboard";
 import { DEFAULT_BUCKET_ID } from "./buckets";
 import { cashuDb } from "./dexie";
+import { ensureCompressed } from "src/utils/ecash";
+import { v4 as uuidv4 } from "uuid";
 
 let redemptionQueue: Promise<any> = Promise.resolve();
 
@@ -99,6 +101,51 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
       const tokenJson = this.decodeToken(receiveStore.receiveData.tokensBase64);
       if (tokenJson == undefined) {
         throw new Error("no tokens provided.");
+      }
+
+      const proofs = token.getProofs(tokenJson);
+      let locktime = 0;
+      let refundPubkey: string | undefined = undefined;
+      for (const p of proofs) {
+        if (typeof p.secret !== "string") continue;
+        try {
+          const obj = JSON.parse(p.secret);
+          if (Array.isArray(obj) && obj[0] === "P2PK" && obj[1]) {
+            const tags = obj[1].tags || [];
+            const lock = tags.find((t: any) => t[0] === "locktime");
+            if (lock) {
+              const lt = parseInt(lock[1], 10);
+              if (!isNaN(lt) && lt > locktime) locktime = lt;
+            }
+            const refund = tags.find((t: any) => t[0] === "refund");
+            if (refund && refund.length > 1 && !refundPubkey) {
+              refundPubkey = ensureCompressed(refund[1]);
+            }
+          }
+        } catch {}
+      }
+
+      const nowSec = Math.floor(Date.now() / 1000);
+      if (locktime && locktime > nowSec) {
+        const amount = proofs.reduce((s, p) => s + p.amount, 0);
+        await cashuDb.lockedTokens.put({
+          id: uuidv4(),
+          tokenString: encodedToken,
+          amount,
+          owner: "subscriber",
+          tierId: bucketId,
+          intervalKey: "",
+          unlockTs: locktime,
+          refundUnlockTs: 0,
+          status: "locked",
+          subscriptionEventId: null,
+          refundPubkey,
+          autoRedeem: true,
+          label: receiveStore.receiveData.label ?? "Locked tokens",
+        } as any);
+        receiveStore.showReceiveTokens = false;
+        uiStore.closeDialogs();
+        return;
       }
       // check if we have all mints
       if (!this.knowThisMintOfTokenJson(tokenJson)) {
