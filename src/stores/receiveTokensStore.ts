@@ -20,10 +20,26 @@ import { cashuDb } from "./dexie";
 import { ensureCompressed } from "src/utils/ecash";
 import { v4 as uuidv4 } from "uuid";
 
-let redemptionQueue: Promise<any> = Promise.resolve();
 
-export function enqueueRedemption<T>(fn: () => Promise<T>): Promise<T> {
-  const res = redemptionQueue.then(fn);
+let redemptionQueue: Promise<any> = Promise.resolve();
+const seen = new Set<string>();
+
+export function enqueueRedemption<T>(
+  fn: () => Promise<T>,
+  tokenStr?: string,
+): Promise<T | undefined> {
+  if (tokenStr) {
+    if (seen.has(tokenStr)) {
+      return Promise.resolve(undefined);
+    }
+    seen.add(tokenStr);
+  }
+
+  const res = redemptionQueue
+    .then(fn)
+    .finally(() => {
+      if (tokenStr) seen.delete(tokenStr);
+    });
   redemptionQueue = res.catch(() => {});
   return res;
 }
@@ -48,8 +64,8 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
     scanningCard: false,
   }),
   actions: {
-    enqueue<T>(fn: () => Promise<T>): Promise<T> {
-      return enqueueRedemption(fn);
+    enqueue<T>(fn: () => Promise<T>, tokenStr?: string): Promise<T | undefined> {
+      return enqueueRedemption(fn, tokenStr);
     },
     decodeToken: function (encodedToken: string) {
       encodedToken = encodedToken.trim();
@@ -168,11 +184,13 @@ export const useReceiveTokensStore = defineStore("receiveTokensStore", {
       try {
         const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
         if (decodedToken) {
-          await this.enqueue(() =>
-            this.receiveToken(
-              this.receiveData.tokensBase64,
-              this.receiveData.bucketId,
-            ),
+          await this.enqueue(
+            () =>
+              this.receiveToken(
+                this.receiveData.tokensBase64,
+                this.receiveData.bucketId,
+              ),
+            this.receiveData.tokensBase64,
           );
           return true;
         }

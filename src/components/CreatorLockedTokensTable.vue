@@ -118,7 +118,10 @@ export default defineComponent({
       receiveStore.receiveData.bucketId = token.tierId;
       receiveStore.receiveData.p2pkPrivateKey =
         p2pkStore.getPrivateKeyForP2PKEncodedToken(token.tokenString);
-      await receiveStore.enqueue(() => wallet.redeem(token.tokenString));
+      await receiveStore.enqueue(
+        () => wallet.redeem(token.tokenString),
+        token.tokenString,
+      );
       await cashuDb.lockedTokens
         .where("tokenString")
         .equals(token.tokenString)

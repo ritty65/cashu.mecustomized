@@ -158,7 +158,10 @@ async function redeemPayment() {
     if (unlockTime.value && remaining.value > 0) {
       return;
     }
-    await receiveStore.enqueue(() => wallet.redeem(payment.token));
+    await receiveStore.enqueue(
+      () => wallet.redeem(payment.token),
+      payment.token,
+    );
     if (payment.subscription_id) {
       const sub = await cashuDb.subscriptions.get(payment.subscription_id);
       const idx = sub?.intervals.findIndex(
