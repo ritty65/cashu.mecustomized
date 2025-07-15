@@ -1,39 +1,47 @@
 <template>
-  <q-carousel v-model="slide" control-color="primary" swipeable animated :height="220">
+  <q-carousel v-model="slide" control-color="primary" swipeable animated height="220px">
     <q-carousel-slide
       v-for="(p, idx) in payments"
       :name="idx"
       :key="idx"
       class="q-pa-md"
     >
-      <TokenInformation
-        :encodedToken="p.token"
-        :showAmount="true"
-        :showMintCheck="true"
-        :showP2PKCheck="true"
-      />
-      <div class="q-mt-sm">
-        <q-badge :color="badgeColor(p.status)" class="q-pa-sm">
-          <q-icon :name="badgeIcon(p.status)" class="q-mr-xs" />
-          {{ p.status }}
-        </q-badge>
-      </div>
-      <div
-        v-if="p.unlock_time && remaining(p) > 0"
-        class="text-caption q-mt-xs"
-      >
-        Unlocks in {{ countdown(p) }}
-      </div>
-      <div class="row q-gutter-sm q-mt-sm">
-        <q-btn
-          v-if="creator"
-          color="primary"
-          label="Redeem"
-          :disable="!canRedeem(p)"
-          @click="$emit('redeem', p)"
-        />
-        <q-btn flat color="primary" label="Download" @click="download(p)" />
-      </div>
+      <q-expansion-item dense>
+        <template #header>
+          <TokenInformation
+            :encodedToken="p.token"
+            :showAmount="true"
+            :showMintCheck="true"
+            :showP2PKCheck="true"
+          />
+        </template>
+        <div class="q-mt-sm">
+          <q-badge :color="badgeColor(p.status)" class="q-pa-sm">
+            <q-icon :name="badgeIcon(p.status)" class="q-mr-xs" />
+            {{ p.status }}
+          </q-badge>
+        </div>
+        <div
+          v-if="p.unlock_time && remaining(p) > 0"
+          class="text-caption q-mt-xs"
+        >
+          Unlocks in {{ countdown(p) }}
+        </div>
+        <div class="row q-gutter-sm q-mt-sm">
+          <q-btn
+            v-if="creator"
+            color="primary"
+            label="Redeem"
+            :disable="!canRedeem(p)"
+            @click="$emit('redeem', p)"
+          >
+            <q-tooltip v-if="p.status === 'locked'">
+              Unlocks on {{ new Date(p.unlock_time * 1000).toLocaleString() }}
+            </q-tooltip>
+          </q-btn>
+          <q-btn flat color="primary" label="Download" @click="download(p)" />
+        </div>
+      </q-expansion-item>
     </q-carousel-slide>
   </q-carousel>
 </template>
@@ -76,7 +84,9 @@ function countdown(p: any): string {
   });
 }
 function canRedeem(p: any) {
-  return props.creator && (!p.unlock_time || remaining(p) <= 0);
+  return (
+    props.creator && (!p.unlock_time || remaining(p) <= 0) && p.status !== "locked"
+  );
 }
 function download(p: any) {
   saveReceipt({ ...props.message, subscriptionPayment: p });

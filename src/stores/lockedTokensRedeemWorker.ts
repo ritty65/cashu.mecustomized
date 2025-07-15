@@ -49,6 +49,7 @@ export const useLockedTokensRedeemWorker = defineStore(
       async _processTokens() {
         const settingsStore = useSettingsStore();
         if (!settingsStore.autoRedeemLockedTokens) return;
+        const seen = new Set<string>();
         const now = Math.floor(Date.now() / 1000);
         let entries = await cashuDb.lockedTokens
           .where("unlockTs")
@@ -79,6 +80,8 @@ export const useLockedTokensRedeemWorker = defineStore(
         const receiveStore = useReceiveTokensStore();
         const mintStore = useMintsStore();
         for (const entry of entries) {
+          if (seen.has(entry.tokenString)) continue;
+          seen.add(entry.tokenString);
           if (entry.autoRedeem !== true) continue;
           const nowSec = Math.floor(Date.now() / 1000);
           if (entry.unlockTs > nowSec) {
@@ -205,7 +208,11 @@ export const useLockedTokensRedeemWorker = defineStore(
                 }
               }
             } catch (err: any) {
-              if (
+              if (err?.message === "missing-key") {
+                await cashuDb.lockedTokens.update(entry.id, {
+                  status: "waitingForKey",
+                });
+              } else if (
                 typeof err?.message === "string" &&
                 (err.message.includes("No private key or remote signer") ||
                   err.message.includes(

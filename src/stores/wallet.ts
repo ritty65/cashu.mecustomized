@@ -19,6 +19,19 @@ import { ensureCompressed } from "src/utils/ecash";
 
 import * as _ from "underscore";
 import token from "src/js/token";
+function extractDataFromProof(tokenStr: string): string | undefined {
+  const decoded = token.decode(tokenStr);
+  if (!decoded) return undefined;
+  const proofs = token.getProofs(decoded);
+  if (!proofs.length) return undefined;
+  try {
+    const obj = JSON.parse(proofs[0].secret);
+    if (Array.isArray(obj) && obj[0] === "P2PK") {
+      return ensureCompressed(obj[1].data);
+    }
+  } catch {}
+  return undefined;
+}
 import {
   notifyApiError,
   notifyError,
@@ -826,15 +839,17 @@ export const useWalletStore = defineStore("wallet", {
     },
 
     redeem: async function (tokenString: string) {
-      const receiveStore = useReceiveTokensStore();
       const p2pkStore = useP2PKStore();
-      receiveStore.receiveData.tokensBase64 = tokenString;
-      receiveStore.receiveData.p2pkPrivateKey =
-        p2pkStore.getPrivateKeyForP2PKEncodedToken(tokenString);
-      while (true) {
-        const res = await this.attemptRedeem(tokenString);
-        if (res) break;
+      const pub = extractDataFromProof(tokenString);
+      if (pub && !p2pkStore.haveThisKey(pub)) {
+        throw new Error("missing-key");
       }
+      const decoded = token.decode(tokenString);
+      if (!decoded) throw new Error("Invalid token");
+      const mintUrl = token.getMint(decoded);
+      const unit = token.getUnit(decoded);
+      const wallet = this.mintWallet(mintUrl, unit);
+      await wallet.receive(tokenString);
     },
 
     // /mint
