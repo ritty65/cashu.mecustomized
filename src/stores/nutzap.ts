@@ -6,7 +6,6 @@ import { useP2PKStore } from "./p2pk";
 import { cashuDb, type LockedToken as DexieLockedToken } from "./dexie";
 import token from "src/js/token";
 import { v4 as uuidv4 } from "uuid";
-import crypto from "crypto";
 import { ensureCompressed } from "src/utils/ecash";
 import { useMintsStore } from "./mints";
 import { useProofsStore } from "./proofs";
