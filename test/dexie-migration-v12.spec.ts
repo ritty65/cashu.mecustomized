@@ -1,0 +1,41 @@
+import Dexie from "dexie";
+import { describe, it, expect, beforeEach } from "vitest";
+import { cashuDb } from "../src/stores/dexie";
+
+beforeEach(async () => {
+  localStorage.clear();
+  await cashuDb.close();
+  await Dexie.delete("cashuDatabase");
+});
+
+describe("dexie migration v12", () => {
+  it("removes preimage and hashlock on upgrade", async () => {
+    const oldDb = new Dexie("cashuDatabase");
+    oldDb.version(10).stores({
+      lockedTokens:
+        "&id, tokenString, owner, tierId, intervalKey, unlockTs, refundUnlockTs, status, subscriptionEventId, subscriptionId, monthIndex, totalMonths, hashlock, preimage",
+    });
+    await oldDb.open();
+    await oldDb.table("lockedTokens").add({
+      id: "1",
+      tokenString: "t",
+      amount: 1,
+      owner: "creator",
+      tierId: "tier",
+      intervalKey: "1",
+      unlockTs: 0,
+      refundUnlockTs: 0,
+      status: "pending",
+      subscriptionEventId: null,
+      preimage: "pre",
+      hashlock: "hash",
+    });
+    await oldDb.close();
+
+    await cashuDb.open();
+    const row = await cashuDb.lockedTokens.get("1");
+    expect(row?.autoRedeem).toBe(false);
+    expect((row as any).preimage).toBeUndefined();
+    expect((row as any).hashlock).toBeUndefined();
+  });
+});
