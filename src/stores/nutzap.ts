@@ -44,7 +44,6 @@ export interface NutzapQueuedSend {
   token: string;
   unlockTime: number;
   receiverP2PK: string;
-  refundPubkey?: string;
   createdAt: number;
 }
 
@@ -74,7 +73,6 @@ export const useNutzapStore = defineStore("nutzap", {
         token: item.token,
         receiver_p2pk: item.receiverP2PK,
         unlock_time: item.unlockTime,
-        ...(item.refundPubkey ? { refund_pubkey: item.refundPubkey } : {}),
       } as const;
       const { success } = await messenger.sendDm(
         item.npub,
@@ -218,7 +216,6 @@ export const useNutzapStore = defineStore("nutzap", {
               token: tokenStr,
               receiver_p2pk: creator.cashuP2pk,
               unlock_time: unlockDate,
-              refund_pubkey: refundKey,
             }),
             relayList
           );
@@ -229,7 +226,6 @@ export const useNutzapStore = defineStore("nutzap", {
               token: tokenStr,
               unlockTime: unlockDate,
               receiverP2PK: creator.cashuP2pk,
-              refundPubkey: refundKey,
               createdAt: Math.floor(Date.now() / 1000),
             });
           }
@@ -242,7 +238,6 @@ export const useNutzapStore = defineStore("nutzap", {
             token: tokenStr,
             unlockTime: unlockDate,
             receiverP2PK: creator.cashuP2pk,
-            refundPubkey: refundKey,
             createdAt: Math.floor(Date.now() / 1000),
           });
         }
@@ -368,7 +363,6 @@ export const useNutzapStore = defineStore("nutzap", {
                 token,
                 receiver_p2pk: creatorP2pk,
                 unlock_time: unlockDate,
-                refund_pubkey: refundKey,
               }),
               trustedRelays
             );
@@ -379,7 +373,6 @@ export const useNutzapStore = defineStore("nutzap", {
                 token,
                 unlockTime: unlockDate,
                 receiverP2PK: creatorP2pk,
-                refundPubkey: refundKey,
                 createdAt: Math.floor(Date.now() / 1000),
               });
             }
@@ -392,7 +385,6 @@ export const useNutzapStore = defineStore("nutzap", {
               token,
               unlockTime: unlockDate,
               receiverP2PK: creatorP2pk,
-              refundPubkey: refundKey,
               createdAt: Math.floor(Date.now() / 1000),
             });
           }
