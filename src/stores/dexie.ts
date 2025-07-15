@@ -73,13 +73,14 @@ export interface LockedToken {
   intervalKey: string;
   unlockTs: number;
   refundUnlockTs: number;
-  status: "pending" | "unlockable" | "claimed" | "expired";
+  status: "pending" | "unlockable" | "claimed" | "expired" | "locked";
   subscriptionEventId: string | null;
   subscriptionId?: string;
   monthIndex?: number;
   totalMonths?: number;
   label?: string;
   autoRedeem?: boolean;
+  refundPubkey?: string;
 }
 
 // export interface Proof {
