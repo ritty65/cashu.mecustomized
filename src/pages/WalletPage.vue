@@ -289,6 +289,7 @@ import { useNPCStore } from "src/stores/npubcash";
 import { useNostrStore, SignerType } from "src/stores/nostr";
 import { usePRStore } from "src/stores/payment-request";
 import { useDexieStore } from "src/stores/dexie";
+import { useAccountSignerStore } from "src/stores/accountSigner";
 
 import { useStorageStore } from "src/stores/storage";
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
@@ -657,7 +658,7 @@ export default {
       if (event.data?.type === "locked-token-missing-signer") {
         const tokenId = event.data.tokenId;
         const uiStore = useUiStore();
-        const signerStore = useSignerStore();
+        const signerStore = useAccountSignerStore();
         signerStore.reset();
         uiStore.showMissingSignerModal = true;
         const stop = watch(

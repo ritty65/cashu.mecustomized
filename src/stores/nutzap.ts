@@ -6,6 +6,8 @@ import { useP2PKStore } from "./p2pk";
 import { cashuDb, type LockedToken as DexieLockedToken } from "./dexie";
 import token from "src/js/token";
 import { v4 as uuidv4 } from "uuid";
+import crypto from "crypto";
+import { ensureCompressed } from "src/utils/ecash";
 import { useMintsStore } from "./mints";
 import { useProofsStore } from "./proofs";
 import { useMessengerStore } from "./messenger";
@@ -197,17 +199,23 @@ export const useNutzapStore = defineStore("nutzap", {
           );
         const mintWallet = wallet.mintWallet(mint.url, mints.activeUnit);
         const proofs = mints.mintUnitProofs(mint, mints.activeUnit);
-        const { sendProofs, locked } = await wallet.sendToLock(
+        const secret = [
+          "P2PK",
+          {
+            data: ensureCompressed(creator.cashuP2pk),
+            nonce: crypto.randomUUID().replace(/-/g, "").slice(0, 16),
+            tags: [
+              ["locktime", unlockDate.toString()],
+              ["refund", useNostrStore().npub],
+            ],
+          },
+        ];
+        const { send } = await mintWallet.split(price, {
           proofs,
-          mintWallet,
-          price,
-          creator.cashuP2pk,
-          "nutzap",
-          unlockDate,
-          refundKey
-        );
-
-        const tokenStr = proofsStore.serializeProofs(sendProofs);
+          secret,
+        });
+        const tokenStr = proofsStore.serializeProofs(send);
+        const locked = { id: uuidv4(), tokenString: tokenStr } as any;
         try {
           const { success, event } = await messenger.sendDm(
             creator.nostrPubkey,
@@ -344,16 +352,23 @@ export const useNutzapStore = defineStore("nutzap", {
 
           const mintWallet = wallet.mintWallet(mint.url, mints.activeUnit);
           const proofs = mints.mintUnitProofs(mint, mints.activeUnit);
-          const { sendProofs, locked } = await wallet.sendToLock(
+          const secret = [
+            "P2PK",
+            {
+              data: ensureCompressed(creatorP2pk),
+              nonce: crypto.randomUUID().replace(/-/g, "").slice(0, 16),
+              tags: [
+                ["locktime", unlockDate.toString()],
+                ["refund", useNostrStore().npub],
+              ],
+            },
+          ];
+          const { send } = await mintWallet.split(amount, {
             proofs,
-            mintWallet,
-            amount,
-            creatorP2pk,
-            "nutzap",
-            unlockDate,
-            refundKey
-          );
-          const token = proofsStore.serializeProofs(sendProofs);
+            secret,
+          });
+          const token = proofsStore.serializeProofs(send);
+          const locked = { id: uuidv4(), tokenString: token } as any;
 
           try {
             const { success, event } = await messenger.sendDm(

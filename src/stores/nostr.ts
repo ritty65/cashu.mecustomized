@@ -994,7 +994,8 @@ export const useNostrStore = defineStore("nostr", {
             const shared = await (window as any).nostr.getSharedSecret(sender);
             try {
               return await nip44.v2.decrypt(content, shared);
-            } catch (err) {
+            } catch (err: any) {
+              if (err?.message && err.message.includes("invalid MAC")) return "";
               throw err;
             }
           }
@@ -1513,6 +1514,24 @@ export const useNostrStore = defineStore("nostr", {
       if (verbose) {
         notifySuccess("Ecash added to history.");
       }
+    },
+    async handleLockedTokenMessage(tokenStr: string) {
+      const decoded = token.decode(tokenStr);
+      if (!decoded) return;
+      const p = token.getProofs(decoded)[0];
+      let tags: any[] = [];
+      try {
+        const obj = JSON.parse(p.secret);
+        tags = obj[1]?.tags || [];
+      } catch {}
+      const getTag = (n: string) => tags.find((t: any) => t[0] === n)?.[1];
+      const lock = Number(getTag("locktime") ?? 0);
+      if (lock > Date.now()) {
+        await cashuDb.lockedTokens.put({ tokenString: tokenStr, status: "locked" } as any);
+        return;
+      }
+      const receiveStore = useReceiveTokensStore();
+      await receiveStore.enqueue(() => receiveStore.receiveToken(tokenStr, DEFAULT_BUCKET_ID), tokenStr);
     },
   },
 });

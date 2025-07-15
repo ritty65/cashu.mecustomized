@@ -241,7 +241,7 @@ describe("Nutzap subscriptions", () => {
       subscriptionEventId: null,
     } as any);
     await worker.processTokens();
-    expect(redeem).toHaveBeenCalledWith("tier1");
+    expect(redeem).toHaveBeenCalledWith("tok");
     expect(await cashuDb.lockedTokens.count()).toBe(0);
   });
 
@@ -268,7 +268,7 @@ describe("Nutzap subscriptions", () => {
 
     spy.mockReturnValue((future + 1) * 1000);
     await worker.processTokens();
-    expect(redeem).toHaveBeenCalledWith("tier2");
+    expect(redeem).toHaveBeenCalledWith("tok2");
     expect(await cashuDb.lockedTokens.count()).toBe(0);
     spy.mockRestore();
   });
