@@ -9,7 +9,6 @@ export type Receipt = {
   date: string;
   receiver_p2pk?: string;
   unlock_time?: number;
-  hashlock?: string;
 };
 
 export function formatTimestamp(ts: number): string {
@@ -33,25 +32,14 @@ export function receiptToDmText(
 ): string {
   const payload = subscription
     ? {
-        type: "cashu_subscription_payment",
-        subscription_id: subscription.subscription_id,
-        tier_id: subscription.tier_id,
-        month_index: subscription.month_index,
-        total_months: subscription.total_months,
         token: receipt.token,
         receiver_p2pk: receipt.receiver_p2pk ?? receipt.pubkey,
         unlock_time: receipt.unlock_time ?? receipt.locktime ?? null,
-        hashlock: receipt.hashlock ?? null,
       }
     : {
         token: receipt.token,
-        amount: receipt.amount,
-        unlockTime: receipt.locktime ?? null,
-        bucketId: receipt.bucketId,
-        referenceId: receipt.id,
         receiver_p2pk: receipt.receiver_p2pk ?? receipt.pubkey,
         unlock_time: receipt.unlock_time ?? receipt.locktime ?? null,
-        hashlock: receipt.hashlock ?? null,
       };
   return JSON.stringify(payload);
 }
