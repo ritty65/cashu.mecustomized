@@ -209,17 +209,12 @@ export const useNutzapStore = defineStore("nutzap", {
             ],
           },
         ];
-        const bucketId = proofs[0]?.bucketId;
-        const { sendProofs, locked } = await wallet.sendToLock(
+        const { send } = await mintWallet.split(price, {
           proofs,
-          mintWallet,
-          price,
-          creator.cashuP2pk,
-          bucketId,
-          unlockDate,
-          refundKey
-        );
-        const tokenStr = proofsStore.serializeProofs(sendProofs);
+          secret,
+        });
+        const tokenStr = proofsStore.serializeProofs(send);
+        const locked = { id: uuidv4(), tokenString: tokenStr } as any;
         try {
           const { success, event } = await messenger.sendDm(
             creator.nostrPubkey,
