@@ -12,7 +12,7 @@
           @redeem="redeemPayment"
         />
         <div
-          v-if="unlockTime && remaining > 0"
+          v-if="unlockTime && remaining > 0 && !message.subscriptionPayment?.redeemed"
           class="text-caption q-mt-xs"
         >
           Unlocks in {{ countdown }}
@@ -60,6 +60,7 @@ import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { useWalletStore } from "src/stores/wallet";
 import { notifyError } from "src/js/notify";
 import { cashuDb } from "src/stores/dexie";
+import { liveQuery } from "dexie";
 import { useP2PKStore } from "src/stores/p2pk";
 import { nip19 } from "nostr-tools";
 import { shortenString } from "src/js/string-utils";
@@ -97,6 +98,7 @@ const deliveryIcon = computed(() =>
 const receiveStore = useReceiveTokensStore();
 const redeemed = ref(false);
 const autoRedeem = ref(false);
+let redeemSub: any;
 if (props.message.subscriptionPayment) {
   cashuDb.lockedTokens
     .where("tokenString")
@@ -104,7 +106,23 @@ if (props.message.subscriptionPayment) {
     .first()
     .then((row) => {
       autoRedeem.value = row?.autoRedeem ?? false;
+      redeemed.value = row?.redeemed ?? false;
+      if (props.message.subscriptionPayment)
+        props.message.subscriptionPayment.redeemed = redeemed.value;
     });
+  redeemSub = liveQuery(() =>
+    cashuDb.lockedTokens
+      .where("tokenString")
+      .equals(props.message.subscriptionPayment!.token)
+      .first(),
+  ).subscribe({
+    next: (row) => {
+      redeemed.value = row?.redeemed ?? false;
+      if (props.message.subscriptionPayment)
+        props.message.subscriptionPayment.redeemed = redeemed.value;
+    },
+    error: (err) => console.error(err),
+  });
 }
 
 const now = ref(Date.now());
@@ -114,7 +132,10 @@ onMounted(() => {
     now.value = Date.now();
   }, 1000);
 });
-onUnmounted(() => clearInterval(timer));
+onUnmounted(() => {
+  clearInterval(timer);
+  redeemSub?.unsubscribe();
+});
 
 const receiverPubkey = computed(() => {
   if (!props.message.subscriptionPayment) return "";
@@ -171,6 +192,7 @@ async function redeemPayment() {
       }
     }
     redeemed.value = true;
+    payment.redeemed = true;
   } catch (e) {
     console.error(e);
     notifyError(e);
