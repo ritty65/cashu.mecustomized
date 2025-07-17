@@ -19,7 +19,7 @@
         </q-badge>
       </div>
       <div
-        v-if="p.unlock_time && remaining(p) > 0"
+        v-if="p.unlock_time && remaining(p) > 0 && !p.redeemed"
         class="text-caption q-mt-xs"
       >
         Unlocks in {{ countdown(p) }}

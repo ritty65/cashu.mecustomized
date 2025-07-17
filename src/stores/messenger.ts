@@ -36,6 +36,7 @@ export interface SubscriptionPayment {
   total_months: number;
   amount: number;
   unlock_time?: number;
+  redeemed?: boolean;
 }
 
 export type MessengerMessage = {
