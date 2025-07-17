@@ -70,7 +70,13 @@ export interface LockedToken {
   tierId: string;
   intervalKey: string;
   unlockTs: number;
-  status: "pending" | "unlockable" | "claimed" | "expired";
+  status:
+    | "pending"
+    | "processing"
+    | "unlockable"
+    | "claimed"
+    | "redeemed"
+    | "expired";
   subscriptionEventId: string | null;
   subscriptionId?: string;
   monthIndex?: number;
@@ -78,6 +84,7 @@ export interface LockedToken {
   label?: string;
   autoRedeem?: boolean;
   redeemed?: boolean;
+  redeemedAt?: number | null;
 }
 
 // export interface Proof {
@@ -402,6 +409,16 @@ export class CashuDexie extends Dexie {
               delete i[pre];
               if (i.redeemed === undefined) i.redeemed = false;
             });
+          });
+      });
+
+    this.version(17)
+      .upgrade(async (tx) => {
+        await tx
+          .table("lockedTokens")
+          .toCollection()
+          .modify((entry: any) => {
+            if (entry.redeemedAt === undefined) entry.redeemedAt = null;
           });
       });
   }

@@ -51,13 +51,13 @@ export const useLockedTokensRedeemWorker = defineStore(
         if (!settingsStore.autoRedeemLockedTokens) return;
         const now = Math.floor(Date.now() / 1000);
         let entries = await cashuDb.lockedTokens
-          .where("unlockTs")
-          .belowOrEqual(now)
+          .filter((e) => e.unlockTs <= now && e.status !== "redeemed")
           .toArray();
 
         const legacyEntries = await cashuDb.lockedTokens
           .filter(
             (e: any) =>
+              e.status !== "redeemed" &&
               e.unlockTs === undefined &&
               typeof e.locktime === "number" &&
               e.locktime <= now,
@@ -164,7 +164,10 @@ export const useLockedTokensRedeemWorker = defineStore(
               await receiveStore.enqueue(() =>
                 wallet.receive(entry.tokenString),
               );
-              await cashuDb.lockedTokens.update(entry.id, { status: 'claimed' });
+              await cashuDb.lockedTokens.update(entry.id, {
+                status: 'redeemed',
+                redeemedAt: Date.now(),
+              });
 
               // update subscription interval if applicable
               if (entry.subscriptionId) {

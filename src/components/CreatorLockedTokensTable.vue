@@ -129,7 +129,10 @@ export default defineComponent({
         redeemed: true,
       });
       await receiveStore.enqueue(() => wallet.receive(token.tokenString));
-      await cashuDb.lockedTokens.update(token.id, { status: "claimed" });
+      await cashuDb.lockedTokens.update(token.id, {
+        status: "redeemed",
+        redeemedAt: Date.now(),
+      });
       if (token.subscriptionId) {
         const sub = await cashuDb.subscriptions.get(token.subscriptionId);
         const idx = sub?.intervals.findIndex(

@@ -9,7 +9,11 @@ export const useDexieLockedTokensStore = defineStore(
   () => {
     const lockedTokens = ref<LockedToken[]>([]);
 
-    liveQuery(() => cashuDb.lockedTokens.toArray()).subscribe({
+    liveQuery(() =>
+      cashuDb.lockedTokens
+        .filter((t) => t.status !== "redeemed")
+        .toArray(),
+    ).subscribe({
       next: (rows) => {
         lockedTokens.value = rows;
       },
