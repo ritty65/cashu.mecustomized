@@ -21,8 +21,8 @@ vi.mock("nostr-tools", () => ({
   nip19: { decode: vi.fn() },
 }));
 
-const { nip19 } = require("nostr-tools");
-const { notifyError } = require("../../../src/js/notify");
+import { nip19 } from "nostr-tools";
+import { notifyError } from "../../../src/js/notify";
 
 beforeEach(() => {
   vi.clearAllMocks();
