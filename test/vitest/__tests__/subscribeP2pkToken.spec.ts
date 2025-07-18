@@ -60,8 +60,6 @@ vi.mock("../../../src/js/token", () => ({
 
 beforeEach(async () => {
   localStorage.clear();
-  await cashuDb.close();
-  await cashuDb.delete();
   await cashuDb.open();
   sendDm = vi.fn(async () => ({ success: true }));
   sendToLock = vi.fn(async () => ({

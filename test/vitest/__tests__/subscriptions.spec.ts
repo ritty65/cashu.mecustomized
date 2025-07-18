@@ -104,8 +104,6 @@ vi.mock("../../../src/js/token", () => ({
 
 beforeEach(async () => {
   localStorage.clear();
-  await cashuDb.close();
-  await cashuDb.delete();
   await cashuDb.open();
   useNutzapStore().$reset();
   sendDm = vi.fn(async () => ({}));
