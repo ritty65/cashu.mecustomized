@@ -74,11 +74,12 @@ export const useNutzapStore = defineStore("nutzap", {
         month_index: 0,
         total_months: 0,
       });
-      const { success } = await messenger.sendDm(
+      const { success, event } = await messenger.sendDm(
         item.npub,
         JSON.stringify(payload)
       );
       if (success) {
+        if (event) messenger.pushOwnMessage(event as any);
         const idx = this.sendQueue.findIndex(
           (q) => q.createdAt === item.createdAt
         );
