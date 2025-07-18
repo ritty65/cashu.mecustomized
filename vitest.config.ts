@@ -16,7 +16,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "happy-dom",
-    setupFiles: ["./test/vitest/setup-file.js"],
+    setupFiles: ["./test/setupDexie.ts", "./test/vitest/setup-file.js"],
     exclude: [
       "src/lib/cashu-ts/test/integration.test.ts",
       "src/lib/cashu-ts/test/auth.test.ts",

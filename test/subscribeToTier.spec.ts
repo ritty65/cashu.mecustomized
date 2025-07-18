@@ -30,8 +30,6 @@ vi.mock('../src/stores/proofs', () => ({
 
 beforeEach(async () => {
   localStorage.clear();
-  await cashuDb.close();
-  await cashuDb.delete();
   await cashuDb.open();
   sendDm = vi.fn(async () => ({ success: true, event: { id: '1', content: '{}' } }));
   createHTLC = vi.fn(() => ({ token: JSON.stringify({ lockSecret: 'pre' }), hash: 'h' }));

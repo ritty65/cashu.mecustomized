@@ -4,8 +4,6 @@ import { cashuDb } from '../src/stores/dexie';
 
 beforeEach(async () => {
   localStorage.clear();
-  await cashuDb.close();
-  await Dexie.delete('cashuDatabase');
 });
 
 describe('dexie migration v11', () => {
