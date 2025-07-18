@@ -39,8 +39,27 @@
         {{ time }}
         <q-tooltip>{{ isoTime }}</q-tooltip>
       </span>
+      <template v-if="message.outgoing">
+        <q-spinner-dots
+          v-if="message.status === 'pending'"
+          size="16px"
+          class="q-ml-xs"
+        />
+        <q-icon
+          v-else-if="deliveryStatus"
+          :name="deliveryIcon"
+          size="16px"
+          class="q-ml-xs"
+        />
+        <q-icon
+          v-else-if="message.status === 'failed'"
+          name="error"
+          size="16px"
+          class="q-ml-xs text-negative"
+        />
+      </template>
       <q-icon
-        v-if="deliveryStatus"
+        v-else-if="deliveryStatus"
         :name="deliveryIcon"
         size="16px"
         class="q-ml-xs"

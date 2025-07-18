@@ -46,6 +46,7 @@ export type MessengerMessage = {
   outgoing: boolean;
   subscriptionPayment?: SubscriptionPayment;
   autoRedeem?: boolean;
+  status?: "pending" | "failed";
 };
 
 export const useMessengerStore = defineStore("messenger", {
@@ -149,28 +150,48 @@ export const useMessengerStore = defineStore("messenger", {
       }
 
       const list = relays && relays.length ? relays : (this.relays as any);
-      for (const r of list) {
-        try {
-          const { success, event } = await nostr.sendNip04DirectMessage(
-            recipient,
-            message,
-            privKey,
-            nostr.pubkey,
-            [r],
-          );
-          if (success && event) {
-            this.addOutgoingMessage(
+
+      // create a placeholder message before attempting to publish
+      const placeholder = this.addOutgoingMessage(recipient, message, undefined, undefined, "pending");
+
+      let result: { success: boolean; event: any | null } = {
+        success: false,
+        event: null,
+      };
+
+      const MAX_RETRIES = 3;
+      for (let attempt = 0; attempt < MAX_RETRIES && !result.success; attempt++) {
+        for (const r of list) {
+          try {
+            result = await nostr.sendNip04DirectMessage(
               recipient,
               message,
-              event.created_at,
-              event.id,
+              privKey,
+              nostr.pubkey,
+              [r],
             );
-            return { success: true, event } as any;
+            if (result.success && result.event) {
+              break;
+            }
+            console.warn(`[messenger.sendDm] failed via ${r}`);
+          } catch (e) {
+            console.error(`[messenger.sendDm] relay ${r}`, e);
           }
-          console.warn(`[messenger.sendDm] failed via ${r}`);
-        } catch (e) {
-          console.error(`[messenger.sendDm] relay ${r}`, e);
         }
+      }
+
+      if (placeholder) {
+        if (result.success && result.event) {
+          placeholder.id = result.event.id;
+          placeholder.created_at = result.event.created_at;
+          placeholder.status = undefined;
+        } else {
+          placeholder.status = "failed";
+        }
+      }
+
+      if (result.success && result.event) {
+        return { success: true, event: result.event } as any;
       }
       return { success: false } as any;
     },
@@ -272,7 +293,8 @@ export const useMessengerStore = defineStore("messenger", {
       content: string,
       created_at?: number,
       id?: string,
-    ) {
+      status?: "pending" | "failed",
+    ): MessengerMessage | undefined {
       pubkey = this.normalizeKey(pubkey);
       const messageId = id || uuidv4();
       if (this.eventLog.some((m) => m.id === messageId)) return;
@@ -282,11 +304,13 @@ export const useMessengerStore = defineStore("messenger", {
         content: sanitizeMessage(content),
         created_at: created_at ?? Math.floor(Date.now() / 1000),
         outgoing: true,
+        status,
       };
       if (!this.conversations[pubkey]) this.conversations[pubkey] = [];
       if (!this.conversations[pubkey].some((m) => m.id === messageId))
         this.conversations[pubkey].push(msg);
       this.eventLog.push(msg);
+      return msg;
     },
 
     pushOwnMessage(event: NostrEvent) {
