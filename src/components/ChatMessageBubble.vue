@@ -4,15 +4,15 @@
     :class="message.outgoing ? 'items-end' : 'items-start'"
   >
     <div :class="message.outgoing ? 'sent' : 'received'" :style="bubbleStyle">
-      <template v-if="message.subscriptionPayment">
+      <template v-if="subscriptionPayment">
         <TokenCarousel
-          :payments="message.subscriptionPayment"
+          :payments="subscriptionPayment"
           :creator="!message.outgoing"
           :message="message"
           @redeem="redeemPayment"
         />
         <div
-          v-if="unlockTime && remaining > 0 && !message.subscriptionPayment?.redeemed"
+          v-if="unlockTime && remaining > 0 && !redeemed.value"
           class="text-caption q-mt-xs"
         >
           Unlocks in {{ countdown }}
@@ -54,7 +54,7 @@ import { computed, ref, onMounted, onUnmounted } from "vue";
 import { formatDistanceToNow } from "date-fns";
 import { useQuasar } from "quasar";
 import { mdiCheck, mdiCheckAll } from "@quasar/extras/mdi-v6";
-import type { MessengerMessage } from "src/stores/messenger";
+import type { MessengerMessage, SubscriptionPayment } from "src/stores/messenger";
 import TokenCarousel from "components/TokenCarousel.vue";
 import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { useWalletStore } from "src/stores/wallet";
@@ -72,6 +72,12 @@ const props = defineProps<{
 
 const $q = useQuasar();
 const p2pk = useP2PKStore();
+
+const subscriptionPayment = ref<SubscriptionPayment | undefined>(
+  props.message.subscriptionPayment
+    ? { ...props.message.subscriptionPayment }
+    : undefined,
+);
 
 
 const receivedStyle = computed(() => ({
@@ -99,27 +105,27 @@ const receiveStore = useReceiveTokensStore();
 const redeemed = ref(false);
 const autoRedeem = ref(false);
 let redeemSub: any;
-if (props.message.subscriptionPayment) {
+if (subscriptionPayment.value) {
   cashuDb.lockedTokens
     .where("tokenString")
-    .equals(props.message.subscriptionPayment.token)
+    .equals(subscriptionPayment.value.token)
     .first()
     .then((row) => {
       autoRedeem.value = row?.autoRedeem ?? false;
       redeemed.value = row?.redeemed ?? false;
-      if (props.message.subscriptionPayment)
-        props.message.subscriptionPayment.redeemed = redeemed.value;
+      subscriptionPayment.value &&
+        (subscriptionPayment.value.redeemed = redeemed.value);
     });
   redeemSub = liveQuery(() =>
     cashuDb.lockedTokens
       .where("tokenString")
-      .equals(props.message.subscriptionPayment!.token)
+      .equals(subscriptionPayment.value!.token)
       .first(),
   ).subscribe({
     next: (row) => {
       redeemed.value = row?.redeemed ?? false;
-      if (props.message.subscriptionPayment)
-        props.message.subscriptionPayment.redeemed = redeemed.value;
+      subscriptionPayment.value &&
+        (subscriptionPayment.value.redeemed = redeemed.value);
     },
     error: (err) => console.error(err),
   });
@@ -138,13 +144,13 @@ onUnmounted(() => {
 });
 
 const receiverPubkey = computed(() => {
-  if (!props.message.subscriptionPayment) return "";
-  return p2pk.getTokenPubkey(props.message.subscriptionPayment.token) || "";
+  if (!subscriptionPayment.value) return "";
+  return p2pk.getTokenPubkey(subscriptionPayment.value.token) || "";
 });
 
 const unlockTime = computed(() => {
-  if (!props.message.subscriptionPayment) return undefined;
-  return p2pk.getTokenLocktime(props.message.subscriptionPayment.token);
+  if (!subscriptionPayment.value) return undefined;
+  return p2pk.getTokenLocktime(subscriptionPayment.value.token);
 });
 
 const unlockIso = computed(() =>
@@ -171,8 +177,8 @@ const receiverPubkeyNpub = computed(() => {
 });
 
 async function redeemPayment() {
-  if (!props.message.subscriptionPayment) return;
-  const payment = props.message.subscriptionPayment;
+  if (!subscriptionPayment.value) return;
+  const payment = subscriptionPayment.value;
   const wallet = useWalletStore();
   const receiveStore = useReceiveTokensStore();
   try {
@@ -200,10 +206,10 @@ async function redeemPayment() {
 }
 
 async function updateAutoRedeem(val: boolean) {
-  if (!props.message.subscriptionPayment) return;
+  if (!subscriptionPayment.value) return;
   const row = await cashuDb.lockedTokens
     .where("tokenString")
-    .equals(props.message.subscriptionPayment.token)
+    .equals(subscriptionPayment.value.token)
     .first();
   if (row) await cashuDb.lockedTokens.update(row.id, { autoRedeem: val });
   autoRedeem.value = val;
