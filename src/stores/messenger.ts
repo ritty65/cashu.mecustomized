@@ -19,14 +19,11 @@ import { useNostrStore } from "./nostr";
 import { cashuDb, type LockedToken } from "./dexie";
 import { DEFAULT_BUCKET_ID } from "./buckets";
 import token from "src/js/token";
-import { subscriptionPayload } from "src/utils/receipt-utils";
+import {
+  subscriptionPayload,
+  parseSubscriptionPayload,
+} from "src/utils/receipt-utils";
 
-function parseSubscriptionPaymentPayload(
-  obj: any,
-): { token: string; unlock_time?: number } | undefined {
-  if (obj?.type !== "cashu_subscription_payment" || !obj.token) return;
-  return { token: obj.token, unlock_time: obj.unlock_time };
-}
 
 export interface SubscriptionPayment {
   token: string;
@@ -294,7 +291,7 @@ export const useMessengerStore = defineStore("messenger", {
       if (!msg) return;
       try {
         const payload = JSON.parse(msg.content);
-        const sub = parseSubscriptionPaymentPayload(payload);
+        const sub = parseSubscriptionPayload(payload);
         if (sub) {
           const decoded = token.decode(sub.token);
           const amount = decoded
@@ -338,7 +335,7 @@ export const useMessengerStore = defineStore("messenger", {
           console.warn("[messenger.addIncomingMessage] invalid JSON", e);
           continue;
         }
-        const sub = parseSubscriptionPaymentPayload(payload);
+        const sub = parseSubscriptionPayload(payload);
         if (sub) {
           const decoded = token.decode(sub.token);
           const amount = decoded

@@ -69,19 +69,25 @@ export function formatTimestamp(ts: number): string {
   )}`;
 }
 
+export function parseSubscriptionPayload(
+  obj: any,
+): SubscriptionDmPayload | undefined {
+  if (obj?.type !== "cashu_subscription_payment" || !obj.token) return;
+  return {
+    type: "cashu_subscription_payment",
+    token: obj.token,
+    unlock_time: obj.unlock_time ?? null,
+    subscription_id: obj.subscription_id,
+    tier_id: obj.tier_id,
+    month_index: obj.month_index,
+    total_months: obj.total_months,
+  };
+}
+
 export function parseSubscriptionDm(text: string): SubscriptionDmPayload | undefined {
   try {
     const obj = JSON.parse(text);
-    if (obj?.type !== "cashu_subscription_payment" || !obj.token) return;
-    return {
-      type: "cashu_subscription_payment",
-      token: obj.token,
-      unlock_time: obj.unlock_time ?? null,
-      subscription_id: obj.subscription_id,
-      tier_id: obj.tier_id,
-      month_index: obj.month_index,
-      total_months: obj.total_months,
-    };
+    return parseSubscriptionPayload(obj);
   } catch {
     return;
   }
