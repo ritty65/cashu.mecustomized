@@ -4,6 +4,10 @@ import { cashuDb } from '../src/stores/dexie';
 
 beforeEach(async () => {
   localStorage.clear();
+  await cashuDb.close();
+  if (await Dexie.exists('cashuDatabase')) {
+    await Dexie.delete('cashuDatabase');
+  }
 });
 
 describe('dexie migration v11', () => {
