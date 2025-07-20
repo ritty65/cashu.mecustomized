@@ -29,6 +29,7 @@ vi.mock("../../../src/stores/nostr", async (importOriginal) => {
     pubkey: "pub",
     connected: true,
     relays: [] as string[],
+    resolvePubkey: (pk: string) => pk,
   };
   Object.defineProperty(store, "privKeyHex", {
     get() {
@@ -56,6 +57,7 @@ import { useNostrStore } from "../../../src/stores/nostr";
 beforeEach(() => {
   localStorage.clear();
   vi.clearAllMocks();
+  useMessengerStore().$reset();
 });
 
 describe("messenger store", () => {
