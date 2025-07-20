@@ -23,6 +23,7 @@ vi.mock("../../../src/stores/nostr", async (importOriginal) => {
       signerType: "seed",
       connected: true,
       relays: [] as string[],
+      resolvePubkey: (pk: string) => pk,
       get privKeyHex() {
         return this.privateKeySignerPrivateKey;
       },
@@ -72,6 +73,7 @@ import { useMessengerStore } from "../../../src/stores/messenger";
 beforeEach(() => {
   localStorage.clear();
   vi.clearAllMocks();
+  useMessengerStore().$reset();
 });
 
 describe("messenger.sendToken", () => {

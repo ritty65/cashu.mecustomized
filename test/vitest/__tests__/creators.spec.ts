@@ -23,8 +23,7 @@ vi.mock("../../../src/stores/nostr", async (importOriginal) => {
 vi.mock("nostr-tools", () => ({
   nip19: { decode: vi.fn() },
 }));
-
-const { nip19 } = require("nostr-tools");
+import { nip19 } from "nostr-tools";
 
 beforeEach(() => {
   vi.clearAllMocks();
