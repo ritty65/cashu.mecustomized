@@ -66,9 +66,8 @@
 
     <q-menu
       v-model="menu"
-      anchor="top right"
+      anchor="bottom right"
       self="top right"
-      :offset="[0, 8]"
       dark
       separate
       class="bg-slate-800 elevated-menu"
