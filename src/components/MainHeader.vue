@@ -158,7 +158,7 @@
       </q-item>
       <q-item clickable @click="gotoCreatorHub">
         <q-item-section avatar>
-          <q-icon name="img:icons/creator-hub.svg" />
+          <q-icon name="hub" />
         </q-item-section>
         <q-item-section>
           <q-item-label>{{
