@@ -25,6 +25,7 @@
       :pagination="pagination"
       :loading="loading"
       :rows-per-page-options="[5, 10, 20]"
+      @update:pagination="updatePagination"
     >
       <template #body-cell-subscriber="props">
         <q-td :props="props">
@@ -58,14 +59,36 @@ const store = useCreatorSubscriptionsStore();
 const { subscriptions, loading } = storeToRefs(store);
 
 const filter = ref('');
-const pagination = ref({ page: 1, rowsPerPage: 5 });
+const pagination = ref({
+  page: 1,
+  rowsPerPage: 5,
+  sortBy: 'subscriber',
+  descending: false,
+});
 
 const columns = [
-  { name: 'subscriber', label: 'Subscriber', field: 'subscriberNpub', align: 'left' },
-  { name: 'tier', label: 'Tier', field: 'tierId', align: 'left' },
-  { name: 'months', label: 'Months', field: 'receivedMonths', align: 'center' },
-  { name: 'status', label: 'Status', field: 'status', align: 'left' }
+  {
+    name: 'subscriber',
+    label: 'Subscriber',
+    field: 'subscriberNpub',
+    align: 'left',
+    sortable: true,
+  },
+  { name: 'tier', label: 'Tier', field: 'tierId', align: 'left', sortable: true },
+  {
+    name: 'months',
+    label: 'Months',
+    field: 'receivedMonths',
+    align: 'center',
+    sortable: true,
+    sort: (a: number, b: number) => a - b,
+  },
+  { name: 'status', label: 'Status', field: 'status', align: 'left', sortable: true },
 ];
+
+function updatePagination(p: any) {
+  pagination.value = p;
+}
 
 function pubkeyNpub(hex: string): string {
   try {
