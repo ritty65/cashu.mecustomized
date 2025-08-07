@@ -117,37 +117,39 @@
     </div>
 
     <!-- bulk actions -->
-    <q-banner
-      v-if="selected.length"
-      class="bg-grey-2 q-px-md q-py-sm rounded-borders mb-4 flex items-center gap-2"
-    >
-      <div class="text-caption">{{ t('CreatorSubscribers.selectionCount', { count: selected.length }) }}</div>
-      <q-btn
-        flat
-        color="primary"
-        :disable="selected.length === 0 || !canSendDm"
-        :label="$t('CreatorSubscribers.actions.sendGroupMessage')"
-        @click="sendGroupMessage"
+    <q-slide-transition>
+      <div
+        v-if="selected.length"
+        class="bg-gray-800 text-white border border-gray-700 q-px-md q-py-sm rounded-borders mb-4 flex items-center gap-2 sticky top-0 z-20"
       >
-        <q-tooltip v-if="selected.length === 0">
-          {{ t('CreatorSubscribers.tooltips.noSelection') }}
-        </q-tooltip>
-        <q-tooltip v-else-if="!canSendDm">
-          {{ t('CreatorSubscribers.tooltips.notLoggedIn') }}
-        </q-tooltip>
-      </q-btn>
-      <q-btn
-        flat
-        color="primary"
-        :disable="selected.length === 0"
-        :label="$t('CreatorSubscribers.actions.exportSelected')"
-        @click="exportSelected"
-      >
-        <q-tooltip v-if="selected.length === 0">
-          {{ t('CreatorSubscribers.tooltips.noSelection') }}
-        </q-tooltip>
-      </q-btn>
-    </q-banner>
+        <div class="text-caption">{{ t('CreatorSubscribers.selectionCount', { count: selected.length }) }}</div>
+        <q-btn
+          flat
+          color="primary"
+          :disable="selected.length === 0 || !canSendDm"
+          :label="$t('CreatorSubscribers.actions.sendGroupMessage')"
+          @click="sendGroupMessage"
+        >
+          <q-tooltip v-if="selected.length === 0">
+            {{ t('CreatorSubscribers.tooltips.noSelection') }}
+          </q-tooltip>
+          <q-tooltip v-else-if="!canSendDm">
+            {{ t('CreatorSubscribers.tooltips.notLoggedIn') }}
+          </q-tooltip>
+        </q-btn>
+        <q-btn
+          flat
+          color="primary"
+          :disable="selected.length === 0"
+          :label="$t('CreatorSubscribers.actions.exportSelected')"
+          @click="exportSelected"
+        >
+          <q-tooltip v-if="selected.length === 0">
+            {{ t('CreatorSubscribers.tooltips.noSelection') }}
+          </q-tooltip>
+        </q-btn>
+      </div>
+    </q-slide-transition>
 
     <!-- no data -->
     <div
