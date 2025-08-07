@@ -159,41 +159,75 @@
       {{ $t("CreatorSubscribers.noData") }}
     </div>
 
-    <!-- subscriber cards -->
-    <div v-else class="space-y-4">
-      <q-card
-        v-for="sub in filteredSubscribers"
-        :key="sub.subscriptionId"
-        class="p-4 flex items-center gap-4 cursor-pointer"
-        @click="openSubscriber(sub)"
-      >
-        <q-checkbox
-          :model-value="isSelected(sub)"
-          @update:model-value="(val) => handleSelectChange(val, sub)"
-          @click.stop
-        />
-        <q-avatar size="48px">
-          <div class="placeholder text-white">
-            {{ getInitials(sub.subscriberNpub) }}
+    <!-- subscriber table -->
+    <q-table
+      v-else
+      :rows="filteredSubscribers"
+      :columns="columns"
+      row-key="subscriptionId"
+      selection="multiple"
+      v-model:selected="selected"
+      flat
+      :row-class="() => 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800'"
+      @row-click="(_, row) => openSubscriber(row)"
+    >
+      <template #body-cell-subscriber="props">
+        <q-td :props="props">
+          <div class="flex items-center gap-3">
+            <q-avatar size="32px">
+              <template v-if="avatarUrl(props.row.subscriberNpub)">
+                <img :src="avatarUrl(props.row.subscriberNpub)" />
+              </template>
+              <template v-else>
+                <div class="placeholder text-white text-sm">
+                  {{ getInitials(props.row.subscriberNpub) }}
+                </div>
+              </template>
+            </q-avatar>
+            <div class="flex flex-col">
+              <span class="font-medium">
+                {{ displayName(props.row.subscriberNpub) }}
+              </span>
+              <span class="text-xs text-gray-500">
+                {{ shortenString(pubkeyNpub(props.row.subscriberNpub), 15, 6) }}
+              </span>
+            </div>
           </div>
-        </q-avatar>
-        <div class="flex-1">
-          <div class="font-medium">
-            {{ shortenString(pubkeyNpub(sub.subscriberNpub), 15, 6) }}
-          </div>
-          <q-badge color="primary" class="q-mt-xs">{{ sub.tierName }}</q-badge>
-        </div>
-        <div class="text-right">
-          <div>{{ formatCurrency(sub.totalAmount) }}</div>
-          <q-badge
-            class="q-mt-xs"
-            :color="sub.status === 'active' ? 'positive' : 'warning'"
-          >
-            {{ t(`CreatorSubscribers.status.${sub.status}`) }}
+        </q-td>
+      </template>
+
+      <template #body-cell-revenue="props">
+        <q-td :props="props" class="text-right">
+          {{ formatCurrency(props.row.totalAmount) }}
+        </q-td>
+      </template>
+
+      <template #body-cell-start="props">
+        <q-td :props="props">
+          {{ props.row.startDate ? formatTs(props.row.startDate) : '-' }}
+        </q-td>
+      </template>
+
+      <template #body-cell-frequency="props">
+        <q-td :props="props">
+          {{ t(`CreatorSubscribers.frequency.${props.row.frequency}`) }}
+        </q-td>
+      </template>
+
+      <template #body-cell-status="props">
+        <q-td :props="props">
+          <q-badge :color="props.row.status === 'active' ? 'positive' : 'warning'">
+            {{ t(`CreatorSubscribers.status.${props.row.status}`) }}
           </q-badge>
-        </div>
-      </q-card>
-    </div>
+        </q-td>
+      </template>
+
+      <template #body-cell-view="props">
+        <q-td :props="props" class="text-right">
+          <q-icon name="chevron_right" />
+        </q-td>
+      </template>
+    </q-table>
 
     <!-- filter dialog -->
     <q-dialog v-model="showFilters">
@@ -308,7 +342,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import {
   useCreatorSubscriptionsStore,
@@ -346,6 +380,52 @@ const tierOptions = computed(() => {
 const statusOptions = computed(() => [
   { label: t("CreatorSubscribers.status.active"), value: "active" },
   { label: t("CreatorSubscribers.status.pending"), value: "pending" },
+]);
+
+const columns = computed(() => [
+  {
+    name: "subscriber",
+    label: t("CreatorSubscribers.columns.subscriber"),
+    field: "subscriberNpub",
+    align: "left",
+    sortable: true,
+  },
+  {
+    name: "tier",
+    label: t("CreatorSubscribers.columns.tier"),
+    field: "tierName",
+    align: "left",
+    sortable: true,
+  },
+  {
+    name: "revenue",
+    label: t("CreatorSubscribers.summary.revenue"),
+    field: "totalAmount",
+    align: "right",
+    sortable: true,
+  },
+  {
+    name: "start",
+    label: t("CreatorSubscribers.columns.start"),
+    field: "startDate",
+    align: "left",
+    sortable: true,
+  },
+  {
+    name: "frequency",
+    label: "Frequency",
+    field: "frequency",
+    align: "left",
+    sortable: true,
+  },
+  {
+    name: "status",
+    label: t("CreatorSubscribers.columns.status"),
+    field: "status",
+    align: "left",
+    sortable: true,
+  },
+  { name: "view", label: "", field: "view", align: "right" },
 ]);
 
 function clearFilters() {
@@ -421,6 +501,35 @@ const revenueSparklinePoints = computed(() => {
 const messenger = useMessengerStore();
 const router = useRouter();
 const nostr = useNostrStore();
+
+const profiles = ref<Record<string, any>>({});
+watch(
+  subscriptions,
+  async (subs) => {
+    for (const s of subs) {
+      const npub = s.subscriberNpub;
+      if (!profiles.value[npub]) {
+        try {
+          profiles.value[npub] = await nostr.getProfile(npub);
+        } catch {
+          profiles.value[npub] = null;
+        }
+      }
+    }
+  },
+  { immediate: true },
+);
+
+function displayName(npub: string): string {
+  const p = profiles.value[npub];
+  return p?.display_name || p?.name || pubkeyNpub(npub);
+}
+
+function avatarUrl(npub: string): string | null {
+  const p = profiles.value[npub];
+  return p?.picture || null;
+}
+
 const selected = ref<CreatorSubscription[]>([]);
 const showMessageDialog = ref(false);
 const messageText = ref("");
@@ -498,20 +607,6 @@ function exportSelected() {
   selected.value = [];
 }
 
-function isSelected(sub: CreatorSubscription) {
-  return selected.value.some((s) => s.subscriptionId === sub.subscriptionId);
-}
-
-function handleSelectChange(val: boolean, sub: CreatorSubscription) {
-  const idx = selected.value.findIndex((s) => s.subscriptionId === sub.subscriptionId);
-  if (val && idx === -1) selected.value.push(sub);
-  if (!val && idx !== -1) selected.value.splice(idx, 1);
-  const ids = selected.value.map((s) => s.subscriptionId);
-  if (ids.length !== new Set(ids).size) {
-    console.warn('Duplicate subscriptionId detected in selection');
-  }
-}
-
 const showSubscriberDialog = ref(false);
 const currentSubscriber = ref<CreatorSubscription | null>(null);
 const subscriberProfile = ref<any>(null);
@@ -585,8 +680,8 @@ const filteredSubscribers = computed(() => {
 <style scoped>
 .placeholder {
   background: var(--divider-color);
-  width: 64px;
-  height: 64px;
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
