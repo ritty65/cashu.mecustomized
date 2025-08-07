@@ -157,41 +157,58 @@
       {{ $t("CreatorSubscribers.noData") }}
     </div>
 
-    <!-- subscriber cards -->
-    <div v-else class="space-y-4">
-      <q-card
-        v-for="sub in filteredSubscribers"
-        :key="sub.subscriptionId"
-        class="p-4 flex items-center gap-4 cursor-pointer"
-        @click="openSubscriber(sub)"
-      >
-        <q-checkbox
-          :model-value="isSelected(sub)"
-          @update:model-value="(val) => handleSelectChange(val, sub)"
-          @click.stop
-        />
-        <q-avatar size="48px">
-          <div class="placeholder text-white">
-            {{ getInitials(sub.subscriberNpub) }}
-          </div>
-        </q-avatar>
-        <div class="flex-1">
-          <div class="font-medium">
-            {{ shortenString(pubkeyNpub(sub.subscriberNpub), 15, 6) }}
-          </div>
-          <q-badge color="primary" class="q-mt-xs">{{ sub.tierName }}</q-badge>
-        </div>
-        <div class="text-right">
-          <div>{{ formatCurrency(sub.totalAmount) }}</div>
-          <q-badge
-            class="q-mt-xs"
-            :color="sub.status === 'active' ? 'positive' : 'warning'"
-          >
-            {{ t(`CreatorSubscribers.status.${sub.status}`) }}
-          </q-badge>
-        </div>
-      </q-card>
-    </div>
+    <!-- subscriber table -->
+    <q-table
+      v-else
+      flat
+      hide-bottom
+      :rows="filteredSubscribers"
+      :columns="columns"
+      row-key="subscriptionId"
+      class="subscribers-table"
+    >
+      <template #body="props">
+        <q-tr
+          :props="props"
+          class="hover:bg-grey-2 dark:hover:bg-grey-8 cursor-pointer"
+          @click="openSubscriber(props.row)"
+        >
+          <q-td auto-width>
+            <q-checkbox
+              :model-value="isSelected(props.row)"
+              @update:model-value="(val) => handleSelectChange(val, props.row)"
+              @click.stop
+            />
+          </q-td>
+          <q-td auto-width>
+            <q-avatar size="32px">
+              <template v-if="profiles[props.row.subscriberNpub]?.picture">
+                <img :src="profiles[props.row.subscriberNpub].picture" />
+              </template>
+              <template v-else>
+                <div class="placeholder text-white">
+                  {{ getInitials(props.row.subscriberNpub) }}
+                </div>
+              </template>
+            </q-avatar>
+          </q-td>
+          <q-td>{{ getDisplayName(props.row) }}</q-td>
+          <q-td>{{ shortenString(pubkeyNpub(props.row.subscriberNpub), 15, 6) }}</q-td>
+          <q-td>{{ props.row.tierName }}</q-td>
+          <q-td>{{ formatCurrency(props.row.totalAmount) }}</q-td>
+          <q-td>{{ props.row.startDate ? formatTs(props.row.startDate) : '-' }}</q-td>
+          <q-td>{{ t(`CreatorSubscribers.frequency.${props.row.frequency}`) }}</q-td>
+          <q-td>
+            <q-badge :color="props.row.status === 'active' ? 'positive' : 'warning'">
+              {{ t(`CreatorSubscribers.status.${props.row.status}`) }}
+            </q-badge>
+          </q-td>
+          <q-td auto-width>
+            <q-icon name="chevron_right" />
+          </q-td>
+        </q-tr>
+      </template>
+    </q-table>
 
     <!-- filter dialog -->
     <q-dialog v-model="showFilters">
@@ -306,7 +323,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import {
   useCreatorSubscriptionsStore,
@@ -330,6 +347,8 @@ const mintsStore = useMintsStore();
 const uiStore = useUiStore();
 const { activeUnit } = storeToRefs(mintsStore);
 const { t } = useI18n();
+
+const profiles = ref<Record<string, any>>({});
 
 const filter = ref("");
 const tierFilter = ref<string | null>(null);
@@ -419,6 +438,22 @@ const revenueSparklinePoints = computed(() => {
 const messenger = useMessengerStore();
 const router = useRouter();
 const nostr = useNostrStore();
+
+watch(
+  subscriptions,
+  async (subs) => {
+    for (const s of subs) {
+      const pk = s.subscriberNpub;
+      if (profiles.value[pk] !== undefined) continue;
+      try {
+        profiles.value[pk] = await nostr.getProfile(pk);
+      } catch {
+        profiles.value[pk] = {};
+      }
+    }
+  },
+  { immediate: true }
+);
 const selected = ref<CreatorSubscription[]>([]);
 const showMessageDialog = ref(false);
 const messageText = ref("");
@@ -565,6 +600,55 @@ function getInitials(npub: string): string {
   return pubkeyNpub(npub).slice(0, 2).toUpperCase();
 }
 
+function getDisplayName(sub: CreatorSubscription): string {
+  const p: any = profiles.value[sub.subscriberNpub];
+  return (
+    p?.display_name ||
+    p?.name ||
+    shortenString(pubkeyNpub(sub.subscriberNpub), 15, 6)
+  );
+}
+
+const columns = computed(() => [
+  { name: "select", label: "", sortable: false },
+  { name: "avatar", label: "", sortable: false },
+  {
+    name: "name",
+    label: t("CreatorSubscribers.columns.subscriber"),
+    field: (row: CreatorSubscription) => getDisplayName(row),
+    sortable: true,
+  },
+  {
+    name: "npub",
+    label: "npub",
+    field: (row: CreatorSubscription) => pubkeyNpub(row.subscriberNpub),
+    sortable: true,
+  },
+  { name: "tier", label: t("CreatorSubscribers.columns.tier"), field: "tierName", sortable: true },
+  {
+    name: "total",
+    label: t("CreatorSubscribers.summary.revenue"),
+    field: "totalAmount",
+    sortable: true,
+    format: (val: number) => formatCurrency(val),
+  },
+  {
+    name: "start",
+    label: t("CreatorSubscribers.columns.start"),
+    field: (row: CreatorSubscription) => row.startDate || 0,
+    sortable: true,
+    format: (val: number) => (val ? formatTs(val) : "-"),
+  },
+  {
+    name: "frequency",
+    label: "Frequency",
+    field: "frequency",
+    sortable: true,
+  },
+  { name: "status", label: t("CreatorSubscribers.columns.status"), field: "status", sortable: true },
+  { name: "actions", label: t("CreatorSubscribers.columns.actions"), sortable: false },
+]);
+
 const filteredSubscribers = computed(() => {
   const term = filter.value.toLowerCase();
   return subscriptions.value.filter((s) => {
@@ -583,8 +667,8 @@ const filteredSubscribers = computed(() => {
 <style scoped>
 .placeholder {
   background: var(--divider-color);
-  width: 64px;
-  height: 64px;
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
