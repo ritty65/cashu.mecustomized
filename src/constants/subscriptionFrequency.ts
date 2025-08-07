@@ -1,4 +1,4 @@
-export type SubscriptionFrequency = 'weekly' | 'biweekly' | 'monthly';
+export type SubscriptionFrequency = "weekly" | "biweekly" | "monthly";
 
 export const FREQUENCY_TO_DAYS: Record<SubscriptionFrequency, number> = {
   weekly: 7,

@@ -133,19 +133,19 @@ async function secureGetItem(key: string): Promise<string | null> {
 
 export function npubToHex(s: string): string | null {
   const input = s.trim();
-  console.debug('[npubToHex] input', input);
+  console.debug("[npubToHex] input", input);
   try {
     const decoded = nip19.decode(input);
-    console.debug('[npubToHex] decoded', decoded);
+    console.debug("[npubToHex] decoded", decoded);
     const { type, data } = decoded;
-    if (type !== 'npub') return null;
-    if (typeof data === 'string') {
+    if (type !== "npub") return null;
+    if (typeof data === "string") {
       if (/^[0-9a-fA-F]{64}$/.test(data)) return data.toLowerCase();
     } else if (data instanceof Uint8Array) {
       return bytesToHex(data);
     }
   } catch (err) {
-    console.error('[npubToHex] decode failed', err);
+    console.error("[npubToHex] decode failed", err);
   }
   return null;
 }
@@ -168,29 +168,31 @@ export class RelayConnectionError extends Error {
   }
 }
 
-async function urlsToRelaySet(urls?: string[]): Promise<NDKRelaySet | undefined> {
+async function urlsToRelaySet(
+  urls?: string[]
+): Promise<NDKRelaySet | undefined> {
   if (!urls?.length) return undefined;
 
   const ndk = await useNdk({ requireSigner: false });
   const set = new NDKRelaySet(new Set(), ndk);
-  urls.forEach((u) =>
-    set.addRelay(ndk.pool.getRelay(u) ?? new NDKRelay(u))
-  );
+  urls.forEach((u) => set.addRelay(ndk.pool.getRelay(u) ?? new NDKRelay(u)));
   return set;
 }
 
 /** Wraps relay.connect() in a timeout (ms) so it never hangs forever */
 function connectWithTimeout(relay: any, ms = 6000): Promise<void> {
   return new Promise((resolve, reject) => {
-    const t = setTimeout(() =>
-      reject(new Error(`[nostr] timeout ${relay?.url ?? ''}`)), ms);
+    const t = setTimeout(
+      () => reject(new Error(`[nostr] timeout ${relay?.url ?? ""}`)),
+      ms
+    );
     relay
       .connect()
       .then(() => {
         clearTimeout(t);
         resolve();
       })
-      .catch(err => {
+      .catch((err) => {
         clearTimeout(t);
         reject(err);
       });
@@ -250,7 +252,9 @@ export async function fetchNutzapProfile(
   await nostr.initNdkReadOnly();
   const ndk = await useNdk();
   if (!ndk) {
-    throw new Error('NDK not initialised \u2013 call initSignerIfNotSet() first');
+    throw new Error(
+      "NDK not initialised \u2013 call initSignerIfNotSet() first"
+    );
   }
   try {
     await ensureRelayConnectivity(ndk);
@@ -308,12 +312,13 @@ export async function publishNutzapProfile(opts: {
   await nostr.ensureNdkConnected(opts.relays);
   const tags: NDKTag[] = [["pubkey", opts.p2pkPub]];
   for (const url of opts.mints) tags.push(["mint", url]);
-  if (opts.relays)
-    for (const r of opts.relays) tags.push(["relay", r]);
+  if (opts.relays) for (const r of opts.relays) tags.push(["relay", r]);
 
   const ndk = await useNdk();
   if (!ndk) {
-    throw new Error('NDK not initialised \u2013 call initSignerIfNotSet() first');
+    throw new Error(
+      "NDK not initialised \u2013 call initSignerIfNotSet() first"
+    );
   }
   const ev = new NDKEvent(ndk);
   ev.kind = 10019;
@@ -398,7 +403,7 @@ export async function publishDiscoveryProfile(opts: {
     notifyError(e?.message ?? String(e));
     throw e;
   }
-  return eventsToPublish.map(ev => ev.id);
+  return eventsToPublish.map((ev) => ev.id);
 }
 
 /** Publishes a ‘kind:9321’ Nutzap event. */
@@ -412,7 +417,9 @@ export async function publishNutzap(opts: {
   await nostr.ensureNdkConnected(opts.relayHints);
   const ndk = await useNdk();
   if (!ndk) {
-    throw new Error('NDK not initialised \u2013 call initSignerIfNotSet() first');
+    throw new Error(
+      "NDK not initialised \u2013 call initSignerIfNotSet() first"
+    );
   }
   const ev = new NDKEvent(ndk);
   ev.kind = 9321;
@@ -444,7 +451,9 @@ export async function subscribeToNutzaps(
   await nostr.initNdkReadOnly();
   const ndk = await useNdk();
   if (!ndk) {
-    throw new Error('NDK not initialised \u2013 call initSignerIfNotSet() first');
+    throw new Error(
+      "NDK not initialised \u2013 call initSignerIfNotSet() first"
+    );
   }
   const sub = ndk.subscribe({
     kinds: [9321],
@@ -510,7 +519,7 @@ export const useNostrStore = defineStore("nostr", {
       ),
       initialized: false,
       secureStorageLoaded: false,
-      lastError: '' as string | null,
+      lastError: "" as string | null,
       lastEventTimestamp,
       nip17EventIdsWeHaveSeen: useLocalStorage<NostrEventLog[]>(
         "cashu.ndk.nip17EventIdsWeHaveSeen",
@@ -519,7 +528,7 @@ export const useNostrStore = defineStore("nostr", {
       profiles: useLocalStorage<
         Record<string, { profile: any; fetchedAt: number }>
       >("cashu.ndk.profiles", {}),
-  };
+    };
   },
   getters: {
     seedSignerPrivateKeyNsecComputed: (state) => {
@@ -585,12 +594,42 @@ export const useNostrStore = defineStore("nostr", {
       if (seedSk) this.seedSignerPrivateKey = seedSk;
       const seedPk = await secureGetItem("cashu.ndk.seedSignerPublicKey");
       if (seedPk) this.seedSignerPublicKey = seedPk;
-      watch(() => this.pubkey, v => { secureSetItem("cashu.ndk.pubkey", v); });
-      watch(() => this.signerType, v => { secureSetItem("cashu.ndk.signerType", v.toString()); });
-      watch(() => this.nip46Token, v => { secureSetItem("cashu.ndk.nip46Token", v); });
-      watch(() => this.privateKeySignerPrivateKey, v => { secureSetItem("cashu.ndk.privateKeySignerPrivateKey", v); });
-      watch(() => this.seedSignerPrivateKey, v => { secureSetItem("cashu.ndk.seedSignerPrivateKey", v); });
-      watch(() => this.seedSignerPublicKey, v => { secureSetItem("cashu.ndk.seedSignerPublicKey", v); });
+      watch(
+        () => this.pubkey,
+        (v) => {
+          secureSetItem("cashu.ndk.pubkey", v);
+        }
+      );
+      watch(
+        () => this.signerType,
+        (v) => {
+          secureSetItem("cashu.ndk.signerType", v.toString());
+        }
+      );
+      watch(
+        () => this.nip46Token,
+        (v) => {
+          secureSetItem("cashu.ndk.nip46Token", v);
+        }
+      );
+      watch(
+        () => this.privateKeySignerPrivateKey,
+        (v) => {
+          secureSetItem("cashu.ndk.privateKeySignerPrivateKey", v);
+        }
+      );
+      watch(
+        () => this.seedSignerPrivateKey,
+        (v) => {
+          secureSetItem("cashu.ndk.seedSignerPrivateKey", v);
+        }
+      );
+      watch(
+        () => this.seedSignerPublicKey,
+        (v) => {
+          secureSetItem("cashu.ndk.seedSignerPublicKey", v);
+        }
+      );
       this.secureStorageLoaded = true;
     },
     initNdkReadOnly: async function () {
@@ -602,10 +641,7 @@ export const useNostrStore = defineStore("nostr", {
         this.connected = true;
       } catch (e: any) {
         console.warn("[nostr] read-only connect failed", e);
-        notifyWarning(
-          `Failed to connect to relays`,
-          e?.message ?? String(e)
-        );
+        notifyWarning(`Failed to connect to relays`, e?.message ?? String(e));
         this.connected = false;
       }
     },
@@ -635,24 +671,28 @@ export const useNostrStore = defineStore("nostr", {
 
       // 3. connect every relay with a 6-second guard, but do not await ndk.connect() again
       const relaysArr = Array.from(ndk.pool.relays.values());
-      const connectPromises = relaysArr.map(r => connectWithTimeout(r, 6000));
+      const connectPromises = relaysArr.map((r) => connectWithTimeout(r, 6000));
 
       // flip Online as soon as one opens
       try {
         await Promise.any(connectPromises);
         this.connected = true;
-      } catch (e:any) {
+      } catch (e: any) {
         this.connected = false;
         this.lastError = e?.message ?? String(e);
         notifyError(this.lastError);
       }
 
       // 4. keep icons in RelayManager.vue fresh
-      ndk.pool.on("relay:connect", () => { this.relays = [...this.relays]; });
-      ndk.pool.on("relay:disconnect", () => { this.relays = [...this.relays]; });
+      ndk.pool.on("relay:connect", () => {
+        this.relays = [...this.relays];
+      });
+      ndk.pool.on("relay:disconnect", () => {
+        this.relays = [...this.relays];
+      });
 
       // 5. background logging – never throw
-      Promise.allSettled(connectPromises).then(res =>
+      Promise.allSettled(connectPromises).then((res) =>
         res.forEach((r, i) => {
           if (r.status === "rejected") {
             console.warn("[nostr] relay", relaysArr[i].url, "failed", r.reason);
@@ -661,7 +701,8 @@ export const useNostrStore = defineStore("nostr", {
               (r.reason as any)?.message ?? String(r.reason)
             );
           }
-        }));
+        })
+      );
     },
     ensureNdkConnected: async function (relays?: string[]) {
       const ndk = await useNdk();
@@ -670,10 +711,7 @@ export const useNostrStore = defineStore("nostr", {
           await ndk.connect();
           this.connected = true;
         } catch (e: any) {
-          notifyWarning(
-            "Failed to connect to relays",
-            e?.message ?? String(e)
-          );
+          notifyWarning("Failed to connect to relays", e?.message ?? String(e));
         }
       }
       if (relays?.length) {
@@ -746,10 +784,7 @@ export const useNostrStore = defineStore("nostr", {
           const pk66 = ensureCompressed(
             "02" + getPublicKey(hexToBytes(privKey))
           );
-          if (
-            !p2pkStore.haveThisKey(pk66) &&
-            p2pkStore.p2pkKeys.length === 0
-          ) {
+          if (!p2pkStore.haveThisKey(pk66) && p2pkStore.p2pkKeys.length === 0) {
             const keyPair = {
               publicKey: pk66,
               privateKey: privKey,
@@ -1040,25 +1075,21 @@ export const useNostrStore = defineStore("nostr", {
         (!privKey || privKey.length === 0) &&
         (this.signerType === SignerType.NIP07 ||
           this.signerType === SignerType.NIP46) &&
-        (window as any)?.nostr?.[useNip04 ? 'nip04' : 'nip44']?.encrypt
+        (window as any)?.nostr?.[useNip04 ? "nip04" : "nip44"]?.encrypt
       ) {
         return await (window as any).nostr[
-          useNip04 ? 'nip04' : 'nip44'
+          useNip04 ? "nip04" : "nip44"
         ].encrypt(recipient, message);
       }
       if (!privKey) {
         throw new Error("No private key for encryption");
       }
       if (useNip04) {
-        return await nip04.encrypt(
-          privKey,
-          recipient,
-          message,
-        );
+        return await nip04.encrypt(privKey, recipient, message);
       }
       return await nip44.v2.encrypt(
         message,
-        nip44.v2.utils.getConversationKey(privKey, recipient),
+        nip44.v2.utils.getConversationKey(privKey, recipient)
       );
     },
     decryptNip04: async function (
@@ -1077,7 +1108,10 @@ export const useNostrStore = defineStore("nostr", {
           } catch (e) {
             if ((window as any)?.nostr?.nip04?.decrypt) {
               try {
-                return await (window as any).nostr.nip04.decrypt(sender, content);
+                return await (window as any).nostr.nip04.decrypt(
+                  sender,
+                  content
+                );
               } catch {}
             }
             const shared = await (window as any).nostr.getSharedSecret(sender);
@@ -1423,10 +1457,9 @@ export const useNostrStore = defineStore("nostr", {
             : 0;
           const unlockTs = payload.unlock_time ?? payload.unlockTime ?? 0;
           const creatorsStore = useCreatorsStore();
-          const tierName =
-            creatorsStore.tiersMap[this.pubkey || ""]?.find(
-              (t) => t.id === payload.tier_id,
-            )?.name;
+          const tierName = creatorsStore.tiersMap[this.pubkey || ""]?.find(
+            (t) => t.id === payload.tier_id
+          )?.name;
           const entry: LockedToken = {
             id: uuidv4(),
             tokenString: payload.token,
@@ -1457,7 +1490,7 @@ export const useNostrStore = defineStore("nostr", {
           const receiveStore = useReceiveTokensStore();
           receiveStore.receiveData.tokensBase64 = payload.token;
           await receiveStore.enqueue(() =>
-            receiveStore.receiveToken(payload.token, DEFAULT_BUCKET_ID),
+            receiveStore.receiveToken(payload.token, DEFAULT_BUCKET_ID)
           );
           return;
         }
@@ -1517,7 +1550,8 @@ export const useNostrStore = defineStore("nostr", {
         if (
           payload.token &&
           payload.bucketId &&
-          (payload.unlockTime !== undefined || payload.unlock_time !== undefined)
+          (payload.unlockTime !== undefined ||
+            payload.unlock_time !== undefined)
         ) {
           const buckets = useBucketsStore();
           if (!buckets.bucketList.find((b) => b.id === payload.bucketId)) {
@@ -1655,14 +1689,14 @@ export async function subscribeToNostr(
       ? relays
       : useSettingsStore().defaultNostrRelays.value;
   if (!relayUrls || relayUrls.length === 0) {
-    console.warn('[nostr] subscribeMany called with empty relay list');
+    console.warn("[nostr] subscribeMany called with empty relay list");
     return false;
   }
 
   // Ensure at least one relay is reachable before subscribing
   const healthy = await filterHealthyRelays(relayUrls);
   if (healthy.length === 0) {
-    console.error('[nostr] subscription failed: all relays unreachable');
+    console.error("[nostr] subscription failed: all relays unreachable");
     return false;
   }
 
@@ -1671,7 +1705,7 @@ export async function subscribeToNostr(
     pool.subscribeMany(healthy, [filter], { onevent: cb });
     return true;
   } catch (e) {
-    console.error('Failed to subscribe', e);
+    console.error("Failed to subscribe", e);
     return false;
   }
 }

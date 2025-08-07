@@ -50,7 +50,8 @@
             <div class="text-right">
               <div class="text-h6">{{ total }}</div>
               <div class="text-xs text-gray-300">
-                +{{ subscribersThisMonth }} {{ $t("CreatorSubscribers.summary.thisMonth") }}
+                +{{ subscribersThisMonth }}
+                {{ $t("CreatorSubscribers.summary.thisMonth") }}
               </div>
             </div>
           </div>
@@ -80,7 +81,8 @@
             <div class="text-right">
               <div class="text-h6">{{ active }}</div>
               <div class="text-xs text-gray-300">
-                +{{ activeThisMonth }} {{ $t("CreatorSubscribers.summary.thisMonth") }}
+                +{{ activeThisMonth }}
+                {{ $t("CreatorSubscribers.summary.thisMonth") }}
               </div>
             </div>
           </div>
@@ -100,7 +102,8 @@
             <div class="text-right">
               <div class="text-h6">{{ formatCurrency(revenue) }}</div>
               <div class="text-xs text-gray-300">
-                +{{ formatCurrency(revenueThisMonth) }} {{ $t("CreatorSubscribers.summary.thisMonth") }}
+                +{{ formatCurrency(revenueThisMonth) }}
+                {{ $t("CreatorSubscribers.summary.thisMonth") }}
               </div>
             </div>
           </div>
@@ -121,7 +124,9 @@
       v-if="selected.length"
       class="bg-grey-2 q-px-md q-py-sm rounded-borders mb-4 flex items-center gap-2"
     >
-      <div class="text-caption">{{ t('CreatorSubscribers.selectionCount', { count: selected.length }) }}</div>
+      <div class="text-caption">
+        {{ t("CreatorSubscribers.selectionCount", { count: selected.length }) }}
+      </div>
       <q-btn
         flat
         color="primary"
@@ -130,10 +135,10 @@
         @click="sendGroupMessage"
       >
         <q-tooltip v-if="selected.length === 0">
-          {{ t('CreatorSubscribers.tooltips.noSelection') }}
+          {{ t("CreatorSubscribers.tooltips.noSelection") }}
         </q-tooltip>
         <q-tooltip v-else-if="!canSendDm">
-          {{ t('CreatorSubscribers.tooltips.notLoggedIn') }}
+          {{ t("CreatorSubscribers.tooltips.notLoggedIn") }}
         </q-tooltip>
       </q-btn>
       <q-btn
@@ -144,7 +149,7 @@
         @click="exportSelected"
       >
         <q-tooltip v-if="selected.length === 0">
-          {{ t('CreatorSubscribers.tooltips.noSelection') }}
+          {{ t("CreatorSubscribers.tooltips.noSelection") }}
         </q-tooltip>
       </q-btn>
     </q-banner>
@@ -197,7 +202,7 @@
     <q-dialog v-model="showFilters">
       <q-card style="min-width: 300px">
         <q-card-section class="text-h6">
-          {{ $t('CreatorSubscribers.actions.filters') }}
+          {{ $t("CreatorSubscribers.actions.filters") }}
         </q-card-section>
         <q-card-section>
           <q-select
@@ -222,10 +227,10 @@
         </q-card-section>
         <q-card-actions align="right">
           <q-btn flat color="primary" @click="clearFilters" v-close-popup>
-            {{ $t('global.actions.cancel.label') }}
+            {{ $t("global.actions.cancel.label") }}
           </q-btn>
           <q-btn flat color="primary" v-close-popup>
-            {{ $t('global.actions.ok.label') }}
+            {{ $t("global.actions.ok.label") }}
           </q-btn>
         </q-card-actions>
       </q-card>
@@ -248,19 +253,19 @@
         </q-card-section>
         <q-card-section>
           <div>
-            <strong>{{ $t('CreatorSubscribers.columns.tier') }}:</strong>
+            <strong>{{ $t("CreatorSubscribers.columns.tier") }}:</strong>
             {{ currentSubscriber?.tierName }}
           </div>
           <div>
-            <strong>{{ $t('CreatorSubscribers.columns.nextRenewal') }}:</strong>
+            <strong>{{ $t("CreatorSubscribers.columns.nextRenewal") }}:</strong>
             {{
               currentSubscriber?.nextRenewal
                 ? formatTs(currentSubscriber.nextRenewal)
-                : '-'
+                : "-"
             }}
           </div>
           <div>
-            <strong>{{ $t('CreatorSubscribers.summary.revenue') }}:</strong>
+            <strong>{{ $t("CreatorSubscribers.summary.revenue") }}:</strong>
             {{ formatCurrency(currentSubscriber?.totalAmount || 0) }}
           </div>
         </q-card-section>
@@ -270,13 +275,13 @@
         </q-card-section>
         <q-card-actions align="right">
           <q-btn flat color="primary" @click="sendMessageFromDrawer">
-            {{ $t('CreatorSubscribers.actions.sendMessage') }}
+            {{ $t("CreatorSubscribers.actions.sendMessage") }}
           </q-btn>
           <q-btn flat color="primary" @click="copyNpub">
-            {{ $t('global.actions.copy.label') }}
+            {{ $t("global.actions.copy.label") }}
           </q-btn>
           <q-btn flat v-close-popup color="grey">
-            {{ $t('global.actions.close.label') }}
+            {{ $t("global.actions.close.label") }}
           </q-btn>
         </q-card-actions>
       </q-card>
@@ -285,19 +290,14 @@
       <q-card style="min-width: 350px">
         <q-card-section class="text-h6">{{ dialogTitle }}</q-card-section>
         <q-card-section>
-          <q-input
-            v-model="messageText"
-            type="textarea"
-            autogrow
-            dense
-          />
+          <q-input v-model="messageText" type="textarea" autogrow dense />
         </q-card-section>
         <q-card-actions align="right">
           <q-btn flat color="primary" v-close-popup>
-            {{ $t('global.actions.cancel.label') }}
+            {{ $t("global.actions.cancel.label") }}
           </q-btn>
           <q-btn flat color="primary" @click="confirmMessage">
-            {{ $t('global.actions.send.label') }}
+            {{ $t("global.actions.send.label") }}
           </q-btn>
         </q-card-actions>
       </q-card>
@@ -377,16 +377,19 @@ function isThisMonth(ts: number | null) {
   if (!ts) return false;
   const d = new Date(ts * 1000);
   const now = new Date();
-  return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+  return (
+    d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
+  );
 }
 
-const subscribersThisMonth = computed(() =>
-  subscriptions.value.filter((s) => isThisMonth(s.startDate)).length
+const subscribersThisMonth = computed(
+  () => subscriptions.value.filter((s) => isThisMonth(s.startDate)).length
 );
-const activeThisMonth = computed(() =>
-  subscriptions.value.filter(
-    (s) => s.status === "active" && isThisMonth(s.startDate)
-  ).length
+const activeThisMonth = computed(
+  () =>
+    subscriptions.value.filter(
+      (s) => s.status === "active" && isThisMonth(s.startDate)
+    ).length
 );
 const revenueThisMonth = computed(() =>
   subscriptions.value
@@ -426,12 +429,10 @@ const messageRecipients = ref<string[]>([]);
 const dialogTitle = computed(() =>
   messageRecipients.value.length > 1
     ? t("CreatorSubscribers.actions.sendGroupMessage")
-    : t("CreatorSubscribers.actions.sendMessage"),
+    : t("CreatorSubscribers.actions.sendMessage")
 );
 const canSendDm = computed(
-  () =>
-    messenger.connected &&
-    (!!nostr.signer || !!nostr.privKeyHex)
+  () => messenger.connected && (!!nostr.signer || !!nostr.privKeyHex)
 );
 
 function pubkeyNpub(hex: string): string {
@@ -462,7 +463,7 @@ async function confirmMessage() {
   showMessageDialog.value = false;
   if (!text || recips.length === 0) return;
   if (!canSendDm.value) {
-    notifyError(t('CreatorSubscribers.notifications.dm_not_ready'));
+    notifyError(t("CreatorSubscribers.notifications.dm_not_ready"));
     return;
   }
   let allSuccess = true;
@@ -478,20 +479,20 @@ async function confirmMessage() {
   }
   selected.value = [];
   if (allSuccess) {
-    notifySuccess(t('wallet.notifications.nostr_dm_sent'));
-    if (recips.length) router.push('/nostr-messenger');
+    notifySuccess(t("wallet.notifications.nostr_dm_sent"));
+    if (recips.length) router.push("/nostr-messenger");
   } else {
-    notifyError(t('wallet.notifications.nostr_dm_failed'));
+    notifyError(t("wallet.notifications.nostr_dm_failed"));
   }
 }
 
 function exportSelected() {
   if (!selected.value.length) return;
   try {
-    exportSubscribers(selected.value, 'subscribers.csv');
-    notifySuccess(t('CreatorSubscribers.notifications.export_success'));
+    exportSubscribers(selected.value, "subscribers.csv");
+    notifySuccess(t("CreatorSubscribers.notifications.export_success"));
   } catch {
-    notifyError(t('CreatorSubscribers.notifications.export_failed'));
+    notifyError(t("CreatorSubscribers.notifications.export_failed"));
   }
   selected.value = [];
 }
@@ -501,12 +502,14 @@ function isSelected(sub: CreatorSubscription) {
 }
 
 function handleSelectChange(val: boolean, sub: CreatorSubscription) {
-  const idx = selected.value.findIndex((s) => s.subscriptionId === sub.subscriptionId);
+  const idx = selected.value.findIndex(
+    (s) => s.subscriptionId === sub.subscriptionId
+  );
   if (val && idx === -1) selected.value.push(sub);
   if (!val && idx !== -1) selected.value.splice(idx, 1);
   const ids = selected.value.map((s) => s.subscriptionId);
   if (ids.length !== new Set(ids).size) {
-    console.warn('Duplicate subscriptionId detected in selection');
+    console.warn("Duplicate subscriptionId detected in selection");
   }
 }
 
@@ -516,7 +519,9 @@ const subscriberProfile = ref<any>(null);
 const latestNote = ref<string | null>(null);
 
 const currentSubscriberNpub = computed(() =>
-  currentSubscriber.value ? pubkeyNpub(currentSubscriber.value.subscriberNpub) : ""
+  currentSubscriber.value
+    ? pubkeyNpub(currentSubscriber.value.subscriberNpub)
+    : ""
 );
 
 async function openSubscriber(sub: CreatorSubscription) {

@@ -28,7 +28,15 @@ export default configure(function (/* ctx */) {
     // app boot file (/src/boot)
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli/boot-files
-    boot: ["polyfills", "ndk", "base", "global-components", "cashu", "i18n"],
+    boot: [
+  'polyfills',
+  'ndk',
+  'base',
+  'global-components',
+  'cashu',
+  'i18n',
+  'buffer-polyfill'
+],
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#css
     css: ["app.scss", "base.scss", "buckets.scss"],
@@ -53,7 +61,20 @@ export default configure(function (/* ctx */) {
       // publicPath: '/',
       // analyze: true,
       // env: {},
-      // rawDefine: {}
+      // rawDefine: {
+  // Buffer polyfill for browser build
+  vite: {
+    optimizeDeps: { include: ['buffer'] },
+    build: {
+      rollupOptions: {
+        plugins: [{
+          name: 'buffer-polyfill',
+          resolveId (id) { return id === 'buffer' ? 'buffer' : null; }
+        }]
+      }
+    }
+  },
+}
       // ignorePublicFolder: true,
       // minify: false,
       // polyfillModulePreload: true,
@@ -63,7 +84,10 @@ export default configure(function (/* ctx */) {
         viteConf.resolve = viteConf.resolve || {};
         viteConf.resolve.alias = {
           ...(viteConf.resolve.alias || {}),
-          "@cashu/cashu-ts": path.resolve(__dirname, "src/lib/cashu-ts/src/index.ts"),
+          "@cashu/cashu-ts": path.resolve(
+            __dirname,
+            "src/lib/cashu-ts/src/index.ts"
+          ),
         };
       },
       // viteVuePluginOptions: {},
@@ -84,10 +108,10 @@ export default configure(function (/* ctx */) {
     framework: {
       config: {
         brand: {
-          dark: '#0e141b',
-          'dark-page': '#0e141b',
-          accent: '#f54dd0'
-        }
+          dark: "#0e141b",
+          "dark-page": "#0e141b",
+          accent: "#f54dd0",
+        },
       },
 
       iconSet: "material-icons", // Quasar icon set
@@ -204,4 +228,44 @@ export default configure(function (/* ctx */) {
       // extendBexManifestJson (json) {}
     },
   };
+}
+  /* === added automatically ==================================== */
+  
+    build: {
+      rollupOptions: {
+        plugins: [
+          {
+            name: 'buffer-polyfill',
+            resolveId(id) { return id === 'buffer' ? 'buffer' : null; },
+          },
+        ],
+      },
+    },
+  },
+  // ► Buffer polyfill ◄
+  
+    build: {
+      rollupOptions: {
+        plugins: [
+          {
+            name: 'buffer-polyfill',
+            resolveId(id) { return id === 'buffer' ? 'buffer' : null; },
+          },
+        ],
+      },
+    },
+  },
+  // ► Buffer polyfill ◄
+  
+    build: {
+      rollupOptions: {
+        plugins: [
+          {
+            name: 'buffer-polyfill',
+            resolveId(id) { return id === 'buffer' ? 'buffer' : null; },
+          },
+        ],
+      },
+    },
+  },
 });

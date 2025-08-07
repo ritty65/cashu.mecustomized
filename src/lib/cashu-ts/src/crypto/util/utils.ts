@@ -1,8 +1,7 @@
 import { bytesToHex } from '@noble/curves/abstract/utils';
-import { Buffer } from 'buffer';
 
 export function bytesToNumber(bytes: Uint8Array): bigint {
-	return hexToNumber(bytesToHex(bytes));
+	return BigInt('0x' + bytesToHex(bytes));
 }
 
 export function hexToNumber(hex: string): bigint {

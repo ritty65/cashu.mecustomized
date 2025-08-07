@@ -27,7 +27,6 @@ export function hashColor(name: string): string {
   return COLOR_PALETTE[idx];
 }
 
-
 export const DEFAULT_BUCKET_ID = "unassigned";
 export const DEFAULT_BUCKET_NAME = "Default";
 

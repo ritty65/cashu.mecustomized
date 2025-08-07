@@ -2,7 +2,7 @@ import type { CreatorSubscription } from "stores/creatorSubscriptions";
 
 export function exportSubscribers(
   subscribers: CreatorSubscription[],
-  filename: string,
+  filename: string
 ) {
   const headers = [
     "Subscriber",

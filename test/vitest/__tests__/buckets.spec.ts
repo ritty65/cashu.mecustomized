@@ -155,9 +155,7 @@ describe("Buckets store", () => {
       bucketId: bucket1.id,
     });
 
-
     await proofsStore.moveProofs([proof.secret], bucket2.id);
-
 
     const storedProofs = await cashuDb.proofs.toArray();
     expect(storedProofs[0].bucketId).toBe(bucket2.id);
@@ -202,11 +200,17 @@ describe("Buckets store", () => {
     const bucket = buckets.addBucket({ name: "Archive Me" })!;
     expect(bucket.isArchived).toBe(false);
     expect(buckets.activeBuckets.find((b) => b.id === bucket.id)).toBeDefined();
-    expect(buckets.archivedBuckets.find((b) => b.id === bucket.id)).toBeUndefined();
+    expect(
+      buckets.archivedBuckets.find((b) => b.id === bucket.id)
+    ).toBeUndefined();
 
     buckets.editBucket(bucket.id, { isArchived: true });
-    expect(buckets.archivedBuckets.find((b) => b.id === bucket.id)).toBeDefined();
-    expect(buckets.activeBuckets.find((b) => b.id === bucket.id)).toBeUndefined();
+    expect(
+      buckets.archivedBuckets.find((b) => b.id === bucket.id)
+    ).toBeDefined();
+    expect(
+      buckets.activeBuckets.find((b) => b.id === bucket.id)
+    ).toBeUndefined();
 
     // default bucket cannot be archived
     buckets.editBucket(DEFAULT_BUCKET_ID, { isArchived: true });

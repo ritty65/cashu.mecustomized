@@ -24,9 +24,7 @@ import { subscriptionPayload } from "src/utils/receipt-utils";
 import { useCreatorsStore } from "./creators";
 import { frequencyToDays } from "src/constants/subscriptionFrequency";
 
-function parseSubscriptionPaymentPayload(
-  obj: any
-):
+function parseSubscriptionPaymentPayload(obj: any):
   | {
       token: string;
       unlock_time?: number;
@@ -489,10 +487,9 @@ export const useMessengerStore = defineStore("messenger", {
           const unlockTs = sub.unlock_time ?? payload.unlockTime ?? 0;
           const creatorsStore = useCreatorsStore();
           const myPubkey = useNostrStore().pubkey;
-          const tierName =
-            creatorsStore.tiersMap[myPubkey || ""]?.find(
-              (t) => t.id === payload.tier_id,
-            )?.name;
+          const tierName = creatorsStore.tiersMap[myPubkey || ""]?.find(
+            (t) => t.id === payload.tier_id
+          )?.name;
           const entry: LockedToken = {
             id: uuidv4(),
             tokenString: sub.token,

@@ -349,8 +349,8 @@ export const useNWCStore = defineStore("nwc", {
         JSON.stringify(result),
         nip44.utils.getConversationKey(
           hexToBytes(nostr.privKeyHex),
-          event.author.pubkey,
-        ),
+          event.author.pubkey
+        )
       );
       replyEvent.tags = [
         ["p", event.author.pubkey],
@@ -531,8 +531,8 @@ export const useNWCStore = defineStore("nwc", {
           event.content,
           nip44.utils.getConversationKey(
             hexToBytes(conn.connectionSecret),
-            conn.walletPublicKey,
-          ),
+            conn.walletPublicKey
+          )
         );
         // debug("### decryptedContent", decryptedContent)
         await this.parseNWCCommand(decryptedContent, event, conn);
