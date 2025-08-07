@@ -14,6 +14,8 @@ export default defineConfig({
     },
   },
   test: {
+    setupFiles: ['<root>/test/setup/global-mocks.ts'],
+    ...(process.env.CI ? { include: ['test/ci-smoke/**/*.spec.ts'] } : {}),
     globals: true,
     environment: "happy-dom",
     setupFiles: ["./test/vitest/setup-file.js"],
