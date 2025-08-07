@@ -157,41 +157,67 @@
       {{ $t("CreatorSubscribers.noData") }}
     </div>
 
-    <!-- subscriber cards -->
-    <div v-else class="space-y-4">
-      <q-card
-        v-for="sub in filteredSubscribers"
-        :key="sub.subscriptionId"
-        class="p-4 flex items-center gap-4 cursor-pointer"
-        @click="openSubscriber(sub)"
-      >
-        <q-checkbox
-          :model-value="isSelected(sub)"
-          @update:model-value="(val) => handleSelectChange(val, sub)"
-          @click.stop
-        />
-        <q-avatar size="48px">
-          <div class="placeholder text-white">
-            {{ getInitials(sub.subscriberNpub) }}
-          </div>
-        </q-avatar>
-        <div class="flex-1">
-          <div class="font-medium">
-            {{ shortenString(pubkeyNpub(sub.subscriberNpub), 15, 6) }}
-          </div>
-          <q-badge color="primary" class="q-mt-xs">{{ sub.tierName }}</q-badge>
-        </div>
-        <div class="text-right">
-          <div>{{ formatCurrency(sub.totalAmount) }}</div>
-          <q-badge
-            class="q-mt-xs"
-            :color="sub.status === 'active' ? 'positive' : 'warning'"
-          >
-            {{ t(`CreatorSubscribers.status.${sub.status}`) }}
-          </q-badge>
-        </div>
-      </q-card>
-    </div>
+    <!-- subscriber table -->
+    <q-table
+      v-else
+      flat
+      :rows="filteredSubscribers"
+      :columns="columns"
+      row-key="subscriptionId"
+      hide-bottom
+      :rows-per-page-options="[0]"
+      class="shadow-none"
+    >
+      <template #body="props">
+        <q-tr
+          :props="props"
+          class="cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700"
+          @click="openSubscriber(props.row)"
+        >
+          <q-td>
+            <q-checkbox
+              :model-value="isSelected(props.row)"
+              @update:model-value="(val) => handleSelectChange(val, props.row)"
+              @click.stop
+            />
+          </q-td>
+          <q-td>
+            <div class="flex items-center gap-2">
+              <q-avatar size="40px">
+                <template v-if="profiles[props.row.subscriberNpub]?.picture">
+                  <img :src="profiles[props.row.subscriberNpub].picture" />
+                </template>
+                <template v-else>
+                  <div class="placeholder text-white">
+                    {{ getInitials(props.row.subscriberNpub) }}
+                  </div>
+                </template>
+              </q-avatar>
+              <div class="flex flex-col">
+                <span class="font-medium">
+                  {{ getDisplayName(props.row.subscriberNpub) }}
+                </span>
+                <span class="text-xs text-gray-500">
+                  {{ shortenString(pubkeyNpub(props.row.subscriberNpub), 12, 6) }}
+                </span>
+              </div>
+            </div>
+          </q-td>
+          <q-td>{{ props.row.tierName }}</q-td>
+          <q-td>{{ formatCurrency(props.row.totalAmount) }}</q-td>
+          <q-td>{{ props.row.startDate ? formatTs(props.row.startDate) : '-' }}</q-td>
+          <q-td>{{ t(`CreatorSubscribers.frequency.${props.row.frequency}`) }}</q-td>
+          <q-td>
+            <q-badge :color="props.row.status === 'active' ? 'positive' : 'warning'">
+              {{ t(`CreatorSubscribers.status.${props.row.status}`) }}
+            </q-badge>
+          </q-td>
+          <q-td class="text-right">
+            <q-icon name="chevron_right" />
+          </q-td>
+        </q-tr>
+      </template>
+    </q-table>
 
     <!-- filter dialog -->
     <q-dialog v-model="showFilters">
@@ -306,7 +332,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import {
   useCreatorSubscriptionsStore,
@@ -344,6 +370,47 @@ const tierOptions = computed(() => {
 const statusOptions = computed(() => [
   { label: t("CreatorSubscribers.status.active"), value: "active" },
   { label: t("CreatorSubscribers.status.pending"), value: "pending" },
+]);
+
+const columns = computed(() => [
+  { name: "select", label: "", field: "select", sortable: false },
+  {
+    name: "subscriber",
+    label: t("CreatorSubscribers.columns.subscriber"),
+    field: "subscriberNpub",
+    sortable: true,
+  },
+  {
+    name: "tier",
+    label: t("CreatorSubscribers.columns.tier"),
+    field: "tierName",
+    sortable: true,
+  },
+  {
+    name: "revenue",
+    label: t("CreatorSubscribers.summary.revenue"),
+    field: "totalAmount",
+    sortable: true,
+  },
+  {
+    name: "memberSince",
+    label: "Member since",
+    field: "startDate",
+    sortable: true,
+  },
+  {
+    name: "frequency",
+    label: "Frequency",
+    field: "frequency",
+    sortable: true,
+  },
+  {
+    name: "status",
+    label: t("CreatorSubscribers.columns.status"),
+    field: "status",
+    sortable: true,
+  },
+  { name: "view", label: "", field: "view", sortable: false },
 ]);
 
 function clearFilters() {
@@ -419,6 +486,28 @@ const revenueSparklinePoints = computed(() => {
 const messenger = useMessengerStore();
 const router = useRouter();
 const nostr = useNostrStore();
+const profiles = ref<Record<string, any>>({});
+
+watch(
+  () => subscriptions.value.map((s) => s.subscriberNpub),
+  async (npubs) => {
+    for (const npub of npubs) {
+      if (!profiles.value[npub]) {
+        try {
+          profiles.value[npub] = await nostr.getProfile(npub);
+        } catch {
+          profiles.value[npub] = null;
+        }
+      }
+    }
+  },
+  { immediate: true }
+);
+
+function getDisplayName(npub: string): string {
+  const p = profiles.value[npub];
+  return p?.display_name || p?.name || shortenString(pubkeyNpub(npub), 15, 6);
+}
 const selected = ref<CreatorSubscription[]>([]);
 const showMessageDialog = ref(false);
 const messageText = ref("");
@@ -583,8 +672,8 @@ const filteredSubscribers = computed(() => {
 <style scoped>
 .placeholder {
   background: var(--divider-color);
-  width: 64px;
-  height: 64px;
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
