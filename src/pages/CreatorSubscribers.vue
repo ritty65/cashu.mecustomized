@@ -202,32 +202,45 @@
           {{ $t('CreatorSubscribers.actions.filters') }}
         </q-card-section>
         <q-card-section>
-          <q-select
+          <div class="text-subtitle2 q-mb-xs">
+            {{ $t('CreatorSubscribers.columns.tier') }}
+          </div>
+          <q-option-group
             v-model="tierFilter"
-            dense
-            emit-value
-            map-options
-            clearable
+            type="checkbox"
             :options="tierOptions"
-            :label="$t('CreatorSubscribers.columns.tier')"
           />
-          <q-select
+          <div class="text-subtitle2 q-mt-md q-mb-xs">
+            {{ $t('CreatorSubscribers.columns.status') }}
+          </div>
+          <q-option-group
             v-model="statusFilter"
+            type="checkbox"
+            :options="statusOptions"
+          />
+          <q-input
+            v-model.number="revenueMin"
+            type="number"
             dense
-            emit-value
-            map-options
             clearable
             class="q-mt-md"
-            :options="statusOptions"
-            :label="$t('CreatorSubscribers.columns.status')"
+            :label="$t('CreatorSubscribers.filter.revenueFrom')"
+          />
+          <q-input
+            v-model.number="revenueMax"
+            type="number"
+            dense
+            clearable
+            class="q-mt-md"
+            :label="$t('CreatorSubscribers.filter.revenueTo')"
           />
         </q-card-section>
         <q-card-actions align="right">
-          <q-btn flat color="primary" @click="clearFilters" v-close-popup>
-            {{ $t('global.actions.cancel.label') }}
+          <q-btn flat color="primary" @click="resetFilters">
+            {{ $t('CreatorSubscribers.actions.resetFilters') }}
           </q-btn>
           <q-btn flat color="primary" v-close-popup>
-            {{ $t('global.actions.ok.label') }}
+            {{ $t('global.actions.close.label') }}
           </q-btn>
         </q-card-actions>
       </q-card>
@@ -308,7 +321,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import {
   useCreatorSubscriptionsStore,
@@ -334,8 +347,10 @@ const { activeUnit } = storeToRefs(mintsStore);
 const { t } = useI18n();
 
 const filter = ref("");
-const tierFilter = ref<string | null>(null);
-const statusFilter = ref<string | null>(null);
+const tierFilter = ref<string[]>([]);
+const statusFilter = ref<string[]>([]);
+const revenueMin = ref<number | null>(null);
+const revenueMax = ref<number | null>(null);
 const showFilters = ref(false);
 
 const tierOptions = computed(() => {
@@ -348,9 +363,12 @@ const statusOptions = computed(() => [
   { label: t("CreatorSubscribers.status.pending"), value: "pending" },
 ]);
 
-function clearFilters() {
-  tierFilter.value = null;
-  statusFilter.value = null;
+function resetFilters() {
+  tierFilter.value = [];
+  statusFilter.value = [];
+  revenueMin.value = null;
+  revenueMax.value = null;
+  filter.value = "";
 }
 
 function formatCurrency(amount: number): string {
@@ -421,6 +439,13 @@ const revenueSparklinePoints = computed(() => {
 const messenger = useMessengerStore();
 const router = useRouter();
 const nostr = useNostrStore();
+watch(
+  () => subscriptions.value.map((s) => s.subscriberNpub),
+  async (pubkeys) => {
+    await Promise.all(pubkeys.map((pk) => nostr.getProfile(pk).catch(() => null)));
+  },
+  { immediate: true }
+);
 const selected = ref<CreatorSubscription[]>([]);
 const showMessageDialog = ref(false);
 const messageText = ref("");
@@ -570,14 +595,28 @@ function getInitials(npub: string): string {
 const filteredSubscribers = computed(() => {
   const term = filter.value.toLowerCase();
   return subscriptions.value.filter((s) => {
+    const npub = pubkeyNpub(s.subscriberNpub).toLowerCase();
+    const profile = (nostr.profiles as Record<string, any>)[s.subscriberNpub]?.profile;
+    const name = (profile?.display_name || profile?.name || "").toLowerCase();
     const matchesSearch =
       !term ||
       s.subscriberNpub.toLowerCase().includes(term) ||
+      npub.includes(term) ||
+      name.includes(term) ||
       s.tierName.toLowerCase().includes(term);
-    const matchesTier = !tierFilter.value || s.tierName === tierFilter.value;
+    const matchesTier =
+      tierFilter.value.length === 0 || tierFilter.value.includes(s.tierName);
     const matchesStatus =
-      !statusFilter.value || s.status === statusFilter.value;
-    return matchesSearch && matchesTier && matchesStatus;
+      statusFilter.value.length === 0 || statusFilter.value.includes(s.status);
+    const matchesRevenue =
+      (revenueMin.value == null || s.totalAmount >= revenueMin.value) &&
+      (revenueMax.value == null || s.totalAmount <= revenueMax.value);
+    return (
+      matchesSearch &&
+      matchesTier &&
+      matchesStatus &&
+      matchesRevenue
+    );
   });
 });
 </script>

@@ -1645,6 +1645,8 @@ export const messages = {
       nextRenewalFrom: "Next renewal from",
       nextRenewalTo: "Next renewal to",
       monthsRemaining: "Periods remaining",
+      revenueFrom: "Revenue from",
+      revenueTo: "Revenue to",
     },
     filters: {
       frequency: "Filter by frequency",
@@ -1674,6 +1676,7 @@ export const messages = {
       sendGroupMessage: "Send Group DM",
       exportSelected: "Export selected",
       filters: "Filters",
+      resetFilters: "Reset filters",
     },
     status: {
       active: "Active",
