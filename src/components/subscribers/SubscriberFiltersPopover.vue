@@ -3,6 +3,9 @@
     ref="menu"
     anchor="bottom right"
     self="top right"
+    :offset="[0,8]"
+    :persistent="false"
+    content-class="filters-menu"
     transition-show="jump-down"
     transition-hide="jump-up"
   >

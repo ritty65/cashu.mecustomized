@@ -1,104 +1,22 @@
 import { defineStore } from "pinia";
 import type { Subscriber, Frequency, SubStatus } from "../types/subscriber";
+import type { ISubscribersSource } from "src/data/subscribersSource";
+import { HttpSubscribersSource } from "src/data/httpSubscribersSource";
 
 type Tab = "all" | Frequency | "pending" | "ended";
 
 export type SortOption = "next" | "first" | "amount";
 
-const mockSubscribers: Subscriber[] = [
-  {
-    id: "1",
-    name: "Alice",
-    npub: "npub1alice",
-    nip05: "alice@example.com",
-    tierId: "t1",
-    tierName: "Bronze",
-    amountSat: 1000,
-    frequency: "weekly",
-    status: "active",
-    startDate: 1700000000,
-    nextRenewal: 1700000000 + 7 * 86400,
-    lifetimeSat: 5000,
-  },
-  {
-    id: "2",
-    name: "Bob",
-    npub: "npub1bob",
-    nip05: "bob@example.com",
-    tierId: "t1",
-    tierName: "Bronze",
-    amountSat: 1000,
-    frequency: "weekly",
-    status: "pending",
-    startDate: 1700001000,
-    nextRenewal: 1700001000 + 7 * 86400,
-    lifetimeSat: 1000,
-  },
-  {
-    id: "3",
-    name: "Carol",
-    npub: "npub1carol",
-    nip05: "carol@example.com",
-    tierId: "t2",
-    tierName: "Silver",
-    amountSat: 2000,
-    frequency: "biweekly",
-    status: "active",
-    startDate: 1700002000,
-    nextRenewal: 1700002000 + 14 * 86400,
-    lifetimeSat: 4000,
-  },
-  {
-    id: "4",
-    name: "Dave",
-    npub: "npub1dave",
-    nip05: "dave@example.com",
-    tierId: "t2",
-    tierName: "Silver",
-    amountSat: 2000,
-    frequency: "biweekly",
-    status: "ended",
-    startDate: 1690000000,
-    lifetimeSat: 2000,
-  },
-  {
-    id: "5",
-    name: "Eve",
-    npub: "npub1eve",
-    nip05: "eve@example.com",
-    tierId: "t3",
-    tierName: "Gold",
-    amountSat: 5000,
-    frequency: "monthly",
-    status: "active",
-    startDate: 1700003000,
-    nextRenewal: 1700003000 + 30 * 86400,
-    lifetimeSat: 10000,
-  },
-  {
-    id: "6",
-    name: "Frank",
-    npub: "npub1frank",
-    nip05: "frank@example.com",
-    tierId: "t3",
-    tierName: "Gold",
-    amountSat: 5000,
-    frequency: "monthly",
-    status: "pending",
-    startDate: 1700004000,
-    nextRenewal: 1700004000 + 30 * 86400,
-    lifetimeSat: 5000,
-  },
-];
-
 export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
   state: () => ({
-    subscribers: mockSubscribers as Subscriber[],
+    subscribers: [] as Subscriber[],
     query: "",
     activeTab: "all" as Tab,
     statuses: new Set<SubStatus>(),
     tiers: new Set<string>(),
     sort: "next" as SortOption,
+    source: null as ISubscribersSource | null,
+    hydrated: false,
   }),
   getters: {
     filtered(state): Subscriber[] {
@@ -190,6 +108,19 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
     },
   },
   actions: {
+    setSource(src?: ISubscribersSource) {
+      this.source = src ?? new HttpSubscribersSource();
+    },
+    async hydrate(creatorNpub: string) {
+      if (!this.source) this.setSource();
+      const rows = await this.source!.listByCreator(creatorNpub);
+      this.subscribers = rows;
+      this.hydrated = true;
+    },
+    async fetchPayments(npub: string) {
+      if (!this.source?.paymentsBySubscriber) return [];
+      return await this.source.paymentsBySubscriber(npub);
+    },
     setActiveTab(tab: Tab) {
       this.activeTab = tab;
     },
