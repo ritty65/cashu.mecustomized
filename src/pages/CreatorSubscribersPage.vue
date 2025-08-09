@@ -2,6 +2,22 @@
   <q-page padding>
     <SubscriberFiltersPopover ref="filters" />
     <div class="container-xl q-mx-auto q-px-md">
+    <q-banner
+      v-if="showEndpointBanner"
+      class="bg-warning text-black q-mb-md"
+      inline-actions
+    >
+      Set VITE_SUBSCRIBERS_ENDPOINT or localStorage.creator_npub
+      <template #action>
+        <q-btn
+          flat
+          dense
+          round
+          icon="close"
+          @click="showEndpointBanner = false"
+        />
+      </template>
+    </q-banner>
     <!-- Top bar -->
     <div class="row items-center q-gutter-sm q-mb-md">
       <div class="text-h6">Subscribers</div>
@@ -50,6 +66,8 @@
         @click="downloadCsv()"
       />
     </div>
+
+    <q-linear-progress v-if="loading" indeterminate class="q-mb-md" />
 
     <!-- KPI Row -->
     <div class="row q-col-gutter-md q-mb-md">
@@ -152,9 +170,26 @@
       >
     </q-tabs>
 
+    <!-- Empty State -->
+    <div
+      v-if="!loading && filtered.length === 0"
+      class="q-pa-xl text-center"
+    >
+      <div class="text-h6 q-mb-sm">No subscribers found</div>
+      <div class="text-caption">
+        <span v-if="error" class="q-mr-sm">{{ error }}</span>
+        <q-btn
+          size="sm"
+          flat
+          label="Retry"
+          @click="subStore.hydrate(creatorNpub)"
+        />
+      </div>
+    </div>
+
     <!-- Table -->
     <q-table
-      v-if="view === 'table'"
+      v-else-if="view === 'table'"
       flat
       :rows="filtered"
       row-key="id"
@@ -398,7 +433,8 @@ import SubscriberFiltersPopover from "src/components/subscribers/SubscriberFilte
 import SubscriberCard from "src/components/SubscriberCard.vue";
 
 const subStore = useCreatorSubscribersStore();
-const { filtered, counts, activeTab } = storeToRefs(subStore);
+const { filtered, counts, activeTab, loading, error } = storeToRefs(subStore);
+const showEndpointBanner = ref(!import.meta.env.VITE_SUBSCRIBERS_ENDPOINT);
 const creatorNpub =
   localStorage.getItem('creator_npub') || import.meta.env.VITE_CREATOR_NPUB || '';
 
