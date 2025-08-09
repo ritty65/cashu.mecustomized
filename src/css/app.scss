@@ -323,3 +323,9 @@ body.body--dark .received {
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 1rem;
 }
+
+.filters-menu { z-index: 3005; }
+.container-xl { max-width: 1440px; margin: 0 auto; }
+.panel-container.chart { height: 180px; }
+@media (max-width: 1024px){ .panel-container.chart { height: 160px; } }
+.z-toolbar { position: relative; z-index: 2; }

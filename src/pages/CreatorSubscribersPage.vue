@@ -1,6 +1,7 @@
 <template>
   <q-page padding>
     <SubscriberFiltersPopover ref="filters" />
+    <div class="container-xl q-mx-auto q-px-md">
     <!-- Top bar -->
     <div class="row items-center q-gutter-sm q-mb-md">
       <div class="text-h6">Subscribers</div>
@@ -15,26 +16,22 @@
           <q-icon name="search" />
         </template>
       </q-input>
-      <q-btn-toggle
-        v-model="view"
-        dense
-        toggle-color="primary"
-        class="q-ml-sm"
-        :options="[
-          { value: 'table', icon: 'table_rows' },
-          { value: 'cards', icon: 'grid_view' },
-        ]"
-      />
-      <q-btn-toggle
-        v-model="density"
-        dense
-        toggle-color="primary"
-        class="q-ml-sm"
-        :options="[
-          { value: 'comfortable', icon: 'view_comfy' },
-          { value: 'compact', icon: 'view_compact' },
-        ]"
-      />
+      <div class="row items-center no-wrap q-gutter-sm z-toolbar">
+        <q-btn-toggle v-model="view" toggle-color="primary"
+          :options="[
+            { label:'Table',  icon:'table_rows', value:'table'  },
+            { label:'Cards',  icon:'grid_view',   value:'cards'  }
+          ]" aria-label="Change list view">
+          <q-tooltip anchor="bottom middle" self="top middle">Switch between table and cards</q-tooltip>
+        </q-btn-toggle>
+        <q-btn-toggle v-model="density" toggle-color="primary"
+          :options="[
+            { label:'Comfy',  icon:'view_comfy',   value:'comfortable' },
+            { label:'Compact',icon:'view_compact', value:'compact'     }
+          ]" aria-label="Row density">
+          <q-tooltip anchor="bottom middle" self="top middle">Adjust row density</q-tooltip>
+        </q-btn-toggle>
+      </div>
       <q-btn
         dense
         flat
@@ -93,15 +90,15 @@
 
     <!-- Charts -->
     <div class="row q-col-gutter-md q-mb-md">
-      <q-card flat bordered class="col-12 col-md-4 panel-container q-pa-sm">
+      <q-card flat bordered class="col-12 col-lg-5 panel-container chart q-pa-sm">
         <div class="text-subtitle2 q-mb-sm">Revenue over time</div>
         <canvas ref="lineEl" />
       </q-card>
-      <q-card flat bordered class="col-12 col-md-4 panel-container q-pa-sm">
+      <q-card flat bordered class="col-12 col-lg-4 panel-container chart q-pa-sm">
         <div class="text-subtitle2 q-mb-sm">Frequency mix</div>
         <canvas ref="doughnutEl" />
       </q-card>
-      <q-card flat bordered class="col-12 col-md-4 panel-container q-pa-sm">
+      <q-card flat bordered class="col-12 col-lg-3 panel-container chart q-pa-sm">
         <div class="text-subtitle2 q-mb-sm">Status by frequency</div>
         <canvas ref="barEl" />
       </q-card>
@@ -335,7 +332,7 @@
           <q-list bordered dense>
             <q-item v-for="p in payments" :key="p.ts">
               <q-item-section>{{ formatDate(p.ts) }}</q-item-section>
-              <q-item-section side>{{ p.amount }} sat</q-item-section>
+              <q-item-section side>{{ p.amountSat }} sat</q-item-section>
             </q-item>
           </q-list>
         </div>
@@ -352,6 +349,7 @@
         </div>
       </div>
     </q-drawer>
+  </div>
   </q-page>
 </template>
 
@@ -401,6 +399,13 @@ import SubscriberCard from "src/components/SubscriberCard.vue";
 
 const subStore = useCreatorSubscribersStore();
 const { filtered, counts, activeTab } = storeToRefs(subStore);
+const creatorNpub =
+  localStorage.getItem('creator_npub') || import.meta.env.VITE_CREATOR_NPUB || '';
+
+onMounted(async () => {
+  subStore.setSource(); // Http source by default
+  if (creatorNpub) await subStore.hydrate(creatorNpub);
+});
 // `filtered` is maintained by the Pinia store based on the active tab,
 // search query and filter popover. Treat it as the single source of truth
 // for the subscriber list and KPI counts throughout this page.
@@ -663,9 +668,13 @@ function formatDate(ts: number) {
 
 const drawer = ref(false);
 const current = ref<Subscriber | null>(null);
-function openDrawer(r: Subscriber) {
-  current.value = r;
-  drawer.value = true;
+const payments = computed(() => current.value?._payments ?? []);
+async function openDrawer(r: Subscriber) {
+  current.value = r; drawer.value = true;
+  if (!('_payments' in r)) {
+    const list = await subStore.fetchPayments(r.npub);
+    (r as any)._payments = list;
+  }
 }
 const $q = useQuasar();
 const router = useRouter();
@@ -684,17 +693,6 @@ function dmSubscriber() {
     query: { pubkey: current.value.npub },
   });
 }
-const payments = computed(() => {
-  const r = current.value;
-  if (!r) return [] as any[];
-  const interval =
-    r.frequency === "weekly" ? 7 : r.frequency === "biweekly" ? 14 : 30;
-  const last = (r.nextRenewal ?? r.startDate) - interval * 86400;
-  return [
-    { ts: last, amount: r.amountSat },
-    { ts: r.nextRenewal ?? r.startDate, amount: r.amountSat },
-  ];
-});
 const activity = computed(() => {
   const r = current.value;
   if (!r) return [] as any[];
