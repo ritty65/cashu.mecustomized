@@ -17,6 +17,8 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
     sort: "next" as SortOption,
     source: null as ISubscribersSource | null,
     hydrated: false,
+    loading: false,
+    error: null as string | null,
   }),
   getters: {
     filtered(state): Subscriber[] {
@@ -113,9 +115,17 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
     },
     async hydrate(creatorNpub: string) {
       if (!this.source) this.setSource();
-      const rows = await this.source!.listByCreator(creatorNpub);
-      this.subscribers = rows;
-      this.hydrated = true;
+      this.loading = true;
+      this.error = null;
+      try {
+        const rows = await this.source!.listByCreator(creatorNpub);
+        this.subscribers = rows;
+        this.hydrated = true;
+      } catch (e: any) {
+        this.error = String(e?.message || e);
+      } finally {
+        this.loading = false;
+      }
     },
     async fetchPayments(npub: string) {
       if (!this.source?.paymentsBySubscriber) return [];
