@@ -129,28 +129,6 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
           .and((t) => !!t.subscriptionId && !!t.subscriberNpub)
           .toArray();
 
-        const validRows = [] as typeof rows;
-        const wallets = new Map<string, CashuWallet>();
-        for (const row of rows) {
-          try {
-            const decoded = getDecodedToken(row.tokenString);
-            const proofs = decoded.proofs as Proof[];
-            const mint = decoded.mint;
-            let wallet = wallets.get(mint);
-            if (!wallet) {
-              wallet = new CashuWallet(mint);
-              wallets.set(mint, wallet);
-            }
-            const states = await wallet.checkProofsStates(proofs);
-            const spent = states.some((s) => s.state === CheckStateEnum.SPENT);
-            if (!spent) {
-              validRows.push(row);
-            }
-          } catch (e) {
-            console.error(e);
-          }
-        }
-
         type Agg = {
           id: string;
           npub: string;
@@ -164,33 +142,51 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
           totalPeriods?: number;
         };
 
+        const wallets = new Map<string, CashuWallet>();
         const map = new Map<string, Agg>();
-        for (const row of validRows) {
-          const key = `${row.subscriptionId}-${row.subscriberNpub}`;
-          const freq = (row.frequency || daysToFrequency(row.intervalDays || 30)) as Frequency;
-          const intervalDays = row.intervalDays ?? frequencyToDays(freq);
-          let agg = map.get(key);
-          if (!agg) {
-            agg = {
-              id: key,
-              npub: row.subscriberNpub!,
-              tierId: row.tierId,
-              tierName: row.tierName || "",
-              amountSat: row.amount,
-              frequency: freq,
-              intervalDays,
-              tokens: [],
-              lifetime: 0,
-              totalPeriods: row.totalPeriods,
-            };
-            map.set(key, agg);
-          }
-          if (row.unlockTs != null) {
-            agg.tokens.push({ unlockTs: row.unlockTs });
-          }
-          agg.lifetime += row.amount;
-          if (row.totalPeriods != null && agg.totalPeriods == null) {
-            agg.totalPeriods = row.totalPeriods;
+        for (const row of rows) {
+          try {
+            const decoded = getDecodedToken(row.tokenString);
+            const proofs = decoded.proofs as Proof[];
+            const mint = decoded.mint;
+            let wallet = wallets.get(mint);
+            if (!wallet) {
+              wallet = new CashuWallet(mint);
+              wallets.set(mint, wallet);
+            }
+            const states = await wallet.checkProofsStates(proofs);
+            const spent = states.some((s) => s.state === CheckStateEnum.SPENT);
+
+            const key = `${row.subscriptionId}-${row.subscriberNpub}`;
+            const freq = (row.frequency || daysToFrequency(row.intervalDays || 30)) as Frequency;
+            const intervalDays = row.intervalDays ?? frequencyToDays(freq);
+            let agg = map.get(key);
+            if (!agg) {
+              agg = {
+                id: key,
+                npub: row.subscriberNpub!,
+                tierId: row.tierId,
+                tierName: row.tierName || "",
+                amountSat: row.amount,
+                frequency: freq,
+                intervalDays,
+                tokens: [],
+                lifetime: 0,
+                totalPeriods: row.totalPeriods,
+              };
+              map.set(key, agg);
+            }
+            if (!spent) {
+              if (row.unlockTs != null) {
+                agg.tokens.push({ unlockTs: row.unlockTs });
+              }
+              agg.lifetime += row.amount;
+            }
+            if (row.totalPeriods != null && agg.totalPeriods == null) {
+              agg.totalPeriods = row.totalPeriods;
+            }
+          } catch (e) {
+            console.error(e);
           }
         }
 
