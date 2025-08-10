@@ -16,7 +16,6 @@ export interface CachedProfileDexie {
 }
 
 import type { Tier } from "./types";
-import type { Subscriber } from "src/types/subscriber";
 
 export interface CreatorTierDefinition {
   creatorNpub: string;
@@ -107,7 +106,6 @@ export class CashuDexie extends Dexie {
   creatorsTierDefinitions!: Table<CreatorTierDefinition, string>;
   subscriptions!: Table<Subscription, string>;
   lockedTokens!: Table<LockedToken, string>;
-  subscribers!: Table<Subscriber, string>;
 
   constructor() {
     super("cashuDatabase");
@@ -535,13 +533,9 @@ export class CashuDexie extends Dexie {
               delete i.receivedMonths;
             });
             delete (entry as any).totalMonths;
-          delete (entry as any).receivedMonths;
-        });
+            delete (entry as any).receivedMonths;
+          });
       });
-
-    this.version(22).stores({
-      subscribers: '&id,npub,tier,joinedAt',
-    });
   }
 }
 
