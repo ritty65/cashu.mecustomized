@@ -114,6 +114,13 @@ export default {
           caption: "钱包配置",
         },
       },
+      creatorHub: {
+        title: "Creator Hub",
+        creatorHub: {
+          title: "Creator Hub",
+          caption: "Manage your tiers & subscribers",
+        },
+      },
       terms: {
         title: "条款",
         terms: {

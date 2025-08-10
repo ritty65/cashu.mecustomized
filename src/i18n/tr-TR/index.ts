@@ -115,6 +115,13 @@ export default {
           caption: "Cüzdan yapılandırması",
         },
       },
+      creatorHub: {
+        title: "Creator Hub",
+        creatorHub: {
+          title: "Creator Hub",
+          caption: "Manage your tiers & subscribers",
+        },
+      },
       terms: {
         title: "Şartlar",
         terms: {
