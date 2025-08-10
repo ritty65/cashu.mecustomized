@@ -593,7 +593,7 @@ function openFilters() {
 }
 
 function retry() {
-  void subStore.loadFromDb();
+  void subStore.sync();
   void subStore.fetchProfiles();
 }
 
@@ -639,7 +639,7 @@ let doughnutChart: Chart | null = null;
 let barChart: Chart | null = null;
 
 onMounted(() => {
-  void subStore.loadFromDb();
+  void subStore.sync();
   // Instantiate charts after DOM elements are available.
   if (lineEl.value) {
     lineChart = new ChartJS(lineEl.value, {
