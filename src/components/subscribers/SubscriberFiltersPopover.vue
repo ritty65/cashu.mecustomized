@@ -12,6 +12,7 @@
     <div class="q-pa-md" style="min-width: 200px">
       <div class="text-subtitle2 q-mb-sm">Status</div>
       <q-option-group v-model="localStatuses" :options="statusOptions" type="checkbox" />
+      <q-checkbox v-model="localDueSoon" label="Due soon (72h)" size="sm" class="q-mt-xs" />
       <div class="text-subtitle2 q-mt-md q-mb-sm">Tier</div>
       <q-option-group v-model="localTiers" :options="tierOptions" type="checkbox" />
       <div class="text-subtitle2 q-mt-md q-mb-sm">Sort</div>
@@ -36,6 +37,7 @@ const menu = ref();
 const localStatuses = ref<SubStatus[]>(Array.from(store.statuses));
 const localTiers = ref<string[]>(Array.from(store.tiers));
 const localSort = ref<SortOption>(store.sort);
+const localDueSoon = ref<boolean>(store.dueSoonOnly);
 
 const statusOptions = [
   { label: 'Active', value: 'active' },
@@ -58,7 +60,8 @@ function apply() {
   store.applyFilters({
     statuses: new Set(localStatuses.value),
     tiers: new Set(localTiers.value),
-    sort: localSort.value
+    sort: localSort.value,
+    dueSoonOnly: localDueSoon.value
   });
 }
 
@@ -66,6 +69,7 @@ function clear() {
   localStatuses.value = [];
   localTiers.value = [];
   localSort.value = 'next';
+  localDueSoon.value = false;
   store.clearFilters();
 }
 
