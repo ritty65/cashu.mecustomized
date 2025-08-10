@@ -202,6 +202,17 @@ pnpm install
 pnpm test
 ```
 
+### Environment variables
+
+Create a `.env` file in the project root (or export variables in your shell):
+
+```
+VITE_SUBSCRIBERS_SOURCE=auto
+# VITE_SUBSCRIBERS_ENDPOINT=https://api.example.com/subscribers
+```
+
+`VITE_SUBSCRIBERS_SOURCE` selects the data source for the subscribers page. Use `auto` to check Dexie first and fall back to HTTP, or force `dexie` or `http`.
+
 ### Verifying the NDK refactor
 
 After migrating away from direct `NDK` instances, check that no lingering instantiations remain.

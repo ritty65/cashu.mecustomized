@@ -57,6 +57,15 @@
         @click.stop="openFilters"
         aria-label="Filters"
       />
+      <q-chip
+        v-if="sourceKind === 'auto' && usedFallback"
+        dense
+        outline
+        color="grey-6"
+        class="q-ml-sm"
+      >
+        Using HTTP (no local data)
+      </q-chip>
       <q-btn
         outline
         color="grey-5"
@@ -367,7 +376,12 @@
           <q-list bordered dense>
             <q-item v-for="p in payments" :key="p.ts">
               <q-item-section>{{ formatDate(p.ts) }}</q-item-section>
-              <q-item-section side>{{ p.amountSat }} sat</q-item-section>
+              <q-item-section side>
+                <div class="row items-center no-wrap q-gutter-xs">
+                  <q-chip dense :color="paymentStatusColor(p.status)" text-color="white">{{ p.status }}</q-chip>
+                  <span>{{ p.amountSat }} sat</span>
+                </div>
+              </q-item-section>
             </q-item>
           </q-list>
         </div>
@@ -433,7 +447,8 @@ import SubscriberFiltersPopover from "src/components/subscribers/SubscriberFilte
 import SubscriberCard from "src/components/SubscriberCard.vue";
 
 const subStore = useCreatorSubscribersStore();
-const { filtered, counts, activeTab, loading, error } = storeToRefs(subStore);
+const { filtered, counts, activeTab, loading, error, sourceKind, usedFallback } =
+  storeToRefs(subStore);
 const showEndpointBanner = ref(!import.meta.env.VITE_SUBSCRIBERS_ENDPOINT);
 const creatorNpub =
   localStorage.getItem('creator_npub') || import.meta.env.VITE_CREATOR_NPUB || '';
@@ -676,6 +691,9 @@ function freqShort(f: Frequency) {
 }
 function statusColor(s: SubStatus) {
   return s === "active" ? "positive" : s === "pending" ? "warning" : "negative";
+}
+function paymentStatusColor(s: string | undefined) {
+  return s === 'settled' ? 'positive' : s === 'failed' ? 'negative' : 'warning';
 }
 function progressPercent(r: Subscriber) {
   if (!r.nextRenewal) return 0;
