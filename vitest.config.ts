@@ -17,15 +17,14 @@ export default defineConfig({
     globals: true,
     environment: "happy-dom",
     setupFiles: ["./test/vitest/setup-file.js"],
-    include: [
-      "test/httpSubscribersSource.spec.ts",
-      "test/subscribersSource.spec.ts",
-      "test/creatorSubscribers.store.spec.ts",
-      "test/SubscribersTable.component.spec.ts",
-    ],
     exclude: [
-      "test/vitest/**",
-      "test/e2e/**",
+      "src/lib/cashu-ts/test/integration.test.ts",
+      "src/lib/cashu-ts/test/auth.test.ts",
+    ],
+    include: [
+      "src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
+      "test/creatorSubscribers-page.spec.ts",
+      "test/vitest/__tests__/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}",
     ],
   },
     resolve: {
