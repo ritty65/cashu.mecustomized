@@ -1,5 +1,14 @@
 import { FREE_RELAYS } from "src/config/relays";
 
+const reportedRelays = new Set<string>();
+
+function reportRelayFailure(url: string) {
+  if (reportedRelays.has(url)) return;
+  reportedRelays.add(url);
+  console.debug("Relay failed", url);
+  setTimeout(() => reportedRelays.delete(url), 5 * 60 * 1000);
+}
+
 export async function pingRelay(url: string): Promise<boolean> {
   return new Promise((resolve) => {
     let settled = false;
@@ -10,6 +19,7 @@ export async function pingRelay(url: string): Promise<boolean> {
         try {
           ws.close();
         } catch {}
+        reportRelayFailure(url);
         resolve(false);
       }
     }, 1000);
@@ -25,6 +35,7 @@ export async function pingRelay(url: string): Promise<boolean> {
       if (!settled) {
         settled = true;
         clearTimeout(timer);
+        reportRelayFailure(url);
         resolve(false);
       }
     };
@@ -37,6 +48,7 @@ export async function pingRelay(url: string): Promise<boolean> {
         settled = true;
         clearTimeout(timer);
         ws.close();
+        reportRelayFailure(url);
         resolve(false);
       }
     };
