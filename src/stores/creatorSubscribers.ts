@@ -20,7 +20,10 @@ export type SortOption = "next" | "first" | "amount";
 export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
   state: () => ({
     subscribers: [] as Subscriber[],
-    profileCache: {} as Record<string, { name: string; nip05: string }>,
+    profileCache: {} as Record<
+      string,
+      { name: string; nip05: string; about?: string; picture?: string; lud16?: string }
+    >,
     query: "",
     activeTab: "all" as Tab,
     statuses: new Set<SubStatus>(),
@@ -256,6 +259,9 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
           this.profileCache[npub] = {
             name: profile?.name || "",
             nip05: profile?.nip05 || "",
+            about: profile?.about || "",
+            picture: profile?.picture || "",
+            lud16: profile?.lud16 || "",
           };
         }
         this.subscribers = this.subscribers.map((s) => {
