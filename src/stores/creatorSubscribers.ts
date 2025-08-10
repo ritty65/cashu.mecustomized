@@ -15,7 +15,10 @@ export type SortOption = "next" | "first" | "amount";
 export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
   state: () => ({
     subscribers: [] as Subscriber[],
-    profileCache: {} as Record<string, { name: string; nip05: string }>,
+    profileCache: {} as Record<
+      string,
+      { name: string; nip05: string; picture?: string; about?: string; lud16?: string }
+    >,
     /** handle returned by Dexie's liveQuery for cleanup */
     _dbSub: null as { unsubscribe(): void } | null,
     query: "",
@@ -246,6 +249,9 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
           this.profileCache[npub] = {
             name: profile?.name || "",
             nip05: profile?.nip05 || "",
+            picture: profile?.picture || "",
+            about: profile?.about || "",
+            lud16: profile?.lud16 || "",
           };
         }
         this.subscribers = this.subscribers.map((s) => {

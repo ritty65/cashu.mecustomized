@@ -137,211 +137,232 @@
       </q-card>
     </div>
 
-    <!-- Tabs -->
-    <q-tabs v-model="activeTab" dense class="q-mb-md" no-caps>
-      <q-tab name="all">
-        <div class="row items-center no-wrap">
-          <span>{{ t('CreatorSubscribers.tabs.all') }}</span>
-          <q-badge class="q-ml-xs" color="primary">{{ counts.all }}</q-badge>
-        </div>
-      </q-tab>
-      <q-tab name="weekly">
-        <div class="row items-center no-wrap">
-          <span>{{ t('CreatorSubscribers.frequency.weekly') }}</span>
-          <q-badge class="q-ml-xs" color="primary">{{ counts.weekly }}</q-badge>
-        </div>
-      </q-tab>
-      <q-tab name="biweekly">
-        <div class="row items-center no-wrap">
-          <span>{{ t('CreatorSubscribers.frequency.biweekly') }}</span>
-          <q-badge class="q-ml-xs" color="primary">{{ counts.biweekly }}</q-badge>
-        </div>
-      </q-tab>
-      <q-tab name="monthly">
-        <div class="row items-center no-wrap">
-          <span>{{ t('CreatorSubscribers.frequency.monthly') }}</span>
-          <q-badge class="q-ml-xs" color="primary">{{ counts.monthly }}</q-badge>
-        </div>
-      </q-tab>
-      <q-tab name="pending">
-        <div class="row items-center no-wrap">
-          <span>{{ t('CreatorSubscribers.status.pending') }}</span>
-          <q-badge class="q-ml-xs" color="primary">{{ counts.pending }}</q-badge>
-        </div>
-      </q-tab>
-      <q-tab name="ended">
-        <div class="row items-center no-wrap">
-          <span>{{ t('CreatorSubscribers.status.ended') }}</span>
-          <q-badge class="q-ml-xs" color="primary">{{ counts.ended }}</q-badge>
-        </div>
-      </q-tab>
-    </q-tabs>
-
-    <!-- Table -->
-    <q-table
-      v-if="view === 'table'"
-      flat
-      :rows="paginatedRows"
-      row-key="id"
-      selection="multiple"
-      v-model:selected="selected"
-      :columns="columns"
-      :rows-per-page-options="[10, 25, 50]"
-      :row-class="rowClass"
-      :dense="density === 'compact'"
-      :class="['density--' + density]"
-      v-model:pagination="pagination"
-      :row-count="filtered.length"
-      @request="onRequest"
-    >
-      <template #body-cell-subscriber="props">
-        <q-td :props="props">
-          <div class="row items-center q-gutter-sm no-wrap">
-            <q-avatar size="32px">{{ initials(props.row.name) }}</q-avatar>
-            <div>
-              <div class="text-body2">{{ props.row.name }}</div>
-              <div class="text-caption text-grey-6">{{ props.row.nip05 }}</div>
+    <div class="row">
+      <div class="col-auto q-mr-md">
+        <q-tabs v-model="activeTab" vertical class="q-mb-md" no-caps>
+          <q-tab name="all">
+            <div class="row items-center no-wrap">
+              <span>{{ t('CreatorSubscribers.tabs.all') }}</span>
+              <q-badge class="q-ml-xs" color="primary">{{ counts.all }}</q-badge>
             </div>
-          </div>
-        </q-td>
-      </template>
-      <template #body-cell-tier="props">
-        <q-td :props="props"
-          ><q-chip dense color="primary" text-color="white">{{
-            props.row.tierName
-          }}</q-chip></q-td
+          </q-tab>
+          <q-tab name="weekly">
+            <div class="row items-center no-wrap">
+              <span>{{ t('CreatorSubscribers.frequency.weekly') }}</span>
+              <q-badge class="q-ml-xs" color="primary">{{ counts.weekly }}</q-badge>
+            </div>
+          </q-tab>
+          <q-tab name="biweekly">
+            <div class="row items-center no-wrap">
+              <span>{{ t('CreatorSubscribers.frequency.biweekly') }}</span>
+              <q-badge class="q-ml-xs" color="primary">{{ counts.biweekly }}</q-badge>
+            </div>
+          </q-tab>
+          <q-tab name="monthly">
+            <div class="row items-center no-wrap">
+              <span>{{ t('CreatorSubscribers.frequency.monthly') }}</span>
+              <q-badge class="q-ml-xs" color="primary">{{ counts.monthly }}</q-badge>
+            </div>
+          </q-tab>
+          <q-tab name="pending">
+            <div class="row items-center no-wrap">
+              <span>{{ t('CreatorSubscribers.status.pending') }}</span>
+              <q-badge class="q-ml-xs" color="primary">{{ counts.pending }}</q-badge>
+            </div>
+          </q-tab>
+          <q-tab name="ended">
+            <div class="row items-center no-wrap">
+              <span>{{ t('CreatorSubscribers.status.ended') }}</span>
+              <q-badge class="q-ml-xs" color="primary">{{ counts.ended }}</q-badge>
+            </div>
+          </q-tab>
+        </q-tabs>
+      </div>
+      <div class="col">
+        <!-- Table -->
+        <q-table
+          v-if="view === 'table'"
+          flat
+          :rows="paginatedRows"
+          row-key="id"
+          selection="multiple"
+          v-model:selected="selected"
+          :columns="columns"
+          :rows-per-page-options="[10, 25, 50]"
+          :row-class="rowClass"
+          :dense="density === 'compact'"
+          :class="['density--' + density]"
+          v-model:pagination="pagination"
+          :row-count="filtered.length"
+          @request="onRequest"
+          @row-click="onRowClick"
         >
-      </template>
-      <template #body-cell-frequency="props">
-        <q-td :props="props"
-          ><q-chip dense outline>{{
-            freqShort(props.row.frequency)
-          }}</q-chip></q-td
+          <template #body-cell-subscriber="props">
+            <q-td :props="props">
+              <div class="row items-center q-gutter-sm no-wrap">
+                <q-avatar size="32px">
+                  <img
+                    v-if="profileCache[props.row.npub]?.picture"
+                    :src="profileCache[props.row.npub].picture"
+                  />
+                  <span v-else>{{ initials(props.row.name) }}</span>
+                </q-avatar>
+                <div>
+                  <div class="text-body2">{{ props.row.name }}</div>
+                  <div class="text-caption text-grey-6" v-if="props.row.nip05">
+                    {{ props.row.nip05 }}
+                  </div>
+                  <div class="text-caption text-grey-6">{{ props.row.npub }}</div>
+                </div>
+              </div>
+            </q-td>
+          </template>
+          <template #body-cell-tier="props">
+            <q-td :props="props"
+              ><q-chip dense color="primary" text-color="white">{{
+                props.row.tierName
+              }}</q-chip></q-td
+            >
+          </template>
+          <template #body-cell-frequency="props">
+            <q-td :props="props"
+              ><q-chip dense outline>{{
+                freqShort(props.row.frequency)
+              }}</q-chip></q-td
+            >
+          </template>
+          <template #body-cell-status="props">
+            <q-td :props="props"
+              ><q-chip
+                dense
+                :color="statusColor(props.row.status)"
+                :text-color="statusTextColor(props.row.status)"
+                :icon="statusIcon(props.row.status)"
+                >{{ t('CreatorSubscribers.status.' + props.row.status) }}</q-chip
+              ></q-td>
+          </template>
+          <template #body-cell-amount="props"
+            ><q-td :props="props">{{ props.row.amountSat }} sat</q-td></template
+          >
+          <template #body-cell-nextRenewal="props">
+            <q-td :props="props">
+              <div class="row items-center no-wrap q-gutter-sm">
+                <div
+                  class="progress-ring"
+                  :style="{
+                    '--progress': progressPercent(props.row),
+                    '--size': '28px',
+                    '--thickness': '3px',
+                    '--progress-ring-fill': `var(--q-${
+                      dueSoon(props.row) ? 'warning' : 'primary'
+                    })`,
+                  }"
+                  :data-label="`${progressPercent(props.row)}%`"
+                  role="progressbar"
+                  :aria-valuenow="progressPercent(props.row)"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  :aria-label="t('CreatorSubscribers.renewalProgress')"
+                  :aria-valuetext="progressPercent(props.row) + '%'"
+                />
+                <div class="column">
+                  <div
+                    :class="[
+                      'text-caption',
+                      dueSoon(props.row) ? 'text-warning' : '',
+                    ]"
+                  >
+                    {{
+                      props.row.nextRenewal ? distToNow(props.row.nextRenewal) : '—'
+                    }}
+                  </div>
+                  <div class="text-caption text-grey-6">
+                    {{
+                      props.row.nextRenewal ? formatDate(props.row.nextRenewal) : ''
+                    }}
+                  </div>
+                </div>
+              </div>
+            </q-td>
+          </template>
+          <template #body-cell-lifetime="props"
+            ><q-td :props="props">{{ props.row.lifetimeSat }} sat</q-td></template
+          >
+          <template #body-cell-actions="props"
+            ><q-td :props="props"
+              ><q-btn
+                flat
+                dense
+                round
+                icon="chevron_right"
+                :aria-label="t('CreatorSubscribers.actions.openDetails')"
+                @click="openDrawer(props.row)" /></q-td
+          ></template>
+        </q-table>
+        <q-virtual-scroll
+          v-else
+          :items="filtered"
+          :virtual-scroll-item-size="140"
+          content-class="subscriber-cards"
         >
-      </template>
-      <template #body-cell-status="props">
-        <q-td :props="props"
-          ><q-chip
-            dense
-            :color="statusColor(props.row.status)"
-            :text-color="statusTextColor(props.row.status)"
-            :icon="statusIcon(props.row.status)"
-            >{{ t('CreatorSubscribers.status.' + props.row.status) }}</q-chip
-          ></q-td>
-      </template>
-      <template #body-cell-amount="props"
-        ><q-td :props="props">{{ props.row.amountSat }} sat</q-td></template
-      >
-      <template #body-cell-nextRenewal="props">
-        <q-td :props="props">
-          <div class="row items-center no-wrap q-gutter-sm">
-            <div
-              class="progress-ring"
-              :style="{
-                '--progress': progressPercent(props.row),
-                '--size': '28px',
-                '--thickness': '3px',
-                '--progress-ring-fill': `var(--q-${
-                  dueSoon(props.row) ? 'warning' : 'primary'
-                })`,
-              }"
-              :data-label="`${progressPercent(props.row)}%`"
-              role="progressbar"
-              :aria-valuenow="progressPercent(props.row)"
-              aria-valuemin="0"
-              aria-valuemax="100"
-              :aria-label="t('CreatorSubscribers.renewalProgress')"
-              :aria-valuetext="progressPercent(props.row) + '%'"
+          <template #default="{ item: row }">
+            <SubscriberCard
+              :subscription="{ tierName: row.tierName, subscriberNpub: row.npub } as any"
+              :status="row.status"
+              :next-in="row.nextRenewal ? distToNow(row.nextRenewal) : '—'"
+              :progress="progressPercent(row) / 100"
+              :amount="row.amountSat + ' sat'"
+              :compact="density === 'compact'"
+              @click="openDrawer(row)"
             />
-            <div class="column">
-              <div
-                :class="[
-                  'text-caption',
-                  dueSoon(props.row) ? 'text-warning' : '',
-                ]"
-              >
-                {{
-                  props.row.nextRenewal ? distToNow(props.row.nextRenewal) : '—'
-                }}
-              </div>
-              <div class="text-caption text-grey-6">
-                {{
-                  props.row.nextRenewal ? formatDate(props.row.nextRenewal) : ''
-                }}
-              </div>
-            </div>
-          </div>
-        </q-td>
-      </template>
-      <template #body-cell-lifetime="props"
-        ><q-td :props="props">{{ props.row.lifetimeSat }} sat</q-td></template
-      >
-      <template #body-cell-actions="props"
-        ><q-td :props="props"
-          ><q-btn
+          </template>
+        </q-virtual-scroll>
+
+        <!-- Selection bar -->
+        <div
+          v-if="selected.length"
+          class="q-mt-sm q-pa-sm bg-primary text-white row items-center q-gutter-sm"
+        >
+          <div>{{ t('CreatorSubscribers.selectionCount', { count: selected.length }) }}</div>
+          <q-space />
+          <q-btn
+            outline
+            dense
+            color="white"
+            icon="download"
+            :label="t('CreatorSubscribers.actions.exportSelected')"
+            :aria-label="t('CreatorSubscribers.actions.exportSelected')"
+            @click="exportSelected"
+          />
+          <q-btn
             flat
             dense
-            round
-            icon="chevron_right"
-            :aria-label="t('CreatorSubscribers.actions.openDetails')"
-            @click="openDrawer(props.row)" /></q-td
-      ></template>
-    </q-table>
-    <q-virtual-scroll
-      v-else
-      :items="filtered"
-      :virtual-scroll-item-size="140"
-      content-class="subscriber-cards"
-    >
-      <template #default="{ item: row }">
-        <SubscriberCard
-          :subscription="{ tierName: row.tierName, subscriberNpub: row.npub } as any"
-          :status="row.status"
-          :next-in="row.nextRenewal ? distToNow(row.nextRenewal) : '—'"
-          :progress="progressPercent(row) / 100"
-          :amount="row.amountSat + ' sat'"
-          :compact="density === 'compact'"
-          @click="openDrawer(row)"
-        />
-      </template>
-    </q-virtual-scroll>
-
-    <!-- Selection bar -->
-    <div
-      v-if="selected.length"
-      class="q-mt-sm q-pa-sm bg-primary text-white row items-center q-gutter-sm"
-    >
-      <div>{{ t('CreatorSubscribers.selectionCount', { count: selected.length }) }}</div>
-      <q-space />
-      <q-btn
-        outline
-        dense
-        color="white"
-        icon="download"
-        :label="t('CreatorSubscribers.actions.exportSelected')"
-        :aria-label="t('CreatorSubscribers.actions.exportSelected')"
-        @click="exportSelected"
-      />
-      <q-btn
-        flat
-        dense
-        color="white"
-        :label="t('CreatorSubscribers.actions.clear')"
-        :aria-label="t('CreatorSubscribers.actions.clear')"
-        @click="clearSelected"
-      />
+            color="white"
+            :label="t('CreatorSubscribers.actions.clear')"
+            :aria-label="t('CreatorSubscribers.actions.clear')"
+            @click="clearSelected"
+          />
+        </div>
+      </div>
     </div>
 
     <!-- Drawer -->
     <q-drawer v-model="drawer" side="right" overlay bordered>
       <div v-if="current" class="q-pa-md">
         <div class="row items-center q-gutter-sm">
-          <q-avatar size="64px">{{ initials(current.name) }}</q-avatar>
+          <q-avatar size="64px">
+            <img v-if="profile?.picture" :src="profile.picture" />
+            <span v-else>{{ initials(current.name) }}</span>
+          </q-avatar>
           <div>
             <div class="text-h6">{{ current.name }}</div>
-            <div class="text-body2 text-grey-6">{{ current.nip05 }}</div>
+            <div class="text-body2 text-grey-6" v-if="profile?.nip05 || current.nip05">
+              {{ profile?.nip05 || current.nip05 }}
+            </div>
+            <div class="text-body2 text-grey-6">{{ current.npub }}</div>
           </div>
         </div>
+        <div class="q-mt-sm" v-if="profile?.about">{{ profile.about }}</div>
         <div class="row q-gutter-xs q-mt-md">
           <q-chip dense color="primary" text-color="white">{{
             current.tierName
@@ -379,6 +400,7 @@
         <div class="row q-gutter-sm q-mt-md">
           <q-btn outline :label="t('CreatorSubscribers.drawer.actions.dm')" :aria-label="t('CreatorSubscribers.drawer.actions.dm')" @click="dmSubscriber" />
           <q-btn outline :label="t('CreatorSubscribers.drawer.actions.copyNpub')" :aria-label="t('CreatorSubscribers.drawer.actions.copyNpub')" @click="copyNpub" />
+          <q-btn outline :label="t('CreatorSubscribers.drawer.actions.openProfile')" :aria-label="t('CreatorSubscribers.drawer.actions.openProfile')" @click="openProfile" />
         </div>
         <div class="q-mt-lg">
           <div class="text-subtitle2 q-mb-sm">
@@ -457,7 +479,8 @@ import SubscriberCard from "src/components/SubscriberCard.vue";
 const { t } = useI18n();
 
 const subStore = useCreatorSubscribersStore();
-const { filtered, counts, activeTab, loading, error } = storeToRefs(subStore);
+const { filtered, counts, activeTab, loading, error, profileCache } =
+  storeToRefs(subStore);
 // `filtered` is maintained by the Pinia store based on the active tab,
 // search query and filter popover. Treat it as the single source of truth
 // for the subscriber list and KPI counts throughout this page.
@@ -828,6 +851,21 @@ function openDrawer(r: Subscriber) {
 }
 const $q = useQuasar();
 const router = useRouter();
+
+const profile = computed(() =>
+  current.value ? profileCache.value[current.value.npub] : undefined,
+);
+
+function openProfile() {
+  if (!current.value) return;
+  window.open(`https://njump.me/${current.value.npub}`, "_blank");
+}
+
+function onRowClick(evt: MouseEvent, row: Subscriber) {
+  const target = evt.target as HTMLElement;
+  if (target.closest(".q-checkbox, .q-btn")) return;
+  openDrawer(row);
+}
 
 function copyNpub() {
   if (!current.value) return;
