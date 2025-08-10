@@ -16,7 +16,10 @@ const HEADER = [
   "start_date_iso",
 ].join(",");
 
-export function downloadCsv(rows?: Subscriber[], filenameSuffix?: string) {
+export function downloadCsv(
+  rows?: Subscriber[],
+  opts?: { filenameSuffix?: string },
+) {
   const store = useCreatorSubscribersStore();
   const data = rows ?? store.filtered;
 
@@ -48,7 +51,7 @@ export function downloadCsv(rows?: Subscriber[], filenameSuffix?: string) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  const suffix = filenameSuffix ? `-${filenameSuffix}` : "";
+  const suffix = opts?.filenameSuffix ?? "";
   a.download = `subscribers-${Date.now()}${suffix}.csv`;
   a.click();
   URL.revokeObjectURL(url);

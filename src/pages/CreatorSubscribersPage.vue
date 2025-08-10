@@ -40,7 +40,13 @@
       <div class="row items-center col-12 col-md-4 justify-end q-gutter-sm">
         <q-btn dense flat round icon="tune" @click.stop="openFilters" aria-label="Filters" />
         <q-btn dense flat round icon="refresh" @click="refresh" aria-label="Refresh" />
-        <q-btn outline color="grey-5" icon="download" label="Export CSV" @click="downloadCsv(undefined,'filtered')" />
+        <q-btn
+          outline
+          color="grey-5"
+          icon="download"
+          label="Export CSV"
+          @click="downloadCsv(undefined, { filenameSuffix: '-filtered' })"
+        />
       </div>
     </q-toolbar>
     <q-linear-progress v-if="loading" indeterminate class="q-mb-md" />
@@ -125,7 +131,7 @@
     <EmptyState
       v-if="!loading && filtered.length === 0"
       :subtitle="error || 'Try refreshing or connecting your data source.'"
-      :show-connect="!import.meta.env.VITE_SUBSCRIBERS_ENDPOINT"
+      :show-connect="showConnect"
       :on-retry="() => subStore.hydrate(creatorNpub)"
       @connect="connectDialog = true"
     />
@@ -139,7 +145,6 @@
       :density="density"
       :row-class="rowClass"
     >
-      <template #cells>
       <template #body-cell-subscriber="props">
         <q-td :props="props">
           <div class="row items-center q-gutter-sm no-wrap">
@@ -230,7 +235,6 @@
             icon="chevron_right"
             @click="openDrawer(props.row)" /></q-td
       ></template>
-      </template>
     </SubscribersTable>
     <div v-else class="subscriber-cards">
       <div v-if="loading" class="q-gutter-y-sm">
@@ -257,8 +261,22 @@
     >
       <div>{{ selected.length }} selected</div>
       <q-space />
-      <q-btn outline dense color="white" icon="download" label="Export filtered" @click="downloadCsv(undefined,'filtered')" />
-      <q-btn outline dense color="white" icon="download" label="Export selection" @click="downloadCsv(selected,'selection')" />
+      <q-btn
+        outline
+        dense
+        color="white"
+        icon="download"
+        label="Export filtered"
+        @click="downloadCsv(undefined, { filenameSuffix: '-filtered' })"
+      />
+      <q-btn
+        outline
+        dense
+        color="white"
+        icon="download"
+        label="Export selection"
+        @click="downloadCsv(selected, { filenameSuffix: '-selection' })"
+      />
       <q-btn v-if="selected.length" outline dense color="white" icon="chat" label="DM selected" @click="dmSelected" />
       <q-btn flat dense color="white" label="Clear" @click="selected = []" />
     </div>
@@ -294,6 +312,16 @@
             </div>
           </q-tab-panel>
           <q-tab-panel name="payments">
+            <div class="row justify-end q-mb-sm">
+              <q-btn
+                size="sm"
+                dense
+                flat
+                round
+                icon="download"
+                @click="exportCurrentCsv"
+              />
+            </div>
             <q-list bordered dense>
               <q-item v-for="p in payments" :key="p.ts">
                 <q-item-section>{{ formatDate(p.ts) }}</q-item-section>
@@ -332,12 +360,10 @@
 </template>
 
 <script setup lang="ts">
-import {
-
 // Chart.js will be imported lazily when charts become visible
 import type { Chart } from 'chart.js';
 
-import { ref, computed, watch, onMounted } from "vue";
+import { ref, computed, watch, onMounted, onBeforeUnmount } from "vue";
 import { useCreatorSubscribersStore } from "src/stores/creatorSubscribers";
 import { storeToRefs } from "pinia";
 import { useDebounceFn } from "@vueuse/core";
@@ -356,6 +382,7 @@ import SubscribersTable from "src/components/subscribers/SubscribersTable.vue";
 const subStore = useCreatorSubscribersStore();
 const { filtered, counts, activeTab, loading, error } = storeToRefs(subStore);
 const showEndpointBanner = ref(!import.meta.env.VITE_SUBSCRIBERS_ENDPOINT);
+const showConnect = !import.meta.env.VITE_SUBSCRIBERS_ENDPOINT;
 const creatorNpub =
   localStorage.getItem('creator_npub') || import.meta.env.VITE_CREATOR_NPUB || '';
 
@@ -669,6 +696,12 @@ function dmSelected() {
   if (!selected.value.length) return;
   const keys = selected.value.map(r => r.npub).join(',');
   router.push({ path: '/nostr-messenger', query: { pubkeys: keys } });
+}
+function exportCurrentCsv() {
+  const c = current.value;
+  if (c) {
+    downloadCsv([c], { filenameSuffix: `-subscriber-${c.npub}` });
+  }
 }
 const activity = computed(() => {
   const r = current.value;

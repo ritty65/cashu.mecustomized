@@ -154,13 +154,17 @@ describe('CreatorSubscribersPage', () => {
     (downloadCsv as unknown as vi.Mock).mockClear();
 
     await wrapper.find('button[data-label="Export CSV"]').trigger('click');
-    expect(downloadCsv).toHaveBeenCalledWith();
+    expect(downloadCsv).toHaveBeenCalledWith(undefined, {
+      filenameSuffix: '-filtered',
+    });
 
     (downloadCsv as unknown as vi.Mock).mockClear();
     wrapper.vm.selected = [store.subscribers[0]];
     await wrapper.vm.$nextTick();
     await wrapper.find('button[data-label="Export selection"]').trigger('click');
-    expect(downloadCsv).toHaveBeenCalledWith([store.subscribers[0]]);
+    expect(downloadCsv).toHaveBeenCalledWith([store.subscribers[0]], {
+      filenameSuffix: '-selection',
+    });
   });
 
   it('updates KPI numbers when searching, switching tabs and applying filters', async () => {
