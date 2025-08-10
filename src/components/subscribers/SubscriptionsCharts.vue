@@ -1,5 +1,5 @@
 <template>
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+  <div v-if="props.rows.length" class="grid grid-cols-1 md:grid-cols-3 gap-4">
     <div class="flex flex-col items-center">
       <MiniDonut :series="frequencySeries" :labels="frequencyLabels" />
       <div class="text-caption q-mt-xs">Frequency</div>
@@ -13,6 +13,7 @@
       <div class="text-caption q-mt-xs">New subs</div>
     </div>
   </div>
+  <div v-else>No data yet</div>
 </template>
 
 <script setup lang="ts">
@@ -22,7 +23,10 @@ import MiniDonut from './MiniDonut.vue';
 import MiniBar from './MiniBar.vue';
 import type { CreatorSubscription } from 'stores/creatorSubscriptions';
 
-const props = defineProps<{ rows: CreatorSubscription[] }>();
+const props = withDefaults(
+  defineProps<{ rows?: CreatorSubscription[] }>(),
+  { rows: () => [] }
+);
 
 const { t } = useI18n();
 
@@ -34,9 +38,9 @@ const frequencyLabels = computed(() => [
 
 const frequencySeries = computed(() => {
   const counts = { weekly: 0, biweekly: 0, monthly: 0 };
-  props.rows.forEach((r) => {
+  for (const r of props.rows ?? []) {
     counts[r.frequency] = (counts[r.frequency] || 0) + 1;
-  });
+  }
   return [counts.weekly, counts.biweekly, counts.monthly];
 });
 
@@ -57,9 +61,9 @@ const statusLabels = computed(() => [
 
 const statusSeries = computed(() => {
   const counts = { active: 0, pending: 0, ended: 0 };
-  props.rows.forEach((r) => {
+  for (const r of props.rows ?? []) {
     counts[uiStatus(r)]++;
-  });
+  }
   return [counts.active, counts.pending, counts.ended];
 });
 
@@ -67,13 +71,13 @@ const newSubsSeries = computed(() => {
   const days = 7;
   const now = Date.now() / 1000;
   const arr = Array(days).fill(0);
-  props.rows.forEach((r) => {
-    if (!r.startDate) return;
+  for (const r of props.rows ?? []) {
+    if (!r.startDate) continue;
     const diff = Math.floor((now - r.startDate) / (24 * 60 * 60));
     if (diff >= 0 && diff < days) {
       arr[days - diff - 1]++;
     }
-  });
+  }
   return arr;
 });
 </script>

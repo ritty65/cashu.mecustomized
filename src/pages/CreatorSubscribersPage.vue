@@ -82,7 +82,7 @@ onMounted(() => {
           <div class="text-h5">{{ store.total }}</div>
         </q-card>
       </div>
-      <subscriptions-charts :subscribers="store.subscribers" />
+      <subscriptions-charts :rows="store.subscribers" />
     </div>
 
     <div v-if="store.loading" class="flex flex-center q-my-xl">
