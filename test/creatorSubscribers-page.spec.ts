@@ -195,7 +195,7 @@ describe('CreatorSubscribersPage', () => {
     const store = useCreatorSubscribersStore(wrapper.vm.$pinia);
     wrapper.vm.error = 'oops';
     await wrapper.vm.$nextTick();
-    const loadSpy = vi.spyOn(store, 'loadFromDb');
+    const loadSpy = vi.spyOn(store, 'sync');
     const fetchSpy = vi.spyOn(store, 'fetchProfiles');
     await wrapper.find('button[data-label="Retry"]').trigger('click');
     expect(loadSpy).toHaveBeenCalled();
