@@ -1,18 +1,10 @@
 import type { ISubscribersSource, Payment } from './subscribersSource';
 import type { Subscriber } from 'src/types/subscriber';
+import { toSec } from '@/utils/time';
 
 // Expect a JSON endpoint that returns creator subscribers in a shape we can map.
 // Configure with VITE_SUBSCRIBERS_ENDPOINT, e.g. https://api.example.com/subscribers
 const API = import.meta.env.VITE_SUBSCRIBERS_ENDPOINT;
-
-function toSec(v: number | string | null | undefined): number | undefined {
-  if (v == null) return undefined;
-  if (typeof v === 'number') return v > 2_000_000_000 ? Math.floor(v / 1000) : v; // ms→s
-  // try ISO or numeric string
-  const n = Number(v);
-  if (!Number.isNaN(n)) return n > 2_000_000_000 ? Math.floor(n / 1000) : n;
-  const d = Date.parse(v); return isNaN(d) ? undefined : Math.floor(d / 1000);
-}
 
 export class HttpSubscribersSource implements ISubscribersSource {
   async listByCreator(creatorNpub: string): Promise<Subscriber[]> {

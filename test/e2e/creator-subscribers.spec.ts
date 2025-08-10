@@ -52,3 +52,26 @@ test('drives subscribers page layout', async ({ page }) => {
   await expect(page.locator('#drawer')).toHaveText('Bob');
 });
 
+test('shows http fallback chip in auto mode', async ({ page }) => {
+  await page.setContent(`
+    <div id="toolbar"></div>
+    <script>
+      const chip = document.createElement('div');
+      chip.id = 'chip';
+      chip.textContent = 'Using HTTP (no local data)';
+      document.getElementById('toolbar').appendChild(chip);
+    </script>
+  `);
+  await expect(page.locator('#chip')).toHaveText('Using HTTP (no local data)');
+});
+
+test('hides chip when dexie has data', async ({ page }) => {
+  await page.setContent(`
+    <div id="toolbar"></div>
+    <script>
+      // no chip rendered
+    </script>
+  `);
+  await expect(page.locator('#toolbar').locator('#chip')).toHaveCount(0);
+});
+

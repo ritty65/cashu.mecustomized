@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import type { Subscriber, Frequency, SubStatus } from "../types/subscriber";
 import type { ISubscribersSource } from "src/data/subscribersSource";
 import { HttpSubscribersSource } from "src/data/httpSubscribersSource";
+import { DexieSubscribersSource } from "src/data/dexieSubscribersSource";
 
 type Tab = "all" | Frequency | "pending" | "ended";
 
@@ -16,6 +17,8 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
     tiers: new Set<string>(),
     sort: "next" as SortOption,
     source: null as ISubscribersSource | null,
+    sourceKind: 'auto' as 'dexie' | 'http' | 'auto',
+    usedFallback: false,
     hydrated: false,
     loading: false,
     error: null as string | null,
@@ -108,10 +111,54 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
         ended: arr.filter((s) => s.status === "ended").length,
       };
     },
+    sourceKindEffective(state): 'dexie' | 'http' {
+      return state.sourceKind === 'auto'
+        ? state.usedFallback ? 'http' : 'dexie'
+        : state.sourceKind;
+    },
   },
   actions: {
     setSource(src?: ISubscribersSource) {
-      this.source = src ?? new HttpSubscribersSource();
+      const kind = (import.meta.env.VITE_SUBSCRIBERS_SOURCE ?? 'auto') as
+        | 'dexie'
+        | 'http'
+        | 'auto';
+      this.sourceKind = kind;
+      this.usedFallback = false;
+      if (src) {
+        this.source = src;
+        return;
+      }
+      if (kind === 'dexie') {
+        this.source = new DexieSubscribersSource();
+        return;
+      }
+      if (kind === 'http') {
+        this.source = new HttpSubscribersSource();
+        return;
+      }
+      const dexie = new DexieSubscribersSource();
+      const http = new HttpSubscribersSource();
+      const store = this;
+      this.source = {
+        async listByCreator(npub: string) {
+          try {
+            const rows = await dexie.listByCreator(npub);
+            if (rows.length) return rows;
+          } catch {}
+          store.usedFallback = true;
+          return http.listByCreator(npub);
+        },
+        async paymentsBySubscriber(npub: string) {
+          if (!store.usedFallback) {
+            try {
+              const rows = await dexie.paymentsBySubscriber(npub);
+              if (rows.length) return rows;
+            } catch {}
+          }
+          return http.paymentsBySubscriber?.(npub) ?? [];
+        },
+      } as ISubscribersSource;
     },
     async hydrate(creatorNpub: string) {
       if (!this.source) this.setSource();
