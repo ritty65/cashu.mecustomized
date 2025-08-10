@@ -1,411 +1,421 @@
 <template>
   <q-page padding>
-    <SubscriberFiltersPopover ref="filters" />
-    <q-banner v-if="error" dense class="q-mb-md bg-red-1 text-red">
-      {{ error }}
-      <template #action>
-        <q-btn
-          flat
-          color="red"
-          :label="t('CreatorSubscribers.actions.retry')"
-          :aria-label="t('CreatorSubscribers.actions.retry')"
-          @click="retry"
-        />
-      </template>
-    </q-banner>
-    <q-inner-loading :showing="loading">
-      <q-spinner size="50px" color="primary" />
-    </q-inner-loading>
-    <!-- Top bar -->
-    <div class="row items-center q-gutter-sm q-mb-md">
-      <div class="text-h6">{{ t('CreatorSubscribers.summary.subscribers') }}</div>
-      <q-input
-        dense
-        v-model="search"
-        :placeholder="t('CreatorSubscribers.toolbar.searchPlaceholder')"
-        class="q-ml-md"
-        clearable
-      >
-        <template #prepend>
-          <q-icon name="search" />
-        </template>
-      </q-input>
-      <q-btn-toggle
-        v-model="view"
-        dense
-        toggle-color="primary"
-        class="q-ml-sm"
-        :options="viewOptions"
-      />
-      <q-btn-toggle
-        v-model="density"
-        dense
-        toggle-color="primary"
-        class="q-ml-sm"
-        :options="densityOptions"
-      />
-      <q-btn
-        dense
-        flat
-        round
-        icon="tune"
-        class="q-ml-sm"
-        @click.stop="openFilters()"
-        :aria-label="t('CreatorSubscribers.actions.filters')"
-      />
-      <q-btn
-        outline
-        color="grey-5"
-        icon="download"
-        :label="t('CreatorSubscribers.toolbar.exportCsv')"
-        class="q-ml-sm"
-        :aria-label="t('CreatorSubscribers.toolbar.exportCsv')"
-        @click="downloadCsv()"
-      />
-    </div>
-
-    <!-- KPI Row -->
-    <div class="row q-col-gutter-md q-mb-md">
-      <q-card
-        flat
-        bordered
-        class="col-12 col-sm-6 col-md-3 panel-container q-pa-sm"
-      >
-        <div class="text-caption text-grey">
-          {{ t('CreatorSubscribers.summary.subscribers') }}
-        </div>
-        <div class="text-h6">{{ counts.all }}</div>
-      </q-card>
-      <q-card
-        flat
-        bordered
-        class="col-12 col-sm-6 col-md-3 panel-container q-pa-sm"
-      >
-        <div class="text-caption text-grey">
-          {{ t('CreatorSubscribers.summary.active') }} /
-          {{ t('CreatorSubscribers.summary.pending') }}
-        </div>
-        <div class="text-h6">{{ activeCount }} / {{ pendingCount }}</div>
-      </q-card>
-      <q-card
-        flat
-        bordered
-        class="col-12 col-sm-6 col-md-3 panel-container q-pa-sm"
-      >
-        <div class="text-caption text-grey">
-          {{ t('CreatorSubscribers.summary.lifetimeRevenue') }}
-        </div>
-        <div class="text-h6">{{ lifetimeRevenue }} sat</div>
-      </q-card>
-      <q-card
-        flat
-        bordered
-        class="col-12 col-sm-6 col-md-3 panel-container q-pa-sm"
-        @click="togglePeriod"
-      >
-        <div class="text-caption text-grey">
-          {{ periodMode === 'week'
-            ? t('CreatorSubscribers.summary.nextWeek')
-            : t('CreatorSubscribers.summary.nextMonth') }}
-        </div>
-        <div class="text-h6">{{ formattedKpiThisPeriodSat }} sat</div>
-      </q-card>
-    </div>
-
-    <!-- Charts -->
-    <div class="row q-col-gutter-md q-mb-md">
-      <q-card flat bordered class="col-12 col-md-4 panel-container q-pa-sm">
-        <div class="text-subtitle2 q-mb-sm">
-          {{ t('CreatorSubscribers.charts.revenueOverTime') }}
-        </div>
-        <canvas ref="lineEl" :aria-label="t('CreatorSubscribers.charts.revenueOverTime')" role="img" />
-        <p class="sr-only">{{ revenueSummary }}</p>
-      </q-card>
-      <q-card flat bordered class="col-12 col-md-4 panel-container q-pa-sm">
-        <div class="text-subtitle2 q-mb-sm">
-          {{ t('CreatorSubscribers.charts.frequencyMix') }}
-        </div>
-        <canvas ref="doughnutEl" :aria-label="t('CreatorSubscribers.charts.frequencyMix')" role="img" />
-        <p class="sr-only">{{ frequencySummary }}</p>
-      </q-card>
-      <q-card flat bordered class="col-12 col-md-4 panel-container q-pa-sm">
-        <div class="text-subtitle2 q-mb-sm">
-          {{ t('CreatorSubscribers.charts.statusByFrequency') }}
-        </div>
-        <canvas ref="barEl" :aria-label="t('CreatorSubscribers.charts.statusByFrequency')" role="img" />
-        <p class="sr-only">{{ statusSummary }}</p>
-      </q-card>
-    </div>
-
-    <!-- Tabs -->
-    <q-tabs v-model="activeTab" dense class="q-mb-md" no-caps>
-      <q-tab name="all">
-        <div class="row items-center no-wrap">
-          <span>{{ t('CreatorSubscribers.tabs.all') }}</span>
-          <q-badge class="q-ml-xs" color="primary">{{ counts.all }}</q-badge>
-        </div>
-      </q-tab>
-      <q-tab name="weekly">
-        <div class="row items-center no-wrap">
-          <span>{{ t('CreatorSubscribers.frequency.weekly') }}</span>
-          <q-badge class="q-ml-xs" color="primary">{{ counts.weekly }}</q-badge>
-        </div>
-      </q-tab>
-      <q-tab name="biweekly">
-        <div class="row items-center no-wrap">
-          <span>{{ t('CreatorSubscribers.frequency.biweekly') }}</span>
-          <q-badge class="q-ml-xs" color="primary">{{ counts.biweekly }}</q-badge>
-        </div>
-      </q-tab>
-      <q-tab name="monthly">
-        <div class="row items-center no-wrap">
-          <span>{{ t('CreatorSubscribers.frequency.monthly') }}</span>
-          <q-badge class="q-ml-xs" color="primary">{{ counts.monthly }}</q-badge>
-        </div>
-      </q-tab>
-      <q-tab name="pending">
-        <div class="row items-center no-wrap">
-          <span>{{ t('CreatorSubscribers.status.pending') }}</span>
-          <q-badge class="q-ml-xs" color="primary">{{ counts.pending }}</q-badge>
-        </div>
-      </q-tab>
-      <q-tab name="ended">
-        <div class="row items-center no-wrap">
-          <span>{{ t('CreatorSubscribers.status.ended') }}</span>
-          <q-badge class="q-ml-xs" color="primary">{{ counts.ended }}</q-badge>
-        </div>
-      </q-tab>
-    </q-tabs>
-
-    <!-- Table -->
-    <q-table
-      v-if="view === 'table'"
-      flat
-      :rows="paginatedRows"
-      row-key="id"
-      selection="multiple"
-      v-model:selected="selected"
-      :columns="columns"
-      :rows-per-page-options="[10, 25, 50]"
-      :row-class="rowClass"
-      :dense="density === 'compact'"
-      :class="['density--' + density]"
-      v-model:pagination="pagination"
-      :row-count="filtered.length"
-      @request="onRequest"
-    >
-      <template #body-cell-subscriber="props">
-        <q-td :props="props">
-          <div class="row items-center q-gutter-sm no-wrap">
-            <q-avatar size="32px">{{ initials(props.row.name) }}</q-avatar>
-            <div>
-              <div class="text-body2">{{ props.row.name }}</div>
-              <div class="text-caption text-grey-6">{{ props.row.nip05 }}</div>
+    <q-splitter v-model="splitterModel" class="subscriber-layout">
+      <template #before>
+        <q-tabs
+          v-model="activeTab"
+          dense
+          vertical
+          class="sidebar-tabs"
+          no-caps
+        >
+          <q-tab name="all">
+            <div class="row items-center no-wrap">
+              <span>{{ t('CreatorSubscribers.tabs.all') }}</span>
+              <q-badge class="q-ml-xs" color="primary">{{ counts.all }}</q-badge>
             </div>
-          </div>
-        </q-td>
+          </q-tab>
+          <q-tab name="weekly">
+            <div class="row items-center no-wrap">
+              <span>{{ t('CreatorSubscribers.frequency.weekly') }}</span>
+              <q-badge class="q-ml-xs" color="primary">{{ counts.weekly }}</q-badge>
+            </div>
+          </q-tab>
+          <q-tab name="biweekly">
+            <div class="row items-center no-wrap">
+              <span>{{ t('CreatorSubscribers.frequency.biweekly') }}</span>
+              <q-badge class="q-ml-xs" color="primary">{{ counts.biweekly }}</q-badge>
+            </div>
+          </q-tab>
+          <q-tab name="monthly">
+            <div class="row items-center no-wrap">
+              <span>{{ t('CreatorSubscribers.frequency.monthly') }}</span>
+              <q-badge class="q-ml-xs" color="primary">{{ counts.monthly }}</q-badge>
+            </div>
+          </q-tab>
+          <q-tab name="pending">
+            <div class="row items-center no-wrap">
+              <span>{{ t('CreatorSubscribers.status.pending') }}</span>
+              <q-badge class="q-ml-xs" color="primary">{{ counts.pending }}</q-badge>
+            </div>
+          </q-tab>
+          <q-tab name="ended">
+            <div class="row items-center no-wrap">
+              <span>{{ t('CreatorSubscribers.status.ended') }}</span>
+              <q-badge class="q-ml-xs" color="primary">{{ counts.ended }}</q-badge>
+            </div>
+          </q-tab>
+        </q-tabs>
       </template>
-      <template #body-cell-tier="props">
-        <q-td :props="props"
-          ><q-chip dense color="primary" text-color="white">{{
-            props.row.tierName
-          }}</q-chip></q-td
-        >
-      </template>
-      <template #body-cell-frequency="props">
-        <q-td :props="props"
-          ><q-chip dense outline>{{
-            freqShort(props.row.frequency)
-          }}</q-chip></q-td
-        >
-      </template>
-      <template #body-cell-status="props">
-        <q-td :props="props"
-          ><q-chip
-            dense
-            :color="statusColor(props.row.status)"
-            :text-color="statusTextColor(props.row.status)"
-            :icon="statusIcon(props.row.status)"
-            >{{ t('CreatorSubscribers.status.' + props.row.status) }}</q-chip
-          ></q-td>
-      </template>
-      <template #body-cell-amount="props"
-        ><q-td :props="props">{{ props.row.amountSat }} sat</q-td></template
-      >
-      <template #body-cell-nextRenewal="props">
-        <q-td :props="props">
-          <div class="row items-center no-wrap q-gutter-sm">
-            <div
-              class="progress-ring"
-              :style="{
-                '--progress': progressPercent(props.row),
-                '--size': '28px',
-                '--thickness': '3px',
-                '--progress-ring-fill': `var(--q-${
-                  dueSoon(props.row) ? 'warning' : 'primary'
-                })`,
-              }"
-              :data-label="`${progressPercent(props.row)}%`"
-              role="progressbar"
-              :aria-valuenow="progressPercent(props.row)"
-              aria-valuemin="0"
-              aria-valuemax="100"
-              :aria-label="t('CreatorSubscribers.renewalProgress')"
-              :aria-valuetext="progressPercent(props.row) + '%'"
+      <template #after>
+        <SubscriberFiltersPopover ref="filters" />
+        <q-banner v-if="error" dense class="q-mb-md bg-red-1 text-red">
+          {{ error }}
+          <template #action>
+            <q-btn
+              flat
+              color="red"
+              :label="t('CreatorSubscribers.actions.retry')"
+              :aria-label="t('CreatorSubscribers.actions.retry')"
+              @click="retry"
             />
-            <div class="column">
-              <div
-                :class="[
-                  'text-caption',
-                  dueSoon(props.row) ? 'text-warning' : '',
-                ]"
-              >
-                {{
-                  props.row.nextRenewal ? distToNow(props.row.nextRenewal) : '—'
-                }}
-              </div>
-              <div class="text-caption text-grey-6">
-                {{
-                  props.row.nextRenewal ? formatDate(props.row.nextRenewal) : ''
-                }}
-              </div>
+          </template>
+        </q-banner>
+        <q-inner-loading :showing="loading">
+          <q-spinner size="50px" color="primary" />
+        </q-inner-loading>
+        <!-- Top bar -->
+        <div class="row items-center q-gutter-sm q-mb-md">
+          <div class="text-h6">{{ t('CreatorSubscribers.summary.subscribers') }}</div>
+          <q-input
+            dense
+            v-model="search"
+            :placeholder="t('CreatorSubscribers.toolbar.searchPlaceholder')"
+            class="q-ml-md"
+            clearable
+          >
+            <template #prepend>
+              <q-icon name="search" />
+            </template>
+          </q-input>
+          <q-btn-toggle
+            v-model="view"
+            dense
+            toggle-color="primary"
+            class="q-ml-sm"
+            :options="viewOptions"
+          />
+          <q-btn-toggle
+            v-model="density"
+            dense
+            toggle-color="primary"
+            class="q-ml-sm"
+            :options="densityOptions"
+          />
+          <q-btn
+            dense
+            flat
+            round
+            icon="tune"
+            class="q-ml-sm"
+            @click.stop="openFilters()"
+            :aria-label="t('CreatorSubscribers.actions.filters')"
+          />
+          <q-btn
+            outline
+            color="grey-5"
+            icon="download"
+            :label="t('CreatorSubscribers.toolbar.exportCsv')"
+            class="q-ml-sm"
+            :aria-label="t('CreatorSubscribers.toolbar.exportCsv')"
+            @click="downloadCsv()"
+          />
+        </div>
+
+        <!-- KPI Row -->
+        <div class="row q-col-gutter-md q-mb-md">
+          <q-card
+            flat
+            bordered
+            class="col-12 col-sm-6 col-md-3 panel-container q-pa-sm"
+          >
+            <div class="text-caption text-grey">
+              {{ t('CreatorSubscribers.summary.subscribers') }}
             </div>
-          </div>
-        </q-td>
-      </template>
-      <template #body-cell-lifetime="props"
-        ><q-td :props="props">{{ props.row.lifetimeSat }} sat</q-td></template
-      >
-      <template #body-cell-actions="props"
-        ><q-td :props="props"
-          ><q-btn
+            <div class="text-h6">{{ counts.all }}</div>
+          </q-card>
+          <q-card
+            flat
+            bordered
+            class="col-12 col-sm-6 col-md-3 panel-container q-pa-sm"
+          >
+            <div class="text-caption text-grey">
+              {{ t('CreatorSubscribers.summary.active') }} /
+              {{ t('CreatorSubscribers.summary.pending') }}
+            </div>
+            <div class="text-h6">{{ activeCount }} / {{ pendingCount }}</div>
+          </q-card>
+          <q-card
+            flat
+            bordered
+            class="col-12 col-sm-6 col-md-3 panel-container q-pa-sm"
+          >
+            <div class="text-caption text-grey">
+              {{ t('CreatorSubscribers.summary.lifetimeRevenue') }}
+            </div>
+            <div class="text-h6">{{ lifetimeRevenue }} sat</div>
+          </q-card>
+          <q-card
+            flat
+            bordered
+            class="col-12 col-sm-6 col-md-3 panel-container q-pa-sm"
+            @click="togglePeriod"
+          >
+            <div class="text-caption text-grey">
+              {{ periodMode === 'week'
+                ? t('CreatorSubscribers.summary.nextWeek')
+                : t('CreatorSubscribers.summary.nextMonth') }}
+            </div>
+            <div class="text-h6">{{ formattedKpiThisPeriodSat }} sat</div>
+          </q-card>
+        </div>
+
+        <!-- Charts -->
+        <div class="row q-col-gutter-md q-mb-md">
+          <q-card flat bordered class="col-12 col-md-4 panel-container q-pa-sm">
+            <div class="text-subtitle2 q-mb-sm">
+              {{ t('CreatorSubscribers.charts.revenueOverTime') }}
+            </div>
+            <canvas ref="lineEl" :aria-label="t('CreatorSubscribers.charts.revenueOverTime')" role="img" />
+            <p class="sr-only">{{ revenueSummary }}</p>
+          </q-card>
+          <q-card flat bordered class="col-12 col-md-4 panel-container q-pa-sm">
+            <div class="text-subtitle2 q-mb-sm">
+              {{ t('CreatorSubscribers.charts.frequencyMix') }}
+            </div>
+            <canvas ref="doughnutEl" :aria-label="t('CreatorSubscribers.charts.frequencyMix')" role="img" />
+            <p class="sr-only">{{ frequencySummary }}</p>
+          </q-card>
+          <q-card flat bordered class="col-12 col-md-4 panel-container q-pa-sm">
+            <div class="text-subtitle2 q-mb-sm">
+              {{ t('CreatorSubscribers.charts.statusByFrequency') }}
+            </div>
+            <canvas ref="barEl" :aria-label="t('CreatorSubscribers.charts.statusByFrequency')" role="img" />
+            <p class="sr-only">{{ statusSummary }}</p>
+          </q-card>
+        </div>
+
+        <!-- Table -->
+        <q-table
+          v-if="view === 'table'"
+          flat
+          :rows="paginatedRows"
+          row-key="id"
+          selection="multiple"
+          v-model:selected="selected"
+          :columns="columns"
+          :rows-per-page-options="[10, 25, 50]"
+          :row-class="rowClass"
+          :dense="density === 'compact'"
+          :class="['density--' + density]"
+          v-model:pagination="pagination"
+          :row-count="filtered.length"
+          @request="onRequest"
+        >
+          <template #body-cell-subscriber="props">
+            <q-td :props="props">
+              <div class="row items-center q-gutter-sm no-wrap">
+                <q-avatar size="32px">{{ initials(props.row.name) }}</q-avatar>
+                <div>
+                  <div class="text-body2">{{ props.row.name }}</div>
+                  <div class="text-caption text-grey-6">{{ props.row.nip05 }}</div>
+                </div>
+              </div>
+            </q-td>
+          </template>
+          <template #body-cell-tier="props">
+            <q-td :props="props"
+              ><q-chip dense color="primary" text-color="white">{{
+                props.row.tierName
+              }}</q-chip></q-td
+            >
+          </template>
+          <template #body-cell-frequency="props">
+            <q-td :props="props"
+              ><q-chip dense outline>{{
+                freqShort(props.row.frequency)
+              }}</q-chip></q-td
+            >
+          </template>
+          <template #body-cell-status="props">
+            <q-td :props="props"
+              ><q-chip
+                dense
+                :color="statusColor(props.row.status)"
+                :text-color="statusTextColor(props.row.status)"
+                :icon="statusIcon(props.row.status)"
+                >{{ t('CreatorSubscribers.status.' + props.row.status) }}</q-chip
+              ></q-td>
+          </template>
+          <template #body-cell-amount="props"
+            ><q-td :props="props">{{ props.row.amountSat }} sat</q-td></template
+          >
+          <template #body-cell-nextRenewal="props">
+            <q-td :props="props">
+              <div class="row items-center no-wrap q-gutter-sm">
+                <div
+                  class="progress-ring"
+                  :style="{
+                    '--progress': progressPercent(props.row),
+                    '--size': '28px',
+                    '--thickness': '3px',
+                    '--progress-ring-fill': `var(--q-${
+                      dueSoon(props.row) ? 'warning' : 'primary'
+                    })`,
+                  }"
+                  :data-label="`${progressPercent(props.row)}%`"
+                  role="progressbar"
+                  :aria-valuenow="progressPercent(props.row)"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                  :aria-label="t('CreatorSubscribers.renewalProgress')"
+                  :aria-valuetext="progressPercent(props.row) + '%'"
+                />
+                <div class="column">
+                  <div
+                    :class="[
+                      'text-caption',
+                      dueSoon(props.row) ? 'text-warning' : '',
+                    ]"
+                  >
+                    {{
+                      props.row.nextRenewal ? distToNow(props.row.nextRenewal) : '—'
+                    }}
+                  </div>
+                  <div class="text-caption text-grey-6">
+                    {{
+                      props.row.nextRenewal ? formatDate(props.row.nextRenewal) : ''
+                    }}
+                  </div>
+                </div>
+              </div>
+            </q-td>
+          </template>
+          <template #body-cell-lifetime="props"
+            ><q-td :props="props">{{ props.row.lifetimeSat }} sat</q-td></template
+          >
+          <template #body-cell-actions="props"
+            ><q-td :props="props"
+              ><q-btn
+                flat
+                dense
+                round
+                icon="chevron_right"
+                :aria-label="t('CreatorSubscribers.actions.openDetails')"
+                @click="openDrawer(props.row)" /></q-td
+          ></template>
+        </q-table>
+        <q-virtual-scroll
+          v-else
+          :items="filtered"
+          :virtual-scroll-item-size="140"
+          content-class="subscriber-cards"
+        >
+          <template #default="{ item: row }">
+            <SubscriberCard
+              :subscription="{ tierName: row.tierName, subscriberNpub: row.npub } as any"
+              :status="row.status"
+              :next-in="row.nextRenewal ? distToNow(row.nextRenewal) : '—'"
+              :progress="progressPercent(row) / 100"
+              :amount="row.amountSat + ' sat'"
+              :compact="density === 'compact'"
+              @click="openDrawer(row)"
+            />
+          </template>
+        </q-virtual-scroll>
+
+        <!-- Selection bar -->
+        <div
+          v-if="selected.length"
+          class="q-mt-sm q-pa-sm bg-primary text-white row items-center q-gutter-sm"
+        >
+          <div>{{ t('CreatorSubscribers.selectionCount', { count: selected.length }) }}</div>
+          <q-space />
+          <q-btn
+            outline
+            dense
+            color="white"
+            icon="download"
+            :label="t('CreatorSubscribers.actions.exportSelected')"
+            :aria-label="t('CreatorSubscribers.actions.exportSelected')"
+            @click="exportSelected"
+          />
+          <q-btn
             flat
             dense
-            round
-            icon="chevron_right"
-            :aria-label="t('CreatorSubscribers.actions.openDetails')"
-            @click="openDrawer(props.row)" /></q-td
-      ></template>
-    </q-table>
-    <q-virtual-scroll
-      v-else
-      :items="filtered"
-      :virtual-scroll-item-size="140"
-      content-class="subscriber-cards"
-    >
-      <template #default="{ item: row }">
-        <SubscriberCard
-          :subscription="{ tierName: row.tierName, subscriberNpub: row.npub } as any"
-          :status="row.status"
-          :next-in="row.nextRenewal ? distToNow(row.nextRenewal) : '—'"
-          :progress="progressPercent(row) / 100"
-          :amount="row.amountSat + ' sat'"
-          :compact="density === 'compact'"
-          @click="openDrawer(row)"
-        />
+            color="white"
+            :label="t('CreatorSubscribers.actions.clear')"
+            :aria-label="t('CreatorSubscribers.actions.clear')"
+            @click="clearSelected"
+          />
+        </div>
+
+        <!-- Drawer -->
+        <q-drawer v-model="drawer" side="right" overlay bordered>
+          <div v-if="current" class="q-pa-md">
+            <div class="row items-center q-gutter-sm">
+              <q-avatar size="64px">{{ initials(current.name) }}</q-avatar>
+              <div>
+                <div class="text-h6">{{ current.name }}</div>
+                <div class="text-body2 text-grey-6">{{ current.nip05 }}</div>
+              </div>
+            </div>
+            <div class="row q-gutter-xs q-mt-md">
+              <q-chip dense color="primary" text-color="white">{{
+                current.tierName
+              }}</q-chip>
+              <q-chip dense outline>{{
+                t('CreatorSubscribers.frequency.' + current.frequency)
+              }}</q-chip>
+              <q-chip
+                dense
+                :color="statusColor(current.status)"
+                :text-color="statusTextColor(current.status)"
+                :icon="statusIcon(current.status)"
+                >{{ t('CreatorSubscribers.status.' + current.status) }}</q-chip
+              >
+            </div>
+            <div class="q-mt-md">
+              {{ current.amountSat }} sat /
+              {{ t('CreatorSubscribers.frequency.' + current.frequency) }}
+            </div>
+            <div class="q-mt-sm">
+              {{ t('CreatorSubscribers.drawer.overview.nextRenewal') }}:
+              {{ current.nextRenewal ? formatDate(current.nextRenewal) : '—' }}
+              <span v-if="current.nextRenewal" class="text-grey-6"
+                >({{ distToNow(current.nextRenewal) }})</span
+              >
+            </div>
+            <div class="q-mt-sm">
+              {{ t('CreatorSubscribers.drawer.overview.lifetimeTotal') }}:
+              {{ current.lifetimeSat }} sat
+            </div>
+            <div class="q-mt-sm">
+              {{ t('CreatorSubscribers.drawer.overview.since') }}
+              {{ formatDate(current.startDate) }}
+            </div>
+            <div class="row q-gutter-sm q-mt-md">
+              <q-btn outline :label="t('CreatorSubscribers.drawer.actions.dm')" :aria-label="t('CreatorSubscribers.drawer.actions.dm')" @click="dmSubscriber" />
+              <q-btn outline :label="t('CreatorSubscribers.drawer.actions.copyNpub')" :aria-label="t('CreatorSubscribers.drawer.actions.copyNpub')" @click="copyNpub" />
+            </div>
+            <div class="q-mt-lg">
+              <div class="text-subtitle2 q-mb-sm">
+                {{ t('CreatorSubscribers.drawer.tabs.payments') }}
+              </div>
+              <q-list bordered dense>
+                <q-item v-for="p in payments" :key="p.ts">
+                  <q-item-section>{{ formatDate(p.ts) }}</q-item-section>
+                  <q-item-section side>{{ p.amount }} sat</q-item-section>
+                </q-item>
+              </q-list>
+            </div>
+            <div class="q-mt-lg">
+              <div class="text-subtitle2 q-mb-sm">
+                {{ t('CreatorSubscribers.drawer.activity') }}
+              </div>
+              <q-list bordered dense>
+                <q-item v-for="a in activity" :key="a.ts">
+                  <q-item-section>{{ a.text }}</q-item-section>
+                  <q-item-section side class="text-caption text-grey">{{
+                    distToNow(a.ts)
+                  }}</q-item-section>
+                </q-item>
+              </q-list>
+            </div>
+          </div>
+        </q-drawer>
       </template>
-    </q-virtual-scroll>
-
-    <!-- Selection bar -->
-    <div
-      v-if="selected.length"
-      class="q-mt-sm q-pa-sm bg-primary text-white row items-center q-gutter-sm"
-    >
-      <div>{{ t('CreatorSubscribers.selectionCount', { count: selected.length }) }}</div>
-      <q-space />
-      <q-btn
-        outline
-        dense
-        color="white"
-        icon="download"
-        :label="t('CreatorSubscribers.actions.exportSelected')"
-        :aria-label="t('CreatorSubscribers.actions.exportSelected')"
-        @click="exportSelected"
-      />
-      <q-btn
-        flat
-        dense
-        color="white"
-        :label="t('CreatorSubscribers.actions.clear')"
-        :aria-label="t('CreatorSubscribers.actions.clear')"
-        @click="clearSelected"
-      />
-    </div>
-
-    <!-- Drawer -->
-    <q-drawer v-model="drawer" side="right" overlay bordered>
-      <div v-if="current" class="q-pa-md">
-        <div class="row items-center q-gutter-sm">
-          <q-avatar size="64px">{{ initials(current.name) }}</q-avatar>
-          <div>
-            <div class="text-h6">{{ current.name }}</div>
-            <div class="text-body2 text-grey-6">{{ current.nip05 }}</div>
-          </div>
-        </div>
-        <div class="row q-gutter-xs q-mt-md">
-          <q-chip dense color="primary" text-color="white">{{
-            current.tierName
-          }}</q-chip>
-          <q-chip dense outline>{{
-            t('CreatorSubscribers.frequency.' + current.frequency)
-          }}</q-chip>
-          <q-chip
-            dense
-            :color="statusColor(current.status)"
-            :text-color="statusTextColor(current.status)"
-            :icon="statusIcon(current.status)"
-            >{{ t('CreatorSubscribers.status.' + current.status) }}</q-chip
-          >
-        </div>
-        <div class="q-mt-md">
-          {{ current.amountSat }} sat /
-          {{ t('CreatorSubscribers.frequency.' + current.frequency) }}
-        </div>
-        <div class="q-mt-sm">
-          {{ t('CreatorSubscribers.drawer.overview.nextRenewal') }}:
-          {{ current.nextRenewal ? formatDate(current.nextRenewal) : '—' }}
-          <span v-if="current.nextRenewal" class="text-grey-6"
-            >({{ distToNow(current.nextRenewal) }})</span
-          >
-        </div>
-        <div class="q-mt-sm">
-          {{ t('CreatorSubscribers.drawer.overview.lifetimeTotal') }}:
-          {{ current.lifetimeSat }} sat
-        </div>
-        <div class="q-mt-sm">
-          {{ t('CreatorSubscribers.drawer.overview.since') }}
-          {{ formatDate(current.startDate) }}
-        </div>
-        <div class="row q-gutter-sm q-mt-md">
-          <q-btn outline :label="t('CreatorSubscribers.drawer.actions.dm')" :aria-label="t('CreatorSubscribers.drawer.actions.dm')" @click="dmSubscriber" />
-          <q-btn outline :label="t('CreatorSubscribers.drawer.actions.copyNpub')" :aria-label="t('CreatorSubscribers.drawer.actions.copyNpub')" @click="copyNpub" />
-        </div>
-        <div class="q-mt-lg">
-          <div class="text-subtitle2 q-mb-sm">
-            {{ t('CreatorSubscribers.drawer.tabs.payments') }}
-          </div>
-          <q-list bordered dense>
-            <q-item v-for="p in payments" :key="p.ts">
-              <q-item-section>{{ formatDate(p.ts) }}</q-item-section>
-              <q-item-section side>{{ p.amount }} sat</q-item-section>
-            </q-item>
-          </q-list>
-        </div>
-        <div class="q-mt-lg">
-          <div class="text-subtitle2 q-mb-sm">
-            {{ t('CreatorSubscribers.drawer.activity') }}
-          </div>
-          <q-list bordered dense>
-            <q-item v-for="a in activity" :key="a.ts">
-              <q-item-section>{{ a.text }}</q-item-section>
-              <q-item-section side class="text-caption text-grey">{{
-                distToNow(a.ts)
-              }}</q-item-section>
-            </q-item>
-          </q-list>
-        </div>
-      </div>
-    </q-drawer>
+    </q-splitter>
   </q-page>
 </template>
 
@@ -609,6 +619,7 @@ function clearSelected() {
 
 const view = ref<'table' | 'cards'>('table');
 const density = ref<'compact' | 'comfortable'>('comfortable');
+const splitterModel = ref(200);
 
 const viewOptions = computed(() => [
   { value: 'table', icon: 'table_rows', 'aria-label': t('CreatorSubscribers.toolbar.tableView') },
@@ -861,3 +872,20 @@ const activity = computed(() => {
   return arr;
 });
 </script>
+
+<style scoped>
+.subscriber-layout {
+  height: 100%;
+}
+
+.sidebar-tabs {
+  background-color: var(--q-color-grey-2);
+  min-width: 160px;
+}
+
+@media (max-width: 600px) {
+  .sidebar-tabs {
+    min-width: 120px;
+  }
+}
+</style>
