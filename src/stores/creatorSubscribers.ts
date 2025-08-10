@@ -1,61 +1,230 @@
-import { defineStore } from 'pinia';
-import type { Subscriber } from 'src/types/subscriber';
-import * as source from 'src/data/subscribersSource';
+import { defineStore } from "pinia";
+import type { Subscriber, Frequency, SubStatus } from "../types/subscriber";
+import type { ISubscribersSource, Payment } from "src/data/subscribersSource";
+import { HttpSubscribersSource } from "src/data/httpSubscribersSource";
+import { DexieSubscribersSource } from "src/data/dexieSubscribersSource";
 
-type ViewMode = 'table' | 'cards';
+type Tab = "all" | Frequency | "pending" | "ended";
 
-export const useCreatorSubscribers = defineStore('creatorSubscribers', {
+export type SortOption = "next" | "first" | "amount";
+
+export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
   state: () => ({
     subscribers: [] as Subscriber[],
+    query: "",
+    activeTab: "all" as Tab,
+    statuses: new Set<SubStatus>(),
+    tiers: new Set<string>(),
+    sort: "next" as SortOption,
+    dueSoonOnly: false,
+    source: null as ISubscribersSource | null,
+    sourceKind: 'auto' as 'dexie' | 'http' | 'auto',
+    usedFallback: false,
+    hydrated: false,
     loading: false,
     error: null as string | null,
-    viewMode: (localStorage.getItem('creator_subs_viewMode') as ViewMode) || 'table',
-    search: '',
-    selectedId: null as string | null,
+    paymentsCache: {} as Record<string, Payment[]>,
+    notes: JSON.parse(localStorage.getItem('cs_notes') || '{}') as Record<string,string>,
+    lastHydratedAt: 0,
   }),
-
   getters: {
-    filteredSubscribers(state): Subscriber[] {
-      const q = state.search.trim().toLowerCase();
-      if (!q) return state.subscribers;
-      return state.subscribers.filter(s => {
-        const name = (s.name || '').toLowerCase();
-        const npub = (s.npub || '').toLowerCase();
-        return name.includes(q) || npub.includes(q);
+    filtered(state): Subscriber[] {
+      // accessing the active tab here ensures this getter recomputes whenever
+      // the user switches tabs in the UI
+      const currentTab = state.activeTab;
+      let arr = state.subscribers.slice();
+
+      if (state.statuses.size) {
+        arr = arr.filter((s) => state.statuses.has(s.status));
+      }
+
+      if (state.tiers.size) {
+        arr = arr.filter((s) => state.tiers.has(s.tierId));
+      }
+
+      if (state.query.trim()) {
+        const q = state.query.toLowerCase();
+        arr = arr.filter(
+          (s) =>
+            s.name.toLowerCase().includes(q) ||
+            s.npub.toLowerCase().includes(q) ||
+            s.nip05.toLowerCase().includes(q)
+        );
+      }
+
+      switch (state.activeTab) {
+        case "weekly":
+        case "biweekly":
+        case "monthly":
+          arr = arr.filter((s) => s.frequency === state.activeTab);
+          break;
+        case "pending":
+        case "ended":
+          arr = arr.filter((s) => s.status === state.activeTab);
+          break;
+        default:
+          break;
+      }
+
+      if (state.dueSoonOnly) {
+        arr = arr.filter(dueSoon);
+      }
+
+      arr.sort((a, b) => {
+        if (state.sort === "amount") {
+          const al = typeof a.lifetimeSat === "number" ? a.lifetimeSat : 0;
+          const bl = typeof b.lifetimeSat === "number" ? b.lifetimeSat : 0;
+          return bl - al;
+        }
+        if (state.sort === "first") {
+          return a.startDate - b.startDate;
+        }
+        const an =
+          typeof a.nextRenewal === "number" ? a.nextRenewal : Number.POSITIVE_INFINITY;
+        const bn =
+          typeof b.nextRenewal === "number" ? b.nextRenewal : Number.POSITIVE_INFINITY;
+        return an - bn;
       });
+
+      return arr;
     },
-    total: (s) => s.subscribers.length,
+    counts(state) {
+      // state.sort is included to make the getter reactive to sort changes,
+      // even though the sorting itself does not affect the totals
+      void state.sort;
+      let arr = state.subscribers.slice();
+
+      if (state.statuses.size) {
+        arr = arr.filter((s) => state.statuses.has(s.status));
+      }
+      if (state.tiers.size) {
+        arr = arr.filter((s) => state.tiers.has(s.tierId));
+      }
+      if (state.query.trim()) {
+        const q = state.query.toLowerCase();
+        arr = arr.filter(
+          (s) =>
+            s.name.toLowerCase().includes(q) ||
+            s.npub.toLowerCase().includes(q) ||
+            s.nip05.toLowerCase().includes(q)
+        );
+      }
+
+      return {
+        all: arr.length,
+        weekly: arr.filter((s) => s.frequency === "weekly").length,
+        biweekly: arr.filter((s) => s.frequency === "biweekly").length,
+        monthly: arr.filter((s) => s.frequency === "monthly").length,
+        pending: arr.filter((s) => s.status === "pending").length,
+        ended: arr.filter((s) => s.status === "ended").length,
+      };
+    },
+    quickCountsByStatus(state) {
+      const counts = { active: 0, pending: 0, ended: 0 };
+      state.subscribers.forEach((s) => {
+        counts[s.status]++;
+      });
+      return counts;
+    },
+    sourceKindEffective(state): 'dexie' | 'http' {
+      return state.sourceKind === 'auto'
+        ? state.usedFallback ? 'http' : 'dexie'
+        : state.sourceKind;
+    },
   },
-
   actions: {
-    setViewMode(mode: ViewMode) {
-      this.viewMode = mode;
-      localStorage.setItem('creator_subs_viewMode', mode);
+    setSource(src?: ISubscribersSource) {
+      const kind = (import.meta.env.VITE_SUBSCRIBERS_SOURCE ?? 'auto') as
+        | 'dexie'
+        | 'http'
+        | 'auto';
+      this.sourceKind = kind;
+      this.usedFallback = false;
+      if (src) {
+        this.source = src;
+        return;
+      }
+      if (kind === 'dexie') {
+        this.source = new DexieSubscribersSource();
+        return;
+      }
+      if (kind === 'http') {
+        this.source = new HttpSubscribersSource();
+        return;
+      }
+      const dexie = new DexieSubscribersSource();
+      const http = new HttpSubscribersSource();
+      const store = this;
+      this.source = {
+        async listByCreator(npub: string) {
+          try {
+            const rows = await dexie.listByCreator(npub);
+            if (rows.length) return rows;
+          } catch {}
+          store.usedFallback = true;
+          return http.listByCreator(npub);
+        },
+        async paymentsBySubscriber(npub: string) {
+          if (!store.usedFallback) {
+            try {
+              const rows = await dexie.paymentsBySubscriber(npub);
+              if (rows.length) return rows;
+            } catch {}
+          }
+          return http.paymentsBySubscriber?.(npub) ?? [];
+        },
+      } as ISubscribersSource;
     },
-    setSearch(q: string) {
-      this.search = q ?? '';
-    },
-    select(id: string | null) {
-      this.selectedId = id;
-    },
-
-    async fetchSubscribers(force = false) {
-      if (this.loading) return;
+    async hydrate(creatorNpub: string) {
+      if (!this.source) this.setSource();
       this.loading = true;
       this.error = null;
-
-      const creatorNpub = localStorage.getItem('creator_npub') || undefined;
-
       try {
-        const { data } = await source.load(creatorNpub);
-        // replace array to keep reactivity simple
-        this.subscribers = data ?? [];
-      } catch (err: any) {
-        this.error = err?.message || 'Failed to load subscribers';
-        // leave existing subscribers (maybe cached) in place
+        const rows = await this.source!.listByCreator(creatorNpub);
+        this.subscribers = rows;
+        this.hydrated = true;
+        this.lastHydratedAt = Date.now();
+      } catch (e: any) {
+        this.error = String(e?.message || e);
       } finally {
         this.loading = false;
       }
-    }
-  }
+    },
+    async fetchPayments(npub: string) {
+      if (this.paymentsCache[npub]) return this.paymentsCache[npub];
+      if (!this.source?.paymentsBySubscriber) return [];
+      const list = await this.source.paymentsBySubscriber(npub);
+      this.paymentsCache[npub] = list;
+      return list;
+    },
+    setActiveTab(tab: Tab) {
+      this.activeTab = tab;
+    },
+    setQuery(q: string) {
+      this.query = q;
+    },
+    applyFilters(opts: { statuses: Set<SubStatus>; tiers: Set<string>; sort: SortOption; dueSoonOnly: boolean }) {
+      this.statuses = new Set(opts.statuses);
+      this.tiers = new Set(opts.tiers);
+      this.sort = opts.sort;
+      this.dueSoonOnly = opts.dueSoonOnly;
+    },
+    clearFilters() {
+      this.statuses.clear();
+      this.tiers.clear();
+      this.sort = "next";
+      this.dueSoonOnly = false;
+    },
+    setNote(npub: string, text: string) {
+      this.notes[npub] = text;
+      localStorage.setItem('cs_notes', JSON.stringify(this.notes));
+    },
+  },
 });
+
+function dueSoon(r: Subscriber) {
+  if (!r.nextRenewal || r.status !== 'active') return false;
+  return r.nextRenewal * 1000 - Date.now() < 72 * 3600 * 1000;
+}
+
+export type { Subscriber } from "../types/subscriber";

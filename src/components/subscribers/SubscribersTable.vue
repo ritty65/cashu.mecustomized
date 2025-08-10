@@ -1,32 +1,51 @@
-<script setup lang="ts">
-import type { Subscriber } from 'src/types/subscriber';
-const props = defineProps<{ subscribers: Subscriber[] }>();
-const emit = defineEmits<{ (e:'select', sub: Subscriber): void }>();
-function onRowClick(sub: Subscriber) { emit('select', sub); }
-</script>
-
 <template>
   <q-table
+    v-bind="$attrs"
     flat
-    :rows="props.subscribers"
-    :columns="[
-      {name:'name', label:'Subscriber', field:'name', align:'left'},
-      {name:'tier', label:'Tier', field:'tier'},
-      {name:'joinedAt', label:'Since', field:'joinedAt'}
-    ]"
+    :rows="rows"
     row-key="id"
-    @row-click="(_, row) => onRowClick(row)"
+    selection="multiple"
+    v-model:selected="selected"
+    :columns="visibleColumns"
+    :rows-per-page-options="[10,25,50]"
+    :dense="density === 'compact'"
+    :class="['density--' + density]"
+    virtual-scroll
+    :virtual-scroll-item-size="56"
+    :virtual-scroll-sticky-size-start="42"
   >
-    <template #body-cell-name="p">
-      <q-td :props="p">
-        <div class="row items-center q-gutter-sm">
-          <q-avatar size="24px" icon="person" />
-          <div class="ellipsis">{{ p.row.name || p.row.npub }}</div>
-        </div>
-      </q-td>
+    <template #top-right>
+      <q-btn dense flat icon="view_column" aria-label="Columns" @click="colMenu=true" />
+      <q-menu v-model="colMenu" anchor="bottom right" self="top right">
+        <q-list dense style="min-width:220px">
+          <q-item v-for="c in allColumns" :key="c.name" clickable @click="toggle(c.name)">
+            <q-item-section>{{ c.label }}</q-item-section>
+            <q-item-section side><q-toggle v-model="cols[c.name]" /></q-item-section>
+          </q-item>
+        </q-list>
+      </q-menu>
     </template>
-    <template #no-data>
-      <div class="q-pa-md">No subscribers</div>
-    </template>
+
+    <!-- existing body cell slots can be reused verbatim from the page -->
+    <slot name="cells" />
   </q-table>
 </template>
+<script setup lang="ts">
+import { ref, computed, watch, onMounted } from 'vue';
+import type { QTableColumn } from 'quasar';
+const props = defineProps<{
+  rows: any[];
+  columns: QTableColumn[];
+  density: 'compact'|'comfortable';
+  modelValue: any[];
+}>();
+const emit = defineEmits<{(e:'update:modelValue',v:any[]):void}>();
+const selected = ref(props.modelValue);
+watch(selected, v => emit('update:modelValue', v));
+const colMenu = ref(false);
+const cols = ref<Record<string, boolean>>({});
+const allColumns = computed(() => props.columns);
+const visibleColumns = computed(() => props.columns.filter(c => cols.value[c.name] !== false));
+function toggle(name: string){ cols.value[name] = !(cols.value[name] ?? true); localStorage.setItem('cs_columns', JSON.stringify(cols.value)); }
+onMounted(()=>{ cols.value = JSON.parse(localStorage.getItem('cs_columns')||'{}') });
+</script>
