@@ -341,79 +341,15 @@
         </div>
 
         <!-- Drawer -->
-        <q-drawer v-model="drawer" side="right" overlay bordered>
-          <div v-if="current" class="q-pa-md">
-            <div class="row items-center q-gutter-sm">
-              <q-avatar size="64px">{{ initials(current.name) }}</q-avatar>
-              <div>
-                <div class="text-h6">{{ current.name }}</div>
-                <div class="text-body2 text-grey-6">{{ current.nip05 }}</div>
-              </div>
-            </div>
-            <div class="row q-gutter-xs q-mt-md">
-              <q-chip dense color="primary" text-color="white">{{
-                current.tierName
-              }}</q-chip>
-              <q-chip dense outline>{{
-                t('CreatorSubscribers.frequency.' + current.frequency)
-              }}</q-chip>
-              <q-chip
-                dense
-                :color="statusColor(current.status)"
-                :text-color="statusTextColor(current.status)"
-                :icon="statusIcon(current.status)"
-                >{{ t('CreatorSubscribers.status.' + current.status) }}</q-chip
-              >
-            </div>
-            <div class="q-mt-md">
-              {{ current.amountSat }} sat /
-              {{ t('CreatorSubscribers.frequency.' + current.frequency) }}
-            </div>
-            <div class="q-mt-sm">
-              {{ t('CreatorSubscribers.drawer.overview.nextRenewal') }}:
-              {{ current.nextRenewal ? formatDate(current.nextRenewal) : '—' }}
-              <span v-if="current.nextRenewal" class="text-grey-6"
-                >({{ distToNow(current.nextRenewal) }})</span
-              >
-            </div>
-            <div class="q-mt-sm">
-              {{ t('CreatorSubscribers.drawer.overview.lifetimeTotal') }}:
-              {{ current.lifetimeSat }} sat
-            </div>
-            <div class="q-mt-sm">
-              {{ t('CreatorSubscribers.drawer.overview.since') }}
-              {{ formatDate(current.startDate) }}
-            </div>
-            <div class="row q-gutter-sm q-mt-md">
-              <q-btn outline :label="t('CreatorSubscribers.drawer.actions.dm')" :aria-label="t('CreatorSubscribers.drawer.actions.dm')" @click="dmSubscriber" />
-              <q-btn outline :label="t('CreatorSubscribers.drawer.actions.copyNpub')" :aria-label="t('CreatorSubscribers.drawer.actions.copyNpub')" @click="copyNpub" />
-            </div>
-            <div class="q-mt-lg">
-              <div class="text-subtitle2 q-mb-sm">
-                {{ t('CreatorSubscribers.drawer.tabs.payments') }}
-              </div>
-              <q-list bordered dense>
-                <q-item v-for="p in payments" :key="p.ts">
-                  <q-item-section>{{ formatDate(p.ts) }}</q-item-section>
-                  <q-item-section side>{{ p.amount }} sat</q-item-section>
-                </q-item>
-              </q-list>
-            </div>
-            <div class="q-mt-lg">
-              <div class="text-subtitle2 q-mb-sm">
-                {{ t('CreatorSubscribers.drawer.activity') }}
-              </div>
-              <q-list bordered dense>
-                <q-item v-for="a in activity" :key="a.ts">
-                  <q-item-section>{{ a.text }}</q-item-section>
-                  <q-item-section side class="text-caption text-grey">{{
-                    distToNow(a.ts)
-                  }}</q-item-section>
-                </q-item>
-              </q-list>
-            </div>
-          </div>
-        </q-drawer>
+        <SubscriberDrawer
+          v-if="currentSub"
+          v-model="drawer"
+          :sub="currentSub"
+          :profile="currentProfile"
+          @dm="dmSubscriber"
+          @openProfile="openProfile"
+          @cancel="cancelSubscriber"
+        />
       </template>
     </q-splitter>
   </q-page>
@@ -455,7 +391,6 @@ import { useCreatorSubscribersStore } from "src/stores/creatorSubscribers";
 import { storeToRefs } from "pinia";
 import { useDebounceFn } from "@vueuse/core";
 import { format, formatDistanceToNow } from "date-fns";
-import { useQuasar } from "quasar";
 import type { QTableRequestProp } from "quasar";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
@@ -463,6 +398,7 @@ import type { Subscriber, Frequency, SubStatus } from "src/types/subscriber";
 import downloadCsv from "src/utils/subscriberCsv";
 import SubscriberFiltersPopover from "src/components/subscribers/SubscriberFiltersPopover.vue";
 import SubscriberCard from "src/components/SubscriberCard.vue";
+import SubscriberDrawer from "src/components/subscribers/SubscriberDrawer.vue";
 
 const { t } = useI18n();
 
@@ -833,18 +769,39 @@ function formatDate(ts: number) {
 
 const drawer = ref(false);
 const current = ref<Subscriber | null>(null);
+const router = useRouter();
+
 function openDrawer(r: Subscriber) {
   current.value = r;
   drawer.value = true;
 }
-const $q = useQuasar();
-const router = useRouter();
 
-function copyNpub() {
-  if (!current.value) return;
-  $q.clipboard.writeText(current.value.npub);
-  $q.notify({ message: t("copied_to_clipboard"), color: "positive" });
-}
+const currentProfile = computed(() =>
+  current.value ? subStore.profileCache[current.value.npub] : undefined,
+);
+
+const currentSub = computed(() => {
+  const c = current.value;
+  if (!c) return null;
+  const total = c.totalPeriods ?? c.receivedPeriods;
+  const remaining = total - c.receivedPeriods;
+  return {
+    subscriptionId: c.id,
+    subscriberNpub: c.npub,
+    tierId: c.tierId,
+    tierName: c.tierName,
+    frequency: c.frequency,
+    intervalDays: c.intervalDays,
+    totalPeriods: c.totalPeriods ?? null,
+    receivedPeriods: c.receivedPeriods,
+    remainingPeriods: remaining,
+    totalAmount: c.lifetimeSat,
+    status: c.status === "pending" ? "pending" : "active",
+    nextRenewal: c.nextRenewal ?? null,
+    startDate: c.startDate,
+    endDate: null,
+  } as any;
+});
 
 function dmSubscriber() {
   if (!current.value) return;
@@ -853,24 +810,19 @@ function dmSubscriber() {
     query: { pubkey: current.value.npub },
   });
 }
-const payments = computed(() => {
-  const r = current.value;
-  if (!r) return [] as any[];
-  const interval =
-    r.frequency === "weekly" ? 7 : r.frequency === "biweekly" ? 14 : 30;
-  const last = (r.nextRenewal ?? r.startDate) - interval * 86400;
-  return [
-    { ts: last, amount: r.amountSat },
-    { ts: r.nextRenewal ?? r.startDate, amount: r.amountSat },
-  ];
-});
-const activity = computed(() => {
-  const r = current.value;
-  if (!r) return [] as any[];
-  const arr = [{ ts: r.startDate, text: "Started subscription" }];
-  if (r.nextRenewal) arr.push({ ts: r.nextRenewal, text: "Next renewal" });
-  return arr;
-});
+
+function openProfile() {
+  if (!current.value) return;
+  router.push({
+    name: "PublicCreatorProfile",
+    params: { npub: current.value.npub },
+  });
+}
+
+function cancelSubscriber() {
+  if (!current.value) return;
+  // Cancellation workflow placeholder
+}
 </script>
 
 <style scoped>
