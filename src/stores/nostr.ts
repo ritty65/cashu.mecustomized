@@ -127,7 +127,7 @@ async function secureGetItem(key: string): Promise<string | null> {
   try {
     return await decryptString(val);
   } catch (e) {
-    console.error("Failed to decrypt", e);
+    console.debug("[nostr] decrypt failed", e);
     return null;
   }
 }
