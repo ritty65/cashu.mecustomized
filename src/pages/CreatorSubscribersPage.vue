@@ -57,6 +57,7 @@
               color="red"
               :label="t('CreatorSubscribers.actions.retry')"
               :aria-label="t('CreatorSubscribers.actions.retry')"
+              data-testid="retry-btn"
               @click="retry"
             />
           </template>
@@ -98,6 +99,7 @@
             round
             icon="tune"
             class="q-ml-sm"
+            data-testid="open-filters-btn"
             @click.stop="openFilters()"
             :aria-label="t('CreatorSubscribers.actions.filters')"
           />
@@ -108,6 +110,7 @@
             :label="t('CreatorSubscribers.toolbar.exportCsv')"
             class="q-ml-sm"
             :aria-label="t('CreatorSubscribers.toolbar.exportCsv')"
+            data-testid="download-csv-btn"
             @click="downloadCsv()"
           />
         </div>
@@ -292,6 +295,7 @@
                 round
                 icon="chevron_right"
                 :aria-label="t('CreatorSubscribers.actions.openDetails')"
+                data-testid="drawer-btn"
                 @click="openDrawer(props.row)" /></q-td
           ></template>
         </q-table>
@@ -328,6 +332,7 @@
             icon="download"
             :label="t('CreatorSubscribers.actions.exportSelected')"
             :aria-label="t('CreatorSubscribers.actions.exportSelected')"
+            data-testid="export-selected-btn"
             @click="exportSelected"
           />
           <q-btn
@@ -336,6 +341,7 @@
             color="white"
             :label="t('CreatorSubscribers.actions.clear')"
             :aria-label="t('CreatorSubscribers.actions.clear')"
+            data-testid="clear-selected-btn"
             @click="clearSelected"
           />
         </div>

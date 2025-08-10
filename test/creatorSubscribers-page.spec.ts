@@ -53,6 +53,9 @@ vi.mock('src/stores/nostr', () => ({
 }));
 
 const { copyToClipboard } = await import('quasar');
+const downloadCsv = (await import('../src/utils/subscriberCsv')).default as vi.Mock;
+
+const showFilters = vi.fn();
 
 const stubs = {
   'q-page': { template: '<div><slot /></div>' },
@@ -64,15 +67,18 @@ const stubs = {
   'q-btn': {
     props: ['label', 'ariaLabel'],
     template:
-      '<button :data-label="label" :aria-label="ariaLabel" @click="$emit(\'click\')"><slot /></button>',
+      '<button v-bind="$attrs" :data-label="label" :aria-label="ariaLabel" @click="$emit(\'click\', $event)"><slot /></button>',
   },
-  SubscriberFiltersPopover: { template: '<div></div>' },
+  SubscriberFiltersPopover: { template: '<div></div>', methods: { show: showFilters } },
+  'q-table': { template: '<div><slot /></div>' },
+  'q-space': { template: '<span />' },
   SubscriberDrawer: {
     props: ['modelValue', 'sub', 'profile'],
     emits: ['update:modelValue', 'dm', 'openProfile', 'cancel'],
     template:
       '<div class="drawer" v-show="modelValue">\n' +
       '  <button class="dm-btn" @click="$emit(\'dm\')"></button>\n' +
+      '  <button class="profile-btn" @click="$emit(\'openProfile\')"></button>\n' +
       '  <button class="copy-npub-btn" @click="copy(sub.subscriberNpub || sub.npub)"></button>\n' +
       '  <button class="copy-ln-btn" v-if="profile?.lud16" @click="copy(profile.lud16)"></button>\n' +
       '</div>',
@@ -132,6 +138,56 @@ describe('CreatorSubscribersPage drawer', () => {
     (copyToClipboard as unknown as vi.Mock).mockClear();
     await wrapper.find('.copy-ln-btn').trigger('click');
     expect(copyToClipboard).toHaveBeenCalledWith('ln@addr');
+  });
+
+  it('navigates to public profile from drawer', async () => {
+    const { wrapper, store } = mountPage();
+    wrapper.vm.openDrawer(store.subscribers[0] as any);
+    await wrapper.vm.$nextTick();
+    routerPush.mockReset();
+    await wrapper.find('.profile-btn').trigger('click');
+    expect(routerPush).toHaveBeenCalledWith({
+      name: 'PublicCreatorProfile',
+      params: { npub: 'npubA' },
+    });
+  });
+});
+
+describe('CreatorSubscribersPage buttons', () => {
+  it('retries sync when retry button clicked', async () => {
+    const { wrapper, store } = mountPage();
+    store.error = 'fail';
+    store.sync = vi.fn();
+    store.fetchProfiles = vi.fn();
+    await wrapper.vm.$nextTick();
+    await wrapper.find('[data-testid="retry-btn"]').trigger('click');
+    expect(store.sync).toHaveBeenCalled();
+    expect(store.fetchProfiles).toHaveBeenCalled();
+  });
+
+  it('opens filters popover', async () => {
+    const { wrapper } = mountPage();
+    showFilters.mockClear();
+    await wrapper.find('[data-testid="open-filters-btn"]').trigger('click');
+    expect(showFilters).toHaveBeenCalled();
+  });
+
+  it('downloads CSV for all rows', async () => {
+    const { wrapper } = mountPage();
+    downloadCsv.mockClear();
+    await wrapper.find('[data-testid="download-csv-btn"]').trigger('click');
+    expect(downloadCsv).toHaveBeenCalled();
+  });
+
+  it('exports and clears selected', async () => {
+    const { wrapper, store } = mountPage();
+    downloadCsv.mockClear();
+    wrapper.vm.selected = [store.subscribers[0] as any];
+    await wrapper.vm.$nextTick();
+    await wrapper.find('[data-testid="export-selected-btn"]').trigger('click');
+    expect(downloadCsv).toHaveBeenCalledWith([store.subscribers[0]]);
+    await wrapper.find('[data-testid="clear-selected-btn"]').trigger('click');
+    expect(wrapper.vm.selected).toHaveLength(0);
   });
 });
 
