@@ -115,6 +115,13 @@ export default {
           caption: "Configuración de la billetera",
         },
       },
+      creatorHub: {
+        title: "Creator Hub",
+        creatorHub: {
+          title: "Creator Hub",
+          caption: "Manage your tiers & subscribers",
+        },
+      },
       terms: {
         title: "Términos",
         terms: {

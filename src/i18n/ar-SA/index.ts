@@ -114,6 +114,13 @@ export default {
           caption: "تهيئة المحفظة",
         },
       },
+      creatorHub: {
+        title: "Creator Hub",
+        creatorHub: {
+          title: "Creator Hub",
+          caption: "Manage your tiers & subscribers",
+        },
+      },
       terms: {
         title: "الشروط",
         terms: {

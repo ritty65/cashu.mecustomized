@@ -115,6 +115,13 @@ export default {
           caption: "การกำหนดค่า Wallet",
         },
       },
+      creatorHub: {
+        title: "Creator Hub",
+        creatorHub: {
+          title: "Creator Hub",
+          caption: "Manage your tiers & subscribers",
+        },
+      },
       terms: {
         title: "เงื่อนไข",
         terms: {

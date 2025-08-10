@@ -115,6 +115,13 @@ export default {
           caption: "ウォレット構成",
         },
       },
+      creatorHub: {
+        title: "Creator Hub",
+        creatorHub: {
+          title: "Creator Hub",
+          caption: "Manage your tiers & subscribers",
+        },
+      },
       terms: {
         title: "規約",
         terms: {

@@ -115,6 +115,13 @@ export default {
           caption: "Configuration du portefeuille",
         },
       },
+      creatorHub: {
+        title: "Creator Hub",
+        creatorHub: {
+          title: "Creator Hub",
+          caption: "Manage your tiers & subscribers",
+        },
+      },
       terms: {
         title: "Conditions",
         terms: {

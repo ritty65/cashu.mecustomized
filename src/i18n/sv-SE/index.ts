@@ -114,6 +114,13 @@ export default {
           caption: "Plånboksinställningar",
         },
       },
+      creatorHub: {
+        title: "Creator Hub",
+        creatorHub: {
+          title: "Creator Hub",
+          caption: "Manage your tiers & subscribers",
+        },
+      },
       terms: {
         title: "Villkor",
         terms: {
