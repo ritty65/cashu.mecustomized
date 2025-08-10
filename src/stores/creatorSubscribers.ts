@@ -1,105 +1,133 @@
 import { defineStore } from "pinia";
+import { liveQuery } from "dexie";
+import { cashuDb } from "./dexie";
+import { useNostrStore } from "./nostr";
+import { daysToFrequency } from "src/constants/subscriptionFrequency";
 import type { Subscriber, Frequency, SubStatus } from "../types/subscriber";
 
 type Tab = "all" | Frequency | "pending" | "ended";
 
 export type SortOption = "next" | "first" | "amount";
 
-const mockSubscribers: Subscriber[] = [
-  {
-    id: "1",
-    name: "Alice",
-    npub: "npub1alice",
-    nip05: "alice@example.com",
-    tierId: "t1",
-    tierName: "Bronze",
-    amountSat: 1000,
-    frequency: "weekly",
-    status: "active",
-    startDate: 1700000000,
-    nextRenewal: 1700000000 + 7 * 86400,
-    lifetimeSat: 5000,
-  },
-  {
-    id: "2",
-    name: "Bob",
-    npub: "npub1bob",
-    nip05: "bob@example.com",
-    tierId: "t1",
-    tierName: "Bronze",
-    amountSat: 1000,
-    frequency: "weekly",
-    status: "pending",
-    startDate: 1700001000,
-    nextRenewal: 1700001000 + 7 * 86400,
-    lifetimeSat: 1000,
-  },
-  {
-    id: "3",
-    name: "Carol",
-    npub: "npub1carol",
-    nip05: "carol@example.com",
-    tierId: "t2",
-    tierName: "Silver",
-    amountSat: 2000,
-    frequency: "biweekly",
-    status: "active",
-    startDate: 1700002000,
-    nextRenewal: 1700002000 + 14 * 86400,
-    lifetimeSat: 4000,
-  },
-  {
-    id: "4",
-    name: "Dave",
-    npub: "npub1dave",
-    nip05: "dave@example.com",
-    tierId: "t2",
-    tierName: "Silver",
-    amountSat: 2000,
-    frequency: "biweekly",
-    status: "ended",
-    startDate: 1690000000,
-    lifetimeSat: 2000,
-  },
-  {
-    id: "5",
-    name: "Eve",
-    npub: "npub1eve",
-    nip05: "eve@example.com",
-    tierId: "t3",
-    tierName: "Gold",
-    amountSat: 5000,
-    frequency: "monthly",
-    status: "active",
-    startDate: 1700003000,
-    nextRenewal: 1700003000 + 30 * 86400,
-    lifetimeSat: 10000,
-  },
-  {
-    id: "6",
-    name: "Frank",
-    npub: "npub1frank",
-    nip05: "frank@example.com",
-    tierId: "t3",
-    tierName: "Gold",
-    amountSat: 5000,
-    frequency: "monthly",
-    status: "pending",
-    startDate: 1700004000,
-    nextRenewal: 1700004000 + 30 * 86400,
-    lifetimeSat: 5000,
-  },
-];
-
 export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
-  state: () => ({
-    subscribers: mockSubscribers as Subscriber[],
-    query: "",
-    activeTab: "all" as Tab,
-    statuses: new Set<SubStatus>(),
-    tiers: new Set<string>(),
-    sort: "next" as SortOption,
-  }),
+  state: () => {
+    const state = {
+      subscribers: [] as Subscriber[],
+      query: "",
+      activeTab: "all" as Tab,
+      statuses: new Set<SubStatus>(),
+      tiers: new Set<string>(),
+      sort: "next" as SortOption,
+    };
+
+    const nostr = useNostrStore();
+
+    liveQuery(() =>
+      cashuDb.lockedTokens
+        .where("owner")
+        .equals("creator")
+        .and((t) => !!t.subscriptionId)
+        .toArray()
+    ).subscribe({
+      next: async (rows) => {
+        const map = new Map<
+          string,
+          {
+            id: string;
+            npub: string;
+            tierId: string;
+            tierName: string;
+            amountSat: number;
+            frequency: Frequency;
+            startDate: number;
+            lastUnlock: number;
+            intervalDays: number;
+            statusSet: Set<string>;
+            lifetimeSat: number;
+          }
+        >();
+
+        for (const row of rows) {
+          const id = row.subscriptionId!;
+          const intervalDays = row.intervalDays ?? 30;
+          let sub = map.get(id);
+          if (!sub) {
+            sub = {
+              id,
+              npub: row.subscriberNpub || "",
+              tierId: row.tierId,
+              tierName: row.tierName || "",
+              amountSat: row.amount,
+              frequency: daysToFrequency(intervalDays),
+              startDate: row.unlockTs ?? 0,
+              lastUnlock: row.unlockTs ?? 0,
+              intervalDays,
+              statusSet: new Set([row.status]),
+              lifetimeSat: row.amount,
+            };
+            map.set(id, sub);
+          } else {
+            sub.lifetimeSat += row.amount;
+            sub.statusSet.add(row.status);
+            if (row.unlockTs != null) {
+              if (row.unlockTs < sub.startDate) sub.startDate = row.unlockTs;
+              if (row.unlockTs > sub.lastUnlock) sub.lastUnlock = row.unlockTs;
+            }
+          }
+        }
+
+        const arr: Subscriber[] = [];
+        for (const sub of map.values()) {
+          let status: SubStatus;
+          if (
+            [...sub.statusSet].every((s) => s === "claimed" || s === "expired")
+          ) {
+            status = "ended";
+          } else if (sub.statusSet.has("pending")) {
+            status = "pending";
+          } else {
+            status = "active";
+          }
+          const periodSeconds = sub.intervalDays * 86400;
+          const nextRenewal =
+            status === "ended" ? undefined : sub.lastUnlock + periodSeconds;
+          arr.push({
+            id: sub.id,
+            name: sub.npub,
+            npub: sub.npub,
+            nip05: "",
+            tierId: sub.tierId,
+            tierName: sub.tierName,
+            amountSat: sub.amountSat,
+            frequency: sub.frequency,
+            status,
+            startDate: sub.startDate,
+            nextRenewal,
+            lifetimeSat: sub.lifetimeSat,
+          });
+        }
+
+        await Promise.all(
+          arr.map(async (sub) => {
+            try {
+              const profile = await nostr.getProfile(sub.npub);
+              if (profile) {
+                sub.name = profile.display_name || profile.name || sub.npub;
+                sub.nip05 = profile.nip05 || "";
+              }
+            } catch {
+              /* ignore */
+            }
+          })
+        );
+
+        state.subscribers = arr;
+      },
+      error: (err) => console.error(err),
+    });
+
+    return state;
+  },
   getters: {
     filtered(state): Subscriber[] {
       // accessing the active tab here ensures this getter recomputes whenever
@@ -210,3 +238,4 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
 });
 
 export type { Subscriber } from "../types/subscriber";
+

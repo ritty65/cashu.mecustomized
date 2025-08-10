@@ -27,7 +27,10 @@ vi.mock('chart.js', () => {
   };
 });
 
-vi.mock('@vueuse/core', () => ({ useDebounceFn: (fn: any) => fn }));
+vi.mock('@vueuse/core', async (importOriginal) => {
+  const actual = await importOriginal();
+  return { ...actual, useDebounceFn: (fn: any) => fn };
+});
 vi.mock('quasar', async (importOriginal) => {
   const actual = await importOriginal();
   return {
@@ -38,9 +41,26 @@ vi.mock('quasar', async (importOriginal) => {
 });
 vi.mock('src/utils/subscriberCsv', () => ({ default: vi.fn() }));
 
+const profiles: Record<string, any> = {
+  npub1alice: { name: 'Alice', nip05: 'alice@example.com' },
+  npub1bob: { name: 'Bob', nip05: 'bob@example.com' },
+  npub1carol: { name: 'Carol', nip05: 'carol@example.com' },
+  npub1dave: { name: 'Dave', nip05: 'dave@example.com' },
+  npub1eve: { name: 'Eve', nip05: 'eve@example.com' },
+  npub1frank: { name: 'Frank', nip05: 'frank@example.com' },
+};
+
+vi.mock('src/stores/nostr', () => ({
+  useNostrStore: () => ({
+    getProfile: vi.fn(async (npub: string) => profiles[npub] || null),
+  }),
+}));
+
 import downloadCsv from 'src/utils/subscriberCsv';
 import CreatorSubscribersPage from '../src/pages/CreatorSubscribersPage.vue';
 import { useCreatorSubscribersStore } from '../src/stores/creatorSubscribers';
+import { cashuDb } from '../src/stores/dexie';
+import { watch } from 'vue';
 
 const stubs = {
   'q-page': { template: '<div><slot /></div>' },
@@ -79,24 +99,135 @@ const stubs = {
   'q-space': { template: '<span class="q-space"></span>' },
 };
 
-function mountPage() {
-  return mount(CreatorSubscribersPage, {
+const lockedTokens = [
+  // Alice - active weekly, lifetime 5000
+  ...Array.from({ length: 5 }).map((_, i) => ({
+    id: `a${i}`,
+    tokenString: 't',
+    amount: 1000,
+    owner: 'creator',
+    subscriberNpub: 'npub1alice',
+    tierId: 't1',
+    tierName: 'Bronze',
+    unlockTs: 1700000000,
+    status: i === 4 ? 'unlockable' : 'claimed',
+    subscriptionId: '1',
+    frequency: 'weekly',
+    intervalDays: 7,
+  })),
+  // Bob - pending weekly
+  {
+    id: 'b1',
+    tokenString: 't',
+    amount: 1000,
+    owner: 'creator',
+    subscriberNpub: 'npub1bob',
+    tierId: 't1',
+    tierName: 'Bronze',
+    unlockTs: 1700001000,
+    status: 'pending',
+    subscriptionId: '2',
+    frequency: 'weekly',
+    intervalDays: 7,
+  },
+  // Carol - active biweekly, lifetime 4000
+  ...Array.from({ length: 2 }).map((_, i) => ({
+    id: `c${i}`,
+    tokenString: 't',
+    amount: 2000,
+    owner: 'creator',
+    subscriberNpub: 'npub1carol',
+    tierId: 't2',
+    tierName: 'Silver',
+    unlockTs: 1700002000,
+    status: i === 1 ? 'unlockable' : 'claimed',
+    subscriptionId: '3',
+    frequency: 'biweekly',
+    intervalDays: 14,
+  })),
+  // Dave - ended biweekly
+  {
+    id: 'd1',
+    tokenString: 't',
+    amount: 2000,
+    owner: 'creator',
+    subscriberNpub: 'npub1dave',
+    tierId: 't2',
+    tierName: 'Silver',
+    unlockTs: 1690000000,
+    status: 'claimed',
+    subscriptionId: '4',
+    frequency: 'biweekly',
+    intervalDays: 14,
+  },
+  // Eve - active monthly, lifetime 10000
+  ...Array.from({ length: 2 }).map((_, i) => ({
+    id: `e${i}`,
+    tokenString: 't',
+    amount: 5000,
+    owner: 'creator',
+    subscriberNpub: 'npub1eve',
+    tierId: 't3',
+    tierName: 'Gold',
+    unlockTs: 1700003000,
+    status: i === 1 ? 'unlockable' : 'claimed',
+    subscriptionId: '5',
+    frequency: 'monthly',
+    intervalDays: 30,
+  })),
+  // Frank - pending monthly
+  {
+    id: 'f1',
+    tokenString: 't',
+    amount: 5000,
+    owner: 'creator',
+    subscriberNpub: 'npub1frank',
+    tierId: 't3',
+    tierName: 'Gold',
+    unlockTs: 1700004000,
+    status: 'pending',
+    subscriptionId: '6',
+    frequency: 'monthly',
+    intervalDays: 30,
+  },
+];
+
+beforeEach(async () => {
+  await cashuDb.lockedTokens.clear();
+  await cashuDb.lockedTokens.bulkAdd(lockedTokens as any);
+});
+
+async function mountPage() {
+  const wrapper = mount(CreatorSubscribersPage, {
     global: {
       plugins: [createTestingPinia({ createSpy: vi.fn, stubActions: false })],
       stubs,
     },
   });
+  const store = useCreatorSubscribersStore(wrapper.vm.$pinia);
+  await new Promise((resolve) => {
+    const stop = watch(
+      () => store.subscribers.length,
+      (n) => {
+        if (n > 0) {
+          stop();
+          resolve(null);
+        }
+      }
+    );
+  });
+  return wrapper;
 }
 
 describe('CreatorSubscribersPage', () => {
-  it('shows correct tab counts', () => {
-    const wrapper = mountPage();
+  it('shows correct tab counts', async () => {
+    const wrapper = await mountPage();
     const badges = wrapper.findAll('.q-badge');
     expect(badges.map((b) => b.text())).toEqual(['6', '2', '2', '2', '2', '1']);
   });
 
   it('filters by search, status and tier', async () => {
-    const wrapper = mountPage();
+    const wrapper = await mountPage();
     const store = useCreatorSubscribersStore(wrapper.vm.$pinia);
     const rows = () => wrapper.findAll('.tbody-row').map((r) => r.text());
 
@@ -117,7 +248,7 @@ describe('CreatorSubscribersPage', () => {
   });
 
   it('sorts subscribers', async () => {
-    const wrapper = mountPage();
+    const wrapper = await mountPage();
     const store = useCreatorSubscribersStore(wrapper.vm.$pinia);
     const rows = () => wrapper.findAll('.tbody-row').map((r) => r.text());
 
@@ -130,9 +261,9 @@ describe('CreatorSubscribersPage', () => {
     expect(rows()[0]).toBe('Eve');
   });
 
-  it('computes progress and dueSoon correctly', () => {
+  it('computes progress and dueSoon correctly', async () => {
     vi.useFakeTimers();
-    const wrapper = mountPage();
+    const wrapper = await mountPage();
     const store = useCreatorSubscribersStore(wrapper.vm.$pinia);
     const alice = store.subscribers[0];
     const start = alice.nextRenewal! * 1000 - 7 * 86400000;
@@ -149,7 +280,7 @@ describe('CreatorSubscribersPage', () => {
   });
 
   it('exports all or selected rows to CSV', async () => {
-    const wrapper = mountPage();
+    const wrapper = await mountPage();
     const store = useCreatorSubscribersStore();
     (downloadCsv as unknown as vi.Mock).mockClear();
 
@@ -166,7 +297,7 @@ describe('CreatorSubscribersPage', () => {
   it('updates KPI numbers when searching, switching tabs and applying filters', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date(1700000000000));
-    const wrapper = mountPage();
+    const wrapper = await mountPage();
     await wrapper.vm.$nextTick();
     const store = useCreatorSubscribersStore(wrapper.vm.$pinia);
 
@@ -202,7 +333,7 @@ describe('CreatorSubscribersPage', () => {
   it('updates charts without re-instantiating on filter and period changes', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date(1700000000000));
-    const wrapper = mountPage();
+    const wrapper = await mountPage();
     await wrapper.vm.$nextTick();
     await wrapper.vm.$nextTick();
 
