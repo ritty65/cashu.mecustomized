@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import type { Subscriber, Frequency, SubStatus } from "../types/subscriber";
-import type { ISubscribersSource } from "src/data/subscribersSource";
+import type { ISubscribersSource, Payment } from "src/data/subscribersSource";
 import { HttpSubscribersSource } from "src/data/httpSubscribersSource";
 import { DexieSubscribersSource } from "src/data/dexieSubscribersSource";
 
@@ -16,12 +16,16 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
     statuses: new Set<SubStatus>(),
     tiers: new Set<string>(),
     sort: "next" as SortOption,
+    dueSoonOnly: false,
     source: null as ISubscribersSource | null,
     sourceKind: 'auto' as 'dexie' | 'http' | 'auto',
     usedFallback: false,
     hydrated: false,
     loading: false,
     error: null as string | null,
+    paymentsCache: {} as Record<string, Payment[]>,
+    notes: JSON.parse(localStorage.getItem('cs_notes') || '{}') as Record<string,string>,
+    lastHydratedAt: 0,
   }),
   getters: {
     filtered(state): Subscriber[] {
@@ -60,6 +64,10 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
           break;
         default:
           break;
+      }
+
+      if (state.dueSoonOnly) {
+        arr = arr.filter(dueSoon);
       }
 
       arr.sort((a, b) => {
@@ -110,6 +118,13 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
         pending: arr.filter((s) => s.status === "pending").length,
         ended: arr.filter((s) => s.status === "ended").length,
       };
+    },
+    quickCountsByStatus(state) {
+      const counts = { active: 0, pending: 0, ended: 0 };
+      state.subscribers.forEach((s) => {
+        counts[s.status]++;
+      });
+      return counts;
     },
     sourceKindEffective(state): 'dexie' | 'http' {
       return state.sourceKind === 'auto'
@@ -168,6 +183,7 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
         const rows = await this.source!.listByCreator(creatorNpub);
         this.subscribers = rows;
         this.hydrated = true;
+        this.lastHydratedAt = Date.now();
       } catch (e: any) {
         this.error = String(e?.message || e);
       } finally {
@@ -175,8 +191,11 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
       }
     },
     async fetchPayments(npub: string) {
+      if (this.paymentsCache[npub]) return this.paymentsCache[npub];
       if (!this.source?.paymentsBySubscriber) return [];
-      return await this.source.paymentsBySubscriber(npub);
+      const list = await this.source.paymentsBySubscriber(npub);
+      this.paymentsCache[npub] = list;
+      return list;
     },
     setActiveTab(tab: Tab) {
       this.activeTab = tab;
@@ -184,17 +203,28 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
     setQuery(q: string) {
       this.query = q;
     },
-    applyFilters(opts: { statuses: Set<SubStatus>; tiers: Set<string>; sort: SortOption }) {
+    applyFilters(opts: { statuses: Set<SubStatus>; tiers: Set<string>; sort: SortOption; dueSoonOnly: boolean }) {
       this.statuses = new Set(opts.statuses);
       this.tiers = new Set(opts.tiers);
       this.sort = opts.sort;
+      this.dueSoonOnly = opts.dueSoonOnly;
     },
     clearFilters() {
       this.statuses.clear();
       this.tiers.clear();
       this.sort = "next";
+      this.dueSoonOnly = false;
+    },
+    setNote(npub: string, text: string) {
+      this.notes[npub] = text;
+      localStorage.setItem('cs_notes', JSON.stringify(this.notes));
     },
   },
 });
+
+function dueSoon(r: Subscriber) {
+  if (!r.nextRenewal || r.status !== 'active') return false;
+  return r.nextRenewal * 1000 - Date.now() < 72 * 3600 * 1000;
+}
 
 export type { Subscriber } from "../types/subscriber";
