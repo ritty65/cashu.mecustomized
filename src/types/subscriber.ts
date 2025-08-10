@@ -15,6 +15,4 @@ export interface Subscriber {
   startDate: number;
   nextRenewal?: number;
   lifetimeSat: number;
-  tier?: string;
-  joinedAt?: number | string;
 }
