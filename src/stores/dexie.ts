@@ -8,6 +8,7 @@ import { useProofsStore } from "./proofs";
 import { notifyError, notifySuccess } from "../js/notify";
 import type { NostrEvent } from "@nostr-dev-kit/ndk";
 import { frequencyToDays } from "src/constants/subscriptionFrequency";
+import type { Subscriber } from "src/types/subscriber";
 
 export interface CachedProfileDexie {
   pubkey: string;
@@ -106,6 +107,7 @@ export class CashuDexie extends Dexie {
   creatorsTierDefinitions!: Table<CreatorTierDefinition, string>;
   subscriptions!: Table<Subscription, string>;
   lockedTokens!: Table<LockedToken, string>;
+  subscribers!: Table<Subscriber, string>;
 
   constructor() {
     super("cashuDatabase");
@@ -533,9 +535,21 @@ export class CashuDexie extends Dexie {
               delete i.receivedMonths;
             });
             delete (entry as any).totalMonths;
-            delete (entry as any).receivedMonths;
-          });
+          delete (entry as any).receivedMonths;
+        });
       });
+
+    this.version(22).stores({
+      proofs:
+        "secret, id, C, amount, reserved, quote, bucketId, label, description",
+      profiles: "pubkey",
+      creatorsTierDefinitions: "&creatorNpub, eventId, updatedAt",
+      subscriptions:
+        "&id, creatorNpub, tierId, status, createdAt, updatedAt, frequency, intervalDays",
+      lockedTokens:
+        "&id, tokenString, owner, tierId, intervalKey, unlockTs, status, subscriptionEventId, subscriptionId, monthIndex, totalPeriods, autoRedeem, frequency, intervalDays",
+      subscribers: "id,npub,tierId,startDate",
+    });
   }
 }
 
