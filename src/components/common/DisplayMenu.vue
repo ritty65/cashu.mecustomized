@@ -3,6 +3,7 @@
     :flat="flat"
     :icon="icon"
     :label="label"
+    :aria-label="label"
     dense
   >
     <q-list class="display-menu" style="min-width: 200px">
@@ -124,7 +125,7 @@ const densityOptions = [
 
 <style scoped>
 .column-item:focus-visible {
-  outline: 2px solid var(--q-primary);
+  outline: 2px solid var(--q-accent);
   outline-offset: 2px;
 }
 </style>

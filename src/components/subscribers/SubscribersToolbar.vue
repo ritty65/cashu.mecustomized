@@ -26,6 +26,7 @@
           outlined
           debounce="250"
           placeholder="Search"
+          aria-label="Search subscribers"
         />
         <FilterChips :filters="filters" />
       </div>
@@ -47,6 +48,7 @@
           color="primary"
           icon="download"
           label="Export"
+          aria-label="Export subscribers"
           @click="emit('export')"
         />
       </div>

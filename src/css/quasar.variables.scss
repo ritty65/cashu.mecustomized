@@ -16,10 +16,10 @@
 
 $primary: $primary-pink;
 $secondary: $primary-navy;
-$accent: $accent-green;
+$accent: $accent-purple;
 
-$dark: $primary-navy;
-$dark-page: $primary-navy;
+$dark: $surface-dark;
+$dark-page: $surface-dark;
 
 $positive: #21ba45;
 $negative: #c10015;
@@ -28,15 +28,15 @@ $warning: #f2c037;
 
 // Custom variables
 // Panel backgrounds
-$panel-dark: $grey-9;
+$panel-dark: $card-dark;
 $panel-light: $grey-2;
 
 // Subtle border colors
-$subtle-border-dark: $border-subtle-dark;
+$subtle-border-dark: $divider-dark;
 $subtle-border-light: $border-subtle-light;
 
 // Chip colors
-$chip-bg: $accent-green;
+$chip-bg: $accent-purple;
 $chip-text: #ffffff;
 
 // Progress ring colors

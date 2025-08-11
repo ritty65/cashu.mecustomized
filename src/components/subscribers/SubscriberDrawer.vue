@@ -8,6 +8,7 @@
     :width="448"
     v-focus-trap
     class="subscriber-drawer column no-wrap"
+    aria-label="Subscriber details"
     @keydown.esc.prevent="close"
   >
     <div class="drawer-header">
