@@ -249,7 +249,7 @@ body.body--light {
 }
 
 .accent-purple {
-  background-color: #7e22ce !important;
+  background-color: var(--q-accent) !important;
   color: #ffffff !important;
 }
 
@@ -343,6 +343,7 @@ body.body--dark .received {
 
 /* Accessible focus outlines */
 .q-toolbar .q-btn:focus-visible,
+.q-toolbar .q-field:focus-within,
 .q-drawer .q-btn:focus-visible,
 .q-chip:focus-visible {
   outline: 2px solid var(--q-accent);
