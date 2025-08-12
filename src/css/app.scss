@@ -1,6 +1,7 @@
 // app global css in SCSS form
 @import "tokens.scss";
-
+@import "creator-hub.scss";
+@import "toolbar.scss";
 // Use Inter if installed locally and fall back to system fonts
 body {
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
@@ -102,6 +103,17 @@ body,
   --bucket-text-light: #000000;
   --bucket-accent-dark: #ec4899;
   --bucket-accent-light: #ec4899;
+  --chip-bg-dark: var(--q-color-grey-8);
+  --chip-bg-light: var(--q-color-grey-3);
+  --chip-text-dark: #ffffff;
+  --chip-text-light: #111827;
+  --progress-ring-fill-dark: var(--q-color-primary);
+  --progress-ring-fill-light: var(--q-color-primary);
+  --progress-ring-track-dark: var(--q-color-grey-8);
+  --progress-ring-track-light: var(--q-color-grey-3);
+  --due-soon-bg-dark: color-mix(in srgb, var(--q-warning) 30%, transparent);
+  --due-soon-bg-light: color-mix(in srgb, var(--q-warning) 15%, transparent);
+  --border-subtle: 1px solid var(--border-subtle-light);
 }
 
 body.body--dark {
@@ -115,6 +127,12 @@ body.body--dark {
   --bucket-background: var(--bucket-bg-dark);
   --bucket-text-color: var(--bucket-text-dark);
   --bucket-accent: var(--bucket-accent-dark);
+  --border-subtle: 1px solid var(--border-subtle-dark);
+  --chip-bg: var(--chip-bg-dark);
+  --chip-text: var(--chip-text-dark);
+  --progress-ring-fill: var(--progress-ring-fill-dark);
+  --progress-ring-track: var(--progress-ring-track-dark);
+  --due-soon-bg: var(--due-soon-bg-dark);
 }
 
 body.body--light {
@@ -128,6 +146,82 @@ body.body--light {
   --bucket-background: var(--bucket-bg-light);
   --bucket-text-color: var(--bucket-text-light);
   --bucket-accent: var(--bucket-accent-light);
+  --border-subtle: 1px solid var(--border-subtle-light);
+  --chip-bg: var(--chip-bg-light);
+  --chip-text: var(--chip-text-light);
+  --progress-ring-fill: var(--progress-ring-fill-light);
+  --progress-ring-track: var(--progress-ring-track-light);
+  --due-soon-bg: var(--due-soon-bg-light);
+}
+
+/* Utility components */
+.panel-container {
+  background-color: var(--panel-bg-color);
+  border: var(--border-subtle);
+  border-width: 2px;
+  border-radius: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 8px;
+  border-radius: 9999px;
+  font-size: 14px;
+  line-height: 24px;
+}
+
+.chip-outline {
+  @extend .chip;
+  border: var(--border-subtle);
+  background-color: transparent;
+  color: var(--chip-text);
+}
+
+.chip-solid {
+  @extend .chip;
+  background-color: var(--chip-bg);
+  color: var(--chip-text);
+  border: none;
+}
+
+.chip-filled {
+  @extend .chip-solid;
+}
+
+.progress-ring {
+  --progress: 0;
+  --size: 40px;
+  --thickness: 4px;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  position: relative;
+  display: grid;
+  place-items: center;
+  font-size: 0.65rem;
+  background: conic-gradient(
+    var(--progress-ring-fill) calc(var(--progress) * 1%),
+    var(--progress-ring-track) 0
+  );
+}
+
+.progress-ring::before {
+  content: "";
+  position: absolute;
+  inset: var(--thickness);
+  background: var(--panel-bg-color);
+  border-radius: inherit;
+}
+
+.progress-ring::after {
+  content: attr(data-label);
+  position: relative;
+}
+
+.due-soon {
+  background-color: var(--due-soon-bg);
 }
 
 /* utility background classes */
@@ -214,4 +308,20 @@ body.body--dark .received {
   border-top: 4px solid #db2777; // Default to pink accent
   width: 100%;
   max-width: 500px;
+}
+
+.density--compact .q-tr {
+  padding: 0.25rem 0;
+  font-size: 0.85rem;
+}
+
+.density--comfortable .q-tr {
+  padding: 0.5rem 0;
+  font-size: 1rem;
+}
+
+.subscriber-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1.5rem;
 }

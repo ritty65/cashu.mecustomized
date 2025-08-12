@@ -2,7 +2,7 @@ import { debug } from "src/js/logger";
 import { defineStore } from "pinia";
 import Dexie, { Table } from "dexie";
 import { useLocalStorage } from "@vueuse/core";
-import { WalletProof } from "./mints";
+import type { WalletProof } from "src/types/proofs";
 import { useStorageStore } from "./storage";
 import { useProofsStore } from "./proofs";
 import { notifyError, notifySuccess } from "../js/notify";
@@ -91,6 +91,17 @@ export interface LockedToken {
   htlcSecret?: string | null;
 }
 
+export interface SubscriberView {
+  id: string;
+  name: string;
+  state: Record<string, unknown>;
+}
+
+export interface SubscriberViewPref {
+  id: string;
+  activeViewId: string | null;
+}
+
 // export interface Proof {
 //   id: string
 //   C: string
@@ -106,6 +117,8 @@ export class CashuDexie extends Dexie {
   creatorsTierDefinitions!: Table<CreatorTierDefinition, string>;
   subscriptions!: Table<Subscription, string>;
   lockedTokens!: Table<LockedToken, string>;
+  subscriberViews!: Table<SubscriberView, string>;
+  subscriberViewPrefs!: Table<SubscriberViewPref, string>;
 
   constructor() {
     super("cashuDatabase");
@@ -535,6 +548,52 @@ export class CashuDexie extends Dexie {
             delete (entry as any).totalMonths;
             delete (entry as any).receivedMonths;
           });
+      });
+
+    this.version(22).stores({
+      proofs:
+        "secret, id, C, amount, reserved, quote, bucketId, label, description",
+      profiles: "pubkey",
+      creatorsTierDefinitions: "&creatorNpub, eventId, updatedAt",
+      subscriptions:
+        "&id, creatorNpub, tierId, status, createdAt, updatedAt, frequency, intervalDays",
+      lockedTokens:
+        "&id, tokenString, owner, tierId, intervalKey, unlockTs, status, subscriptionEventId, subscriptionId, monthIndex, totalPeriods, autoRedeem, frequency, intervalDays",
+      subscriberViews: "&name",
+    });
+
+    this.version(23)
+      .stores({
+        proofs:
+          "secret, id, C, amount, reserved, quote, bucketId, label, description",
+        profiles: "pubkey",
+        creatorsTierDefinitions: "&creatorNpub, eventId, updatedAt",
+        subscriptions:
+          "&id, creatorNpub, tierId, status, createdAt, updatedAt, frequency, intervalDays",
+        lockedTokens:
+          "&id, tokenString, owner, tierId, intervalKey, unlockTs, status, subscriptionEventId, subscriptionId, monthIndex, totalPeriods, autoRedeem, frequency, intervalDays",
+        subscriberViews: "&id, name",
+        subscriberViewPrefs: "&id",
+      })
+      .upgrade(async (tx) => {
+        const oldViews = await tx.table("subscriberViews").toArray();
+        await tx.table("subscriberViews").clear();
+        await tx.table("subscriberViews").bulkAdd(
+          oldViews.map((v: any) => ({
+            id: v.name,
+            name: v.name,
+            state: {
+              query: v.query,
+              status: v.status,
+              freq: v.freq,
+              tier: v.tier,
+              sort: v.sort,
+              visibleColumns: v.visibleColumns,
+              density: v.density,
+              viewMode: v.viewMode,
+            },
+          }))
+        );
       });
   }
 }

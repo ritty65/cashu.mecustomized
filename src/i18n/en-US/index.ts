@@ -128,10 +128,7 @@ export const messages = {
       },
       creatorHub: {
         title: "Creator Hub",
-        creatorHub: {
-          title: "Creator Hub",
-          caption: "Manage your tiers",
-        },
+        
       },
       myProfile: {
         title: "My Profile",
@@ -1648,18 +1645,25 @@ export const messages = {
     },
     filters: {
       frequency: "Filter by frequency",
+      status: "Status",
+      tier: "Tier",
+      sort: "Sort",
+      clear: "Clear",
+      apply: "Apply",
+      sortOptions: {
+        next: "Next renewal",
+        first: "First seen",
+        amount: "Lifetime sats",
+      },
     },
     columns: {
       subscriber: "Subscriber",
       tier: "Tier",
-      followers: "Followers",
-      following: "Following",
-      latestNote: "Latest note",
-      start: "Start",
-      nextRenewal: "Next renewal",
-      months: "Periods",
-      remaining: "Remaining",
+      frequency: "Freq",
       status: "Status",
+      amount: "Amount",
+      nextRenewal: "Next renewal",
+      lifetime: "Lifetime",
       actions: "Actions",
     },
     frequency: {
@@ -1674,10 +1678,27 @@ export const messages = {
       sendGroupMessage: "Send Group DM",
       exportSelected: "Export selected",
       filters: "Filters",
+      retry: "Retry",
+      clear: "Clear",
+      openDetails: "Open details",
+    },
+    toolbar: {
+      searchPlaceholder: "Search",
+      frequency: "Frequency",
+      status: "Status",
+      tier: "Tier",
+      sort: "Sort",
+      tableView: "Table view",
+      cardView: "Card view",
+      comfortable: "Comfortable",
+      compact: "Compact",
+      exportCsv: "Export CSV",
     },
     status: {
+      any: "Any",
       active: "Active",
       pending: "Pending",
+      ended: "Ended",
     },
     summary: {
       subscribers: "Subscribers",
@@ -1685,7 +1706,29 @@ export const messages = {
       pending: "Pending",
       receivedPeriods: "Received periods",
       revenue: "Revenue",
+      lifetimeRevenue: "Lifetime revenue",
+      thisPeriod: "This period",
+      thisWeek: "this week",
       thisMonth: "this month",
+      nextWeek: "Next week",
+      nextMonth: "Next month",
+    },
+    charts: {
+      frequency: "Frequency",
+      status: "Status",
+      newSubs: "New subs",
+      revenueOverTime: "Revenue over time",
+      frequencyMix: "Frequency mix",
+      statusByFrequency: "Status by frequency",
+      revenueSummary: "Total revenue {total} sat",
+      frequencySummary:
+        "Weekly: {weekly}, Bi-weekly: {biweekly}, Monthly: {monthly}",
+      statusSummary:
+        "Weekly - Active {weeklyActive}, Pending {weeklyPending}, Ended {weeklyEnded}; Bi-weekly - Active {biweeklyActive}, Pending {biweeklyPending}, Ended {biweeklyEnded}; Monthly - Active {monthlyActive}, Pending {monthlyPending}, Ended {monthlyEnded}",
+    },
+    renewalProgress: "Renewal progress",
+    tabs: {
+      all: "All",
     },
     periodsText: "{received} of {total} periods",
     periodsTooltip: "Periods received vs periods purchased",
@@ -1704,6 +1747,33 @@ export const messages = {
       export_success: "Subscribers exported",
       export_failed: "Failed to export subscribers",
       dm_not_ready: "Messenger not ready",
+    },
+    drawer: {
+      tabs: {
+        overview: "Overview",
+        payments: "Payments",
+        notes: "Notes",
+      },
+      overview: {
+        nip05: "nip05",
+        lud16: "lud16",
+        about: "about",
+        nextRenewal: "Next renewal",
+        amountPerInterval: "Amount / interval",
+        lifetimeTotal: "Lifetime total",
+        since: "Since",
+      },
+      actions: {
+        dm: "DM",
+        copyNpub: "Copy npub",
+        copyLud16: "Copy lud16",
+        openProfile: "Profile",
+        cancel: "Cancel",
+      },
+      payments: {
+        noPayments: "No payments",
+      },
+      activity: "Activity",
     },
   },
   restore: {
@@ -1757,11 +1827,7 @@ export const messages = {
       edit: "Edit",
     },
   },
-  creatorHub: {
-    publish: "Publish Profile",
-    profileHeader: "Profile details",
-    endpointsHeader: "Endpoints",
-  },
+  
   swap: {
     in_progress_warning_text: "Swap in progress",
     invalid_swap_data_error_text: "Invalid swap data",
@@ -1800,10 +1866,7 @@ export const messages = {
         description: "Discover creators to support.",
         icon: "img:icons/find-creators.svg",
       },
-      creatorHub: {
-        description: "Set up and manage your creator profile.",
-        icon: "img:icons/creator-hub.svg",
-      },
+      
       myProfile: {
         description: "View and edit your profile.",
         icon: "person",
@@ -1868,11 +1931,7 @@ export const messages = {
           creator:
             "Your public storefront as seen by visitors. Great for a quick audit of how your profile appears worldwide.",
         },
-        creatorHub: {
-          fan: "— (hidden unless you toggle “Creator Mode”)",
-          creator:
-            "Define or edit tiers (price, duration, perks), upload cover art, publish pay-walled posts, check revenue analytics and subscriber list.",
-        },
+        
         myProfile: {
           fan: "Show off your avatar, npub link and optional NIP-05. Personal stats: total zaps sent & received, bucket balances.",
           creator:

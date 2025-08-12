@@ -15,11 +15,12 @@ import {
 } from "../js/notify";
 import { Proof } from "@cashu/cashu-ts";
 import token from "../js/token";
-import { WalletProof, useMintsStore } from "./mints";
+import { useMintsStore } from "./mints";
+import type { WalletProof } from "src/types/proofs";
 import { useTokensStore } from "../stores/tokens";
 import { useNostrStore } from "../stores/nostr";
 import { useNdk } from "src/composables/useNdk";
-import { DEFAULT_BUCKET_ID } from "./buckets";
+import { DEFAULT_BUCKET_ID } from "@/constants/buckets";
 // type NPCConnection = {
 //   walletPublicKey: string,
 //   walletPrivateKey: string,
@@ -131,7 +132,7 @@ export const useNPCStore = defineStore("npc", {
         ["method", method],
       ];
       // TODO: if body is set, add 'payload' tag with sha256 hash of body
-      const sig = await nip98Event.sign(nostrStore.signer);
+      const sig = await nip98Event.sign(nostrStore.signer as any);
       const eventString = JSON.stringify(nip98Event.rawEvent());
       // encode the eventString to base64
       return btoa(eventString);
