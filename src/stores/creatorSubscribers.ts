@@ -253,40 +253,34 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
         const unique = Array.from(new Set(this.subscribers.map((s) => s.npub)));
         const uncached = unique.filter((npub) => !this.profileCache[npub]);
 
-        if (!uncached.length) {
+        const updateSubscribersFromCache = () => {
           this.subscribers = this.subscribers.map((s) => {
             const cached = this.profileCache[s.npub];
+            if (!cached) return s;
             return {
               ...s,
-              name: cached?.name || s.name || s.npub,
-              nip05: cached?.nip05 || s.nip05 || "",
+              name: cached.name || s.name || s.npub,
+              nip05: cached.nip05 || s.nip05 || "",
             };
           });
+        };
+
+        if (!uncached.length) {
+          updateSubscribersFromCache();
+          this.profilesLoading = false;
           return;
         }
 
         if (!nostr.connected) {
-          this.subscribers = this.subscribers.map((s) => {
-            const cached = this.profileCache[s.npub];
-            return {
-              ...s,
-              name: cached?.name || s.name || s.npub,
-              nip05: cached?.nip05 || s.nip05 || "",
-            };
-          });
+          updateSubscribersFromCache();
           this.error = nostr.lastError;
+          this.profilesLoading = false;
           return;
         }
 
         if (!navigator.onLine && this.profilesBatchFetchedAt) {
-          this.subscribers = this.subscribers.map((s) => {
-            const cached = this.profileCache[s.npub];
-            return {
-              ...s,
-              name: cached?.name || s.name || s.npub,
-              nip05: cached?.nip05 || s.nip05 || "",
-            };
-          });
+          updateSubscribersFromCache();
+          this.profilesLoading = false;
           return;
         }
 
@@ -294,70 +288,57 @@ export const useCreatorSubscribersStore = defineStore("creatorSubscribers", {
           await nostr.initNdkReadOnly();
         } catch (e) {
           console.error(e);
-          this.subscribers = this.subscribers.map((s) => {
-            const cached = this.profileCache[s.npub];
-            return {
-              ...s,
-              name: cached?.name || s.name || s.npub,
-              nip05: cached?.nip05 || s.nip05 || "",
-            };
-          });
+          updateSubscribersFromCache();
+          this.profilesLoading = false;
           return;
         }
 
         const ndk = await useNdk({ requireSigner: false });
-        const authors = uncached.map((npub) => nostr.resolvePubkey(npub));
-        const events: Set<any> = await ndk.fetchEvents({ kinds: [0], authors });
-        const found = new Set<string>();
+        const BATCH_SIZE = 20;
 
-        events.forEach((ev: any) => {
-          try {
-            const profile = JSON.parse(ev.content || "{}");
-            const npub = nip19.npubEncode(ev.pubkey);
-            this.profileCache[npub] = {
-              name: profile.name || "",
-              nip05: profile.nip05 || "",
-            };
-            cashuDb.profiles
-              .put({
-                pubkey: ev.pubkey,
-                profile,
-                fetchedAt: Math.floor(Date.now() / 1000),
-              })
-              .catch(console.error);
-            found.add(npub);
-          } catch (err) {
-            console.error(err);
-          }
-        });
+        for (let i = 0; i < uncached.length; i += BATCH_SIZE) {
+          const batch = uncached.slice(i, i + BATCH_SIZE);
+          const authors = batch.map((npub) => nostr.resolvePubkey(npub));
+          const events: Set<any> = await ndk.fetchEvents({ kinds: [0], authors });
+          const found = new Set<string>();
 
-        for (const npub of uncached) {
-          if (!found.has(npub)) {
-            this.profileCache[npub] = { name: "", nip05: "" };
+          events.forEach((ev: any) => {
+            try {
+              const profile = JSON.parse(ev.content || "{}");
+              const npub = nip19.npubEncode(ev.pubkey);
+              this.profileCache[npub] = {
+                name: profile.name || "",
+                nip05: profile.nip05 || "",
+              };
+              cashuDb.profiles
+                .put({
+                  pubkey: ev.pubkey,
+                  profile,
+                  fetchedAt: Math.floor(Date.now() / 1000),
+                })
+                .catch(console.error);
+              found.add(npub);
+            } catch (err) {
+              console.error(err);
+            }
+          });
+
+          // For npubs in the batch that were not found, add an empty cache entry
+          // to prevent re-fetching them in the future.
+          for (const npub of batch) {
+            if (!found.has(npub)) {
+              this.profileCache[npub] = { name: "", nip05: "" };
+            }
           }
+          // Immediately update the UI with the profiles found in this batch
+          updateSubscribersFromCache();
+          // Pause briefly between batches to avoid overwhelming relays
+          await new Promise((resolve) => setTimeout(resolve, 200));
         }
-
         this.profilesBatchFetchedAt = Date.now();
-
-        this.subscribers = this.subscribers.map((s) => {
-          const cached = this.profileCache[s.npub];
-          return {
-            ...s,
-            name: cached?.name || s.name || s.npub,
-            nip05: cached?.nip05 || s.nip05 || "",
-          };
-        });
       } catch (e) {
         console.error(e);
         this.error = e instanceof Error ? e.message : String(e);
-        this.subscribers = this.subscribers.map((s) => {
-          const cached = this.profileCache[s.npub];
-          return {
-            ...s,
-            name: cached?.name || s.name || s.npub,
-            nip05: cached?.nip05 || s.nip05 || "",
-          };
-        });
       } finally {
         this.profilesLoading = false;
       }

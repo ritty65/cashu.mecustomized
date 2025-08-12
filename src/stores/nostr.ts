@@ -1197,8 +1197,8 @@ export const useNostrStore = defineStore("nostr", {
         );
         sub.on("event", (event: NDKEvent) => {
           debug("event");
-          this.decryptNip04(privKey, event.pubkey, event.content).then(
-            (content) => {
+          this.decryptNip04(privKey, event.pubkey, event.content)
+            .then((content) => {
               debug("NIP-04 DM from", event.pubkey);
               debug("Content:", content);
               nip04DirectMessageEvents.add(event);
@@ -1208,8 +1208,13 @@ export const useNostrStore = defineStore("nostr", {
                 const chatStore = useDmChatsStore();
                 chatStore.addIncoming(event.rawEvent() as any);
               } catch {}
-            }
-          );
+            })
+            .catch((e) => {
+              console.error(
+                `[nostr] Failed to decrypt DM from ${event.pubkey}`,
+                e,
+              );
+            });
         });
       });
       try {
@@ -1390,28 +1395,37 @@ export const useNostrStore = defineStore("nostr", {
           try {
             const wappedContent = nip44.v2.decrypt(
               wrapEvent.content,
-              nip44.v2.utils.getConversationKey(privKey || "" as any, wrapEvent.pubkey as any)
+              nip44.v2.utils.getConversationKey(
+                privKey || ("" as any),
+                wrapEvent.pubkey as any,
+              ),
             );
             const sealEvent = JSON.parse(wappedContent) as NostrEvent;
             const dmEventString = nip44.v2.decrypt(
               sealEvent.content,
-              nip44.v2.utils.getConversationKey(privKey || "" as any, sealEvent.pubkey as any)
+              nip44.v2.utils.getConversationKey(
+                privKey || ("" as any),
+                sealEvent.pubkey as any,
+              ),
             );
             dmEvent = JSON.parse(dmEventString) as NDKEvent;
             content = dmEvent.content;
             debug("### NIP-17 DM from", dmEvent.pubkey);
             debug("Content:", content);
+            nip17DirectMessageEvents.add(dmEvent);
+            this.lastEventTimestamp = Math.floor(Date.now() / 1000);
+            this.parseMessageForEcash(content, dmEvent.pubkey);
+            try {
+              const chatStore = useDmChatsStore();
+              chatStore.addIncoming(dmEvent as any);
+            } catch {}
           } catch (e) {
-            console.error(e);
+            console.error(
+              `[nostr] Failed to decrypt NIP-17 DM from ${wrapEvent.pubkey}`,
+              e,
+            );
             return;
           }
-          nip17DirectMessageEvents.add(dmEvent);
-          this.lastEventTimestamp = Math.floor(Date.now() / 1000);
-          this.parseMessageForEcash(content, dmEvent.pubkey);
-          try {
-            const chatStore = useDmChatsStore();
-            chatStore.addIncoming(dmEvent as any);
-          } catch {}
         });
       });
       try {
