@@ -759,10 +759,7 @@ export default {
         },
       },
     },
-    creatorHub: {
-      publish: "Publish Profile",
-      profileHeader: "Profile details",
-    },
+    
     swap: {
       title: "Scambia",
       overline: "Scambi Multimint",
@@ -780,10 +777,7 @@ export default {
         },
       },
       actions: {
-        creatorHub: {
-          publish: "Publish Profile",
-          profileHeader: "Profile details",
-        },
+        
         swap: {
           label: "@:global.actions.swap.label",
           in_progress: "@:MintSettings.swap.actions.swap.label",
@@ -977,27 +971,18 @@ export default {
         label_known_mint: "@:ReceiveTokenDialog.actions.receive.label",
         label_adding_mint: "Aggiunta mint…",
       },
-      creatorHub: {
-        publish: "Publish Profile",
-        profileHeader: "Profile details",
-      },
+      
       swap: {
         label: "@:global.actions.swap.label",
         tooltip_text: "Scambia verso un mint fidato",
         caption: "Scambia { value }",
       },
-      creatorHub: {
-        publish: "Publish Profile",
-        profileHeader: "Profile details",
-      },
+      
       cancel_swap: {
         label: "@:global.actions.cancel.label",
         tooltip_text: "Annulla scambio",
       },
-      creatorHub: {
-        publish: "Publish Profile",
-        profileHeader: "Profile details",
-      },
+      
       confirm_swap: {
         label: "@:ReceiveTokenDialog.actions.swap.label",
         tooltip_text: "@:ReceiveTokenDialog.actions.swap.tooltip_text",
@@ -1376,11 +1361,7 @@ export default {
       },
     },
   },
-  creatorHub: {
-    publish: "Publish Profile",
-    profileHeader: "Profile details",
-    endpointsHeader: "Endpoints",
-  },
+  
   swap: {
     in_progress_warning_text: "Scambio in corso",
     invalid_swap_data_error_text: "Dati di scambio non validi",
@@ -1446,10 +1427,7 @@ export default {
         description: "Scopri i creatori da supportare.",
         icon: "img:icons/find-creators.svg",
       },
-      creatorHub: {
-        description: "Imposta e gestisci il tuo profilo creatore.",
-        icon: "img:icons/creator-hub.svg",
-      },
+      
       myProfile: {
         description: "Visualizza e modifica il tuo profilo.",
         icon: "person",
@@ -1514,11 +1492,7 @@ export default {
           creator:
             "Your public storefront as seen by visitors. Great for a quick audit of how your profile appears worldwide.",
         },
-        creatorHub: {
-          fan: "— (hidden unless you toggle “Creator Mode”)",
-          creator:
-            "Define or edit tiers (price, duration, perks), upload cover art, publish pay-walled posts, check revenue analytics and subscriber list.",
-        },
+        
         myProfile: {
           fan: "Show off your avatar, npub link and optional NIP-05. Personal stats: total zaps sent & received, bucket balances.",
           creator:
@@ -1581,18 +1555,25 @@ export default {
     },
     filters: {
       frequency: "Filter by frequency",
+      status: "Status",
+      tier: "Tier",
+      sort: "Sort",
+      clear: "Clear",
+      apply: "Apply",
+      sortOptions: {
+        next: "Next renewal",
+        first: "First seen",
+        amount: "Lifetime sats",
+      },
     },
     columns: {
       subscriber: "Subscriber",
       tier: "Tier",
-      followers: "Followers",
-      following: "Following",
-      latestNote: "Latest note",
-      start: "Start",
-      nextRenewal: "Next renewal",
-      months: "Periods",
-      remaining: "Remaining",
+      frequency: "Freq",
       status: "Status",
+      amount: "Amount",
+      nextRenewal: "Next renewal",
+      lifetime: "Lifetime",
       actions: "Actions",
     },
     frequency: {
@@ -1607,10 +1588,27 @@ export default {
       sendGroupMessage: "Send Group DM",
       exportSelected: "Export selected",
       filters: "Filters",
+      retry: "Retry",
+      clear: "Clear",
+      openDetails: "Open details",
+    },
+    toolbar: {
+      searchPlaceholder: "Search",
+      frequency: "Frequency",
+      status: "Status",
+      tier: "Tier",
+      sort: "Sort",
+      tableView: "Table view",
+      cardView: "Card view",
+      comfortable: "Comfortable",
+      compact: "Compact",
+      exportCsv: "Export CSV",
     },
     status: {
-      active: "Attivo",
-      pending: "In attesa",
+      any: "Any",
+      active: "Active",
+      pending: "Pending",
+      ended: "Ended",
     },
     summary: {
       subscribers: "Subscribers",
@@ -1618,7 +1616,29 @@ export default {
       pending: "Pending",
       receivedPeriods: "Received periods",
       revenue: "Revenue",
+      lifetimeRevenue: "Lifetime revenue",
+      thisPeriod: "This period",
+      thisWeek: "this week",
       thisMonth: "this month",
+      nextWeek: "Next week",
+      nextMonth: "Next month",
+    },
+    charts: {
+      frequency: "Frequency",
+      status: "Status",
+      newSubs: "New subs",
+      revenueOverTime: "Revenue over time",
+      frequencyMix: "Frequency mix",
+      statusByFrequency: "Status by frequency",
+      revenueSummary: "Total revenue {total} sat",
+      frequencySummary:
+        "Weekly: {weekly}, Bi-weekly: {biweekly}, Monthly: {monthly}",
+      statusSummary:
+        "Weekly - Active {weeklyActive}, Pending {weeklyPending}, Ended {weeklyEnded}; Bi-weekly - Active {biweeklyActive}, Pending {biweeklyPending}, Ended {biweeklyEnded}; Monthly - Active {monthlyActive}, Pending {monthlyPending}, Ended {monthlyEnded}",
+    },
+    renewalProgress: "Renewal progress",
+    tabs: {
+      all: "All",
     },
     periodsText: "{received} of {total} periods",
     periodsTooltip: "Periods received vs periods purchased",
@@ -1628,5 +1648,60 @@ export default {
     nextRenewal: "Renews on {date}",
     noData: "No subscribers yet",
     shareProfile: "Share your profile",
+    selectionCount: "{count} selected",
+    tooltips: {
+      noSelection: "Select subscribers first",
+      notLoggedIn: "Connect to Nostr to send messages",
+    },
+    notifications: {
+      export_success: "Subscribers exported",
+      export_failed: "Failed to export subscribers",
+      dm_not_ready: "Messenger not ready",
+    },
+    drawer: {
+      tabs: {
+        overview: "Overview",
+        payments: "Payments",
+        notes: "Notes",
+      },
+      overview: {
+        nip05: "nip05",
+        lud16: "lud16",
+        about: "about",
+        nextRenewal: "Next renewal",
+        amountPerInterval: "Amount / interval",
+        lifetimeTotal: "Lifetime total",
+        since: "Since",
+      },
+      actions: {
+        dm: "DM",
+        copyNpub: "Copy npub",
+        copyLud16: "Copy lud16",
+        openProfile: "Profile",
+        cancel: "Cancel",
+      },
+      payments: {
+        noPayments: "No payments",
+      },
+      activity: "Activity",
+    },
+  },
+  SubscriberDrawer: {
+    tabs: {
+      overview: "Overview",
+      payments: "Payments",
+      notes: "Notes",
+    },
+    actions: {
+      dm: "DM",
+      copyNpub: "Copy npub",
+      copyLud16: "Copy lud16",
+      openProfile: "Profile",
+      cancel: "Cancel",
+    },
+    notifications: {
+      note_saved: "Note saved",
+      note_save_failed: "Failed to save note",
+    },
   },
 };

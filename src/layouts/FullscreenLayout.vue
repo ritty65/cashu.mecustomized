@@ -4,7 +4,7 @@
     :class="$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark'"
   >
     <MainHeader />
-    <q-page-container>
+    <q-page-container class="text-body1">
       <router-view />
     </q-page-container>
     <PublishBar
