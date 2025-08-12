@@ -520,7 +520,9 @@ export const useNostrStore = defineStore("nostr", {
       profiles: useLocalStorage<
         Record<string, { profile: any; fetchedAt: number }>
       >("cashu.ndk.profiles", {}),
-  };
+      connectionAttempt: null as Promise<void> | null,
+      lastReadOnlyFailure: 0,
+    };
   },
   getters: {
     seedSignerPrivateKeyNsecComputed: (state) => {
@@ -596,19 +598,50 @@ export const useNostrStore = defineStore("nostr", {
     },
     initNdkReadOnly: async function () {
       await this.loadKeysFromStorage();
-      const ndk = await useNdk({ requireSigner: false });
       if (this.connected) return;
-      try {
-        await ndk.connect();
-        this.connected = true;
-      } catch (e: any) {
-        console.warn("[nostr] read-only connect failed", e);
-        notifyWarning(
-          `Failed to connect to relays`,
-          e?.message ?? String(e)
-        );
-        this.connected = false;
+
+      // reuse ongoing attempt
+      if (this.connectionAttempt) {
+        return this.connectionAttempt;
       }
+
+      const settings = useSettingsStore();
+      const backoffMs = settings.nostrReadonlyBackoffMs ?? 30000;
+      const now = Date.now();
+      if (
+        this.lastReadOnlyFailure &&
+        now - this.lastReadOnlyFailure < backoffMs
+      ) {
+        return;
+      }
+
+      const ndk = await useNdk({ requireSigner: false });
+      this.connectionAttempt = (async () => {
+        try {
+          await ndk.connect();
+          this.connected = true;
+          this.lastError = null;
+          this.lastReadOnlyFailure = 0;
+        } catch (e: any) {
+          console.warn("[nostr] read-only connect failed", e);
+          notifyWarning(
+            `Failed to connect to relays`,
+            e?.message ?? String(e)
+          );
+          this.connected = false;
+          this.lastReadOnlyFailure = Date.now();
+        } finally {
+          this.connectionAttempt = null;
+        }
+      })();
+
+      return this.connectionAttempt;
+    },
+    retryReadOnlyConnection: async function () {
+      this.lastReadOnlyFailure = 0;
+      this.connectionAttempt = null;
+      this.connected = false;
+      return this.initNdkReadOnly();
     },
     disconnect: async function () {
       const ndk = await useNdk();
