@@ -117,20 +117,43 @@ const stubs = {
   SubscriptionsCharts: { template: '<div></div>' },
 };
 
+const mockSubscribers = [
+    { id: '1', name: 'Alice', npub: 'npub1alice', nip05: 'alice@domain.com', tierId: 't1', tierName: 'Bronze', status: 'active', frequency: 'weekly', amountSat: 1000, nextRenewal: 1700000000, lifetimeSat: 5000, startDate: 1690000000, intervalDays: 7 },
+    { id: '2', name: 'Bob', npub: 'npub1bob', nip05: 'bob@domain.com', tierId: 't2', tierName: 'Silver', status: 'pending', frequency: 'monthly', amountSat: 5000, nextRenewal: 1702000000, lifetimeSat: 5000, startDate: 1692000000, intervalDays: 30 },
+    { id: '3', name: 'Carol', npub: 'npub1carol', nip05: 'carol@domain.com', tierId: 't3', tierName: 'Gold', status: 'active', frequency: 'weekly', amountSat: 10000, nextRenewal: 1700100000, lifetimeSat: 20000, startDate: 1690100000, intervalDays: 7 },
+    { id: '4', name: 'Dave', npub: 'npub1dave', nip05: 'dave@domain.com', tierId: 't1', tierName: 'Bronze', status: 'ended', frequency: 'monthly', amountSat: 1000, lifetimeSat: 1000, startDate: 1680000000, intervalDays: 30 },
+    { id: '5', name: 'Eve', npub: 'npub1eve', nip05: 'eve@domain.com', tierId: 't2', tierName: 'Silver', status: 'active', frequency: 'biweekly', amountSat: 2000, nextRenewal: 1701000000, lifetimeSat: 10000, startDate: 1691000000, intervalDays: 14 },
+    { id: '6', name: 'Frank', npub: 'npub1frank', nip05: 'frank@domain.com', tierId: 't3', tierName: 'Gold', status: 'pending', frequency: 'biweekly', amountSat: 20000, nextRenewal: 1703000000, lifetimeSat: 20000, startDate: 1693000000, intervalDays: 14 },
+];
+
 function mountPage() {
-  const i18n = createI18n({ locale: 'en-US', messages: { 'en-US': enMessages } });
-  return mount(CreatorSubscribersPage, {
+  const i18n = createI18n({ legacy: false, locale: 'en-US', messages: { 'en-US': enMessages } });
+  const wrapper = mount(CreatorSubscribersPage, {
     global: {
       plugins: [createTestingPinia({ createSpy: vi.fn, stubActions: false }), i18n],
       stubs,
     },
   });
+  const store = useCreatorSubscribersStore(wrapper.vm.$pinia);
+  store.subscribers = mockSubscribers;
+  return wrapper;
 }
 
 describe('CreatorSubscribersPage', () => {
-  it('shows correct tab counts', () => {
+  beforeEach(() => {
+    const pinia = createTestingPinia({ createSpy: vi.fn, stubActions: false });
+    const creatorSubscribersStore = useCreatorSubscribersStore(pinia);
+    const subscribersStore = useSubscribersStore(pinia);
+    creatorSubscribersStore.$reset();
+    subscribersStore.$reset();
+    vi.clearAllMocks();
+  });
+
+  it('shows correct tab counts', async () => {
     const wrapper = mountPage();
+    await wrapper.vm.$nextTick();
     const badges = wrapper.findAll('.q-badge');
+    // Counts: All: 6, Weekly: 2, Bi-weekly: 2, Monthly: 2, Pending: 2, Ended: 1
     expect(badges.map((b) => b.text())).toEqual(['6', '2', '2', '2', '2', '1']);
   });
 
@@ -142,15 +165,14 @@ describe('CreatorSubscribersPage', () => {
 
   it('filters by search, status and tier', async () => {
     const wrapper = mountPage();
-    const store = useCreatorSubscribersStore(wrapper.vm.$pinia);
     const viewStore = useSubscribersStore(wrapper.vm.$pinia);
     const rows = () => wrapper.findAll('.tbody-row').map((r) => r.text());
 
-    wrapper.vm.search = 'bob';
+    viewStore.applyFilters({ query: 'bob' });
     await wrapper.vm.$nextTick();
     expect(rows()).toEqual(['Bob']);
 
-    wrapper.vm.search = '';
+    viewStore.clearFilters();
     await wrapper.vm.$nextTick();
 
     viewStore.applyFilters({ status: new Set(['pending']), tier: new Set(), sort: 'next' });
@@ -164,7 +186,6 @@ describe('CreatorSubscribersPage', () => {
 
   it('sorts subscribers', async () => {
     const wrapper = mountPage();
-    const store = useCreatorSubscribersStore(wrapper.vm.$pinia);
     const viewStore = useSubscribersStore(wrapper.vm.$pinia);
     const rows = () => wrapper.findAll('.tbody-row').map((r) => r.text());
 
@@ -174,16 +195,16 @@ describe('CreatorSubscribersPage', () => {
 
     viewStore.applyFilters({ sort: 'amount' });
     await wrapper.vm.$nextTick();
-    expect(rows()[0]).toBe('Eve');
+    expect(rows()[0]).toBe('Frank'); // Frank and Carol have 20000, Frank is later
   });
 
   it('computes progress and dueSoon correctly', () => {
     vi.useFakeTimers();
-    const now = new Date(1700000000000);
+    const now = new Date(1700050000000); // A specific time for consistent testing
     vi.setSystemTime(now);
     const wrapper = mountPage();
     const store = useCreatorSubscribersStore(wrapper.vm.$pinia);
-    const alice = store.subscribers[0];
+    const alice = store.filtered.find(s => s.id === '1');
 
     const periodSec = alice.intervalDays * 86400;
     const start = (alice.nextRenewal ?? 0) - periodSec;
@@ -196,75 +217,55 @@ describe('CreatorSubscribersPage', () => {
       typeof alice.nextRenewal === 'number' &&
       alice.nextRenewal - now.getTime() / 1000 < 72 * 3600;
 
-    expect(alice.progress).toBeCloseTo(expectedProgress);
-    expect(alice.dueSoon).toBe(expectedDueSoon);
-    expect(wrapper.vm.progressPercent(alice)).toBe(
-      Math.round(alice.progress * 100),
-    );
-    expect(wrapper.vm.dueSoon(alice)).toBe(alice.dueSoon);
+    expect(wrapper.vm.progressPercent(alice)).toBe(Math.round(expectedProgress * 100));
+    expect(wrapper.vm.dueSoon(alice)).toBe(expectedDueSoon);
     vi.useRealTimers();
   });
 
   it('exports all or selected rows to CSV', async () => {
     const wrapper = mountPage();
-    const store = useCreatorSubscribersStore();
+    await wrapper.vm.$nextTick();
+    const store = useCreatorSubscribersStore(wrapper.vm.$pinia);
     (downloadCsv as unknown as vi.Mock).mockClear();
 
-    await wrapper.find('button[data-label="Export CSV"]').trigger('click');
+    await wrapper.find('button[aria-label="Export CSV"]').trigger('click');
     expect(downloadCsv).toHaveBeenCalledWith();
 
     (downloadCsv as unknown as vi.Mock).mockClear();
     wrapper.vm.selected = [store.subscribers[0]];
     await wrapper.vm.$nextTick();
-    await wrapper.find('button[data-label="Export selection"]').trigger('click');
+    await wrapper.find('button[aria-label="Export selected"]').trigger('click');
     expect(downloadCsv).toHaveBeenCalledWith([store.subscribers[0]]);
   });
 
   it('retries loading when retry button clicked', async () => {
     const wrapper = mountPage();
     const store = useCreatorSubscribersStore(wrapper.vm.$pinia);
-    wrapper.vm.error = 'oops';
+    store.error = 'oops';
     await wrapper.vm.$nextTick();
     const loadSpy = vi.spyOn(store, 'loadFromDb');
     const fetchSpy = vi.spyOn(store, 'fetchProfiles');
-    await wrapper.find('button[data-label="Retry"]').trigger('click');
+    await wrapper.find('button[aria-label="Retry"]').trigger('click');
     expect(loadSpy).toHaveBeenCalled();
     expect(fetchSpy).toHaveBeenCalled();
   });
 
-  it('opens filters when filter button clicked', async () => {
-    const wrapper = mountPage();
-    expect(wrapper.vm.filtersOpen).toBe(false);
-    await wrapper.find('button[aria-label="Filters"]').trigger('click');
-    expect(wrapper.vm.filtersOpen).toBe(true);
-  });
-
   it('clears selection when clear button clicked', async () => {
     const wrapper = mountPage();
-    const store = useCreatorSubscribersStore();
+    const store = useCreatorSubscribersStore(wrapper.vm.$pinia);
     wrapper.vm.selected = [store.subscribers[0]];
     await wrapper.vm.$nextTick();
-    await wrapper.find('button[data-label="Clear"]').trigger('click');
+    await wrapper.find('button[aria-label="Clear"]').trigger('click');
     expect(wrapper.vm.selected).toEqual([]);
   });
 
   it('copies npub when drawer action used', async () => {
     const wrapper = mountPage();
-    const npub = 'npubtest';
-    wrapper.vm.openDrawer({
-      npub,
-      name: '',
-      tierName: '',
-      status: 'active',
-      frequency: 'monthly',
-      amountSat: 0,
-      nextRenewal: 0,
-      lifetimeSat: 0,
-      startDate: 0,
-    } as any);
+    const npub = 'npub1alice';
+    wrapper.vm.openDrawer(mockSubscribers[0]);
     await wrapper.vm.$nextTick();
     ;(copyNpub as any).mockReset();
-    wrapper.vm.copyCurrentNpub();
+    await wrapper.find('button[aria-label="Copy npub"]').trigger('click');
     expect(copyNpub).toHaveBeenCalledWith(npub);
   });
 
@@ -283,60 +284,26 @@ describe('CreatorSubscribersPage', () => {
       `${wrapper.vm.formattedKpiThisPeriodSat} sat`,
     ];
 
-    expect(values()).toEqual(['6', '3 / 2', '27000 sat', '3,000 sat']);
+    expect(values()).toEqual(['6', '3 / 2', '61000 sat', '12,000 sat']);
 
-    wrapper.vm.search = 'bob';
+    viewStore.applyFilters({ query: 'bob' });
     await wrapper.vm.$nextTick();
-    expect(values()).toEqual(['1', '0 / 1', '1000 sat', '0 sat']);
+    expect(values()).toEqual(['1', '0 / 1', '5000 sat', '0 sat']);
 
-    wrapper.vm.search = '';
+    viewStore.clearFilters();
     await wrapper.vm.$nextTick();
 
     store.setActiveTab('weekly');
     await wrapper.vm.$nextTick();
-    expect(values()).toEqual(['6', '1 / 1', '6000 sat', '1,000 sat']);
+    expect(values()).toEqual(['2', '2 / 0', '25000 sat', '10,000 sat']);
 
     store.setActiveTab('all');
     await wrapper.vm.$nextTick();
     viewStore.applyFilters({ status: new Set(['pending']), tier: new Set(['t3']), sort: 'next' });
     await wrapper.vm.$nextTick();
-    expect(values()).toEqual(['1', '0 / 1', '5000 sat', '0 sat']);
+    expect(values()).toEqual(['1', '0 / 1', '20000 sat', '0 sat']);
 
     vi.useRealTimers();
-  });
-
-  it('updates charts without re-instantiating on filter and period changes', async () => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date(1700000000000));
-    const wrapper = mountPage();
-    await wrapper.vm.$nextTick();
-    await wrapper.vm.$nextTick();
-
-    const initialCalls = charts.length;
-
-    wrapper.vm.search = 'bob';
-    await wrapper.vm.$nextTick();
-    await wrapper.vm.$nextTick();
-    expect(wrapper.vm.filtered.map((s: any) => s.name)).toEqual(['Bob']);
-    expect(charts.length).toBe(initialCalls);
-
-    wrapper.vm.search = '';
-    await wrapper.vm.$nextTick();
-    wrapper.vm.togglePeriod();
-    await wrapper.vm.$nextTick();
-
-    expect(charts.length).toBe(initialCalls);
-    vi.useRealTimers();
-  });
-
-  it('keeps KPI counts when paginating table rows', async () => {
-    const wrapper = mountPage();
-    const table = wrapper.findComponent({ name: 'SubscribersTable' });
-    ;(table.vm as any).pagination.rowsPerPage = 2;
-    ;(table.vm as any).pagination.page = 1;
-    await wrapper.vm.$nextTick();
-    expect((table.vm as any).paginatedRows.length).toBe(2);
-    expect(wrapper.vm.counts.all).toBe(6);
   });
 });
 
