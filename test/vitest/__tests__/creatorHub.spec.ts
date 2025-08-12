@@ -23,7 +23,7 @@ let ensureRelayConnectivityMock: any;
 
 let ndkStub: any = {};
 
-class MockNDKEvent {
+const MockNDKEvent = class {
   kind: number | undefined;
   tags: any[] = [];
   created_at?: number;

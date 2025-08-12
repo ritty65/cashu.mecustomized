@@ -647,15 +647,23 @@ export const useNostrStore = defineStore("nostr", {
       const relaysArr = Array.from(ndk.pool.relays.values());
       const connectPromises = relaysArr.map(r => connectWithTimeout(r, 6000));
 
-      // flip Online as soon as one opens
-      try {
-        await Promise.any(connectPromises);
+      const results = await Promise.allSettled(connectPromises);
+      const successfulConnections = results.filter(r => r.status === 'fulfilled').length;
+
+      if (successfulConnections > 0) {
         this.connected = true;
         this.lastError = null;
-        this.reconnectBackoffUntil = 0;
-      } catch (e:any) {
+        // Only reset backoff if all relays were successful.
+        // If some failed, we maintain the backoff to avoid hammering them.
+        if (successfulConnections === relaysArr.length) {
+          this.reconnectBackoffUntil = 0;
+        } else {
+          this.reconnectBackoffUntil = Date.now() + RECONNECT_BACKOFF_MS;
+        }
+      } else {
         this.connected = false;
-        this.lastError = e?.message ?? String(e);
+        const firstError = results.find(r => r.status === 'rejected') as PromiseRejectedResult | undefined;
+        this.lastError = firstError?.reason?.message ?? 'All relays failed to connect.';
         this.reconnectBackoffUntil = Date.now() + RECONNECT_BACKOFF_MS;
         notifyError(this.lastError);
       }

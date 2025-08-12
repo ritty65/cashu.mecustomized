@@ -74,7 +74,8 @@
 </template>
 
 <script>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
+import { useRouter } from "vue-router";
 import { useWelcomeStore } from "src/stores/welcome";
 import { useStorageStore } from "src/stores/storage";
 import WelcomeSlidePrivacy from "./welcome/WelcomeSlidePrivacy.vue";
@@ -135,7 +136,18 @@ export default {
     const welcomeStore = useWelcomeStore();
     const storageStore = useStorageStore();
     const fileUpload = ref(null);
+    const router = useRouter();
 
+    watch(
+      () => welcomeStore.showWelcome,
+      (show) => {
+        if (!show) {
+          const currentQuery = window.location.search;
+          const currentHash = window.location.hash;
+          router.push("/wallet" + currentQuery + currentHash);
+        }
+      }
+    );
     const onChangeFileUpload = () => {
       const file = fileUpload.value.files[0];
       if (file) readFile(file);

@@ -3,6 +3,7 @@
 
 module.exports = {
   plugins: [
+    require('@tailwindcss/postcss'),
     // to edit target browsers: use "browserslist" field in package.json
     require("autoprefixer"),
   ],
