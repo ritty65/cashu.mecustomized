@@ -102,6 +102,8 @@ export interface SubscriberViewPref {
   activeViewId: string | null;
 }
 
+let subscriberViewsMigration: any[] = [];
+
 // export interface Proof {
 //   id: string
 //   C: string
@@ -564,6 +566,16 @@ export class CashuDexie extends Dexie {
 
     this.version(23)
       .stores({
+        subscriberViews: null,
+      })
+      .upgrade(async (tx) => {
+        subscriberViewsMigration = await tx
+          .table("subscriberViews")
+          .toArray();
+      });
+
+    this.version(24)
+      .stores({
         proofs:
           "secret, id, C, amount, reserved, quote, bucketId, label, description",
         profiles: "pubkey",
@@ -576,10 +588,8 @@ export class CashuDexie extends Dexie {
         subscriberViewPrefs: "&id",
       })
       .upgrade(async (tx) => {
-        const oldViews = await tx.table("subscriberViews").toArray();
-        await tx.table("subscriberViews").clear();
         await tx.table("subscriberViews").bulkAdd(
-          oldViews.map((v: any) => ({
+          subscriberViewsMigration.map((v: any) => ({
             id: v.name,
             name: v.name,
             state: {
@@ -594,6 +604,7 @@ export class CashuDexie extends Dexie {
             },
           }))
         );
+        subscriberViewsMigration = [];
       });
   }
 }
