@@ -1,6 +1,13 @@
 <template>
   <q-scroll-area class="col column q-pa-md">
-    <template v-for="(msg, idx) in messages" :key="msg.id">
+    <div
+      v-if="messages.length === 0"
+      class="col flex flex-center text-grey-6"
+      style="min-height: 150px"
+    >
+      <span>No messages yet</span>
+    </div>
+    <template v-else v-for="(msg, idx) in messages" :key="msg.id">
       <div
         v-if="showDateSeparator(idx)"
         class="text-caption text-center q-my-md divider-text"

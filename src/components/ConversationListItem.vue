@@ -266,11 +266,13 @@ export default defineComponent({
 }
 
 .name-section {
-  max-width: 40%;
+  flex: 1;
+  min-width: 0;
 }
 
 .snippet-section {
-  max-width: 35%;
+  flex: 1;
+  min-width: 0;
 }
 
 .conversation-item .ellipsis {
