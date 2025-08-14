@@ -26,33 +26,30 @@
           </q-toolbar-title>
         </q-toolbar>
       </q-header>
-      <q-linear-progress
-        v-if="connecting && !loading"
-        indeterminate
-        color="primary"
-        class="q-mb-md"
-      />
+      <q-banner v-if="connecting && !loading" dense class="bg-grey-3">
+        Connecting...
+      </q-banner>
+      <q-banner
+        v-else-if="!messenger.connected && !loading"
+        dense
+        class="bg-grey-3"
+      >
+        <div class="row items-center q-gutter-sm">
+          <span>
+            Offline - {{ connectedCount }}/{{ totalRelays }} connected
+            <span v-if="nextReconnectIn !== null">
+              - reconnecting in {{ nextReconnectIn }}s
+            </span>
+          </span>
+          <q-btn flat dense label="Reconnect All" @click="reconnectAll" />
+        </div>
+      </q-banner>
       <q-spinner v-if="loading" size="lg" color="primary" />
       <ActiveChatHeader :pubkey="selected" />
       <MessageList :messages="messages" class="col" />
       <MessageInput @send="sendMessage" @sendToken="openSendTokenDialog" />
       <ChatSendTokenDialog ref="chatSendTokenDialogRef" :recipient="selected" />
     </div>
-    <q-footer
-      v-if="!messenger.connected && !connecting && !loading"
-      class="bg-grey-3 text-dark q-pa-sm"
-      elevated
-    >
-      <div class="row items-center justify-between">
-        <span>
-          Offline - {{ connectedCount }}/{{ totalRelays }} connected
-          <span v-if="nextReconnectIn !== null">
-            - reconnecting in {{ nextReconnectIn }}s
-          </span>
-        </span>
-        <q-btn flat dense label="Reconnect All" @click="reconnectAll" />
-      </div>
-    </q-footer>
     <q-btn
       v-if="$q.screen.lt.md && !messenger.drawerOpen"
       fab
@@ -224,17 +221,6 @@ export default defineComponent({
       }
     });
 
-    watch(
-      () => messenger.connected,
-      (val, oldVal) => {
-        if (oldVal === false && val === true) {
-          $q.notify({ type: "positive", message: "Reconnected to relays" });
-        } else if (oldVal === true && val === false && !connecting.value) {
-          $q.notify({ type: "negative", message: "Disconnected from relays" });
-        }
-      },
-    );
-
     const sendMessage = (
       payload:
         | string
@@ -269,12 +255,8 @@ export default defineComponent({
         messenger.disconnect();
         messenger.started = false;
         await messenger.start();
-        if (!messenger.connected) {
-          $q.notify({ type: "negative", message: "Reconnect failed" });
-        }
       } catch (e) {
         console.error(e);
-        $q.notify({ type: "negative", message: "Reconnect failed" });
       } finally {
         connecting.value = false;
       }
@@ -308,13 +290,9 @@ export default defineComponent({
   },
 });
 </script>
-<style lang="scss">
-@import "../css/messenger.scss";
-</style>
-
 <style scoped>
 .q-toolbar {
   flex-wrap: nowrap;
 }
-
+  
 </style>
