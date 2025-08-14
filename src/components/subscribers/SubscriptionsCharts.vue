@@ -1,14 +1,13 @@
 <template>
-  <q-expansion-item label="Insights" expand-separator @show="redrawCharts">
-    <div class="row q-gutter-lg q-pa-sm">
-      <q-card class="col-12 col-md-4">
+  <q-expansion-item label="Insights" expand-separator>
+    <div class="row q-col-gutter-lg">
+      <q-card class="col-12">
         <q-card-section>
           <div id="frequencyChartDesc" class="text-caption text-grey-7 q-mb-sm">
             Shows number of subscriptions by frequency.
           </div>
           <div style="height: 300px">
             <Pie
-              ref="frequencyChart"
               :data="frequencyData"
               :options="pieOptions"
               aria-label="Frequency distribution pie chart"
@@ -18,14 +17,13 @@
           </div>
         </q-card-section>
       </q-card>
-      <q-card class="col-12 col-md-4">
+      <q-card class="col-12">
         <q-card-section>
           <div id="statusChartDesc" class="text-caption text-grey-7 q-mb-sm">
             Shows number of subscriptions by status.
           </div>
           <div style="height: 300px">
             <Bar
-              ref="statusChart"
               :data="statusData"
               :options="barOptions"
               aria-label="Subscription status bar chart"
@@ -35,14 +33,13 @@
           </div>
         </q-card-section>
       </q-card>
-      <q-card class="col-12 col-md-4">
+      <q-card class="col-12">
         <q-card-section>
           <div id="newSubsChartDesc" class="text-caption text-grey-7 q-mb-sm">
             Shows new subscribers over the past week.
           </div>
           <div style="height: 300px">
             <Line
-              ref="newSubsChart"
               :data="newSubsData"
               :options="lineOptions"
               aria-label="New subscribers line chart"
@@ -57,7 +54,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import {
   Chart as ChartJS,
@@ -291,14 +288,4 @@ const lineOptions = computed(() => ({
     },
   },
 }));
-
-const frequencyChart = ref<any>(null);
-const statusChart = ref<any>(null);
-const newSubsChart = ref<any>(null);
-
-function redrawCharts() {
-  frequencyChart.value?.chart?.update();
-  statusChart.value?.chart?.update();
-  newSubsChart.value?.chart?.update();
-}
 </script>

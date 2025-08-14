@@ -1,98 +1,124 @@
 <template>
-  <q-layout view="lHh Lpr lFf" class="app-layout" :style="gridStyle">
-    <q-drawer
-      v-model="ui.drawerOpen"
-      side="left"
-      :width="ui.drawerWidth"
-      :mini="ui.drawerMini"
-      :mini-width="ui.drawerMiniWidth"
-      :overlay="isOverlay"
-      bordered
-      class="drawer-container"
-      @mouseenter="maybeExpandOnHover(true)"
-      @mouseleave="maybeExpandOnHover(false)"
-    >
-      <template v-if="!ui.drawerMini">
-        <div class="column no-wrap full-height q-pa-md">
-          <div class="row items-center justify-between q-mb-md">
-            <div class="text-subtitle1">Chats</div>
-            <q-btn flat dense round icon="add" @click="openNewChatDialog" />
+  <q-page
+    class="row full-height no-horizontal-scroll"
+    :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark']"
+  >
+    <q-responsive>
+      <q-drawer
+        :model-value="true"
+        side="left"
+        show-if-above
+        :breakpoint="600"
+        bordered
+        :width="drawerOpen ? 240 : 64"
+        class="drawer-transition drawer-container"
+        :style="{ overflowX: 'hidden' }"
+        :class="[
+          $q.screen.gt.xs ? 'q-pa-lg column' : 'q-pa-md column',
+          { 'drawer-collapsed': !drawerOpen },
+        ]"
+      >
+        <template v-if="drawerOpen">
+          <div class="column no-wrap full-height">
+            <div class="row items-center justify-between q-mb-md">
+              <div class="text-subtitle1">Chats</div>
+              <q-btn flat dense round icon="add" @click="openNewChatDialog" />
+            </div>
+            <q-input
+              dense
+              rounded
+              debounce="300"
+              v-model="conversationSearch"
+              placeholder="Search"
+              class="q-mb-md"
+            >
+              <template #prepend>
+                <q-icon name="search" />
+              </template>
+            </q-input>
+            <q-scroll-area class="col" style="min-height: 0">
+              <Suspense>
+                <template #default>
+                  <ConversationList
+                    :selected-pubkey="selected"
+                    :search="conversationSearch"
+                    @select="selectConversation"
+                  />
+                </template>
+                <template #fallback>
+                  <q-skeleton height="100px" square />
+                </template>
+              </Suspense>
+            </q-scroll-area>
+            <UserInfo />
           </div>
-          <q-input
-            dense
-            rounded
-            debounce="300"
-            v-model="conversationSearch"
-            placeholder="Search"
-            class="q-mb-md"
-          >
-            <template #prepend>
-              <q-icon name="search" />
-            </template>
-          </q-input>
-          <q-scroll-area class="col" style="min-height: 0">
-            <Suspense>
-              <template #default>
-                <ConversationList
-                  :selected-pubkey="selected"
-                  :search="conversationSearch"
-                  @select="selectConversation"
-                />
-              </template>
-              <template #fallback>
-                <q-skeleton height="100px" square />
-              </template>
-            </Suspense>
-          </q-scroll-area>
-          <UserInfo />
-        </div>
-      </template>
-      <template v-else>
-        <div class="column items-center q-gutter-md mini-list q-pa-sm" style="overflow-y: auto">
-          <q-avatar
-            v-for="item in miniList"
-            :key="item.pubkey"
-            size="40px"
-            class="cursor-pointer"
-            @click="selectConversation(item.pubkey)"
-          >
-            <img v-if="item.profile?.picture" :src="item.profile.picture" />
-            <span v-else>{{ item.initials }}</span>
-            <q-tooltip>{{ item.displayName }}</q-tooltip>
-          </q-avatar>
-        </div>
-      </template>
-    </q-drawer>
+        </template>
+        <template v-else>
+          <div class="column items-center q-gutter-md" style="overflow-y: auto">
+            <q-avatar
+              v-for="item in miniList"
+              :key="item.pubkey"
+              size="40px"
+              class="cursor-pointer"
+              @click="selectConversation(item.pubkey)"
+            >
+              <img v-if="item.profile?.picture" :src="item.profile.picture" />
+              <span v-else>{{ item.initials }}</span>
+              <q-tooltip>{{ item.displayName }}</q-tooltip>
+            </q-avatar>
+          </div>
+        </template>
+      </q-drawer>
+    </q-responsive>
 
-    <q-page-container>
-      <q-page class="chat-page column">
-        <q-spinner v-if="loading" size="lg" color="primary" />
-        <ChatHeader
-          v-if="selected"
-          :name="activeChatProfile?.name"
-          :npub="activeChatProfile?.npub"
-          :avatar="activeChatProfile?.avatar"
-          :online="messenger.connected"
-          :connecting="connecting"
-          @copy="copyNpub"
-          @toggleDrawer="toggleDrawer"
-          @refresh="reconnectAll"
-        />
-        <MessageList :messages="messages" class="col" />
-        <div class="q-pa-md">
-          <ComposeBar
-            v-model="draft"
-            @send="sendMessage"
-            @attach="attachFile"
-            @send-token="openSendTokenDialog"
-            @emoji="$q.notify({ message: 'Emoji not implemented yet.', type: 'info' })"
+    <div :class="['col column', $q.screen.gt.xs ? 'q-pa-lg' : 'q-pa-md']">
+      <q-header elevated class="q-mb-md bg-transparent">
+        <q-toolbar>
+          <q-btn
+            flat
+            round
+            dense
+            icon="menu"
+            @click="messenger.toggleDrawer()"
           />
+          <q-btn flat round dense icon="arrow_back" @click="goBack" />
+          <q-toolbar-title class="text-h6 ellipsis">
+            Nostr Messenger
+            <q-badge
+              :color="messenger.connected ? 'positive' : 'negative'"
+              class="q-ml-sm"
+            >
+              {{ messenger.connected ? "Online" : "Offline" }}
+            </q-badge>
+          </q-toolbar-title>
+        </q-toolbar>
+      </q-header>
+      <q-banner v-if="connecting && !loading" dense class="bg-grey-3">
+        Connecting...
+      </q-banner>
+      <q-banner
+        v-else-if="!messenger.connected && !loading"
+        dense
+        class="bg-grey-3"
+      >
+        <div class="row items-center q-gutter-sm">
+          <span>
+            Offline - {{ connectedCount }}/{{ totalRelays }} connected
+            <span v-if="nextReconnectIn !== null">
+              - reconnecting in {{ nextReconnectIn }}s
+            </span>
+          </span>
+          <q-btn flat dense label="Reconnect All" @click="reconnectAll" />
         </div>
-        <ChatSendTokenDialog ref="chatSendTokenDialogRef" :recipient="selected" />
-        <NewChatDialog ref="newChatDialogRef" @start="startChat" />
-      </q-page>
-    </q-page-container>
-  </q-layout>
+      </q-banner>
+      <q-spinner v-if="loading" size="lg" color="primary" />
+      <ActiveChatHeader :pubkey="selected" />
+      <MessageList :messages="messages" class="col" />
+      <MessageInput @send="sendMessage" @sendToken="openSendTokenDialog" />
+      <ChatSendTokenDialog ref="chatSendTokenDialogRef" :recipient="selected" />
+      <NewChatDialog ref="newChatDialogRef" @start="startChat" />
+    </div>
+  </q-page>
   <NostrSetupWizard v-model="showSetupWizard" @complete="setupComplete" />
 </template>
 
@@ -105,11 +131,9 @@ import {
   onUnmounted,
   watch,
 } from "vue";
-import { useRoute } from "vue-router";
-import { useQuasar } from "quasar";
-import { useClipboard } from "@vueuse/core";
+import { useRouter, useRoute } from "vue-router";
+import { useLocalStorage } from "@vueuse/core";
 import { useMessengerStore } from "src/stores/messenger";
-import { useMessengerUiStore } from "src/stores/messengerUi";
 import { useNdk } from "src/composables/useNdk";
 import { useNostrStore } from "src/stores/nostr";
 import { nip19 } from "nostr-tools";
@@ -117,12 +141,12 @@ import type NDK from "@nostr-dev-kit/ndk";
 
 import NewChatDialog from "components/NewChatDialog.vue";
 import ConversationList from "components/ConversationList.vue";
+import ActiveChatHeader from "components/ActiveChatHeader.vue";
 import MessageList from "components/MessageList.vue";
+import MessageInput from "components/MessageInput.vue";
 import ChatSendTokenDialog from "components/ChatSendTokenDialog.vue";
 import NostrSetupWizard from "components/NostrSetupWizard.vue";
 import UserInfo from "components/UserInfo.vue";
-import ChatHeader from "src/components/messenger/ChatHeader.vue";
-import ComposeBar from "src/components/messenger/ComposeBar.vue";
 import { shortenString } from "src/js/string-utils";
 
 export default defineComponent({
@@ -130,23 +154,19 @@ export default defineComponent({
   components: {
     NewChatDialog,
     ConversationList,
+    ActiveChatHeader,
     MessageList,
+    MessageInput,
     ChatSendTokenDialog,
     NostrSetupWizard,
     UserInfo,
-    ChatHeader,
-    ComposeBar,
   },
   setup() {
     const loading = ref(true);
     const connecting = ref(false);
     const messenger = useMessengerStore();
-    const ui = useMessengerUiStore();
     const nostr = useNostrStore();
     const showSetupWizard = ref(false);
-    const draft = ref("");
-    const $q = useQuasar();
-    const { copy } = useClipboard();
 
     const ndkRef = ref<NDK | null>(null);
     const now = ref(Date.now());
@@ -204,31 +224,18 @@ export default defineComponent({
       if (timer) clearInterval(timer);
     });
 
+    const router = useRouter();
     const route = useRoute();
 
-    ui.setOpen(messenger.drawerOpen);
-    const isOverlay = computed(() => $q.screen.lt.md);
-    watch(
-      () => $q.screen.width,
-      () => {
-        if ($q.screen.gt.lg) ui.setMini(false);
-        else if ($q.screen.gt.md) ui.setMini(true);
-        else ui.setMini(false);
-      },
-      { immediate: true },
-    );
-    const gridStyle = computed(() => ({
-      '--drawer-w': isOverlay.value ? '0px' : `${ui.effectiveDrawerWidth}px`,
-    }));
-    function maybeExpandOnHover(hovering: boolean) {
-      if (!isOverlay.value && ui.drawerMini) {
-        ui.setMini(!hovering);
+    const goBack = () => {
+      if (window.history.length > 1) {
+        router.back();
+      } else {
+        router.push("/wallet");
       }
-    }
-    const toggleDrawer = () => {
-      ui.toggleDrawer();
-      messenger.setDrawer(ui.drawerOpen);
     };
+
+    const drawerOpen = computed(() => messenger.drawerOpen);
     const selected = ref("");
     const chatSendTokenDialogRef = ref<InstanceType<
       typeof ChatSendTokenDialog
@@ -240,26 +247,6 @@ export default defineComponent({
     const messages = computed(
       () => messenger.conversations[selected.value] || [],
     );
-
-    const activeChatProfile = computed(() => {
-      if (!selected.value) return null;
-      const pubkey = selected.value;
-      const entry: any = (nostr.profiles as any)[pubkey];
-      const profile = entry?.profile ?? entry ?? {};
-      const alias = messenger.aliases[pubkey];
-      const npub = nip19.npubEncode(pubkey);
-      const name =
-        alias ||
-        profile.display_name ||
-        profile.name ||
-        profile.displayName ||
-        npub;
-      return {
-        name,
-        npub,
-        avatar: profile.picture,
-      };
-    });
 
     const miniList = computed(() => {
       return Object.entries(messenger.conversations)
@@ -327,9 +314,9 @@ export default defineComponent({
     watch(
       selected,
       (val) => {
-      messenger.setCurrentConversation(val);
-    },
-    { immediate: true },
+        messenger.setCurrentConversation(val);
+      },
+      { immediate: true },
     );
 
     const selectConversation = (pubkey: string) => {
@@ -343,29 +330,33 @@ export default defineComponent({
       selected.value = pubkey;
     };
 
-    const sendMessage = (text: string) => {
-      if (!selected.value || !text) return;
-      messenger.sendDm(selected.value, text);
-      draft.value = "";
+    const sendMessage = (
+      payload:
+        | string
+        | {
+            text: string;
+            attachment?: { dataUrl: string; name: string; type: string };
+          },
+    ) => {
+      if (!selected.value) return;
+      if (typeof payload === "string") {
+        messenger.sendDm(selected.value, payload);
+        return;
+      }
+      const { text, attachment } = payload;
+      if (text) messenger.sendDm(selected.value, text);
+      if (attachment) {
+        messenger.sendDm(selected.value, attachment.dataUrl, undefined, {
+          name: attachment.name,
+          type: attachment.type,
+        });
+      }
     };
 
     function openSendTokenDialog() {
       if (!selected.value) return;
       (chatSendTokenDialogRef.value as any)?.show();
     }
-
-    const attachFile = () => {
-      // This is a placeholder for the file attachment logic
-      $q.notify({ message: "File attachment not implemented yet.", type: "info" });
-    };
-
-    const copyNpub = (npub: string) => {
-      copy(npub);
-      $q.notify({
-        message: "Copied public key to clipboard.",
-        type: "positive",
-      });
-    };
 
     function openNewChatDialog() {
       (newChatDialogRef.value as any)?.show();
@@ -394,11 +385,7 @@ export default defineComponent({
       loading,
       connecting,
       messenger,
-      ui,
-      gridStyle,
-      isOverlay,
-      maybeExpandOnHover,
-      toggleDrawer,
+      drawerOpen,
       selected,
       chatSendTokenDialogRef,
       newChatDialogRef,
@@ -410,6 +397,7 @@ export default defineComponent({
       sendMessage,
       openSendTokenDialog,
       openNewChatDialog,
+      goBack,
       reconnectAll,
       connectedCount,
       totalRelays,
@@ -421,14 +409,40 @@ export default defineComponent({
 });
 </script>
 <style scoped>
-.app-layout {
-  transition: --drawer-w 200ms ease;
+.q-toolbar {
+  flex-wrap: nowrap;
 }
-:root,
-.app-layout {
-  --drawer-w: 320px;
+.drawer-transition {
+  transition: transform 0.3s;
 }
+
 .drawer-container {
   min-width: 0;
+}
+
+/* When the drawer is collapsed, only show the avatar */
+.drawer-collapsed .conversation-item {
+  padding: 8px;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.drawer-collapsed .conversation-item .q-item-section:not([avatar]) {
+  display: none;
+}
+
+.drawer-collapsed .conversation-item q-avatar {
+  width: 40px;
+  height: 40px;
+}
+
+@media (max-width: 320px) {
+  .drawer-container .conversation-item q-avatar {
+    width: 40px;
+    height: 40px;
+  }
+  .drawer-container .conversation-item .snippet {
+    display: none;
+  }
 }
 </style>
