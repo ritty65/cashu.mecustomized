@@ -6,6 +6,8 @@
     <MainHeader />
     <q-drawer
       v-model="messenger.drawerOpen"
+      :mini="messenger.drawerMini"
+      mini-width="64"
       side="left"
       show-if-above
       :breakpoint="600"

@@ -376,10 +376,10 @@ export default defineComponent({
     });
 
     const toggleMessengerDrawer = () => {
-      console.log("toggleMessengerDrawer", messenger.drawerOpen);
+      console.log("toggleMessengerDrawer", messenger.drawerMini);
       messenger.toggleDrawer();
       vm?.notify(
-        messenger.drawerOpen ? "Messenger closed" : "Messenger opened",
+        messenger.drawerMini ? "Messenger collapsed" : "Messenger expanded",
       );
     };
 

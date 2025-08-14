@@ -15,6 +15,7 @@ export const LOCAL_STORAGE_KEYS = {
   CASHU_LOCKEDTOKENS: "cashu.lockedTokens",
   CASHU_MESSENGER_CONVERSATIONS: "cashu.messenger.conversations",
   CASHU_MESSENGER_DRAWEROPEN: "cashu.messenger.drawerOpen",
+  CASHU_MESSENGER_DRAWERMINI: "cashu.messenger.drawerMini",
   CASHU_MESSENGER_EVENTLOG: "cashu.messenger.eventLog",
   CASHU_MESSENGER_PINNED: "cashu.messenger.pinned",
   CASHU_MESSENGER_UNREAD: "cashu.messenger.unread",

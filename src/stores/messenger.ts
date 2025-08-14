@@ -104,6 +104,7 @@ export const useMessengerStore = defineStore("messenger", {
       sendQueue: [] as MessengerMessage[],
       currentConversation: "",
       drawerOpen: useLocalStorage<boolean>("cashu.messenger.drawerOpen", true),
+      drawerMini: useLocalStorage<boolean>("cashu.messenger.drawerMini", false),
       started: false,
       watchInitialized: false,
     };
@@ -797,7 +798,7 @@ export const useMessengerStore = defineStore("messenger", {
     },
 
     toggleDrawer() {
-      this.drawerOpen = !this.drawerOpen;
+      this.drawerMini = !this.drawerMini;
     },
 
     setDrawer(open: boolean) {
