@@ -102,7 +102,6 @@ export const useMessengerStore = defineStore("messenger", {
         [] as MessengerMessage[],
       ),
       sendQueue: [] as MessengerMessage[],
-      failedRelays: new Set<string>(),
       currentConversation: "",
       drawerOpen: useLocalStorage<boolean>("cashu.messenger.drawerOpen", true),
       started: false,
@@ -213,28 +212,19 @@ export const useMessengerStore = defineStore("messenger", {
             [r],
           );
           if (success && event) {
-            this.failedRelays.delete(r);
             msg.id = event.id;
             msg.created_at = event.created_at ?? Math.floor(Date.now() / 1000);
             msg.status = "sent";
             this.pushOwnMessage(event as any);
             return { success: true, event } as any;
           }
-          if (!this.failedRelays.has(r)) {
-            console.warn(`[messenger.sendDm] failed via ${r}`);
-            this.failedRelays.add(r);
-          }
-        } catch (e: any) {
-          if (!this.failedRelays.has(r)) {
-            console.error(`[messenger.sendDm] relay ${r}`, e);
-            notifyError(`Relay ${r} unreachable`);
-            this.failedRelays.add(r);
-          }
+          console.warn(`[messenger.sendDm] failed via ${r}`);
+        } catch (e) {
+          console.error(`[messenger.sendDm] relay ${r}`, e);
         }
       }
       msg.status = "failed";
       this.sendQueue.push(msg);
-      notifyError("All relays unreachable. Message queued for retry.");
       return { success: false } as any;
     },
     async sendToken(
@@ -694,25 +684,18 @@ export const useMessengerStore = defineStore("messenger", {
     async connect(relays: string[]) {
       const nostr = useNostrStore();
       this.relays = relays as any;
-      this.failedRelays.clear();
-      try {
-        // Reconnect the nostr store with the updated relays
-        await nostr.connect(relays as any);
-      } catch (e: any) {
-        notifyError(e?.message ?? "Failed to connect to relays");
-      }
+      // Reconnect the nostr store with the updated relays
+      await nostr.connect(relays as any);
     },
 
     removeRelay(relay: string) {
       this.relays = (this.relays as any).filter((r: string) => r !== relay);
-      this.failedRelays.delete(relay);
       const nostr = useNostrStore();
       nostr.connect(this.relays as any);
     },
 
     disconnect() {
       const nostr = useNostrStore();
-      this.failedRelays.clear();
       nostr.disconnect();
     },
 
@@ -725,9 +708,7 @@ export const useMessengerStore = defineStore("messenger", {
         if (!privKey) return;
       }
       const list = this.relays as any;
-      let anyFailed = false;
       for (const msg of [...this.sendQueue]) {
-        let delivered = false;
         for (const r of list) {
           try {
             const { success, event } = await nostr.sendNip04DirectMessage(
@@ -738,7 +719,6 @@ export const useMessengerStore = defineStore("messenger", {
               [r],
             );
             if (success && event) {
-              this.failedRelays.delete(r);
               msg.id = event.id;
               msg.created_at =
                 event.created_at ?? Math.floor(Date.now() / 1000);
@@ -746,28 +726,13 @@ export const useMessengerStore = defineStore("messenger", {
               this.pushOwnMessage(event as any);
               const idx = this.sendQueue.indexOf(msg);
               if (idx >= 0) this.sendQueue.splice(idx, 1);
-              delivered = true;
               break;
             }
-            if (!this.failedRelays.has(r)) {
-              this.failedRelays.add(r);
-              console.warn(`[messenger.retryFailedMessages] failed via ${r}`);
-            }
-          } catch (e: any) {
-            if (!this.failedRelays.has(r)) {
-              console.error(`[messenger.retryFailedMessages] relay ${r}`, e);
-              notifyError(`Relay ${r} unreachable`);
-              this.failedRelays.add(r);
-            }
+          } catch (e) {
+            console.error(`[messenger.retryFailedMessages] relay ${r}`, e);
           }
         }
-        if (!delivered) {
-          anyFailed = true;
-          msg.status = "failed";
-        }
-      }
-      if (anyFailed) {
-        notifyError("Some messages could not be sent. Will retry automatically.");
+        if (msg.status !== "sent") msg.status = "failed";
       }
     },
 
