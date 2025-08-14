@@ -1,82 +1,71 @@
 <template>
-  <q-layout
-    class="full-height no-horizontal-scroll"
-    :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark']"
-  >
+  <q-layout view="lHh Lpr lFf" class="app-layout" :style="gridStyle">
     <q-drawer
-        v-model="drawerOpen"
-        side="left"
-        show-if-above
-        :breakpoint="600"
-        bordered
-        :mini="!drawerOpen"
-        :mini-to-overlay="true"
-        :width="360"
-        class="drawer-transition drawer-container"
-        :style="{ overflowX: 'hidden' }"
-        :class="[$q.screen.gt.xs ? 'q-pa-lg column' : 'q-pa-md column']"
-      >
-        <template v-if="drawerOpen">
-          <q-slide-transition>
-            <div class="column no-wrap full-height drawer-content">
-              <div class="row items-center justify-between q-mb-md">
-                <div class="text-subtitle1">Chats</div>
-                <q-btn flat dense round icon="add" @click="openNewChatDialog" />
-              </div>
-            <q-input
-              dense
-              rounded
-              debounce="300"
-              v-model="conversationSearch"
-              placeholder="Search"
-              class="q-mb-md"
-            >
-              <template #prepend>
-                <q-icon name="search" />
+      v-model="ui.drawerOpen"
+      side="left"
+      :width="ui.drawerWidth"
+      :mini="ui.drawerMini"
+      :mini-width="ui.drawerMiniWidth"
+      :overlay="isOverlay"
+      bordered
+      class="drawer-container"
+      @mouseenter="maybeExpandOnHover(true)"
+      @mouseleave="maybeExpandOnHover(false)"
+    >
+      <template v-if="!ui.drawerMini">
+        <div class="column no-wrap full-height q-pa-md">
+          <div class="row items-center justify-between q-mb-md">
+            <div class="text-subtitle1">Chats</div>
+            <q-btn flat dense round icon="add" @click="openNewChatDialog" />
+          </div>
+          <q-input
+            dense
+            rounded
+            debounce="300"
+            v-model="conversationSearch"
+            placeholder="Search"
+            class="q-mb-md"
+          >
+            <template #prepend>
+              <q-icon name="search" />
+            </template>
+          </q-input>
+          <q-scroll-area class="col" style="min-height: 0">
+            <Suspense>
+              <template #default>
+                <ConversationList
+                  :selected-pubkey="selected"
+                  :search="conversationSearch"
+                  @select="selectConversation"
+                />
               </template>
-            </q-input>
-            <q-scroll-area class="col" style="min-height: 0">
-              <Suspense>
-                <template #default>
-                  <ConversationList
-                    :selected-pubkey="selected"
-                    :search="conversationSearch"
-                    @select="selectConversation"
-                  />
-                </template>
-                <template #fallback>
-                  <q-skeleton height="100px" square />
-                </template>
-              </Suspense>
-            </q-scroll-area>
-            <UserInfo />
-            </div>
-          </q-slide-transition>
-        </template>
-        <template v-else>
-          <q-slide-transition>
-            <div
-              class="column items-center q-gutter-md mini-list"
-              style="overflow-y: auto"
-            >
-              <q-avatar
-                v-for="item in miniList"
-                :key="item.pubkey"
-                size="40px"
-              class="cursor-pointer"
-              @click="selectConversation(item.pubkey)"
-            >
-              <img v-if="item.profile?.picture" :src="item.profile.picture" />
-              <span v-else>{{ item.initials }}</span>
-              <q-tooltip>{{ item.displayName }}</q-tooltip>
-              </q-avatar>
-            </div>
-          </q-slide-transition>
-        </template>
+              <template #fallback>
+                <q-skeleton height="100px" square />
+              </template>
+            </Suspense>
+          </q-scroll-area>
+          <UserInfo />
+        </div>
+      </template>
+      <template v-else>
+        <div class="column items-center q-gutter-md mini-list q-pa-sm" style="overflow-y: auto">
+          <q-avatar
+            v-for="item in miniList"
+            :key="item.pubkey"
+            size="40px"
+            class="cursor-pointer"
+            @click="selectConversation(item.pubkey)"
+          >
+            <img v-if="item.profile?.picture" :src="item.profile.picture" />
+            <span v-else>{{ item.initials }}</span>
+            <q-tooltip>{{ item.displayName }}</q-tooltip>
+          </q-avatar>
+        </div>
+      </template>
     </q-drawer>
 
     <q-page-container>
-      <q-page :class="['column', $q.screen.gt.xs ? 'q-pa-lg' : 'q-pa-md']">
+      <q-page class="chat-page column">
         <q-spinner v-if="loading" size="lg" color="primary" />
         <ChatHeader
           v-if="selected"
@@ -86,7 +75,7 @@
           :online="messenger.connected"
           :connecting="connecting"
           @copy="copyNpub"
-          @toggleDrawer="messenger.toggleDrawer"
+          @toggleDrawer="toggleDrawer"
           @refresh="reconnectAll"
         />
         <MessageList :messages="messages" class="col" />
@@ -120,6 +109,7 @@ import { useRoute } from "vue-router";
 import { useQuasar } from "quasar";
 import { useClipboard } from "@vueuse/core";
 import { useMessengerStore } from "src/stores/messenger";
+import { useMessengerUiStore } from "src/stores/messengerUi";
 import { useNdk } from "src/composables/useNdk";
 import { useNostrStore } from "src/stores/nostr";
 import { nip19 } from "nostr-tools";
@@ -151,6 +141,7 @@ export default defineComponent({
     const loading = ref(true);
     const connecting = ref(false);
     const messenger = useMessengerStore();
+    const ui = useMessengerUiStore();
     const nostr = useNostrStore();
     const showSetupWizard = ref(false);
     const draft = ref("");
@@ -215,7 +206,29 @@ export default defineComponent({
 
     const route = useRoute();
 
-    const drawerOpen = computed(() => messenger.drawerOpen);
+    ui.setOpen(messenger.drawerOpen);
+    const isOverlay = computed(() => $q.screen.lt.md);
+    watch(
+      () => $q.screen.width,
+      () => {
+        if ($q.screen.gt.lg) ui.setMini(false);
+        else if ($q.screen.gt.md) ui.setMini(true);
+        else ui.setMini(false);
+      },
+      { immediate: true },
+    );
+    const gridStyle = computed(() => ({
+      '--drawer-w': isOverlay.value ? '0px' : `${ui.effectiveDrawerWidth}px`,
+    }));
+    function maybeExpandOnHover(hovering: boolean) {
+      if (!isOverlay.value && ui.drawerMini) {
+        ui.setMini(!hovering);
+      }
+    }
+    const toggleDrawer = () => {
+      ui.toggleDrawer();
+      messenger.setDrawer(ui.drawerOpen);
+    };
     const selected = ref("");
     const chatSendTokenDialogRef = ref<InstanceType<
       typeof ChatSendTokenDialog
@@ -314,9 +327,9 @@ export default defineComponent({
     watch(
       selected,
       (val) => {
-        messenger.setCurrentConversation(val);
-      },
-      { immediate: true },
+      messenger.setCurrentConversation(val);
+    },
+    { immediate: true },
     );
 
     const selectConversation = (pubkey: string) => {
@@ -381,7 +394,11 @@ export default defineComponent({
       loading,
       connecting,
       messenger,
-      drawerOpen,
+      ui,
+      gridStyle,
+      isOverlay,
+      maybeExpandOnHover,
+      toggleDrawer,
       selected,
       chatSendTokenDialogRef,
       newChatDialogRef,
@@ -404,26 +421,14 @@ export default defineComponent({
 });
 </script>
 <style scoped>
-.drawer-transition {
-  transition: width 0.3s;
+.app-layout {
+  transition: --drawer-w 200ms ease;
 }
-
-.drawer-content,
-.mini-list q-avatar {
-  transition: opacity 0.3s, transform 0.3s;
+:root,
+.app-layout {
+  --drawer-w: 320px;
 }
-
 .drawer-container {
   min-width: 0;
-}
-
-@media (max-width: 320px) {
-  .drawer-container .conversation-item q-avatar {
-    width: 40px;
-    height: 40px;
-  }
-  .drawer-container .conversation-item .snippet {
-    display: none;
-  }
 }
 </style>
