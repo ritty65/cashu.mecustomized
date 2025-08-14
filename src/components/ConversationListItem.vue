@@ -239,6 +239,7 @@ export default defineComponent({
   display: flex;
   gap: 10px;
   border-left: 3px solid transparent;
+  overflow-x: hidden;
 }
 .conversation-item.selected {
   background-color: color-mix(in srgb, var(--q-primary), transparent 92%);
@@ -265,12 +266,10 @@ export default defineComponent({
   white-space: normal;
 }
 
-.name-section {
-  max-width: 40%;
-}
-
+.name-section,
 .snippet-section {
-  max-width: 35%;
+  flex: 1;
+  min-width: 0;
 }
 
 .conversation-item .ellipsis {
