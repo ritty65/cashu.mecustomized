@@ -62,6 +62,11 @@ async function createReadOnlyNdk(): Promise<NDK> {
   const ndk = new NDK({ explicitRelayUrls: relayUrls });
   mergeDefaultRelays(ndk);
   await safeConnect(ndk);
+  await new Promise((r) => setTimeout(r, 3000));
+  if (![...ndk.pool.relays.values()].some((r: any) => r.connected)) {
+    mergeDefaultRelays(ndk);
+    await ndk.connect(8000);
+  }
   return ndk;
 }
 
@@ -73,7 +78,12 @@ export async function createSignedNdk(signer: NDKSigner): Promise<NDK> {
   const ndk = new NDK({ explicitRelayUrls: relays });
   mergeDefaultRelays(ndk);
   ndk.signer = signer;
-  await safeConnect(ndk);
+  await ndk.connect();
+  await new Promise((r) => setTimeout(r, 3000));
+  if (![...ndk.pool.relays.values()].some((r: any) => r.connected)) {
+    mergeDefaultRelays(ndk);
+    await ndk.connect(8000);
+  }
   return ndk;
 }
 
@@ -100,6 +110,11 @@ export async function createNdk(): Promise<NDK> {
   const ndk = new NDK({ signer: signer as any, explicitRelayUrls: relayUrls });
   mergeDefaultRelays(ndk);
   await safeConnect(ndk);
+  await new Promise((r) => setTimeout(r, 3000));
+  if (![...ndk.pool.relays.values()].some((r: any) => r.connected)) {
+    mergeDefaultRelays(ndk);
+    await ndk.connect(8000);
+  }
   return ndk;
 }
 

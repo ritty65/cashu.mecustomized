@@ -497,18 +497,15 @@ export const useMintsStore = defineStore("mints", {
         // reload mint from local storage
         mint = this.mints.filter((m) => m.url === mint.url)[0];
 
-        // for each keyset we do not have keys for, fetch keys in parallel
-        const keysetIdsToFetch = keysets
-          .map((k) => k.id)
-          .filter((id) => !mint.keys.find((k) => k.id === id));
-
-        if (keysetIdsToFetch.length > 0) {
-          const promises = keysetIdsToFetch.map((id) =>
-            mintClass.api.getKeys(id),
-          );
-          const newKeysArray = await Promise.all(promises);
-          const newKeys = newKeysArray.flatMap((k) => k.keysets);
-          this.mints.filter((m) => m.url === mint.url)[0].keys.push(...newKeys);
+        // for each keyset we do not have keys for, fetch keys
+        for (const keyset of keysets) {
+          if (!mint.keys.find((k) => k.id === keyset.id)) {
+            const keys = await mintClass.api.getKeys(keyset.id);
+            // store keys in mint and update local storage
+            this.mints
+              .filter((m) => m.url === mint.url)[0]
+              .keys.push(keys.keysets[0]);
+          }
         }
 
         // return the mint with keys set
