@@ -2,7 +2,6 @@
   <q-header class="bg-transparent z-10">
     <q-toolbar>
       <q-btn
-        v-if="!isMessengerPage"
         flat
         dense
         round
@@ -22,12 +21,13 @@
         color="primary"
         aria-label="Back"
         no-caps
-        class="q-mr-sm"
+        class="q-ml-sm"
       >
         <span class="q-mx-md text-weight-bold">
           {{ $t("FullscreenHeader.actions.back.label") }}
         </span>
       </q-btn>
+      <q-toolbar-title></q-toolbar-title>
       <q-btn
         v-if="isMessengerPage"
         flat
@@ -39,17 +39,6 @@
         @click.stop="toggleMessengerDrawer"
         class="q-mr-sm"
       />
-      <q-toolbar-title class="row items-center">
-        <template v-if="isMessengerPage">
-          Nostr Messenger
-          <q-badge
-            :color="messenger.connected ? 'positive' : 'negative'"
-            class="q-ml-sm"
-          >
-            {{ messenger.connected ? 'Online' : 'Offline' }}
-          </q-badge>
-        </template>
-      </q-toolbar-title>
       <transition
         appear
         enter-active-class="animated wobble"

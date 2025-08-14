@@ -276,6 +276,7 @@ export default defineComponent({
 }
 
 .conversation-item .ellipsis {
+  flex: 1;
   min-width: 0;
 }
 

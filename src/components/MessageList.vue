@@ -2,13 +2,10 @@
   <q-scroll-area class="col column q-pa-md">
     <div
       v-if="messages.length === 0"
-      class="col flex flex-center text-grey-6 q-my-xl"
+      class="col flex flex-center text-grey-6"
       style="min-height: 150px"
     >
-      <div class="column items-center">
-        <q-icon name="chat_bubble_outline" size="48px" class="q-mb-sm" />
-        <span>No messages yet</span>
-      </div>
+      <span>No messages yet</span>
     </div>
     <template v-else v-for="(msg, idx) in messages" :key="msg.id">
       <div
@@ -55,8 +52,6 @@ watch(
 );
 
 const formatDate = (ts: number) => new Date(ts * 1000).toLocaleString();
-
-// TODO: consider using QVirtualScroll for better performance with long lists
 
 defineExpose({ formatDay, showDateSeparator });
 </script>
