@@ -15,9 +15,6 @@
           :avatar="item.avatar"
           :online="item.online"
           :starred="item.starred"
-          :selected="selectedPubkey === item.pubkey"
-          :unread-count="unreadCounts[item.pubkey]"
-          :comfy-mode="comfyMode"
           @click="select(item.pubkey)"
         />
         <q-separator v-if="filteredRegular.length" spaced />
@@ -36,9 +33,6 @@
         :avatar="item.avatar"
         :online="item.online"
         :starred="item.starred"
-        :selected="selectedPubkey === item.pubkey"
-        :unread-count="unreadCounts[item.pubkey]"
-        :comfy-mode="comfyMode"
         @click="select(item.pubkey)"
       />
       <div
@@ -56,7 +50,6 @@ import { computed, watch, onMounted, ref } from "vue";
 import { storeToRefs } from "pinia";
 import { useMessengerStore } from "src/stores/messenger";
 import { useNostrStore } from "src/stores/nostr";
-import { useMessengerUiStore } from "src/stores/messengerUi";
 import { nip19 } from "nostr-tools";
 import { formatDistanceToNow } from "date-fns";
 import ChatListItem from "src/components/messenger/ChatListItem.vue";
@@ -66,8 +59,7 @@ const props = defineProps<{ selectedPubkey: string; search?: string }>();
 const emit = defineEmits(["select"]);
 const messenger = useMessengerStore();
 const nostr = useNostrStore();
-const ui = useMessengerUiStore();
-const { conversations, unreadCounts } = storeToRefs(messenger);
+const { conversations } = storeToRefs(messenger);
 const filterQuery = ref(props.search || "");
 watch(
   () => props.search,
@@ -140,6 +132,4 @@ onMounted(loadProfiles);
 watch(enrichedConversations, loadProfiles);
 
 const select = (pubkey: string) => emit("select", nostr.resolvePubkey(pubkey));
-
-const comfyMode = computed(() => ui.comfyMode);
 </script>
