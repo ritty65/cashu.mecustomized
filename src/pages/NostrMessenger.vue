@@ -10,7 +10,7 @@
         show-if-above
         :breakpoint="600"
         bordered
-        :width="drawerOpen ? 360 : 64"
+        :width="drawerOpen ? 240 : 64"
         class="drawer-transition drawer-container"
         :style="{ overflowX: 'hidden' }"
         :class="[
@@ -19,12 +19,11 @@
         ]"
       >
         <template v-if="drawerOpen">
-          <q-slide-transition>
-            <div class="column no-wrap full-height drawer-content">
-              <div class="row items-center justify-between q-mb-md">
-                <div class="text-subtitle1">Chats</div>
-                <q-btn flat dense round icon="add" @click="openNewChatDialog" />
-              </div>
+          <div class="column no-wrap full-height">
+            <div class="row items-center justify-between q-mb-md">
+              <div class="text-subtitle1">Chats</div>
+              <q-btn flat dense round icon="add" @click="openNewChatDialog" />
+            </div>
             <q-input
               dense
               rounded
@@ -52,33 +51,48 @@
               </Suspense>
             </q-scroll-area>
             <UserInfo />
-            </div>
-          </q-slide-transition>
+          </div>
         </template>
         <template v-else>
-          <q-slide-transition>
-            <div
-              class="column items-center q-gutter-md mini-list"
-              style="overflow-y: auto"
-            >
-              <q-avatar
-                v-for="item in miniList"
-                :key="item.pubkey"
-                size="40px"
+          <div class="column items-center q-gutter-md" style="overflow-y: auto">
+            <q-avatar
+              v-for="item in miniList"
+              :key="item.pubkey"
+              size="40px"
               class="cursor-pointer"
               @click="selectConversation(item.pubkey)"
             >
               <img v-if="item.profile?.picture" :src="item.profile.picture" />
               <span v-else>{{ item.initials }}</span>
               <q-tooltip>{{ item.displayName }}</q-tooltip>
-              </q-avatar>
-            </div>
-          </q-slide-transition>
+            </q-avatar>
+          </div>
         </template>
       </q-drawer>
     </q-responsive>
 
     <div :class="['col column', $q.screen.gt.xs ? 'q-pa-lg' : 'q-pa-md']">
+      <q-header elevated class="q-mb-md bg-transparent">
+        <q-toolbar>
+          <q-btn
+            flat
+            round
+            dense
+            icon="menu"
+            @click="messenger.toggleDrawer()"
+          />
+          <q-btn flat round dense icon="arrow_back" @click="goBack" />
+          <q-toolbar-title class="text-h6 ellipsis">
+            Nostr Messenger
+            <q-badge
+              :color="messenger.connected ? 'positive' : 'negative'"
+              class="q-ml-sm"
+            >
+              {{ messenger.connected ? "Online" : "Offline" }}
+            </q-badge>
+          </q-toolbar-title>
+        </q-toolbar>
+      </q-header>
       <q-banner v-if="connecting && !loading" dense class="bg-grey-3">
         Connecting...
       </q-banner>
@@ -117,7 +131,7 @@ import {
   onUnmounted,
   watch,
 } from "vue";
-import { useRoute } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { useLocalStorage } from "@vueuse/core";
 import { useMessengerStore } from "src/stores/messenger";
 import { useNdk } from "src/composables/useNdk";
@@ -210,7 +224,16 @@ export default defineComponent({
       if (timer) clearInterval(timer);
     });
 
+    const router = useRouter();
     const route = useRoute();
+
+    const goBack = () => {
+      if (window.history.length > 1) {
+        router.back();
+      } else {
+        router.push("/wallet");
+      }
+    };
 
     const drawerOpen = computed(() => messenger.drawerOpen);
     const selected = ref("");
@@ -374,6 +397,7 @@ export default defineComponent({
       sendMessage,
       openSendTokenDialog,
       openNewChatDialog,
+      goBack,
       reconnectAll,
       connectedCount,
       totalRelays,
@@ -385,18 +409,11 @@ export default defineComponent({
 });
 </script>
 <style scoped>
+.q-toolbar {
+  flex-wrap: nowrap;
+}
 .drawer-transition {
-  transition: width 0.3s;
-}
-
-.drawer-content,
-.mini-list q-avatar {
-  transition: opacity 0.3s, transform 0.3s;
-}
-
-.drawer-collapsed .drawer-content {
-  opacity: 0;
-  transform: translateX(-20px);
+  transition: transform 0.3s;
 }
 
 .drawer-container {
