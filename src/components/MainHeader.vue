@@ -2,6 +2,7 @@
   <q-header class="bg-transparent z-10">
     <q-toolbar>
       <q-btn
+        v-if="!isMessengerPage"
         flat
         dense
         round
@@ -27,7 +28,19 @@
           {{ $t("FullscreenHeader.actions.back.label") }}
         </span>
       </q-btn>
-      <q-toolbar-title></q-toolbar-title>
+      <q-toolbar-title
+        v-if="isMessengerPage"
+        class="row items-center no-wrap"
+      >
+        Nostr Messenger
+        <q-badge
+          :color="messenger.connected ? 'positive' : 'negative'"
+          class="q-ml-sm"
+        >
+          {{ messenger.connected ? 'Online' : 'Offline' }}
+        </q-badge>
+      </q-toolbar-title>
+      <q-toolbar-title v-else></q-toolbar-title>
       <q-btn
         v-if="isMessengerPage"
         flat
