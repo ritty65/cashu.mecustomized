@@ -27,7 +27,17 @@
           {{ $t("FullscreenHeader.actions.back.label") }}
         </span>
       </q-btn>
-      <q-toolbar-title></q-toolbar-title>
+      <q-toolbar-title>
+        <template v-if="isMessengerPage">
+          Nostr Messenger
+          <q-badge
+            :color="messenger.connected ? 'positive' : 'negative'"
+            class="q-ml-sm"
+          >
+            {{ messenger.connected ? 'Online' : 'Offline' }}
+          </q-badge>
+        </template>
+      </q-toolbar-title>
       <q-btn
         v-if="isMessengerPage"
         flat

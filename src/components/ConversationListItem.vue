@@ -265,13 +265,9 @@ export default defineComponent({
   white-space: normal;
 }
 
-.name-section {
-  flex: 1;
-  min-width: 0;
-}
-
+.name-section,
 .snippet-section {
-  flex: 1;
+  flex: 1 1 auto;
   min-width: 0;
 }
 
