@@ -79,28 +79,28 @@
     </q-responsive>
 
     <div :class="['col column', $q.screen.gt.xs ? 'q-pa-lg' : 'q-pa-md']">
-      <q-banner v-if="connecting && !loading" dense class="bg-grey-3">
-        Connecting...
-      </q-banner>
-      <q-banner
-        v-else-if="!messenger.connected && !loading"
-        dense
-        class="bg-grey-3"
-      >
-        <div class="row items-center q-gutter-sm">
-          <span>
-            Offline - {{ connectedCount }}/{{ totalRelays }} connected
-            <span v-if="nextReconnectIn !== null">
-              - reconnecting in {{ nextReconnectIn }}s
-            </span>
-          </span>
-          <q-btn flat dense label="Reconnect All" @click="reconnectAll" />
-        </div>
-      </q-banner>
       <q-spinner v-if="loading" size="lg" color="primary" />
-      <ActiveChatHeader :pubkey="selected" />
+      <ChatHeader
+        v-if="selected"
+        :name="activeChatProfile?.name"
+        :npub="activeChatProfile?.npub"
+        :avatar="activeChatProfile?.avatar"
+        :online="messenger.connected"
+        :connecting="connecting"
+        @copy="copyNpub"
+        @toggleDrawer="messenger.toggleDrawer"
+        @refresh="reconnectAll"
+      />
       <MessageList :messages="messages" class="col" />
-      <MessageInput @send="sendMessage" @sendToken="openSendTokenDialog" />
+      <div class="q-pa-md">
+        <ComposeBar
+          v-model="draft"
+          @send="sendMessage"
+          @attach="attachFile"
+          @send-token="openSendTokenDialog"
+          @emoji="$q.notify({ message: 'Emoji not implemented yet.', type: 'info' })"
+        />
+      </div>
       <ChatSendTokenDialog ref="chatSendTokenDialogRef" :recipient="selected" />
       <NewChatDialog ref="newChatDialogRef" @start="startChat" />
     </div>
@@ -118,7 +118,8 @@ import {
   watch,
 } from "vue";
 import { useRoute } from "vue-router";
-import { useLocalStorage } from "@vueuse/core";
+import { useQuasar } from "quasar";
+import { useClipboard } from "@vueuse/core";
 import { useMessengerStore } from "src/stores/messenger";
 import { useNdk } from "src/composables/useNdk";
 import { useNostrStore } from "src/stores/nostr";
@@ -127,12 +128,12 @@ import type NDK from "@nostr-dev-kit/ndk";
 
 import NewChatDialog from "components/NewChatDialog.vue";
 import ConversationList from "components/ConversationList.vue";
-import ActiveChatHeader from "components/ActiveChatHeader.vue";
 import MessageList from "components/MessageList.vue";
-import MessageInput from "components/MessageInput.vue";
 import ChatSendTokenDialog from "components/ChatSendTokenDialog.vue";
 import NostrSetupWizard from "components/NostrSetupWizard.vue";
 import UserInfo from "components/UserInfo.vue";
+import ChatHeader from "src/components/messenger/ChatHeader.vue";
+import ComposeBar from "src/components/messenger/ComposeBar.vue";
 import { shortenString } from "src/js/string-utils";
 
 export default defineComponent({
@@ -140,12 +141,12 @@ export default defineComponent({
   components: {
     NewChatDialog,
     ConversationList,
-    ActiveChatHeader,
     MessageList,
-    MessageInput,
     ChatSendTokenDialog,
     NostrSetupWizard,
     UserInfo,
+    ChatHeader,
+    ComposeBar,
   },
   setup() {
     const loading = ref(true);
@@ -153,6 +154,9 @@ export default defineComponent({
     const messenger = useMessengerStore();
     const nostr = useNostrStore();
     const showSetupWizard = ref(false);
+    const draft = ref("");
+    const $q = useQuasar();
+    const { copy } = useClipboard();
 
     const ndkRef = ref<NDK | null>(null);
     const now = ref(Date.now());
@@ -224,6 +228,26 @@ export default defineComponent({
     const messages = computed(
       () => messenger.conversations[selected.value] || [],
     );
+
+    const activeChatProfile = computed(() => {
+      if (!selected.value) return null;
+      const pubkey = selected.value;
+      const entry: any = (nostr.profiles as any)[pubkey];
+      const profile = entry?.profile ?? entry ?? {};
+      const alias = messenger.aliases[pubkey];
+      const npub = nip19.npubEncode(pubkey);
+      const name =
+        alias ||
+        profile.display_name ||
+        profile.name ||
+        profile.displayName ||
+        npub;
+      return {
+        name,
+        npub,
+        avatar: profile.picture,
+      };
+    });
 
     const miniList = computed(() => {
       return Object.entries(messenger.conversations)
@@ -307,33 +331,29 @@ export default defineComponent({
       selected.value = pubkey;
     };
 
-    const sendMessage = (
-      payload:
-        | string
-        | {
-            text: string;
-            attachment?: { dataUrl: string; name: string; type: string };
-          },
-    ) => {
-      if (!selected.value) return;
-      if (typeof payload === "string") {
-        messenger.sendDm(selected.value, payload);
-        return;
-      }
-      const { text, attachment } = payload;
-      if (text) messenger.sendDm(selected.value, text);
-      if (attachment) {
-        messenger.sendDm(selected.value, attachment.dataUrl, undefined, {
-          name: attachment.name,
-          type: attachment.type,
-        });
-      }
+    const sendMessage = (text: string) => {
+      if (!selected.value || !text) return;
+      messenger.sendDm(selected.value, text);
+      draft.value = "";
     };
 
     function openSendTokenDialog() {
       if (!selected.value) return;
       (chatSendTokenDialogRef.value as any)?.show();
     }
+
+    const attachFile = () => {
+      // This is a placeholder for the file attachment logic
+      $q.notify({ message: "File attachment not implemented yet.", type: "info" });
+    };
+
+    const copyNpub = (npub: string) => {
+      copy(npub);
+      $q.notify({
+        message: "Copied public key to clipboard.",
+        type: "positive",
+      });
+    };
 
     function openNewChatDialog() {
       (newChatDialogRef.value as any)?.show();

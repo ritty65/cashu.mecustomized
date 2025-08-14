@@ -22,7 +22,26 @@
         >
           {{ formatDay(msg.created_at) }}
         </div>
-        <ChatMessageBubble :message="msg" :delivery-status="msg.status" />
+        <div
+          class="row"
+          :class="msg.outgoing ? 'justify-end' : 'justify-start'"
+        >
+          <MessageBubble
+            :outgoing="msg.outgoing"
+            :meta="formatDate(msg.created_at)"
+          >
+            <div v-if="msg.tokenPayload">
+              <MessageTokenCard
+                :amount="msg.tokenPayload.amount"
+                :mint="msg.tokenPayload.mint"
+                :memo="msg.tokenPayload.memo"
+              />
+            </div>
+            <div v-else>
+              {{ msg.content }}
+            </div>
+          </MessageBubble>
+        </div>
       </template>
     </q-virtual-scroll>
   </q-scroll-area>
@@ -31,7 +50,8 @@
 <script lang="ts" setup>
 import { nextTick, ref, watch } from "vue";
 import type { MessengerMessage } from "src/stores/messenger";
-import ChatMessageBubble from "./ChatMessageBubble.vue";
+import MessageBubble from "src/components/messenger/MessageBubble.vue";
+import MessageTokenCard from "src/components/messenger/MessageTokenCard.vue";
 
 const props = defineProps<{ messages: MessengerMessage[] }>();
 const virtScroll = ref<any>();
