@@ -1,10 +1,9 @@
 <template>
-  <q-page
-    class="row full-height no-horizontal-scroll"
+  <q-layout
+    class="full-height no-horizontal-scroll"
     :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark']"
   >
-    <q-responsive>
-      <q-drawer
+    <q-drawer
         :model-value="true"
         side="left"
         show-if-above
@@ -75,36 +74,37 @@
             </div>
           </q-slide-transition>
         </template>
-      </q-drawer>
-    </q-responsive>
+    </q-drawer>
 
-    <div :class="['col column', $q.screen.gt.xs ? 'q-pa-lg' : 'q-pa-md']">
-      <q-spinner v-if="loading" size="lg" color="primary" />
-      <ChatHeader
-        v-if="selected"
-        :name="activeChatProfile?.name"
-        :npub="activeChatProfile?.npub"
-        :avatar="activeChatProfile?.avatar"
-        :online="messenger.connected"
-        :connecting="connecting"
-        @copy="copyNpub"
-        @toggleDrawer="messenger.toggleDrawer"
-        @refresh="reconnectAll"
-      />
-      <MessageList :messages="messages" class="col" />
-      <div class="q-pa-md">
-        <ComposeBar
-          v-model="draft"
-          @send="sendMessage"
-          @attach="attachFile"
-          @send-token="openSendTokenDialog"
-          @emoji="$q.notify({ message: 'Emoji not implemented yet.', type: 'info' })"
+    <q-page-container>
+      <q-page :class="['column', $q.screen.gt.xs ? 'q-pa-lg' : 'q-pa-md']">
+        <q-spinner v-if="loading" size="lg" color="primary" />
+        <ChatHeader
+          v-if="selected"
+          :name="activeChatProfile?.name"
+          :npub="activeChatProfile?.npub"
+          :avatar="activeChatProfile?.avatar"
+          :online="messenger.connected"
+          :connecting="connecting"
+          @copy="copyNpub"
+          @toggleDrawer="messenger.toggleDrawer"
+          @refresh="reconnectAll"
         />
-      </div>
-      <ChatSendTokenDialog ref="chatSendTokenDialogRef" :recipient="selected" />
-      <NewChatDialog ref="newChatDialogRef" @start="startChat" />
-    </div>
-  </q-page>
+        <MessageList :messages="messages" class="col" />
+        <div class="q-pa-md">
+          <ComposeBar
+            v-model="draft"
+            @send="sendMessage"
+            @attach="attachFile"
+            @send-token="openSendTokenDialog"
+            @emoji="$q.notify({ message: 'Emoji not implemented yet.', type: 'info' })"
+          />
+        </div>
+        <ChatSendTokenDialog ref="chatSendTokenDialogRef" :recipient="selected" />
+        <NewChatDialog ref="newChatDialogRef" @start="startChat" />
+      </q-page>
+    </q-page-container>
+  </q-layout>
   <NostrSetupWizard v-model="showSetupWizard" @complete="setupComplete" />
 </template>
 
