@@ -1,6 +1,14 @@
 <template>
   <div class="row no-wrap items-center q-pa-sm">
-    <q-input v-model="text" class="col" dense outlined @keyup.enter="send">
+    <q-input
+      v-model="text"
+      class="col"
+      dense
+      outlined
+      type="textarea"
+      autogrow
+      @keydown.enter="handleEnter"
+    >
       <template v-slot:append>
         <q-btn
           flat
@@ -12,20 +20,31 @@
         <q-btn flat round color="primary" @click="sendToken">
           <NutIcon />
         </q-btn>
-        <q-btn
-          flat
-          round
-          icon="send"
-          color="primary"
-          class="q-ml-sm"
-          :disable="!text.trim() && !attachment"
-          @click="send"
-        />
+        <div class="relative-position">
+          <q-btn
+            flat
+            round
+            icon="send"
+            color="primary"
+            class="q-ml-sm"
+            :disable="!canSend"
+            @click="send"
+          />
+          <q-tooltip v-if="!canSend">Add text or attachment</q-tooltip>
+        </div>
       </template>
     </q-input>
     <input ref="fileInput" type="file" class="hidden" @change="handleFile" />
   </div>
-  <div v-if="attachment" class="q-px-sm q-pb-sm">
+  <div v-if="attachment" class="q-px-sm q-pb-sm relative-position">
+    <q-btn
+      dense
+      flat
+      round
+      icon="close"
+      class="absolute-top-right"
+      @click="removeAttachment"
+    />
     <q-img
       v-if="isImage"
       :src="attachment"
@@ -46,6 +65,9 @@ const attachment = ref<string | null>(null);
 const attachmentName = ref<string>("");
 const attachmentType = ref<string>("");
 const isImage = computed(() => attachment.value?.startsWith("data:image"));
+const canSend = computed(
+  () => text.value.trim().length > 0 || !!attachment.value,
+);
 const fileInput = ref<HTMLInputElement>();
 
 const send = () => {
@@ -64,6 +86,7 @@ const send = () => {
   attachmentName.value = "";
   attachmentType.value = "";
   text.value = "";
+  if (fileInput.value) fileInput.value.value = "";
 };
 
 const sendToken = () => {
@@ -84,5 +107,18 @@ const handleFile = (e: Event) => {
     attachmentType.value = files[0].type;
   };
   reader.readAsDataURL(files[0]);
+};
+
+const removeAttachment = () => {
+  attachment.value = null;
+  attachmentName.value = "";
+  attachmentType.value = "";
+  if (fileInput.value) fileInput.value.value = "";
+};
+
+const handleEnter = (e: KeyboardEvent) => {
+  if (e.shiftKey) return;
+  e.preventDefault();
+  send();
 };
 </script>
