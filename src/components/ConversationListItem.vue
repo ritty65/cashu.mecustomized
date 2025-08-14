@@ -265,12 +265,10 @@ export default defineComponent({
   white-space: normal;
 }
 
-.name-section {
-  max-width: 40%;
-}
-
+.name-section,
 .snippet-section {
-  max-width: 35%;
+  flex: 1;
+  min-width: 0;
 }
 
 .conversation-item .ellipsis {
