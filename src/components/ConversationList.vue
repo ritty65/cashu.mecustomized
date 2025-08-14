@@ -1,13 +1,32 @@
 <template>
   <div>
-    <q-list bordered>
-      <template v-if="filteredPinned.length">
-        <q-item-label header class="q-px-md q-pt-sm q-pb-xs"
-          >Pinned</q-item-label
+    <div
+      v-if="filteredPinned.length + filteredRegular.length === 0"
+      class="q-pa-md text-caption text-grey-7"
+    >
+      No active conversations.
+    </div>
+    <q-virtual-scroll
+      v-else
+      bordered
+      :items="virtualItems"
+      :virtual-scroll-sizes="virtualSizes"
+      :virtual-scroll-item-size="ITEM_HEIGHT"
+      class="full-width"
+    >
+      <template v-slot="{ item }">
+        <q-item-label
+          v-if="item.type === 'header'"
+          :key="item.key"
+          header
+          class="q-px-md q-pt-sm q-pb-xs bg-white dark:bg-dark"
+          style="position: sticky; top: 0; z-index: 1"
         >
+          {{ item.label }}
+        </q-item-label>
         <ConversationListItem
-          v-for="item in filteredPinned"
-          :key="'pinned-' + item.pubkey"
+          v-else
+          :key="item.key"
           :pubkey="item.pubkey"
           :lastMsg="item.lastMsg"
           :selected="item.pubkey === selectedPubkey"
@@ -15,29 +34,8 @@
           @pin="togglePin(item.pubkey)"
           @delete="deleteConversation(item.pubkey)"
         />
-        <q-separator v-if="filteredRegular.length" spaced />
       </template>
-
-      <q-item-label header class="q-px-md q-pt-sm q-pb-xs"
-        >All Conversations</q-item-label
-      >
-      <ConversationListItem
-        v-for="item in filteredRegular"
-        :key="'reg-' + item.pubkey"
-        :pubkey="item.pubkey"
-        :lastMsg="item.lastMsg"
-        :selected="item.pubkey === selectedPubkey"
-        @click="select(item.pubkey)"
-        @pin="togglePin(item.pubkey)"
-        @delete="deleteConversation(item.pubkey)"
-      />
-      <div
-        v-if="filteredPinned.length + filteredRegular.length === 0"
-        class="q-pa-md text-caption text-grey-7"
-      >
-        No active conversations.
-      </div>
-    </q-list>
+    </q-virtual-scroll>
   </div>
 </template>
 
@@ -99,6 +97,47 @@ const applyFilter = (list: typeof uniqueConversations.value) => {
 
 const filteredPinned = computed(() => applyFilter(pinnedConversations.value));
 const filteredRegular = computed(() => applyFilter(regularConversations.value));
+
+const ITEM_HEIGHT = 72;
+const HEADER_HEIGHT = 36;
+
+interface VirtualHeader {
+  type: "header";
+  key: string;
+  label: string;
+}
+
+interface VirtualItem {
+  type: "item";
+  key: string;
+  pubkey: string;
+  lastMsg: any;
+}
+
+type VirtualEntry = VirtualHeader | VirtualItem;
+
+const virtualItems = computed<VirtualEntry[]>(() => {
+  const items: VirtualEntry[] = [];
+  if (filteredPinned.value.length) {
+    items.push({ type: "header", key: "header-pinned", label: "Pinned" });
+    filteredPinned.value.forEach((c) =>
+      items.push({ type: "item", key: "pinned-" + c.pubkey, ...c }),
+    );
+  }
+  items.push({
+    type: "header",
+    key: "header-all",
+    label: "All Conversations",
+  });
+  filteredRegular.value.forEach((c) =>
+    items.push({ type: "item", key: "reg-" + c.pubkey, ...c }),
+  );
+  return items;
+});
+
+const virtualSizes = computed(() =>
+  virtualItems.value.map((i) => (i.type === "header" ? HEADER_HEIGHT : ITEM_HEIGHT)),
+);
 
 const loadProfiles = async () => {
   for (const { pubkey } of uniqueConversations.value) {
