@@ -5,7 +5,7 @@
   >
     <MainHeader />
     <q-page-container class="text-body1">
-      <div class="max-w-7xl mx-auto">
+      <div :class="containerClass">
         <router-view />
       </div>
     </q-page-container>
@@ -13,7 +13,8 @@
 </template>
 
 <script>
-import { defineComponent } from "vue";
+import { defineComponent, computed } from "vue";
+import { useRoute } from "vue-router";
 import MainHeader from "components/MainHeader.vue";
 import { useNostrStore } from "src/stores/nostr";
 import { useNutzapStore } from "src/stores/nutzap";
@@ -23,6 +24,13 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     MainHeader,
+  },
+  setup() {
+    const route = useRoute();
+    const containerClass = computed(() =>
+      route.path.startsWith("/nostr-messenger") ? "" : "max-w-7xl mx-auto",
+    );
+    return { containerClass };
   },
   async mounted() {
     const nostr = useNostrStore();

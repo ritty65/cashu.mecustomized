@@ -1,6 +1,7 @@
 <template>
   <q-scroll-area class="col column q-pa-md">
-    <template v-for="(msg, idx) in messages" :key="msg.id">
+    <EmptyChatPlaceholder v-if="messages.length === 0" />
+    <template v-else v-for="(msg, idx) in messages" :key="msg.id">
       <div
         v-if="showDateSeparator(idx)"
         class="text-caption text-center q-my-md divider-text"
@@ -17,6 +18,7 @@
 import { nextTick, ref, watch } from "vue";
 import type { MessengerMessage } from "src/stores/messenger";
 import ChatMessageBubble from "./ChatMessageBubble.vue";
+import EmptyChatPlaceholder from "./EmptyChatPlaceholder.vue";
 
 const props = defineProps<{ messages: MessengerMessage[] }>();
 const bottom = ref<HTMLElement>();
