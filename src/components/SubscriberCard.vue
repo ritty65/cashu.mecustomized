@@ -7,8 +7,14 @@
       <div class="row items-center justify-between">
         <div>
           <div class="text-h6">{{ subscription.tierName }}</div>
-          <div class="text-caption text-grey">
-            {{ subscription.subscriberNpub }}
+          <div class="text-caption text-grey row items-center q-gutter-xs">
+            <span>{{ shortenNpub(subscription.subscriberNpub) }}</span>
+            <q-icon
+              name="content_copy"
+              size="16px"
+              class="cursor-pointer"
+              @click.stop="copyNpub(subscription.subscriberNpub)"
+            />
           </div>
         </div>
         <div class="text-h6">{{ amount }}</div>
@@ -34,6 +40,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { CreatorSubscription } from "stores/creatorSubscriptions";
+import { copyNpub, shortenNpub } from "src/utils/clipboard";
 
 const props = defineProps<{
   subscription: CreatorSubscription;

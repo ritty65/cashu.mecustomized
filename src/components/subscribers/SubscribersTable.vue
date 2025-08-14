@@ -10,6 +10,15 @@
     v-model:pagination="pagination"
     @row-click="onRowClick"
   >
+    <template #body-cell-subscriber="cell">
+      <q-td :props="cell">
+        <span v-if="cell.row.name">{{ cell.row.name }}</span>
+        <span v-else>
+          {{ shortenNpub(cell.row.npub) }}
+          <q-tooltip>{{ cell.row.npub }}</q-tooltip>
+        </span>
+      </q-td>
+    </template>
     <template #bottom="scope">
       <div class="q-table__bottom row items-center justify-end q-pa-sm">
         <q-pagination
@@ -40,6 +49,7 @@ import { useI18n } from "vue-i18n";
 import { useSubscribersStore } from "src/stores/subscribersStore";
 import { storeToRefs } from "pinia";
 import type { Subscriber } from "src/types/subscriber";
+import { shortenNpub } from "src/utils/clipboard";
 
 defineOptions({ name: "SubscribersTable" });
 
