@@ -2,21 +2,29 @@
   <q-scroll-area class="col column q-pa-md">
     <div
       v-if="messages.length === 0"
-      class="col flex flex-center text-grey-6"
-      style="min-height: 150px"
+      class="col flex flex-center text-grey-6 empty-placeholder"
     >
-      <span>No messages yet</span>
+      <q-icon name="chat_bubble_outline" size="48px" class="q-mb-sm" />
+      <div class="text-subtitle1">No messages yet</div>
+      <div class="text-caption">Select a conversation to start chatting</div>
     </div>
-    <template v-else v-for="(msg, idx) in messages" :key="msg.id">
-      <div
-        v-if="showDateSeparator(idx)"
-        class="text-caption text-center q-my-md divider-text"
-      >
-        {{ formatDay(msg.created_at) }}
-      </div>
-      <ChatMessageBubble :message="msg" :delivery-status="msg.status" />
-    </template>
-    <div ref="bottom"></div>
+    <q-virtual-scroll
+      v-else
+      ref="virtScroll"
+      :items="messages"
+      virtual-scroll-slice-size="30"
+      class="col"
+    >
+      <template #default="{ item: msg, index: idx }">
+        <div
+          v-if="showDateSeparator(idx)"
+          class="text-caption text-center q-my-md divider-text"
+        >
+          {{ formatDay(msg.created_at) }}
+        </div>
+        <ChatMessageBubble :message="msg" :delivery-status="msg.status" />
+      </template>
+    </q-virtual-scroll>
   </q-scroll-area>
 </template>
 
@@ -26,7 +34,7 @@ import type { MessengerMessage } from "src/stores/messenger";
 import ChatMessageBubble from "./ChatMessageBubble.vue";
 
 const props = defineProps<{ messages: MessengerMessage[] }>();
-const bottom = ref<HTMLElement>();
+const virtScroll = ref<any>();
 
 function formatDay(ts: number) {
   const d = new Date(ts * 1000);
@@ -46,7 +54,9 @@ function showDateSeparator(idx: number) {
 watch(
   () => props.messages,
   () => {
-    nextTick(() => bottom.value?.scrollIntoView({ behavior: "smooth" }));
+    nextTick(() =>
+      virtScroll.value?.scrollTo(props.messages.length - 1),
+    );
   },
   { deep: true },
 );
@@ -55,3 +65,10 @@ const formatDate = (ts: number) => new Date(ts * 1000).toLocaleString();
 
 defineExpose({ formatDay, showDateSeparator });
 </script>
+
+<style scoped>
+.empty-placeholder {
+  min-height: 150px;
+  text-align: center;
+}
+</style>
