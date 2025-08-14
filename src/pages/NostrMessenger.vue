@@ -3,74 +3,6 @@
     class="row full-height no-horizontal-scroll"
     :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark']"
   >
-    <q-responsive>
-      <q-drawer
-        :model-value="true"
-        side="left"
-        show-if-above
-        :breakpoint="600"
-        bordered
-        :width="drawerOpen ? 240 : 64"
-        class="drawer-transition drawer-container"
-        :style="{ overflowX: 'hidden' }"
-        :class="[
-          $q.screen.gt.xs ? 'q-pa-lg column' : 'q-pa-md column',
-          { 'drawer-collapsed': !drawerOpen },
-        ]"
-      >
-        <template v-if="drawerOpen">
-          <div class="column no-wrap full-height">
-            <div class="row items-center justify-between q-mb-md">
-              <div class="text-subtitle1">Chats</div>
-              <q-btn flat dense round icon="add" @click="openNewChatDialog" />
-            </div>
-            <q-input
-              dense
-              rounded
-              debounce="300"
-              v-model="conversationSearch"
-              placeholder="Search"
-              class="q-mb-md"
-            >
-              <template #prepend>
-                <q-icon name="search" />
-              </template>
-            </q-input>
-            <q-scroll-area class="col" style="min-height: 0">
-              <Suspense>
-                <template #default>
-                  <ConversationList
-                    :selected-pubkey="selected"
-                    :search="conversationSearch"
-                    @select="selectConversation"
-                  />
-                </template>
-                <template #fallback>
-                  <q-skeleton height="100px" square />
-                </template>
-              </Suspense>
-            </q-scroll-area>
-            <UserInfo />
-          </div>
-        </template>
-        <template v-else>
-          <div class="column items-center q-gutter-md" style="overflow-y: auto">
-            <q-avatar
-              v-for="item in miniList"
-              :key="item.pubkey"
-              size="40px"
-              class="cursor-pointer"
-              @click="selectConversation(item.pubkey)"
-            >
-              <img v-if="item.profile?.picture" :src="item.profile.picture" />
-              <span v-else>{{ item.initials }}</span>
-              <q-tooltip>{{ item.displayName }}</q-tooltip>
-            </q-avatar>
-          </div>
-        </template>
-      </q-drawer>
-    </q-responsive>
-
     <div :class="['col column', $q.screen.gt.xs ? 'q-pa-lg' : 'q-pa-md']">
       <q-header elevated class="q-mb-md bg-transparent">
         <q-toolbar>
@@ -116,7 +48,6 @@
       <MessageList :messages="messages" class="col" />
       <MessageInput @send="sendMessage" @sendToken="openSendTokenDialog" />
       <ChatSendTokenDialog ref="chatSendTokenDialogRef" :recipient="selected" />
-      <NewChatDialog ref="newChatDialogRef" @start="startChat" />
     </div>
   </q-page>
   <NostrSetupWizard v-model="showSetupWizard" @complete="setupComplete" />
@@ -132,34 +63,25 @@ import {
   watch,
 } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import { useLocalStorage } from "@vueuse/core";
 import { useMessengerStore } from "src/stores/messenger";
 import { useNdk } from "src/composables/useNdk";
 import { useNostrStore } from "src/stores/nostr";
 import { nip19 } from "nostr-tools";
 import type NDK from "@nostr-dev-kit/ndk";
-
-import NewChatDialog from "components/NewChatDialog.vue";
-import ConversationList from "components/ConversationList.vue";
 import ActiveChatHeader from "components/ActiveChatHeader.vue";
 import MessageList from "components/MessageList.vue";
 import MessageInput from "components/MessageInput.vue";
 import ChatSendTokenDialog from "components/ChatSendTokenDialog.vue";
 import NostrSetupWizard from "components/NostrSetupWizard.vue";
-import UserInfo from "components/UserInfo.vue";
-import { shortenString } from "src/js/string-utils";
 
 export default defineComponent({
   name: "NostrMessenger",
   components: {
-    NewChatDialog,
-    ConversationList,
     ActiveChatHeader,
     MessageList,
     MessageInput,
     ChatSendTokenDialog,
     NostrSetupWizard,
-    UserInfo,
   },
   setup() {
     const loading = ref(true);
@@ -201,7 +123,7 @@ export default defineComponent({
         if (qp) {
           const hex = bech32ToHex(qp);
           messenger.startChat(hex);
-          selected.value = hex;
+          messenger.setCurrentConversation(hex);
         }
       }
     }
@@ -235,52 +157,13 @@ export default defineComponent({
       }
     };
 
-    const drawerOpen = computed(() => messenger.drawerOpen);
-    const selected = ref("");
+    const selected = computed(() => messenger.currentConversation);
     const chatSendTokenDialogRef = ref<InstanceType<
       typeof ChatSendTokenDialog
     > | null>(null);
-    const newChatDialogRef = ref<InstanceType<typeof NewChatDialog> | null>(
-      null,
-    );
-    const conversationSearch = ref("");
     const messages = computed(
       () => messenger.conversations[selected.value] || [],
     );
-
-    const miniList = computed(() => {
-      return Object.entries(messenger.conversations)
-        .map(([pubkey, msgs]) => {
-          const entry: any = (nostr.profiles as any)[pubkey];
-          const profile = entry?.profile ?? entry ?? {};
-          const alias = messenger.aliases[pubkey];
-          const displayName =
-            alias ||
-            profile.display_name ||
-            profile.name ||
-            profile.displayName ||
-            pubkey.slice(0, 8) + "…";
-          const initials = displayName
-            .split(/\s+/)
-            .map((w) => w[0])
-            .join("")
-            .slice(0, 2)
-            .toUpperCase();
-          return {
-            pubkey,
-            profile,
-            displayName,
-            initials,
-            lastMsg: msgs[msgs.length - 1],
-            pinned: messenger.pinned[pubkey] || false,
-          };
-        })
-        .sort((a, b) => {
-          if (a.pinned && !b.pinned) return -1;
-          if (b.pinned && !a.pinned) return 1;
-          return (b.lastMsg?.created_at || 0) - (a.lastMsg?.created_at || 0);
-        });
-    });
 
     const connectedCount = computed(() => {
       if (!ndkRef.value) return 0;
@@ -311,25 +194,6 @@ export default defineComponent({
       }
     });
 
-    watch(
-      selected,
-      (val) => {
-        messenger.setCurrentConversation(val);
-      },
-      { immediate: true },
-    );
-
-    const selectConversation = (pubkey: string) => {
-      selected.value = pubkey;
-      messenger.markRead(pubkey);
-      messenger.setCurrentConversation(pubkey);
-    };
-
-    const startChat = (pubkey: string) => {
-      messenger.startChat(pubkey);
-      selected.value = pubkey;
-    };
-
     const sendMessage = (
       payload:
         | string
@@ -358,10 +222,6 @@ export default defineComponent({
       (chatSendTokenDialogRef.value as any)?.show();
     }
 
-    function openNewChatDialog() {
-      (newChatDialogRef.value as any)?.show();
-    }
-
     const reconnectAll = async () => {
       connecting.value = true;
       try {
@@ -385,25 +245,18 @@ export default defineComponent({
       loading,
       connecting,
       messenger,
-      drawerOpen,
       selected,
       chatSendTokenDialogRef,
-      newChatDialogRef,
-      conversationSearch,
       messages,
       showSetupWizard,
-      selectConversation,
-      startChat,
       sendMessage,
       openSendTokenDialog,
-      openNewChatDialog,
       goBack,
       reconnectAll,
       connectedCount,
       totalRelays,
       nextReconnectIn,
       setupComplete,
-      miniList,
     };
   },
 });
@@ -412,37 +265,5 @@ export default defineComponent({
 .q-toolbar {
   flex-wrap: nowrap;
 }
-.drawer-transition {
-  transition: transform 0.3s;
-}
-
-.drawer-container {
-  min-width: 0;
-}
-
-/* When the drawer is collapsed, only show the avatar */
-.drawer-collapsed .conversation-item {
-  padding: 8px;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.drawer-collapsed .conversation-item .q-item-section:not([avatar]) {
-  display: none;
-}
-
-.drawer-collapsed .conversation-item q-avatar {
-  width: 40px;
-  height: 40px;
-}
-
-@media (max-width: 320px) {
-  .drawer-container .conversation-item q-avatar {
-    width: 40px;
-    height: 40px;
-  }
-  .drawer-container .conversation-item .snippet {
-    display: none;
-  }
-}
+  
 </style>
