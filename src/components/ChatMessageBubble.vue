@@ -1,9 +1,9 @@
 <template>
   <div
-    class="q-my-xs row"
+    class="row message-row"
     :class="message.outgoing ? 'justify-end' : 'justify-start'"
   >
-    <q-avatar v-if="!message.outgoing" size="32px" class="q-mr-sm">
+    <q-avatar v-if="!message.outgoing && showAvatar" size="32px" class="q-mr-sm">
       <img v-if="profile?.picture" :src="profile.picture" />
       <span v-else>{{ initials }}</span>
     </q-avatar>
@@ -11,7 +11,7 @@
       class="flex column"
       :class="message.outgoing ? 'items-end' : 'items-start'"
     >
-      <div :class="message.outgoing ? 'sent' : 'received'">
+      <div class="bubble" :class="message.outgoing ? 'bubble-outgoing' : 'bubble-incoming'">
         <template v-if="message.subscriptionPayment">
           <TokenCarousel
             :payments="message.subscriptionPayment"
@@ -83,7 +83,7 @@
           :color="deliveryColor"
         />
       </div>
-      <q-avatar v-if="message.outgoing" size="32px" class="q-ml-sm">
+      <q-avatar v-if="message.outgoing && showAvatar" size="32px" class="q-ml-sm">
         <img v-if="profile?.picture" :src="profile.picture" />
         <span v-else>{{ initials }}</span>
       </q-avatar>
@@ -115,7 +115,21 @@ import { nip19 } from "nostr-tools";
 const props = defineProps<{
   message: MessengerMessage;
   deliveryStatus?: "sent" | "delivered" | "failed";
+  prevMessage?: MessengerMessage;
 }>();
+
+const AVATAR_INTERVAL_SECONDS = 5 * 60;
+
+const showAvatar = computed(() => {
+  const prev = props.prevMessage;
+  if (!prev) return true;
+  const sameSide = prev.outgoing === props.message.outgoing;
+  const sameAuthor =
+    props.message.outgoing || prev.pubkey === props.message.pubkey;
+  const closeInTime =
+    props.message.created_at - prev.created_at < AVATAR_INTERVAL_SECONDS;
+  return !(sameSide && sameAuthor && closeInTime);
+});
 
 const p2pk = useP2PKStore();
 const nostr = useNostrStore();
@@ -270,20 +284,25 @@ async function updateAutoRedeem(val: boolean) {
 </script>
 
 <style scoped>
-.sent,
-.received {
+.message-row {
+  margin: 4px 0;
+}
+
+.bubble {
   padding: 16px;
   max-width: 70%;
   word-break: break-word;
+  margin: 2px 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.sent {
+.bubble-outgoing {
   background-color: var(--q-primary);
   color: #ffffff;
   border-radius: 12px 0 12px 12px;
 }
 
-.received {
+.bubble-incoming {
   background-color: var(--q-secondary);
   color: #000000;
   border-radius: 0 12px 12px 12px;
