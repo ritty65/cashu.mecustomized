@@ -5,10 +5,7 @@
   >
     <MainHeader />
     <q-page-container class="text-body1">
-      <div v-if="!fullWidthRoute" class="max-w-7xl mx-auto">
-        <router-view />
-      </div>
-      <div v-else class="w-full">
+      <div :class="fullWidthRoute ? 'w-full' : 'max-w-7xl mx-auto'">
         <router-view />
       </div>
     </q-page-container>
