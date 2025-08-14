@@ -4,18 +4,17 @@
     :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark']"
   >
     <q-drawer
-        :model-value="true"
+        v-model="drawerOpen"
         side="left"
         show-if-above
         :breakpoint="600"
         bordered
-        :width="drawerOpen ? 360 : 64"
+        :mini="!drawerOpen"
+        :mini-to-overlay="true"
+        :width="360"
         class="drawer-transition drawer-container"
         :style="{ overflowX: 'hidden' }"
-        :class="[
-          $q.screen.gt.xs ? 'q-pa-lg column' : 'q-pa-md column',
-          { 'drawer-collapsed': !drawerOpen },
-        ]"
+        :class="[$q.screen.gt.xs ? 'q-pa-lg column' : 'q-pa-md column']"
       >
         <template v-if="drawerOpen">
           <q-slide-transition>
@@ -414,29 +413,8 @@ export default defineComponent({
   transition: opacity 0.3s, transform 0.3s;
 }
 
-.drawer-collapsed .drawer-content {
-  opacity: 0;
-  transform: translateX(-20px);
-}
-
 .drawer-container {
   min-width: 0;
-}
-
-/* When the drawer is collapsed, only show the avatar */
-.drawer-collapsed .conversation-item {
-  padding: 8px;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.drawer-collapsed .conversation-item .q-item-section:not([avatar]) {
-  display: none;
-}
-
-.drawer-collapsed .conversation-item q-avatar {
-  width: 40px;
-  height: 40px;
 }
 
 @media (max-width: 320px) {
