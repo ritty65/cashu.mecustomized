@@ -23,6 +23,7 @@ import tokenUtil from "src/js/token";
 import { subscriptionPayload } from "src/utils/receipt-utils";
 import { useCreatorsStore } from "./creators";
 import { frequencyToDays } from "src/constants/subscriptionFrequency";
+import { useMessengerUiStore } from "./messengerUi";
 
 function parseSubscriptionPaymentPayload(obj: any):
   | {
@@ -833,10 +834,18 @@ export const useMessengerStore = defineStore("messenger", {
 
     toggleDrawer() {
       this.drawerOpen = !this.drawerOpen;
+      try {
+        const ui = useMessengerUiStore();
+        ui.setOpen(this.drawerOpen);
+      } catch {}
     },
 
     setDrawer(open: boolean) {
       this.drawerOpen = open;
+      try {
+        const ui = useMessengerUiStore();
+        ui.setOpen(open);
+      } catch {}
     },
   },
 });

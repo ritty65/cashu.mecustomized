@@ -1,10 +1,22 @@
 <template>
-  <q-item clickable dense class="h-14">
+  <q-item
+    clickable
+    :dense="!comfyMode"
+    :class="['h-14', selected && 'bg-primary text-white', comfyMode && 'q-pt-sm q-pb-sm']"
+    :active="selected"
+  >
     <!-- Left: avatar + presence -->
     <q-item-section avatar>
       <q-avatar size="36px">
         <img v-if="avatar" :src="avatar" alt="" />
         <span v-else>{{ initials }}</span>
+        <q-badge
+          v-if="unreadCount"
+          color="accent"
+          floating
+          rounded
+          :label="unreadCount"
+        />
       </q-avatar>
       <div class="presence-dot" :class="online ? 'bg-positive' : 'bg-grey-6'"></div>
     </q-item-section>
@@ -44,11 +56,17 @@ const props = defineProps<{
   avatar?: string;
   online?: boolean;
   starred?: boolean;
+  selected?: boolean;
+  unreadCount?: number;
+  comfyMode?: boolean;
 }>();
 
 const displayName = computed(() => props.name || shortNpub(props.npub || ""));
 const preview = computed(() => previewText(props.lastMessage || ""));
 const initials = computed(() => (props.name || props.npub || "?").slice(0, 1).toUpperCase());
+const selected = computed(() => props.selected || false);
+const unreadCount = computed(() => props.unreadCount || 0);
+const comfyMode = computed(() => props.comfyMode || false);
 </script>
 
 <style scoped>
