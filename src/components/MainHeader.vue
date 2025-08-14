@@ -487,6 +487,7 @@ export default defineComponent({
       countdown,
       reloading,
       uiStore,
+      messenger,
       gotoBuckets,
       gotoFindCreators,
       gotoCreatorHub,
