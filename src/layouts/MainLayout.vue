@@ -7,15 +7,19 @@
     <q-drawer
       v-model="messenger.drawerOpen"
       :mini="messenger.drawerMini"
-      mini-width="64"
-      :width="360"
+      mini-width="80"
+      :width="$q.screen.lt.md ? 260 : 320"
       side="left"
       show-if-above
       :breakpoint="600"
       bordered
       :behavior="$q.screen.lt.md ? 'mobile' : 'default'"
       :overlay="$q.screen.lt.md"
-      :class="$q.screen.gt.xs ? 'q-pa-lg column' : 'q-pa-md column'"
+      :class="[
+        $q.screen.gt.xs ? 'q-pa-lg column' : 'q-pa-md column',
+        { 'drawer-collapsed': messenger.drawerMini }
+      ]"
+      style="overflow-x: hidden"
     >
       <div class="column no-wrap full-height">
         <div class="row items-center justify-between q-mb-md">

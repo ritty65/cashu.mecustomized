@@ -277,6 +277,9 @@ export default defineComponent({
   min-width: 0;
 }
 
+.drawer-collapsed .conversation-item .name-section,
+.drawer-collapsed .conversation-item .snippet-section,
+.drawer-collapsed .conversation-item .timestamp-section,
 .drawer-collapsed .conversation-item .ellipsis {
   display: none;
 }
