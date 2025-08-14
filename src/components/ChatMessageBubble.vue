@@ -285,27 +285,29 @@ async function updateAutoRedeem(val: boolean) {
 
 <style scoped>
 .message-row {
-  margin: 4px 0;
+  margin: var(--messenger-message-row-margin);
 }
 
 .bubble {
-  padding: 16px;
+  padding: var(--messenger-bubble-padding);
   max-width: 70%;
   word-break: break-word;
-  margin: 2px 0;
+  margin: var(--messenger-bubble-margin);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  font-family: var(--messenger-font-family);
+  font-size: var(--messenger-font-size);
 }
 
 .bubble-outgoing {
-  background-color: var(--q-primary);
-  color: #ffffff;
-  border-radius: 12px 0 12px 12px;
+  background-color: var(--messenger-bubble-outgoing-bg);
+  color: var(--messenger-bubble-outgoing-color);
+  border-radius: var(--messenger-bubble-outgoing-radius);
 }
 
 .bubble-incoming {
-  background-color: var(--q-secondary);
-  color: #000000;
-  border-radius: 0 12px 12px 12px;
+  background-color: var(--messenger-bubble-incoming-bg);
+  color: var(--messenger-bubble-incoming-color);
+  border-radius: var(--messenger-bubble-incoming-radius);
 }
 
 .token-wrapper {

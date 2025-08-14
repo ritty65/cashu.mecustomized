@@ -308,9 +308,13 @@ export default defineComponent({
   },
 });
 </script>
+<style lang="scss">
+@import "../css/messenger.scss";
+</style>
+
 <style scoped>
 .q-toolbar {
   flex-wrap: nowrap;
 }
-  
+
 </style>
