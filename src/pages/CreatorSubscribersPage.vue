@@ -214,6 +214,15 @@
           </template>
         </q-virtual-scroll>
 
+        <q-menu ref="avatarMenuRef">
+          <q-list class="card-bg">
+            <q-item clickable v-close-popup @click="copyNpub(menuNpub)">
+              <q-item-section>{{
+                t("CreatorSubscribers.drawer.actions.copyNpub")
+              }}</q-item-section>
+            </q-item>
+          </q-list>
+        </q-menu>
       </q-page>
     </q-page-container>
     <SubscriberDrawer v-model="drawer" :subscriber="current" />
@@ -259,6 +268,7 @@ import {
 import { storeToRefs } from "pinia";
 import { useDebounceFn } from "@vueuse/core";
 import { useQuasar } from "quasar";
+import type { QMenu } from "quasar";
 import { useI18n } from "vue-i18n";
 import type { Subscriber, Frequency, SubStatus } from "src/types/subscriber";
 import downloadCsv from "src/utils/subscriberCsv";
@@ -268,6 +278,7 @@ import SubscriptionsCharts from "src/components/subscribers/SubscriptionsCharts.
 import KpiCard from "src/components/subscribers/KpiCard.vue";
 import SubscribersTable from "src/components/subscribers/SubscribersTable.vue";
 import SubscriberDrawer from "src/components/subscribers/SubscriberDrawer.vue";
+import { copyNpub } from "src/utils/clipboard";
 
 const { t } = useI18n();
 const $q = useQuasar();
@@ -583,6 +594,12 @@ const current = ref<Subscriber | null>(null);
 function openDrawer(r: Subscriber) {
   current.value = r;
   drawer.value = true;
+}
+const avatarMenuRef = ref<QMenu | null>(null);
+const menuNpub = ref("");
+function showAvatarMenu(e: Event, row: Subscriber) {
+  menuNpub.value = row.npub;
+  avatarMenuRef.value?.show(e);
 }
 </script>
 
