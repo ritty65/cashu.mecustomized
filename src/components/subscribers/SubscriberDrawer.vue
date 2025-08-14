@@ -25,7 +25,7 @@
           <div class="col" style="min-width: 0">
             <div class="text-h6 break-word">{{ subscriber.name }}</div>
             <div class="text-body2 text-secondary break-word">
-              {{ subscriber.nip05 }}
+              {{ subscriber.nip05 || shortenNpub(subscriber.npub) }}
             </div>
           </div>
         </div>
@@ -36,8 +36,19 @@
           header-class="card-bg"
           label="npub"
         >
-          <div class="q-pa-sm card-bg text-body2 monospace break-word">
-            {{ subscriber.npub }}
+          <div
+            class="q-pa-sm card-bg text-body2 monospace break-word row items-center justify-between"
+          >
+            <span>{{ subscriber.npub }}</span>
+            <q-btn
+              flat
+              dense
+              round
+              icon="content_copy"
+              aria-label="Copy npub"
+              @click="copyCurrentNpub"
+              class="focus-outline"
+            />
           </div>
         </q-expansion-item>
 
@@ -191,7 +202,7 @@ import { useI18n } from "vue-i18n";
 import { format, formatDistanceToNow } from "date-fns";
 import { useQuasar } from "quasar";
 import type { Subscriber } from "src/types/subscriber";
-import { copyNpub } from "src/utils/clipboard";
+import { copyNpub, shortenNpub } from "src/utils/clipboard";
 
 const props = defineProps<{
   modelValue: boolean;
