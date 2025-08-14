@@ -12,6 +12,8 @@
       show-if-above
       :breakpoint="600"
       bordered
+      :behavior="$q.screen.lt.md ? 'mobile' : 'default'"
+      :overlay="$q.screen.lt.md"
       :class="$q.screen.gt.xs ? 'q-pa-lg column' : 'q-pa-md column'"
     >
       <div class="column no-wrap full-height">
@@ -60,6 +62,7 @@
 <script>
 import { defineComponent, ref } from "vue";
 import { useRouter } from "vue-router";
+import { useQuasar } from "quasar";
 import MainHeader from "components/MainHeader.vue";
 import ConversationList from "components/ConversationList.vue";
 import UserInfo from "components/UserInfo.vue";
@@ -82,6 +85,7 @@ export default defineComponent({
     const router = useRouter();
     const conversationSearch = ref("");
     const newChatDialogRef = ref(null);
+    const $q = useQuasar();
 
     const openNewChatDialog = () => {
       newChatDialogRef.value?.show();
@@ -90,6 +94,9 @@ export default defineComponent({
     const selectConversation = (pubkey) => {
       messenger.markRead(pubkey);
       messenger.setCurrentConversation(pubkey);
+      if ($q.screen.lt.md) {
+        messenger.setDrawer(false);
+      }
       if (router.currentRoute.value.path !== "/nostr-messenger") {
         router.push("/nostr-messenger");
       }

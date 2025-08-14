@@ -2,6 +2,7 @@
   <q-page
     class="row full-height no-horizontal-scroll"
     :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark']"
+    v-touch-swipe.right="openDrawer"
   >
     <div :class="['col column', $q.screen.gt.xs ? 'q-pa-lg' : 'q-pa-md']">
       <q-header elevated class="q-mb-md bg-transparent">
@@ -11,7 +12,7 @@
             round
             dense
             icon="menu"
-            @click="messenger.toggleDrawer()"
+            @click="toggleDrawer"
           />
           <q-btn flat round dense icon="arrow_back" @click="goBack" />
           <q-toolbar-title class="text-h6 ellipsis">
@@ -49,6 +50,15 @@
       <MessageInput @send="sendMessage" @sendToken="openSendTokenDialog" />
       <ChatSendTokenDialog ref="chatSendTokenDialogRef" :recipient="selected" />
     </div>
+    <q-btn
+      v-if="$q.screen.lt.md && !messenger.drawerOpen"
+      fab
+      icon="menu"
+      color="primary"
+      class="fixed bottom-left"
+      style="bottom: 16px; left: 16px"
+      @click="openDrawer"
+    />
   </q-page>
   <NostrSetupWizard v-model="showSetupWizard" @complete="setupComplete" />
 </template>
@@ -73,9 +83,11 @@ import MessageList from "components/MessageList.vue";
 import MessageInput from "components/MessageInput.vue";
 import ChatSendTokenDialog from "components/ChatSendTokenDialog.vue";
 import NostrSetupWizard from "components/NostrSetupWizard.vue";
+import { useQuasar, TouchSwipe } from "quasar";
 
 export default defineComponent({
   name: "NostrMessenger",
+  directives: { TouchSwipe },
   components: {
     ActiveChatHeader,
     MessageList,
@@ -89,6 +101,7 @@ export default defineComponent({
     const messenger = useMessengerStore();
     const nostr = useNostrStore();
     const showSetupWizard = ref(false);
+    const $q = useQuasar();
 
     const ndkRef = ref<NDK | null>(null);
     const now = ref(Date.now());
@@ -154,6 +167,20 @@ export default defineComponent({
         router.back();
       } else {
         router.push("/wallet");
+      }
+    };
+
+    const openDrawer = () => {
+      if ($q.screen.lt.md) {
+        messenger.setDrawer(true);
+      }
+    };
+
+    const toggleDrawer = () => {
+      if ($q.screen.lt.md) {
+        messenger.setDrawer(true);
+      } else {
+        messenger.toggleDrawer();
       }
     };
 
@@ -257,6 +284,8 @@ export default defineComponent({
       totalRelays,
       nextReconnectIn,
       setupComplete,
+      openDrawer,
+      toggleDrawer,
     };
   },
 });
