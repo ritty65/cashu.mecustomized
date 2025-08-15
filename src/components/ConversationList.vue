@@ -12,7 +12,7 @@
       :items="virtualItems"
       :virtual-scroll-sizes="virtualSizes"
       :virtual-scroll-item-size="ITEM_HEIGHT"
-      class="full-width"
+      class="full-width conversation-vscroll"
     >
       <template v-slot="{ item }">
         <q-item-label
@@ -159,3 +159,15 @@ const deleteConversation = (pubkey: string) => {
   messenger.deleteConversation(nostr.resolvePubkey(pubkey));
 };
 </script>
+
+<style scoped>
+/* Ensure 100% width includes the 1px border on each side; prevents side overflow */
+.conversation-vscroll {
+  box-sizing: border-box;
+  width: 100%;
+}
+/* Extra safety in case the wrapper uses flex */
+:host {
+  min-width: 0;
+}
+</style>

@@ -264,6 +264,9 @@ export default defineComponent({
   font-size: 0.7rem;
   line-height: 1.2;
   white-space: normal;
+  /* allow long tokens/npubs/URLs to break without creating horizontal scroll */
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .name-section,
@@ -303,7 +306,7 @@ export default defineComponent({
 }
 
 .timestamp-section {
-  min-width: 56px;
+  min-width: 48px;
   text-align: right;
 }
 </style>
