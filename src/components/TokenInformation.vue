@@ -1,51 +1,58 @@
 <template>
-  <div class="row text-left q-py-none q-my-none">
+  <div class="token-information row text-left q-py-none q-my-none">
     <div class="col-12 q-px-none">
-      <q-chip
-        v-if="showAmount"
-        outline
-        class="q-pa-md"
-        style="border-width: 2px"
-      >
-        <q-icon name="toll" size="xs" class="q-mr-sm" />
-        <strong>{{ displayUnit }} </strong>
-      </q-chip>
-      <q-chip
-        outline
-        class="q-pa-md"
-        style="height: 36px; font-family: monospace"
-      >
-        <q-icon name="account_balance" size="xs" class="q-mr-xs" />
-        {{ tokenMintUrl }}
-        <q-spinner-hourglass v-if="addMintBlocking" size="sm" class="q-ml-sm" />
-        <q-icon
-          v-if="
-            showMintCheck && mintKnownToUs(proofsToShow) && !addMintBlocking
-          "
-          name="check"
-          size="sm"
-          color="green"
-          class="q-ml-xs"
-        />
-      </q-chip>
-      <q-chip
-        v-if="isPureP2PK(proofsToShow)"
-        outline
-        icon="lock"
-        class="q-pa-md"
-      >
-        P2PK
-        <q-icon
-          v-if="showP2PKCheck || isLockedToUs(proofsToShow)"
-          :name="isLockedToUs(proofsToShow) ? 'check' : 'close'"
-          size="sm"
-          :color="isLockedToUs(proofsToShow) ? 'green' : 'red'"
-          class="q-ml-xs"
-        />
-      </q-chip>
-      <q-chip v-if="isHTLC(proofsToShow)" outline icon="link" class="q-pa-md">
-        HTLC
-      </q-chip>
+      <div class="chip-row">
+        <q-chip
+          v-if="showAmount"
+          outline
+          class="q-pa-md chip amount-chip"
+          style="border-width: 2px"
+        >
+          <q-icon name="toll" size="xs" class="q-mr-sm" />
+          <strong>{{ displayUnit }} </strong>
+        </q-chip>
+        <q-chip
+          outline
+          class="q-pa-md chip mint-chip"
+          style="height: 36px; font-family: monospace"
+        >
+          <q-icon name="account_balance" size="xs" class="q-mr-xs" />
+          {{ tokenMintUrl }}
+          <q-spinner-hourglass v-if="addMintBlocking" size="sm" class="q-ml-sm" />
+          <q-icon
+            v-if="
+              showMintCheck && mintKnownToUs(proofsToShow) && !addMintBlocking
+            "
+            name="check"
+            size="sm"
+            color="green"
+            class="q-ml-xs"
+          />
+        </q-chip>
+        <q-chip
+          v-if="isPureP2PK(proofsToShow)"
+          outline
+          icon="lock"
+          class="q-pa-md chip"
+        >
+          P2PK
+          <q-icon
+            v-if="showP2PKCheck || isLockedToUs(proofsToShow)"
+            :name="isLockedToUs(proofsToShow) ? 'check' : 'close'"
+            size="sm"
+            :color="isLockedToUs(proofsToShow) ? 'green' : 'red'"
+            class="q-ml-xs"
+          />
+        </q-chip>
+        <q-chip
+          v-if="isHTLC(proofsToShow)"
+          outline
+          icon="link"
+          class="q-pa-md chip"
+        >
+          HTLC
+        </q-chip>
+      </div>
       <div v-if="displayMemo" class="q-my-md">
         <q-icon name="chat" size="xs" color="grey" class="q-mr-sm" />
         <span>{{ displayMemo }}</span>
@@ -170,3 +177,30 @@ export default defineComponent({
   },
 });
 </script>
+
+<style scoped>
+.token-information {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Row that holds the pills: wrap and gap */
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Chips respect container width; long content ellipsizes */
+.chip {
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+}
+</style>

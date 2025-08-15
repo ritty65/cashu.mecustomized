@@ -12,56 +12,58 @@
       :class="message.outgoing ? 'items-end' : 'items-start'"
     >
       <div class="bubble" :class="message.outgoing ? 'bubble-outgoing' : 'bubble-incoming'">
-        <template v-if="message.subscriptionPayment">
-          <TokenCarousel
-            :payments="message.subscriptionPayment"
-            :creator="!message.outgoing"
-            :message="message"
-            @redeem="redeemPayment"
-          />
-          <div v-if="unlockTime && remaining > 0" class="text-caption q-mt-xs">
-            Unlocks in {{ countdown }}
-          </div>
-          <q-toggle
-            v-if="!message.outgoing"
-            v-model="autoRedeem"
-            label="Auto-redeem"
-            class="q-mt-sm"
-            @update:model-value="updateAutoRedeem"
-          />
-        </template>
-        <template v-else-if="message.tokenPayload">
-          <div class="token-wrapper">
-            <TokenInformation
-              :encodedToken="message.tokenPayload.token"
-              :showAmount="true"
+        <div class="bubble-content">
+          <template v-if="message.subscriptionPayment">
+            <TokenCarousel
+              :payments="message.subscriptionPayment"
+              :creator="!message.outgoing"
+              :message="message"
+              @redeem="redeemPayment"
             />
-            <div v-if="message.tokenPayload.memo" class="q-mt-sm">
-              <span class="text-weight-bold">Memo:</span>
-              {{ message.tokenPayload.memo }}
+            <div v-if="unlockTime && remaining > 0" class="text-caption q-mt-xs">
+              Unlocks in {{ countdown }}
             </div>
-          </div>
-        </template>
-        <template v-else>
-          <q-img
-            v-if="imageSrc"
-            :src="imageSrc"
-            style="max-width: 300px; max-height: 300px"
-            class="q-mb-sm"
-          />
-          <template v-else-if="isFile">
-            <a
-              :href="message.content"
-              target="_blank"
-              :download="attachmentName"
-            >
-              {{ attachmentName }}
-            </a>
+            <q-toggle
+              v-if="!message.outgoing"
+              v-model="autoRedeem"
+              label="Auto-redeem"
+              class="q-mt-sm"
+              @update:model-value="updateAutoRedeem"
+            />
+          </template>
+          <template v-else-if="message.tokenPayload">
+            <div class="token-wrapper">
+              <TokenInformation
+                :encodedToken="message.tokenPayload.token"
+                :showAmount="true"
+              />
+              <div v-if="message.tokenPayload.memo" class="q-mt-sm">
+                <span class="text-weight-bold">Memo:</span>
+                {{ message.tokenPayload.memo }}
+              </div>
+            </div>
           </template>
           <template v-else>
-            {{ message.content }}
+            <q-img
+              v-if="imageSrc"
+              :src="imageSrc"
+              style="max-width: 300px; max-height: 300px"
+              class="q-mb-sm"
+            />
+            <template v-else-if="isFile">
+              <a
+                :href="message.content"
+                target="_blank"
+                :download="attachmentName"
+              >
+                {{ attachmentName }}
+              </a>
+            </template>
+            <template v-else>
+              {{ message.content }}
+            </template>
           </template>
-        </template>
+        </div>
       </div>
       <div
         class="text-caption q-mt-xs row items-center"
@@ -289,11 +291,25 @@ async function updateAutoRedeem(val: boolean) {
 }
 
 .bubble {
-  padding: 16px;
+  padding: 18px;
   max-width: 70%;
   word-break: break-word;
   margin: 2px 0;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Constrain content to the bubble’s width & allow natural wrapping */
+.bubble-content {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  white-space: normal;
+}
+/* Ensure any immediate child block respects width */
+.bubble-content > * {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .bubble-outgoing {
@@ -315,11 +331,8 @@ async function updateAutoRedeem(val: boolean) {
   margin-top: 4px;
 }
 
-.token-wrapper .q-chip {
-  white-space: normal;
-  word-break: break-word;
+.token-wrapper .chip {
   max-width: 100%;
-  display: block; /* optional: stack chips vertically */
   margin-bottom: 4px; /* spacing between chips */
 }
 </style>
