@@ -19,7 +19,6 @@
         'q-pa-md column messenger-drawer',
         { 'drawer-collapsed': messenger.drawerMini }
       ]"
-      style="overflow-x: hidden"
     >
       <div class="column no-wrap full-height">
         <div class="row items-center justify-between q-mb-md">
