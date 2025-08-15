@@ -86,14 +86,14 @@
         color="primary"
         rounded
         class="q-mr-sm unread-badge"
-        >{{ unreadCount }}</q-badge
-      >
+      />
       <q-btn
         flat
         dense
         round
         size="sm"
         :icon="isPinned ? 'star' : 'star_outline'"
+        class="action-btn"
         @click.stop="togglePin"
       >
         <q-tooltip>{{ isPinned ? "Unpin" : "Pin" }}</q-tooltip>
@@ -103,7 +103,7 @@
         dense
         round
         icon="more_vert"
-        class="q-ml-sm"
+        class="q-ml-sm action-btn"
         @click.stop="menu = true"
         aria-label="Conversation options"
       >
@@ -242,6 +242,8 @@ export default defineComponent({
   overflow-x: hidden;
   min-width: 0;
   box-sizing: border-box;
+  /* Let each row respond to its own inline size (tracks drawer width) */
+  container-type: inline-size;
 }
 .conversation-item.selected {
   background-color: color-mix(in srgb, var(--q-primary), transparent 92%);
@@ -332,6 +334,10 @@ export default defineComponent({
   min-width: fit-content;
 }
 
+/* Base: ensure icon buttons can actually shrink when container is narrow */
+.action-btn { min-width: 0; padding: 0; }
+.action-btn .q-icon { line-height: 1; }
+
 /* Reveal-on-hover/focus behavior for desktop (pointer: fine).
    Keep everything visible on touch devices by default. */
 @media (hover: hover) and (pointer: fine) {
@@ -345,6 +351,44 @@ export default defineComponent({
     opacity: 1;
     visibility: visible;
   }
+}
+
+/* Container-responsive sizing based on row width (i.e., drawer width) */
+@container (max-width: 420px) {
+  .action-btn {
+    width: 28px;
+    height: 28px;
+  }
+  .action-btn .q-icon {
+    font-size: 18px;
+  }
+  .unread-badge {
+    font-size: 0.70rem;
+    padding: 0 5px;
+  }
+  /* tighten spacing between actions */
+  .action-btn + .action-btn {
+    margin-left: 2px !important;
+  }
+}
+
+@container (max-width: 360px) {
+  .action-btn {
+    width: 24px;
+    height: 24px;
+  }
+  .action-btn .q-icon {
+    font-size: 16px;
+  }
+  .unread-badge {
+    font-size: 0.65rem;
+    padding: 0 4px;
+  }
+}
+
+/* Touch devices: keep tap targets large */
+@media (hover: none) and (pointer: coarse) {
+  .action-btn { width: 32px; height: 32px; }
 }
 
 /* On very narrow drawers, drop the timestamp entirely to maximize text width. */
