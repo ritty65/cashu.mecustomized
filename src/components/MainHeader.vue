@@ -1,116 +1,128 @@
 <template>
   <q-header class="bg-transparent z-10">
-    <q-toolbar>
-      <q-btn
-        flat
-        dense
-        round
-        icon="menu"
-        color="primary"
-        aria-label="Menu"
-        @click="toggleLeftDrawer"
-        :disable="uiStore.globalMutexLock"
-      />
-      <q-btn
-        v-if="showBackButton"
-        flat
-        dense
-        rounded
-        icon="arrow_back_ios_new"
-        :to="backRoute"
-        color="primary"
-        aria-label="Back"
-        no-caps
-        class="q-ml-sm"
-      >
-        <span class="q-mx-md text-weight-bold">
-          {{ $t("FullscreenHeader.actions.back.label") }}
-        </span>
-      </q-btn>
-      <q-toolbar-title></q-toolbar-title>
-      <q-btn
-        v-if="isMessengerPage"
-        flat
-        dense
-        round
-        icon="menu"
-        color="primary"
-        aria-label="Toggle Chat Menu"
-        @click.stop="toggleMessengerDrawer"
-        class="q-mr-sm"
-      />
-      <transition
-        appear
-        enter-active-class="animated wobble"
-        leave-active-class="animated fadeOut"
-      >
+    <q-toolbar class="main-toolbar" dense>
+      <div class="left-controls row items-center no-wrap">
+        <q-btn
+          flat
+          dense
+          round
+          icon="menu"
+          color="primary"
+          aria-label="Menu"
+          @click="toggleLeftDrawer"
+          :disable="uiStore.globalMutexLock"
+        />
+        <q-btn
+          v-if="showBackButton"
+          flat
+          dense
+          rounded
+          icon="arrow_back_ios_new"
+          :to="backRoute"
+          color="primary"
+          aria-label="Back"
+          no-caps
+          class="q-ml-sm"
+        >
+          <span class="q-mx-md text-weight-bold">
+            {{ $t("FullscreenHeader.actions.back.label") }}
+          </span>
+        </q-btn>
+      </div>
+
+      <q-space />
+
+      <div class="toolbar-title ellipsis">
+        <q-toolbar-title />
+      </div>
+
+      <q-space />
+
+      <div class="right-controls row items-center no-wrap">
+        <q-btn
+          v-if="isMessengerPage"
+          flat
+          dense
+          round
+          icon="menu"
+          color="primary"
+          aria-label="Toggle Chat Menu"
+          @click.stop="toggleMessengerDrawer"
+          class="q-mr-sm"
+        />
+        <transition
+          appear
+          enter-active-class="animated wobble"
+          leave-active-class="animated fadeOut"
+        >
+          <q-badge
+            v-if="g.offline"
+            color="red"
+            text-color="black"
+            class="q-mr-sm"
+          >
+            <span>{{ $t("MainHeader.offline.warning.text") }}</span>
+          </q-badge>
+        </transition>
         <q-badge
-          v-if="g.offline"
-          color="red"
+          v-if="isStaging()"
+          color="yellow"
           text-color="black"
           class="q-mr-sm"
         >
-          <span>{{ $t("MainHeader.offline.warning.text") }}</span>
+          <span>{{ $t("MainHeader.staging.warning.text") }}</span>
         </q-badge>
-      </transition>
-      <q-badge
-        v-if="isStaging()"
-        color="yellow"
-        text-color="black"
-        class="q-mr-sm"
-      >
-        <span>{{ $t("MainHeader.staging.warning.text") }}</span>
-      </q-badge>
-      <!-- <q-badge color="yellow" text-color="black" class="q-mr-sm">
-        <span v-if="!isStaging()">Beta</span>
-        <span v-else>Staging – don't use with real funds!</span>
-      </q-badge> -->
-      <transition-group appear enter-active-class="animated pulse">
-        <q-badge
-          v-if="countdown > 0"
-          color="negative"
-          text-color="white"
-          class="q-mr-sm"
-          @click="reload"
-        >
-          {{ $t("MainHeader.reload.warning.text", { countdown }) }}
-          <q-spinner
+        <!-- <q-badge color="yellow" text-color="black" class="q-mr-sm">
+          <span v-if="!isStaging()">Beta</span>
+          <span v-else>Staging – don't use with real funds!</span>
+        </q-badge> -->
+        <transition-group appear enter-active-class="animated pulse">
+          <q-badge
             v-if="countdown > 0"
-            size="0.8em"
-            :thickness="10"
-            class="q-ml-sm"
-            color="white"
-          />
-        </q-badge>
-      </transition-group>
-      <q-btn
-        flat
-        dense
-        round
-        size="0.8em"
-        :icon="countdown > 0 ? 'close' : 'refresh'"
-        :color="countdown > 0 ? 'negative' : 'primary'"
-        aria-label="Refresh"
-        @click.stop="reload"
-        :loading="reloading"
-        :disable="uiStore.globalMutexLock && countdown === 0"
-      >
-        <q-tooltip>{{ $t("MainHeader.reload.tooltip") }}</q-tooltip>
-        <template v-slot:loading>
-          <q-spinner size="xs" />
-        </template>
-      </q-btn>
-      <q-btn
-        flat
-        dense
-        round
-        size="0.8em"
-        :icon="darkIcon"
-        color="primary"
-        aria-label="Toggle Dark Mode"
-        @click.stop="toggleDarkMode"
-        class="q-ml-sm"
-      />
+            color="negative"
+            text-color="white"
+            class="q-mr-sm"
+            @click="reload"
+          >
+            {{ $t("MainHeader.reload.warning.text", { countdown }) }}
+            <q-spinner
+              v-if="countdown > 0"
+              size="0.8em"
+              :thickness="10"
+              class="q-ml-sm"
+              color="white"
+            />
+          </q-badge>
+        </transition-group>
+        <q-btn
+          flat
+          dense
+          round
+          size="0.8em"
+          :icon="countdown > 0 ? 'close' : 'refresh'"
+          :color="countdown > 0 ? 'negative' : 'primary'"
+          aria-label="Refresh"
+          @click.stop="reload"
+          :loading="reloading"
+          :disable="uiStore.globalMutexLock && countdown === 0"
+        >
+          <q-tooltip>{{ $t("MainHeader.reload.tooltip") }}</q-tooltip>
+          <template v-slot:loading>
+            <q-spinner size="xs" />
+          </template>
+        </q-btn>
+        <q-btn
+          flat
+          dense
+          round
+          size="0.8em"
+          :icon="darkIcon"
+          color="primary"
+          aria-label="Toggle Dark Mode"
+          @click.stop="toggleDarkMode"
+          class="q-ml-sm"
+        />
+      </div>
     </q-toolbar>
   </q-header>
 
@@ -501,17 +513,10 @@ export default defineComponent({
   overflow-x: hidden;
 }
 
-.q-toolbar {
-  flex-wrap: nowrap;
-  min-height: 50px; /* Ensure consistent height */
-}
-
-.q-toolbar-title {
-  flex: 0 1 auto; /* Allow title to shrink */
-}
-
-/* Make badges container handle overflow properly */
-.q-toolbar > .q-badge {
-  flex-shrink: 0;
-}
+.main-toolbar { padding-inline: 8px; min-height: 48px; }
+/* Reserve space for left controls so title never collides on click/ripple */
+.left-controls { gap: 4px; flex: 0 0 auto; }
+.right-controls { gap: 4px; flex: 0 0 auto; }
+/* CRITICAL: let the middle title shrink and ellipsis instead of overflowing */
+.toolbar-title { min-width: 0; max-width: min(56vw, 640px); text-align: center; font-weight: 600; }
 </style>
