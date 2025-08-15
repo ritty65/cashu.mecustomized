@@ -33,59 +33,38 @@
       </q-avatar>
     </q-item-section>
 
-    <q-item-section class="q-hoverable name-section">
+    <!-- Main text column: name + time (top row), snippet (bottom row) -->
+    <q-item-section class="main-section">
       <template v-if="loaded">
+        <div class="list-head row no-wrap items-center">
+          <q-item-label
+            class="title ellipsis"
+            :class="{ 'text-weight-bold': unreadCount > 0 }"
+            :title="displayName"
+          >
+            <q-icon v-if="isPinned" name="star" size="xs" color="warning" class="q-mr-xs" />
+            {{ displayName }}
+          </q-item-label>
+          <span class="time text-caption">{{ timeExact }}</span>
+        </div>
+
         <q-item-label
-          class="text-subtitle1 ellipsis"
-          :class="{ 'text-weight-bold': unreadCount > 0 }"
-          :title="displayName"
-        >
-          <q-icon
-            v-if="isPinned"
-            name="star"
-            size="xs"
-            color="warning"
-            class="q-mr-xs"
-          />
-          {{ displayName }}
-        </q-item-label>
-        <q-item-label
-          v-if="secondaryName"
           caption
-          class="text-grey ellipsis"
-          :title="secondaryName"
+          class="snippet ellipsis"
+          :title="displaySnippet"
         >
-          {{ secondaryName }}
+          <template v-if="snippet.icon">
+            <q-icon :name="snippet.icon" size="14px" class="q-mr-xs" />
+          </template>
+          {{ displaySnippet }}
         </q-item-label>
       </template>
       <template v-else>
-        <q-skeleton type="text" width="60%" />
+        <q-skeleton type="text" width="80%" />
       </template>
     </q-item-section>
 
-    <q-item-section class="q-hoverable snippet-section">
-      <q-item-label
-        caption
-        class="snippet ellipsis"
-        :class="{ 'text-weight-bold': unreadCount > 0 }"
-        :title="displaySnippet"
-      >
-        <template v-if="loaded">
-          <q-icon
-            v-if="snippet.icon"
-            :name="snippet.icon"
-            size="14px"
-            class="q-mr-xs"
-          />
-          {{ displaySnippet }}
-        </template>
-        <template v-else><q-skeleton type="text" width="80%" /></template>
-      </q-item-label>
-    </q-item-section>
-
-    <q-item-section side top class="timestamp-section meta-actions text-right">
-      <span class="timestamp text-caption">{{ timeAgo }}</span>
-    </q-item-section>
+    <!-- (timestamp-section removed; time now lives next to the title) -->
 
     <!-- Meta actions: overlayed; does not reserve width when hidden -->
     <q-item-section side class="items-center meta-actions meta-actions--overlay">
@@ -139,13 +118,45 @@
   </q-item>
 </template>
 
-<script lang="ts">
-import { defineComponent, computed, ref } from "vue";
-import { QBadge, QBtn } from "quasar";
-import { useMessengerStore } from "src/stores/messenger";
-import { useNostrStore } from "src/stores/nostr";
-import { formatDistanceToNow } from "date-fns";
-import { parseMessageSnippet } from "src/utils/message-snippet";
+<script setup lang="ts">
+import { computed, ref } from 'vue'
+import { QBadge, QBtn } from 'quasar'
+import { useMessengerStore } from 'src/stores/messenger'
+import { useNostrStore } from 'src/stores/nostr'
+import { parseMessageSnippet } from 'src/utils/message-snippet'
+
+/**
+ * Exact time formatter for drawer:
+ *  - Today: HH:mm (24/12h per locale)
+ *  - Same year: "MMM d"
+ *  - Else: "MMM d, yyyy"
+ * 'lastMsg' prop (already provided here) contains created_at in seconds (Nostr).
+ */
+function formatExactTime(createdAt?: number | string | null): string {
+  if (!createdAt && createdAt !== 0) return ''
+  const sec = Number(createdAt)
+  const d = new Date((isFinite(sec) ? sec : Date.now() / 1000) * 1000)
+  const now = new Date()
+  const sameDay = d.toDateString() === now.toDateString()
+  const sameYear = d.getFullYear() === now.getFullYear()
+  if (sameDay) {
+    return new Intl.DateTimeFormat(undefined, {
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(d)
+  }
+  if (sameYear) {
+    return new Intl.DateTimeFormat(undefined, {
+      month: 'short',
+      day: 'numeric'
+    }).format(d)
+  }
+  return new Intl.DateTimeFormat(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  }).format(d)
+}
 
 /**
  * Humanize drawer snippets so we never show raw JSON fragments.
@@ -157,118 +168,91 @@ import { parseMessageSnippet } from "src/utils/message-snippet";
  *  - Otherwise: the original text trimmed.
  */
 function humanizeSnippet(raw: unknown): string {
-  if (!raw) return "";
-  const t = String(raw).trim();
+  if (!raw) return ''
+  const t = String(raw).trim()
   // Try JSON first (ignore errors)
-  if (t.startsWith("{") || t.startsWith("[")) {
+  if (t.startsWith('{') || t.startsWith('[')) {
     try {
-      const obj = JSON.parse(t);
-      if (obj && typeof obj === "object") {
-        const o: any = obj;
-        if (o.cashu || o.token || o.proofs || o.mint) return "Sent a Cashu token";
+      const obj = JSON.parse(t)
+      if (obj && typeof obj === 'object') {
+        const o: any = obj
+        if (o.cashu || o.token || o.proofs || o.mint) return 'Sent a Cashu token'
         if (o.cashu_subscription || o.subscription || o.recurrence)
-          return "Subscription payment";
+          return 'Subscription payment'
       }
     } catch {
       // fall through
     }
   }
   // Heuristics on plain text
-  if (/"token"\s*:/.test(t) || /\bcashu\b/i.test(t)) return "Sent a Cashu token";
-  if (/\bsubscription\b/i.test(t)) return "Subscription payment";
-  if (/https?:\/\/\S{40,}/i.test(t)) return "Link";
-  return t;
+  if (/"token"\s*:/.test(t) || /\bcashu\b/i.test(t)) return 'Sent a Cashu token'
+  if (/\bsubscription\b/i.test(t)) return 'Subscription payment'
+  if (/https?:\/\/\S{40,}/i.test(t)) return 'Link'
+  return t
 }
 
-export default defineComponent({
-  name: "ConversationListItem",
-  components: { QBadge, QBtn },
-  props: {
-    pubkey: { type: String, required: true },
-    lastMsg: { type: Object as () => any, default: () => ({}) },
-    selected: { type: Boolean, default: false },
-  },
-  emits: ["click", "pin", "delete"],
-  setup(props, { emit }) {
-    const messenger = useMessengerStore();
-    const nostr = useNostrStore();
-    const isOnline = computed(() => messenger.connected);
-    const isPinned = computed(() => messenger.pinned[props.pubkey]);
-    const unreadCount = computed(
-      () => messenger.unreadCounts[props.pubkey] || 0,
-    );
-    const selected = computed(() => props.selected);
-    const profile = computed(() => {
-      const entry: any = (nostr.profiles as any)[props.pubkey];
-      return entry?.profile ?? entry ?? {};
-    });
-    const alias = computed(() => messenger.aliases[props.pubkey]);
-    const profileName = computed(() => {
-      const p: any = profile.value;
-      return (
-        p?.name ||
-        p?.displayName ||
-        p?.display_name ||
-        props.pubkey.slice(0, 8) + "…"
-      );
-    });
-    const displayName = computed(() => alias.value || profileName.value);
-    const showRaw = ref(false);
-    const menu = ref(false);
-    const secondaryName = computed(() => {
-      if (!alias.value) return showRaw.value ? props.pubkey : "";
-      return showRaw.value ? props.pubkey : profileName.value;
-    });
+const props = defineProps({
+  pubkey: { type: String, required: true },
+  lastMsg: { type: Object as () => any, default: () => ({}) },
+  selected: { type: Boolean, default: false }
+})
 
-    const initials = computed(() => {
-      const name = displayName.value;
-      const words = name.split(/\s+/).filter(Boolean);
-      const letters = words.slice(0, 2).map((w) => w[0]);
-      return letters.join("").toUpperCase();
-    });
+const emit = defineEmits(['click', 'pin', 'delete'])
 
-    // consider profile fetched once the key exists, even if it has no fields
-    const loaded = computed(() => profile.value !== undefined);
+const messenger = useMessengerStore()
+const nostr = useNostrStore()
 
-    const timeAgo = computed(() => {
-      const ts = props.lastMsg?.created_at;
-      if (!ts) return "";
-      return formatDistanceToNow(ts * 1000, { addSuffix: true });
-    });
+const isOnline = computed(() => messenger.connected)
+const isPinned = computed(() => messenger.pinned[props.pubkey])
+const unreadCount = computed(() => messenger.unreadCounts[props.pubkey] || 0)
+const selected = computed(() => props.selected)
 
-    const snippet = computed(() =>
-      parseMessageSnippet(props.lastMsg?.content || ""),
-    );
+const profile = computed(() => {
+  const entry: any = (nostr.profiles as any)[props.pubkey]
+  return entry?.profile ?? entry ?? {}
+})
 
-    // Human-readable snippet text
-    const displaySnippet = computed(() => humanizeSnippet(snippet.value?.text));
+const alias = computed(() => messenger.aliases[props.pubkey])
+const profileName = computed(() => {
+  const p: any = profile.value
+  return (
+    p?.name ||
+    p?.displayName ||
+    p?.display_name ||
+    props.pubkey.slice(0, 8) + '…'
+  )
+})
+const displayName = computed(() => alias.value || profileName.value)
 
-    const onClick = () => emit("click", nostr.resolvePubkey(props.pubkey));
-    const togglePin = () => emit("pin", nostr.resolvePubkey(props.pubkey));
-    const deleteItem = () => emit("delete", nostr.resolvePubkey(props.pubkey));
+const initials = computed(() => {
+  const name = displayName.value
+  const words = name.split(/\s+/).filter(Boolean)
+  const letters = words.slice(0, 2).map((w) => w[0])
+  return letters.join('').toUpperCase()
+})
 
-    return {
-      profile,
-      displayName,
-      initials,
-      timeAgo,
-      snippet,
-      displaySnippet,
-      onClick,
-      togglePin,
-      deleteItem,
-      loaded,
-      unreadCount,
-      showRaw,
-      menu,
-      secondaryName,
-      isOnline,
-      isPinned,
-      selected,
-      props,
-    };
-  },
-});
+// consider profile fetched once the key exists, even if it has no fields
+const loaded = computed(() => profile.value !== undefined)
+
+const snippet = computed(() =>
+  parseMessageSnippet(props.lastMsg?.content || '')
+)
+
+// Build display snippet (we already humanize elsewhere)
+const displaySnippet = computed(() => humanizeSnippet(snippet.value?.text))
+
+// Exact time for the last message
+const timeExact = computed(() => {
+  const ts = (props.lastMsg && (props.lastMsg.created_at ?? props.lastMsg.timestamp)) as any
+  return formatExactTime(ts)
+})
+
+const showRaw = ref(false)
+const menu = ref(false)
+
+const onClick = () => emit('click', nostr.resolvePubkey(props.pubkey))
+const togglePin = () => emit('pin', nostr.resolvePubkey(props.pubkey))
+const deleteItem = () => emit('delete', nostr.resolvePubkey(props.pubkey))
 </script>
 
 <style scoped>
@@ -313,25 +297,20 @@ export default defineComponent({
   align-items: center;
   justify-content: center;
 }
-.timestamp {
-  white-space: nowrap;
-  font-size: 0.75rem;
-}
 .snippet {
-  font-size: 0.8rem;
-  line-height: 1.25;
+  font-size: 0.82rem;
+  line-height: 1.3;
   white-space: normal;
   /* Prefer natural word boundaries; only break inside very long strings if needed */
   overflow-wrap: break-word;
   word-break: normal;
   hyphens: none;
-  opacity: 0.9; /* subtle contrast bump */
-  /* Keep visual height predictable for virtualization: clamp to 2 lines */
+  opacity: 0.92; /* subtle contrast bump */
+  /* Clamp to 2 lines; no height jitter for virtual scroll */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
-  overflow: hidden;
-  max-height: calc(1.25em * 2);
+  max-height: calc(1.3em * 2);
 }
 
 /* Safety: links inside snippets (long URLs) should also break gracefully */
@@ -340,20 +319,12 @@ export default defineComponent({
   word-break: break-all;
 }
 
-.name-section,
-.snippet-section {
-  flex: 1;
-  min-width: 0;
-}
-
 .conversation-item .ellipsis {
   flex: 1;
   min-width: 0;
 }
 
-.drawer-collapsed .conversation-item .name-section,
-.drawer-collapsed .conversation-item .snippet-section,
-.drawer-collapsed .conversation-item .timestamp-section,
+.drawer-collapsed .conversation-item .main-section,
 .drawer-collapsed .conversation-item .ellipsis {
   display: none;
 }
@@ -365,12 +336,6 @@ export default defineComponent({
   height: 12px;
   border-radius: 50%;
   border: 2px solid var(--q-color-white);
-}
-
-/* So timestamp doesn't reserve unnecessary width; we already hide it on small widths */
-.timestamp-section {
-  min-width: auto;
-  text-align: right;
 }
 
 /* Actions overlay: remove from layout flow so text gets the space.
@@ -454,9 +419,30 @@ export default defineComponent({
   .conversation-item { padding-right: 48px; } /* reserve space so overlay doesn't obscure text */
 }
 
-/* On very narrow drawers, drop the timestamp entirely to maximize text width. */
-@media (max-width: 360px) {
-  .timestamp-section {
+/* Main content column (title + time / snippet) */
+.main-section {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.list-head {
+  min-width: 0;
+}
+.title {
+  font-size: 0.95rem;
+  line-height: 1.25;
+  min-width: 0;
+}
+.time {
+  margin-left: 8px;
+  white-space: nowrap;
+  opacity: 0.65;
+}
+@container (max-width: 360px) {
+  /* Hide time on very narrow drawers to favor text */
+  .time {
     display: none;
   }
 }
