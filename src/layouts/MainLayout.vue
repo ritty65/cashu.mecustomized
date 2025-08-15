@@ -100,10 +100,10 @@ export default defineComponent({
     const $q = useQuasar();
 
     // Persisted width just for this layout (keep store unchanged)
-    const DEFAULT_DESKTOP = 360;
+    const DEFAULT_DESKTOP = 400;
     const DEFAULT_TABLET = 300;
     const MIN_W = 280;
-    const MAX_W = 520;
+    const MAX_W = 600;
 
     const saved = LocalStorage.getItem("cashu.messenger.drawerWidth");
     const drawerWidth = ref(
