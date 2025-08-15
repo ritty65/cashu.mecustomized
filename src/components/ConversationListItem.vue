@@ -7,7 +7,7 @@
     data-test="conversation-item"
     tabindex="0"
   >
-    <q-item-section avatar>
+    <q-item-section avatar class="avatar-col">
       <q-avatar size="40px" class="relative-position">
         <template v-if="loaded && profile?.picture">
           <img :src="profile.picture" />
@@ -31,6 +31,9 @@
           rounded
         />
       </q-avatar>
+      <q-tooltip v-if="$q.screen.gt.xs && messenger.drawerMini" anchor="top middle" self="bottom middle" class="mini-tooltip">
+        {{ displayName }}
+      </q-tooltip>
     </q-item-section>
 
     <!-- Main text column: name + time (top row), snippet (bottom row) -->
@@ -120,7 +123,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { QBadge, QBtn } from 'quasar'
+import { useQuasar, QBadge, QBtn } from 'quasar'
 import { useMessengerStore } from 'src/stores/messenger'
 import { useNostrStore } from 'src/stores/nostr'
 import { parseMessageSnippet } from 'src/utils/message-snippet'
@@ -201,6 +204,7 @@ const emit = defineEmits(['click', 'pin', 'delete'])
 
 const messenger = useMessengerStore()
 const nostr = useNostrStore()
+const $q = useQuasar()
 
 const isOnline = computed(() => messenger.connected)
 const isPinned = computed(() => messenger.pinned[props.pubkey])
@@ -445,5 +449,41 @@ const deleteItem = () => emit('delete', nostr.resolvePubkey(props.pubkey))
   .time {
     display: none;
   }
+}
+
+/* Mini (collapsed) drawer polish */
+.drawer-collapsed .conversation-item {
+  justify-content: center;
+  padding: 10px 8px;
+  gap: 0;
+  border-left-color: transparent;
+}
+.drawer-collapsed .avatar-col,
+.drawer-collapsed .q-item__section--avatar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+.drawer-collapsed .conversation-item .main-section,
+.drawer-collapsed .conversation-item .snippet,
+.drawer-collapsed .conversation-item .title,
+.drawer-collapsed .conversation-item .time,
+.drawer-collapsed .conversation-item .meta-actions--overlay,
+.drawer-collapsed .conversation-item .ellipsis {
+  display: none !important; /* avatar only */
+}
+.drawer-collapsed .conversation-item .unread-overlay {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  transform: translate(25%, -25%);
+  box-shadow: 0 0 0 2px var(--q-color-dark);
+}
+.mini-tooltip {
+  font-size: 12px;
+  line-height: 1.2;
+  max-width: 220px;
+  white-space: normal;
 }
 </style>
