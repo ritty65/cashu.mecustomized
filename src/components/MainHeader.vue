@@ -30,7 +30,13 @@
         </q-btn>
       </div>
 
-      <q-toolbar-title class="toolbar-title">{{ currentTitle }}</q-toolbar-title>
+      <q-space />
+
+      <div class="toolbar-title ellipsis">
+        <q-toolbar-title />
+      </div>
+
+      <q-space />
 
       <div class="right-controls row items-center no-wrap">
         <q-btn
@@ -326,31 +332,6 @@ export default defineComponent({
     );
     const showBackButton = computed(() => isMessengerPage.value);
     const backRoute = computed(() => "/wallet");
-    const currentTitle = computed(() => {
-      const path = route.path;
-      const titles = {
-        "/wallet": t("MainHeader.menu.wallet.title"),
-        "/find-creators": t("MainHeader.menu.findCreators.title"),
-        "/creator-hub": t("MainHeader.menu.creatorHub.title"),
-        "/my-profile": t("MainHeader.menu.myProfile.title"),
-        "/buckets": t("MainHeader.menu.buckets.title"),
-        "/subscriptions": t("MainHeader.menu.subscriptions.title"),
-        "/nostr-messenger": t("MainHeader.menu.nostrMessenger.title"),
-        "/settings": t("MainHeader.menu.settings.title"),
-        "/restore": t("MainHeader.menu.restore.title"),
-        "/already-running": t("MainHeader.menu.alreadyRunning.title"),
-        "/welcome": t("MainHeader.menu.welcome.title"),
-        "/terms": t("MainHeader.menu.terms.title"),
-        "/about": t("MainHeader.menu.about.title"),
-        "/nostr-login": t("MainHeader.menu.nostrLogin.title"),
-      };
-      for (const [prefix, title] of Object.entries(titles)) {
-        if (path === prefix || path.startsWith(prefix + "/")) {
-          return title;
-        }
-      }
-      return "";
-    });
     const countdown = ref(0);
     const reloading = ref(false);
     let countdownInterval;
@@ -515,7 +496,6 @@ export default defineComponent({
       gotoWallet,
       showBackButton,
       backRoute,
-      currentTitle,
       needsNostrLogin,
       toggleMessengerDrawer,
       isMessengerPage,
@@ -538,14 +518,5 @@ export default defineComponent({
 .left-controls { gap: 4px; flex: 0 0 auto; }
 .right-controls { gap: 4px; flex: 0 0 auto; }
 /* CRITICAL: let the middle title shrink and ellipsis instead of overflowing */
-.toolbar-title {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  max-width: min(56vw, 640px);
-  text-align: center;
-  font-weight: 600;
-}
+.toolbar-title { min-width: 0; max-width: min(56vw, 640px); text-align: center; font-weight: 600; }
 </style>
