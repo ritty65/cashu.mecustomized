@@ -63,7 +63,7 @@
       />
     </q-drawer>
     <q-page-container class="text-body1">
-      <div class="max-w-7xl mx-auto">
+      <div :class="isMessengerRoute ? 'w-full' : 'max-w-7xl mx-auto'">
         <router-view />
       </div>
     </q-page-container>
@@ -172,6 +172,10 @@ export default defineComponent({
       selectConversation(pubkey);
     };
 
+    const isMessengerRoute = computed(() =>
+      router.currentRoute.value.path.startsWith("/nostr-messenger"),
+    );
+
     return {
       messenger,
       conversationSearch,
@@ -179,6 +183,7 @@ export default defineComponent({
       openNewChatDialog,
       selectConversation,
       startChat,
+      isMessengerRoute,
       computedDrawerWidth,
       onResizeStart,
     };
