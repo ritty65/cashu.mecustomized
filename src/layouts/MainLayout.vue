@@ -198,6 +198,11 @@ export default defineComponent({
   overflow-x: hidden;
 }
 
+.messenger-drawer {
+  overflow: hidden;
+  position: relative;
+}
+
 .messenger-drawer :deep(.column),
 .messenger-drawer :deep(.row),
 .messenger-drawer :deep(.col) {
@@ -209,8 +214,8 @@ export default defineComponent({
 .drawer-resizer {
   position: absolute;
   top: 0;
-  right: -4px;
-  width: 8px;
+  right: 0;
+  width: 6px;
   height: 100%;
   cursor: col-resize;
   z-index: 3;
