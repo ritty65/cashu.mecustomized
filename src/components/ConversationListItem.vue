@@ -1,13 +1,11 @@
 <template>
   <q-item
     clickable
-    class="conversation-item hover:bg-grey-2 dark:hover:bg-grey-8"
-    :class="{ selected: props.selected }"
-    :style="{
-      borderLeft:
-        '3px solid ' + (props.selected ? 'var(--q-primary)' : 'transparent'),
-    }"
-    @click="handleClick"
+    @click="onClick"
+    class="conversation-item"
+    :class="{ selected }"
+    data-test="conversation-item"
+    tabindex="0"
   >
     <q-item-section avatar>
       <q-avatar size="40px" class="relative-position">
@@ -89,7 +87,8 @@
       <span class="timestamp text-caption">{{ timeAgo }}</span>
     </q-item-section>
 
-    <q-item-section side class="items-center meta-actions">
+    <!-- Meta actions: overlayed; does not reserve width when hidden -->
+    <q-item-section side class="items-center meta-actions meta-actions--overlay">
       <q-btn
         flat
         dense
@@ -198,6 +197,7 @@ export default defineComponent({
     const unreadCount = computed(
       () => messenger.unreadCounts[props.pubkey] || 0,
     );
+    const selected = computed(() => props.selected);
     const profile = computed(() => {
       const entry: any = (nostr.profiles as any)[props.pubkey];
       return entry?.profile ?? entry ?? {};
@@ -243,7 +243,7 @@ export default defineComponent({
     // Human-readable snippet text
     const displaySnippet = computed(() => humanizeSnippet(snippet.value?.text));
 
-    const handleClick = () => emit("click", nostr.resolvePubkey(props.pubkey));
+    const onClick = () => emit("click", nostr.resolvePubkey(props.pubkey));
     const togglePin = () => emit("pin", nostr.resolvePubkey(props.pubkey));
     const deleteItem = () => emit("delete", nostr.resolvePubkey(props.pubkey));
 
@@ -254,7 +254,7 @@ export default defineComponent({
       timeAgo,
       snippet,
       displaySnippet,
-      handleClick,
+      onClick,
       togglePin,
       deleteItem,
       loaded,
@@ -264,6 +264,7 @@ export default defineComponent({
       secondaryName,
       isOnline,
       isPinned,
+      selected,
       props,
     };
   },
@@ -275,13 +276,13 @@ export default defineComponent({
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   padding: 10px 12px;
   border-radius: 8px;
-  transition: background-color 0.2s ease;
   display: flex;
   gap: 8px;
   border-left: 3px solid transparent;
   overflow-x: hidden;
   min-width: 0;
   box-sizing: border-box;
+  position: relative; /* enable overlay positioning for actions */
   /* Let each row respond to its own inline size (tracks drawer width) */
   container-type: inline-size;
 }
@@ -317,22 +318,20 @@ export default defineComponent({
   font-size: 0.75rem;
 }
 .snippet {
-  /* Slightly larger & clearer for readability */
   font-size: 0.8rem;
-  line-height: 1.2;
+  line-height: 1.25;
   white-space: normal;
-  /* Prefer natural word boundaries; still wrap very long tokens/npubs/URLs */
+  /* Prefer natural word boundaries; only break inside very long strings if needed */
   overflow-wrap: break-word;
-  word-break: break-word;
-  hyphens: auto;
-  /* Improve perceived contrast without hard-coding theme colors */
-  opacity: 0.9;
+  word-break: normal;
+  hyphens: none;
+  opacity: 0.9; /* subtle contrast bump */
   /* Keep visual height predictable for virtualization: clamp to 2 lines */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  max-height: calc(1.2em * 2);
+  max-height: calc(1.25em * 2);
 }
 
 /* Safety: links inside snippets (long URLs) should also break gracefully */
@@ -368,32 +367,37 @@ export default defineComponent({
   border: 2px solid var(--q-color-white);
 }
 
-/* So timestamp doesn't reserve unnecessary width; we'll hide it on hover anyway */
+/* So timestamp doesn't reserve unnecessary width; we already hide it on small widths */
 .timestamp-section {
   min-width: auto;
   text-align: right;
 }
 
-/* Let the controls cluster fit-content instead of forcing extra width */
-:deep(.q-item__section[side]) {
-  flex: 0 0 auto;
-  min-width: fit-content;
+/* Actions overlay: remove from layout flow so text gets the space.
+   Anchored to row's right edge and vertically centered. */
+.meta-actions--overlay {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  gap: 4px;
+  pointer-events: auto;
 }
 
 /* Base: ensure icon buttons can actually shrink when container is narrow */
 .action-btn { min-width: 0; padding: 0; }
 .action-btn .q-icon { line-height: 1; }
 
-/* Reveal-on-hover/focus behavior for desktop (pointer: fine).
-   Keep everything visible on touch devices by default. */
+/* Reveal-on-hover/focus behavior (desktop only) */
 @media (hover: hover) and (pointer: fine) {
-  .meta-actions {
+  .meta-actions--overlay {
     opacity: 0;
     visibility: hidden;
     transition: opacity .15s ease;
   }
-  .conversation-item:hover .meta-actions,
-  .conversation-item:focus-within .meta-actions {
+  .conversation-item:hover .meta-actions--overlay,
+  .conversation-item:focus-within .meta-actions--overlay {
     opacity: 1;
     visibility: visible;
   }
@@ -447,6 +451,7 @@ export default defineComponent({
     min-width: 20px; height: 20px; line-height: 20px;
     font-size: 11px;
   }
+  .conversation-item { padding-right: 48px; } /* reserve space so overlay doesn't obscure text */
 }
 
 /* On very narrow drawers, drop the timestamp entirely to maximize text width. */
