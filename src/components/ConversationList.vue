@@ -10,7 +10,7 @@
       v-else
       :items="virtualItems"
       :virtual-scroll-sizes="virtualSizes"
-      :virtual-scroll-item-size="ITEM_HEIGHT"
+      :virtual-scroll-item-size="itemHeight"
       class="full-width conversation-vscroll"
     >
       <template v-slot="{ item }">
@@ -96,7 +96,7 @@ const applyFilter = (list: typeof uniqueConversations.value) => {
 const filteredPinned = computed(() => applyFilter(pinnedConversations.value));
 const filteredRegular = computed(() => applyFilter(regularConversations.value));
 
-const ITEM_HEIGHT = 72;
+const itemHeight = computed(() => (messenger.drawerMini ? 60 : 72));
 const HEADER_HEIGHT = 36;
 
 interface VirtualHeader {
@@ -134,7 +134,7 @@ const virtualItems = computed<VirtualEntry[]>(() => {
 });
 
 const virtualSizes = computed(() =>
-  virtualItems.value.map((i) => (i.type === "header" ? HEADER_HEIGHT : ITEM_HEIGHT)),
+  virtualItems.value.map((i) => (i.type === "header" ? HEADER_HEIGHT : itemHeight.value)),
 );
 
 const loadProfiles = async () => {

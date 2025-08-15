@@ -262,7 +262,7 @@ const deleteItem = () => emit('delete', nostr.resolvePubkey(props.pubkey))
 <style scoped>
 .conversation-item {
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  padding: 10px 12px;
+  padding: 16px 12px;
   border-radius: 8px;
   display: flex;
   gap: 8px;
@@ -273,6 +273,11 @@ const deleteItem = () => emit('delete', nostr.resolvePubkey(props.pubkey))
   position: relative; /* enable overlay positioning for actions */
   /* Let each row respond to its own inline size (tracks drawer width) */
   container-type: inline-size;
+}
+
+.drawer-collapsed .conversation-item {
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 
 /* Unread badge overlay on avatar (top-right) */
