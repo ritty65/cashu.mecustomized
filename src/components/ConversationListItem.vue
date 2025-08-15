@@ -240,6 +240,8 @@ export default defineComponent({
   gap: 10px;
   border-left: 3px solid transparent;
   overflow-x: hidden;
+  min-width: 0;
+  box-sizing: border-box;
 }
 .conversation-item.selected {
   background-color: color-mix(in srgb, var(--q-primary), transparent 92%);
