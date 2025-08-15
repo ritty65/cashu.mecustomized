@@ -8,7 +8,6 @@
     </div>
     <q-virtual-scroll
       v-else
-      bordered
       :items="virtualItems"
       :virtual-scroll-sizes="virtualSizes"
       :virtual-scroll-item-size="ITEM_HEIGHT"

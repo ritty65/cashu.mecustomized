@@ -233,11 +233,11 @@ export default defineComponent({
 <style scoped>
 .conversation-item {
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  padding: 10px 16px;
+  padding: 10px 12px;
   border-radius: 8px;
   transition: background-color 0.2s ease;
   display: flex;
-  gap: 10px;
+  gap: 8px;
   border-left: 3px solid transparent;
   overflow-x: hidden;
   min-width: 0;
@@ -266,8 +266,8 @@ export default defineComponent({
   font-size: 0.7rem;
   line-height: 1.2;
   white-space: normal;
-  /* Allow single long "words" (tokens/npubs/URLs) to wrap within the column */
-  overflow-wrap: anywhere;
+  /* Prefer natural word boundaries; still break very long tokens/npubs/URLs */
+  overflow-wrap: break-word;
   word-break: break-word;
   /* Keep visual height predictable for virtualization: clamp to 2 lines */
   display: -webkit-box;

@@ -1,5 +1,5 @@
 <template>
-  <div class="row items-center justify-between q-mt-md">
+  <div class="row items-center justify-between q-mt-md userinfo-root">
     <div class="row items-center">
       <q-avatar size="32px" class="q-mr-sm">
         <img v-if="profile?.picture" :src="profile.picture" />
@@ -70,3 +70,13 @@ function toggleDark() {
   $q.localStorage.set("cashu.darkMode", $q.dark.isActive);
 }
 </script>
+
+<style scoped>
+.userinfo-root {
+  min-width: 0;
+}
+.userinfo-root :deep(.row) {
+  min-width: 0;
+  box-sizing: border-box;
+}
+</style>
