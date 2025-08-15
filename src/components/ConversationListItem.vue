@@ -76,11 +76,11 @@
       </q-item-label>
     </q-item-section>
 
-    <q-item-section side top class="timestamp-section text-right">
+    <q-item-section side top class="timestamp-section meta-actions text-right">
       <span class="timestamp text-caption">{{ timeAgo }}</span>
     </q-item-section>
 
-    <q-item-section side class="items-center">
+    <q-item-section side class="items-center meta-actions">
       <q-badge
         v-if="unreadCount > 0"
         color="primary"
@@ -313,14 +313,37 @@ export default defineComponent({
     0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
-.timestamp-section {
-  min-width: 48px;
-  text-align: right;
+/* So timestamp doesn't reserve unnecessary width; we'll hide it on hover anyway */
+.timestamp-section { 
+  min-width: auto;
+  text-align: right; 
 }
 
 /* Let the controls cluster fit-content instead of forcing extra width */
 :deep(.q-item__section[side]) {
   flex: 0 0 auto;
   min-width: fit-content;
+}
+
+/* Reveal-on-hover/focus behavior for desktop (pointer: fine).
+   Keep everything visible on touch devices by default. */
+@media (hover: hover) and (pointer: fine) {
+  .meta-actions {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .15s ease;
+  }
+  .conversation-item:hover .meta-actions,
+  .conversation-item:focus-within .meta-actions {
+    opacity: 1;
+    visibility: visible;
+  }
+}
+
+/* On very narrow drawers, drop the timestamp entirely to maximize text width. */
+@media (max-width: 360px) {
+  .timestamp-section {
+    display: none;
+  }
 }
 </style>
