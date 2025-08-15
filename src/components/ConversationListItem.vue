@@ -266,15 +266,22 @@ export default defineComponent({
   font-size: 0.7rem;
   line-height: 1.2;
   white-space: normal;
-  /* Prefer natural word boundaries; still break very long tokens/npubs/URLs */
+  /* Prefer natural word boundaries; still wrap very long tokens/npubs/URLs */
   overflow-wrap: break-word;
   word-break: break-word;
+  hyphens: auto;
   /* Keep visual height predictable for virtualization: clamp to 2 lines */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   max-height: calc(1.2em * 2);
+}
+
+/* Safety: links inside snippets (long URLs) should also break gracefully */
+.snippet a {
+  overflow-wrap: anywhere;
+  word-break: break-all;
 }
 
 .name-section,
