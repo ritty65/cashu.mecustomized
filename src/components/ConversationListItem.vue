@@ -264,6 +264,15 @@ export default defineComponent({
   font-size: 0.7rem;
   line-height: 1.2;
   white-space: normal;
+  /* Allow single long "words" (tokens/npubs/URLs) to wrap within the column */
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  /* Keep visual height predictable for virtualization: clamp to 2 lines */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  max-height: calc(1.2em * 2);
 }
 
 .name-section,
@@ -303,7 +312,13 @@ export default defineComponent({
 }
 
 .timestamp-section {
-  min-width: 56px;
+  min-width: 48px;
   text-align: right;
+}
+
+/* Let the controls cluster fit-content instead of forcing extra width */
+:deep(.q-item__section[side]) {
+  flex: 0 0 auto;
+  min-width: fit-content;
 }
 </style>
