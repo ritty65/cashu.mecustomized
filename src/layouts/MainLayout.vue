@@ -8,7 +8,7 @@
       v-model="messenger.drawerOpen"
       :mini="messenger.drawerMini"
       mini-width="80"
-      :width="$q.screen.lt.md ? 300 : 340"
+      :width="$q.screen.lt.md ? 260 : 320"
       side="left"
       show-if-above
       :breakpoint="600"
@@ -16,7 +16,7 @@
       :behavior="$q.screen.lt.md ? 'mobile' : 'default'"
       :overlay="$q.screen.lt.md"
       :class="[
-        'q-pa-md column messenger-drawer',
+        $q.screen.gt.xs ? 'q-pa-lg column' : 'q-pa-md column',
         { 'drawer-collapsed': messenger.drawerMini }
       ]"
       style="overflow-x: hidden"
@@ -38,7 +38,7 @@
             <q-icon name="search" />
           </template>
         </q-input>
-        <q-scroll-area class="col" style="min-height: 0; min-width: 0">
+        <q-scroll-area class="col" style="min-height: 0">
           <Suspense>
             <template #default>
               <ConversationList
@@ -129,20 +129,3 @@ export default defineComponent({
   },
 });
 </script>
-
-<style scoped>
-/* Prevent any internal content from creating side scroll inside this drawer */
-.messenger-drawer :deep(.q-drawer__content) {
-  overflow-x: hidden;
-}
-.messenger-drawer :deep(.q-scrollarea) {
-  overflow-x: hidden;
-}
-/* Safety: let flex children shrink to avoid overflow */
-.messenger-drawer :deep(.column),
-.messenger-drawer :deep(.row),
-.messenger-drawer :deep(.col) {
-  min-width: 0;
-  box-sizing: border-box;
-}
-</style>
