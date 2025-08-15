@@ -167,6 +167,10 @@ const deleteConversation = (pubkey: string) => {
   width: 100%;
   max-width: 100%;
 }
+.conversation-vscroll :deep(.q-virtual-scroll__content) {
+  box-sizing: border-box;
+  max-width: 100%;
+}
 /* Safety if a flex wrapper is around */
 :host {
   min-width: 0;
