@@ -8,7 +8,7 @@
       v-model="messenger.drawerOpen"
       :mini="messenger.drawerMini"
       mini-width="80"
-      :width="$q.screen.lt.md ? 300 : 340"
+      :width="computedDrawerWidth"
       side="left"
       show-if-above
       :breakpoint="600"
@@ -53,6 +53,14 @@
         </q-scroll-area>
         <UserInfo />
       </div>
+      <!-- Desktop resizer handle (hidden on <md and when mini) -->
+      <div
+        v-if="$q.screen.gt.sm && !messenger.drawerMini"
+        class="drawer-resizer"
+        @mousedown="onResizeStart"
+        aria-label="Resize conversations panel"
+        title="Drag to resize"
+      />
     </q-drawer>
     <q-page-container class="text-body1">
       <div class="max-w-7xl mx-auto">
@@ -64,9 +72,9 @@
 </template>
 
 <script>
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, computed, watch } from "vue";
 import { useRouter } from "vue-router";
-import { useQuasar } from "quasar";
+import { useQuasar, LocalStorage } from "quasar";
 import MainHeader from "components/MainHeader.vue";
 import ConversationList from "components/ConversationList.vue";
 import UserInfo from "components/UserInfo.vue";
@@ -90,6 +98,59 @@ export default defineComponent({
     const conversationSearch = ref("");
     const newChatDialogRef = ref(null);
     const $q = useQuasar();
+
+    // Persisted width just for this layout (keep store unchanged)
+    const DEFAULT_DESKTOP = 360;
+    const DEFAULT_TABLET = 300;
+    const MIN_W = 280;
+    const MAX_W = 520;
+
+    const saved = LocalStorage.getItem("cashu.messenger.drawerWidth");
+    const drawerWidth = ref(
+      typeof saved === "number"
+        ? saved
+        : $q.screen.lt.md
+          ? DEFAULT_TABLET
+          : DEFAULT_DESKTOP,
+    );
+
+    const computedDrawerWidth = computed(() => {
+      if ($q.screen.lt.md)
+        return Math.max(MIN_W, Math.min(drawerWidth.value, 400));
+      return Math.max(MIN_W, Math.min(drawerWidth.value, MAX_W));
+    });
+
+    watch(drawerWidth, (val) => {
+      LocalStorage.set("cashu.messenger.drawerWidth", val);
+    });
+
+    watch(
+      () => $q.screen.lt.md,
+      (isLt) => {
+        if (isLt && drawerWidth.value > 400) drawerWidth.value = DEFAULT_TABLET;
+        if (!isLt && drawerWidth.value < MIN_W)
+          drawerWidth.value = DEFAULT_DESKTOP;
+      },
+    );
+
+    // Drag-to-resize
+    let startX = 0;
+    let startW = 0;
+    const onMouseMove = (e) => {
+      const dx = e.clientX - startX;
+      drawerWidth.value = startW + dx;
+    };
+    const onMouseUp = () => {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+    };
+    const onResizeStart = (e) => {
+      startX = e.clientX;
+      startW = drawerWidth.value;
+      window.addEventListener("mousemove", onMouseMove);
+      window.addEventListener("mouseup", onMouseUp);
+      e.preventDefault();
+    };
 
     const openNewChatDialog = () => {
       newChatDialogRef.value?.show();
@@ -118,6 +179,8 @@ export default defineComponent({
       openNewChatDialog,
       selectConversation,
       startChat,
+      computedDrawerWidth,
+      onResizeStart,
     };
   },
   async mounted() {
@@ -140,5 +203,33 @@ export default defineComponent({
 .messenger-drawer :deep(.col) {
   min-width: 0;
   box-sizing: border-box;
+}
+
+/* Desktop resizer handle */
+.drawer-resizer {
+  position: absolute;
+  top: 0;
+  right: -4px;
+  width: 8px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 3;
+}
+.drawer-resizer::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 2px;
+  transform: translateY(-50%);
+  width: 2px;
+  height: 32px;
+  border-radius: 2px;
+  background: currentColor;
+  opacity: 0.25;
+}
+@media (max-width: 1023px) {
+  .drawer-resizer {
+    display: none;
+  }
 }
 </style>
