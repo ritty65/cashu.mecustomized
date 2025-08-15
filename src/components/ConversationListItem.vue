@@ -1,10 +1,9 @@
 <template>
   <q-item
     clickable
-    v-ripple
     @click="onClick"
     class="conversation-item"
-    :class="{ selected, 'is-unread': unreadCount > 0 }"
+    :class="{ selected }"
     data-test="conversation-item"
     tabindex="0"
   >
@@ -329,6 +328,10 @@ const deleteItem = () => emit('delete', nostr.resolvePubkey(props.pubkey))
   min-width: 0;
 }
 
+.drawer-collapsed .conversation-item .main-section,
+.drawer-collapsed .conversation-item .ellipsis {
+  display: none;
+}
 .status-dot {
   position: absolute;
   bottom: -2px;
@@ -449,28 +452,28 @@ const deleteItem = () => emit('delete', nostr.resolvePubkey(props.pubkey))
 }
 
 /* Mini (collapsed) drawer polish */
-:deep(.drawer-collapsed) .conversation-item {
+.drawer-collapsed .conversation-item {
   justify-content: center;
   padding: 10px 8px;
   gap: 0;
   border-left-color: transparent;
 }
-:deep(.drawer-collapsed) .avatar-col,
-:deep(.drawer-collapsed) .q-item__section--avatar {
+.drawer-collapsed .avatar-col,
+.drawer-collapsed .q-item__section--avatar {
   display: flex;
   justify-content: center;
   align-items: center;
   width: 100%;
 }
-:deep(.drawer-collapsed) .conversation-item .main-section,
-:deep(.drawer-collapsed) .conversation-item .snippet,
-:deep(.drawer-collapsed) .conversation-item .title,
-:deep(.drawer-collapsed) .conversation-item .time,
-:deep(.drawer-collapsed) .conversation-item .meta-actions--overlay,
-:deep(.drawer-collapsed) .conversation-item .ellipsis {
+.drawer-collapsed .conversation-item .main-section,
+.drawer-collapsed .conversation-item .snippet,
+.drawer-collapsed .conversation-item .title,
+.drawer-collapsed .conversation-item .time,
+.drawer-collapsed .conversation-item .meta-actions--overlay,
+.drawer-collapsed .conversation-item .ellipsis {
   display: none !important; /* avatar only */
 }
-:deep(.drawer-collapsed) .conversation-item .unread-overlay {
+.drawer-collapsed .conversation-item .unread-overlay {
   position: absolute;
   top: 6px;
   right: 6px;

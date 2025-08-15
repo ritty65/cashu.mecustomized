@@ -1,5 +1,5 @@
 <template>
-  <q-header class="bg-transparent z-10" elevated>
+  <q-header class="bg-transparent z-10">
     <q-toolbar class="main-toolbar" dense>
       <div class="left-controls row items-center no-wrap">
         <q-btn
@@ -30,9 +30,13 @@
         </q-btn>
       </div>
 
-      <q-toolbar-title class="toolbar-title ellipsis">
-        <slot name="title">Nostr Messenger</slot>
-      </q-toolbar-title>
+      <q-space />
+
+      <div class="toolbar-title ellipsis">
+        <q-toolbar-title />
+      </div>
+
+      <q-space />
 
       <div class="right-controls row items-center no-wrap">
         <q-btn
