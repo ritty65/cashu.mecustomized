@@ -18,8 +18,7 @@
           v-if="item.type === 'header'"
           :key="item.key"
           header
-          class="q-px-md q-pt-sm q-pb-xs bg-white dark:bg-dark"
-          style="position: sticky; top: 0; z-index: 1"
+          class="conversation-header q-px-md q-pt-sm q-pb-xs"
         >
           {{ item.label }}
         </q-item-label>
@@ -173,5 +172,27 @@ const deleteConversation = (pubkey: string) => {
 /* Safety if a flex wrapper is around */
 :host {
   min-width: 0;
+}
+
+.conversation-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  /* Inherit drawer bg – no bright fill */
+  background: transparent;
+  /* Quiet label aesthetics */
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+  font-size: 0.72rem;
+  opacity: 0.7;
+  /* Subtle divider that adapts to theme */
+  --sep: rgba(0, 0, 0, 0.12);
+  border-bottom: 1px solid var(--sep);
+}
+@media (prefers-color-scheme: dark) {
+  .conversation-header {
+    --sep: rgba(255, 255, 255, 0.08);
+  }
 }
 </style>

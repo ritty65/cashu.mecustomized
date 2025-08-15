@@ -70,16 +70,16 @@
         caption
         class="snippet ellipsis"
         :class="{ 'text-weight-bold': unreadCount > 0 }"
-        :title="snippet.text"
+        :title="displaySnippet"
       >
         <template v-if="loaded">
           <q-icon
             v-if="snippet.icon"
             :name="snippet.icon"
-            size="xs"
+            size="14px"
             class="q-mr-xs"
           />
-          {{ snippet.text }}
+          {{ displaySnippet }}
         </template>
         <template v-else><q-skeleton type="text" width="80%" /></template>
       </q-item-label>
@@ -148,6 +148,39 @@ import { useNostrStore } from "src/stores/nostr";
 import { formatDistanceToNow } from "date-fns";
 import { parseMessageSnippet } from "src/utils/message-snippet";
 
+/**
+ * Humanize drawer snippets so we never show raw JSON fragments.
+ * Heuristics-only (no business logic change):
+ *  - JSON with token/proofs/mint/cashu  -> "Sent a Cashu token"
+ *  - JSON with cashu_subscription/recurrence -> "Subscription payment"
+ *  - Any text containing 'subscription' -> "Subscription payment"
+ *  - Very long http(s) link -> "Link"
+ *  - Otherwise: the original text trimmed.
+ */
+function humanizeSnippet(raw: unknown): string {
+  if (!raw) return "";
+  const t = String(raw).trim();
+  // Try JSON first (ignore errors)
+  if (t.startsWith("{") || t.startsWith("[")) {
+    try {
+      const obj = JSON.parse(t);
+      if (obj && typeof obj === "object") {
+        const o: any = obj;
+        if (o.cashu || o.token || o.proofs || o.mint) return "Sent a Cashu token";
+        if (o.cashu_subscription || o.subscription || o.recurrence)
+          return "Subscription payment";
+      }
+    } catch {
+      // fall through
+    }
+  }
+  // Heuristics on plain text
+  if (/"token"\s*:/.test(t) || /\bcashu\b/i.test(t)) return "Sent a Cashu token";
+  if (/\bsubscription\b/i.test(t)) return "Subscription payment";
+  if (/https?:\/\/\S{40,}/i.test(t)) return "Link";
+  return t;
+}
+
 export default defineComponent({
   name: "ConversationListItem",
   components: { QBadge, QBtn },
@@ -207,6 +240,9 @@ export default defineComponent({
       parseMessageSnippet(props.lastMsg?.content || ""),
     );
 
+    // Human-readable snippet text
+    const displaySnippet = computed(() => humanizeSnippet(snippet.value?.text));
+
     const handleClick = () => emit("click", nostr.resolvePubkey(props.pubkey));
     const togglePin = () => emit("pin", nostr.resolvePubkey(props.pubkey));
     const deleteItem = () => emit("delete", nostr.resolvePubkey(props.pubkey));
@@ -217,6 +253,7 @@ export default defineComponent({
       initials,
       timeAgo,
       snippet,
+      displaySnippet,
       handleClick,
       togglePin,
       deleteItem,
@@ -280,13 +317,16 @@ export default defineComponent({
   font-size: 0.75rem;
 }
 .snippet {
-  font-size: 0.7rem;
+  /* Slightly larger & clearer for readability */
+  font-size: 0.8rem;
   line-height: 1.2;
   white-space: normal;
   /* Prefer natural word boundaries; still wrap very long tokens/npubs/URLs */
   overflow-wrap: break-word;
   word-break: break-word;
   hyphens: auto;
+  /* Improve perceived contrast without hard-coding theme colors */
+  opacity: 0.9;
   /* Keep visual height predictable for virtualization: clamp to 2 lines */
   display: -webkit-box;
   -webkit-line-clamp: 2;
