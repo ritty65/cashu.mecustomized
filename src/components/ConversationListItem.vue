@@ -23,6 +23,15 @@
           rounded
           :color="isOnline ? 'positive' : 'grey'"
         />
+        <!-- Unread badge: overlay on avatar (top-right), always visible -->
+        <q-badge
+          v-if="unreadCount > 0"
+          :label="unreadCount > 99 ? '99+' : String(unreadCount)"
+          color="primary"
+          text-color="white"
+          class="unread-overlay"
+          rounded
+        />
       </q-avatar>
     </q-item-section>
 
@@ -81,12 +90,6 @@
     </q-item-section>
 
     <q-item-section side class="items-center meta-actions">
-      <q-badge
-        v-if="unreadCount > 0"
-        color="primary"
-        rounded
-        class="q-mr-sm unread-badge"
-      />
       <q-btn
         flat
         dense
@@ -245,6 +248,18 @@ export default defineComponent({
   /* Let each row respond to its own inline size (tracks drawer width) */
   container-type: inline-size;
 }
+
+/* Unread badge overlay on avatar (top-right) */
+.unread-overlay {
+  position: absolute;
+  top: -3px; right: -3px;
+  z-index: 1;
+  min-width: 18px; height: 18px; line-height: 18px;
+  padding: 0 4px;
+  font-size: 10px; font-weight: 700;
+  box-shadow: 0 0 0 2px var(--q-color-dark), 0 2px 4px rgba(0,0,0,.15);
+  pointer-events: none; /* don’t block avatar clicks */
+}
 .conversation-item.selected {
   background-color: color-mix(in srgb, var(--q-primary), transparent 92%);
 }
@@ -313,19 +328,10 @@ export default defineComponent({
   border: 2px solid var(--q-color-white);
 }
 
-.unread-badge {
-  font-weight: bold;
-  font-size: 0.75rem;
-  padding: 0 6px;
-  box-shadow:
-    0 0 0 2px var(--q-color-white),
-    0 2px 4px rgba(0, 0, 0, 0.15);
-}
-
 /* So timestamp doesn't reserve unnecessary width; we'll hide it on hover anyway */
-.timestamp-section { 
+.timestamp-section {
   min-width: auto;
-  text-align: right; 
+  text-align: right;
 }
 
 /* Let the controls cluster fit-content instead of forcing extra width */
@@ -362,10 +368,6 @@ export default defineComponent({
   .action-btn .q-icon {
     font-size: 18px;
   }
-  .unread-badge {
-    font-size: 0.70rem;
-    padding: 0 5px;
-  }
   /* tighten spacing between actions */
   .action-btn + .action-btn {
     margin-left: 2px !important;
@@ -380,15 +382,31 @@ export default defineComponent({
   .action-btn .q-icon {
     font-size: 16px;
   }
-  .unread-badge {
-    font-size: 0.65rem;
-    padding: 0 4px;
+}
+
+/* Container-responsive sizing based on row width (i.e., drawer width) */
+@container (max-width: 420px) {
+  .unread-overlay {
+    min-width: 16px; height: 16px; line-height: 16px;
+    font-size: 9px;
+    top: -2px; right: -2px;
+  }
+}
+@container (max-width: 360px) {
+  .unread-overlay {
+    min-width: 14px; height: 14px; line-height: 14px;
+    font-size: 8px;
+    top: -1px; right: -1px;
   }
 }
 
-/* Touch devices: keep tap targets large */
+/* Touch devices: keep tap targets comfy (badge still non-interactive) */
 @media (hover: none) and (pointer: coarse) {
   .action-btn { width: 32px; height: 32px; }
+  .unread-overlay {
+    min-width: 20px; height: 20px; line-height: 20px;
+    font-size: 11px;
+  }
 }
 
 /* On very narrow drawers, drop the timestamp entirely to maximize text width. */
