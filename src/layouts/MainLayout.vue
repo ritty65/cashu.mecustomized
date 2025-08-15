@@ -100,10 +100,10 @@ export default defineComponent({
     const $q = useQuasar();
 
     // Persisted width just for this layout (keep store unchanged)
-    const DEFAULT_DESKTOP = 400;
-    const DEFAULT_TABLET = 300;
-    const MIN_W = 280;
-    const MAX_W = 600;
+    const DEFAULT_DESKTOP = 440;
+    const DEFAULT_TABLET  = 320;
+    const MIN_W = 320;
+    const MAX_W = 640;
 
     const saved = LocalStorage.getItem("cashu.messenger.drawerWidth");
     const drawerWidth = ref(
@@ -116,7 +116,7 @@ export default defineComponent({
 
     const computedDrawerWidth = computed(() => {
       if ($q.screen.lt.md)
-        return Math.max(MIN_W, Math.min(drawerWidth.value, 400));
+        return Math.max(MIN_W, Math.min(drawerWidth.value, 420));
       return Math.max(MIN_W, Math.min(drawerWidth.value, MAX_W));
     });
 
@@ -127,9 +127,8 @@ export default defineComponent({
     watch(
       () => $q.screen.lt.md,
       (isLt) => {
-        if (isLt && drawerWidth.value > 400) drawerWidth.value = DEFAULT_TABLET;
-        if (!isLt && drawerWidth.value < MIN_W)
-          drawerWidth.value = DEFAULT_DESKTOP;
+        if (isLt && drawerWidth.value > 420) drawerWidth.value = DEFAULT_TABLET;
+        if (!isLt && drawerWidth.value < MIN_W) drawerWidth.value = DEFAULT_DESKTOP;
       },
     );
 
