@@ -1,5 +1,5 @@
 <template>
-  <q-header class="bg-transparent z-10">
+  <q-header class="bg-transparent">
     <q-toolbar class="app-toolbar" dense>
       <div class="left-controls row items-center no-wrap">
         <template v-if="showBackButton">
@@ -18,7 +18,7 @@
             round
             icon="menu"
             color="primary"
-            aria-label="Open menu"
+            aria-label="Open main menu"
             :aria-expanded="String(ui.mainNavOpen)"
             aria-controls="app-nav"
             @click="ui.toggleMainNav"
@@ -32,28 +32,29 @@
           round
           icon="menu"
           color="primary"
-          aria-label="Open menu"
+          aria-label="Open main menu"
           :aria-expanded="String(ui.mainNavOpen)"
           aria-controls="app-nav"
           @click="ui.toggleMainNav"
           :disable="ui.globalMutexLock"
+        />
+        <!-- NEW: Chats sidebar toggle (only on Messenger) -->
+        <q-btn
+          v-if="isMessengerPage"
+          flat
+          dense
+          round
+          icon="view_sidebar"
+          color="primary"
+          aria-label="Toggle chats sidebar"
+          @click.stop="toggleMessengerDrawer"
+          class="q-ml-xs"
         />
       </div>
 
       <q-toolbar-title class="app-title">{{ currentTitle }}</q-toolbar-title>
 
       <div class="right-controls row items-center no-wrap">
-        <q-btn
-          v-if="isMessengerPage"
-          flat
-          dense
-          round
-          icon="menu"
-          color="primary"
-          aria-label="Toggle Chat Menu"
-          @click.stop="toggleMessengerDrawer"
-          class="q-mr-sm"
-        />
         <transition
           appear
           enter-active-class="animated wobble"
@@ -245,15 +246,20 @@ export default defineComponent({
 </script>
 <style scoped>
 .q-header {
-  position: sticky; /* or fixed */
+  position: sticky;
   top: 0;
-  z-index: 1000; /* ensures header stays above page content */
+  /* Keep header above Quasar drawer/scrim layers on mobile overlays */
+  z-index: 11000;
   overflow-x: hidden;
 }
 
 .app-toolbar {
   padding-inline: 8px;
   min-height: 48px;
+  /* helps the title feel centered visually */
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
 }
 
 .app-title {
@@ -261,6 +267,7 @@ export default defineComponent({
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-align: center; /* center the title itself */
 }
 
 .left-controls,
