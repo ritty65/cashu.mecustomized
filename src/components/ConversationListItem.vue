@@ -6,6 +6,7 @@
     :class="{ selected }"
     data-test="conversation-item"
     tabindex="0"
+    :aria-label="isMini ? displayName : undefined"
   >
     <q-item-section avatar class="avatar-col">
       <q-avatar size="40px" class="relative-position">
@@ -31,13 +32,18 @@
           rounded
         />
       </q-avatar>
-      <q-tooltip v-if="$q.screen.gt.xs && messenger.drawerMini" anchor="top middle" self="bottom middle" class="mini-tooltip">
+      <q-tooltip
+        v-if="$q.screen.gt.xs && isMini"
+        anchor="top middle"
+        self="bottom middle"
+        class="mini-tooltip"
+      >
         {{ displayName }}
       </q-tooltip>
     </q-item-section>
 
     <!-- Main text column: name + time (top row), snippet (bottom row) -->
-    <q-item-section class="main-section">
+    <q-item-section v-if="!isMini" class="main-section">
       <template v-if="loaded">
         <div class="list-head row no-wrap items-center">
           <q-item-label
@@ -45,7 +51,13 @@
             :class="{ 'text-weight-bold': unreadCount > 0 }"
             :title="displayName"
           >
-            <q-icon v-if="isPinned" name="star" size="xs" color="warning" class="q-mr-xs" />
+            <q-icon
+              v-if="isPinned"
+              name="star"
+              size="xs"
+              color="warning"
+              class="q-mr-xs"
+            />
             {{ displayName }}
           </q-item-label>
           <span class="time text-caption">{{ timeExact }}</span>
@@ -67,10 +79,12 @@
       </template>
     </q-item-section>
 
-    <!-- (timestamp-section removed; time now lives next to the title) -->
-
     <!-- Meta actions: overlayed; does not reserve width when hidden -->
-    <q-item-section side class="items-center meta-actions meta-actions--overlay">
+    <q-item-section
+      v-if="!isMini"
+      side
+      class="items-center meta-actions meta-actions--overlay"
+    >
       <q-btn
         flat
         dense
@@ -210,6 +224,7 @@ const isOnline = computed(() => messenger.connected)
 const isPinned = computed(() => messenger.pinned[props.pubkey])
 const unreadCount = computed(() => messenger.unreadCounts[props.pubkey] || 0)
 const selected = computed(() => props.selected)
+const isMini = computed(() => messenger.drawerMini)
 
 const profile = computed(() => {
   const entry: any = (nostr.profiles as any)[props.pubkey]
@@ -328,10 +343,6 @@ const deleteItem = () => emit('delete', nostr.resolvePubkey(props.pubkey))
   min-width: 0;
 }
 
-.drawer-collapsed .conversation-item .main-section,
-.drawer-collapsed .conversation-item .ellipsis {
-  display: none;
-}
 .status-dot {
   position: absolute;
   bottom: -2px;
@@ -454,10 +465,12 @@ const deleteItem = () => emit('delete', nostr.resolvePubkey(props.pubkey))
 /* Mini (collapsed) drawer polish */
 .drawer-collapsed .conversation-item {
   justify-content: center;
-  padding: 10px 6px;
+  align-items: center;
+  height: 60px;
+  padding: 0;
   gap: 0;
+  border: none;
   border-left-color: transparent;
-  border-bottom: none;
 }
 .drawer-collapsed .avatar-col,
 .drawer-collapsed .q-item__section--avatar {
@@ -465,14 +478,6 @@ const deleteItem = () => emit('delete', nostr.resolvePubkey(props.pubkey))
   justify-content: center;
   align-items: center;
   width: 100%;
-}
-.drawer-collapsed .conversation-item .main-section,
-.drawer-collapsed .conversation-item .snippet,
-.drawer-collapsed .conversation-item .title,
-.drawer-collapsed .conversation-item .time,
-.drawer-collapsed .conversation-item .meta-actions--overlay,
-.drawer-collapsed .conversation-item .ellipsis {
-  display: none !important; /* avatar only */
 }
 .drawer-collapsed .conversation-item .unread-overlay {
   position: absolute;

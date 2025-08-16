@@ -96,7 +96,7 @@ const applyFilter = (list: typeof uniqueConversations.value) => {
 const filteredPinned = computed(() => applyFilter(pinnedConversations.value));
 const filteredRegular = computed(() => applyFilter(regularConversations.value));
 
-const itemHeight = computed(() => (props.mini ? 60 : 72));
+const itemHeight = computed(() => (messenger.drawerMini ? 60 : 72));
 const HEADER_HEIGHT = 36;
 
 interface VirtualHeader {
