@@ -5,32 +5,6 @@
     v-touch-swipe.right="openDrawer"
   >
     <div :class="['col column', $q.screen.gt.xs ? 'q-pa-lg' : 'q-pa-md']">
-      <q-header elevated class="q-mb-md bg-transparent">
-        <div class="page-toolbar q-pa-sm">
-          <div class="header-controls">
-            <q-btn
-              flat
-              round
-              dense
-              icon="menu"
-              @click="toggleDrawer"
-            />
-            <q-btn flat round dense icon="arrow_back" @click="goBack" />
-          </div>
-
-          <div class="toolbar-title">
-            Nostr Messenger
-            <q-badge
-              :color="messenger.connected ? 'positive' : 'negative'"
-              class="q-ml-sm"
-            >
-              {{ messenger.connected ? "Online" : "Offline" }}
-            </q-badge>
-          </div>
-
-          <div class="toolbar-right-ghost" aria-hidden="true"></div>
-        </div>
-      </q-header>
       <q-banner v-if="connecting && !loading" dense class="bg-grey-3">
         Connecting...
       </q-banner>
@@ -77,7 +51,7 @@ import {
   onUnmounted,
   watch,
 } from "vue";
-import { useRouter, useRoute } from "vue-router";
+import { useRoute } from "vue-router";
 import { useMessengerStore } from "src/stores/messenger";
 import { useNdk } from "src/composables/useNdk";
 import { useNostrStore } from "src/stores/nostr";
@@ -164,28 +138,11 @@ export default defineComponent({
       if (timer) clearInterval(timer);
     });
 
-    const router = useRouter();
     const route = useRoute();
-
-    const goBack = () => {
-      if (window.history.length > 1) {
-        router.back();
-      } else {
-        router.push("/wallet");
-      }
-    };
 
     const openDrawer = () => {
       if ($q.screen.lt.md) {
         messenger.setDrawer(true);
-      }
-    };
-
-    const toggleDrawer = () => {
-      if ($q.screen.lt.md) {
-        messenger.setDrawer(true);
-      } else {
-        messenger.toggleDrawer();
       }
     };
 
@@ -283,40 +240,13 @@ export default defineComponent({
       showSetupWizard,
       sendMessage,
       openSendTokenDialog,
-      goBack,
       reconnectAll,
       connectedCount,
       totalRelays,
       nextReconnectIn,
       setupComplete,
       openDrawer,
-      toggleDrawer,
     };
   },
 });
 </script>
-<style scoped>
-.page-toolbar {
-  display: grid;
-  grid-template-columns: auto 1fr auto; /* left / title / right */
-  align-items: center;
-  column-gap: 8px;
-}
-
-.header-controls {
-  display: flex;
-  gap: 4px;
-}
-
-.toolbar-title {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  text-align: center;
-}
-
-.toolbar-right-ghost {
-  width: 72px;
-}
-</style>
