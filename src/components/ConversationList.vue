@@ -10,7 +10,7 @@
       v-else
       :items="virtualItems"
       :virtual-scroll-sizes="virtualSizes"
-      :virtual-scroll-item-size="itemHeight"
+      :virtual-scroll-item-size="ITEM_HEIGHT"
       class="full-width conversation-vscroll"
     >
       <template v-slot="{ item }">
@@ -96,8 +96,8 @@ const applyFilter = (list: typeof uniqueConversations.value) => {
 const filteredPinned = computed(() => applyFilter(pinnedConversations.value));
 const filteredRegular = computed(() => applyFilter(regularConversations.value));
 
+const ITEM_HEIGHT = 72;
 const HEADER_HEIGHT = 36;
-const itemHeight = computed(() => (messenger.drawerMini ? 60 : 72));
 
 interface VirtualHeader {
   type: "header";
@@ -116,20 +116,17 @@ type VirtualEntry = VirtualHeader | VirtualItem;
 
 const virtualItems = computed<VirtualEntry[]>(() => {
   const items: VirtualEntry[] = [];
-  const mini = messenger.drawerMini;
   if (filteredPinned.value.length) {
-    if (!mini)
-      items.push({ type: "header", key: "header-pinned", label: "Pinned" });
+    items.push({ type: "header", key: "header-pinned", label: "Pinned" });
     filteredPinned.value.forEach((c) =>
       items.push({ type: "item", key: "pinned-" + c.pubkey, ...c }),
     );
   }
-  if (!mini)
-    items.push({
-      type: "header",
-      key: "header-all",
-      label: "All Conversations",
-    });
+  items.push({
+    type: "header",
+    key: "header-all",
+    label: "All Conversations",
+  });
   filteredRegular.value.forEach((c) =>
     items.push({ type: "item", key: "reg-" + c.pubkey, ...c }),
   );
@@ -137,7 +134,7 @@ const virtualItems = computed<VirtualEntry[]>(() => {
 });
 
 const virtualSizes = computed(() =>
-  virtualItems.value.map((i) => (i.type === "header" ? HEADER_HEIGHT : itemHeight.value)),
+  virtualItems.value.map((i) => (i.type === "header" ? HEADER_HEIGHT : ITEM_HEIGHT)),
 );
 
 const loadProfiles = async () => {
