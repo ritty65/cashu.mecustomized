@@ -1,6 +1,6 @@
 <template>
   <q-header class="bg-transparent z-10">
-    <q-toolbar class="main-toolbar" dense>
+    <q-toolbar class="app-toolbar" dense>
       <div class="left-controls header-gutter row items-center no-wrap">
         <q-btn
           v-if="!showBackButton"
@@ -14,7 +14,7 @@
           :disable="uiStore.globalMutexLock"
         />
         <q-btn
-          v-else
+          v-else-if="showBackButton"
           flat
           dense
           round
@@ -510,18 +510,35 @@ export default defineComponent({
   overflow-x: hidden;
 }
 
-.main-toolbar { padding-inline: 8px; min-height: 48px; min-width: 0; }
-.header-gutter { flex: 0 0 96px; }
-.left-controls { gap: 4px; }
-.right-controls { gap: 4px; justify-content: flex-end; }
+.app-toolbar {
+  padding-inline: 8px;
+  min-height: 48px;
+}
+
+.app-toolbar,
+.toolbar-title {
+  min-width: 0;
+}
+
+.header-gutter {
+  flex: 0 0 96px;
+}
+
+.left-controls {
+  gap: 4px;
+}
+
+.right-controls {
+  gap: 4px;
+  justify-content: flex-end;
+}
+
 /* CRITICAL: let the middle title shrink and ellipsis instead of overflowing */
 .toolbar-title {
   flex: 1;
-  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   text-align: center;
-  font-weight: 600;
 }
 </style>
