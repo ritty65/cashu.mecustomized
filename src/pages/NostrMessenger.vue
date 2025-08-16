@@ -32,11 +32,20 @@
     <q-btn
       v-if="$q.screen.lt.md && !messenger.drawerOpen"
       fab
-      icon="menu"
+      icon="chat"
       color="primary"
       class="fixed bottom-left"
       style="bottom: 16px; left: 16px"
       @click="openDrawer"
+    />
+    <q-btn
+      v-if="$q.screen.lt.md"
+      fab
+      icon="menu"
+      color="primary"
+      class="fixed bottom-right"
+      style="bottom: 16px; right: 16px"
+      @click="toggleMainMenu"
     />
   </q-page>
   <NostrSetupWizard v-model="showSetupWizard" @complete="setupComplete" />
@@ -146,6 +155,10 @@ export default defineComponent({
       }
     };
 
+    const toggleMainMenu = () => {
+      window.dispatchEvent(new CustomEvent("toggle-left-drawer"));
+    };
+
     const selected = computed(() => messenger.currentConversation);
     const chatSendTokenDialogRef = ref<InstanceType<
       typeof ChatSendTokenDialog
@@ -246,6 +259,7 @@ export default defineComponent({
       nextReconnectIn,
       setupComplete,
       openDrawer,
+      toggleMainMenu,
     };
   },
 });
