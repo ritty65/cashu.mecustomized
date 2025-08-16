@@ -23,6 +23,7 @@ const unitTickerShortMap = {
 
 export const useUiStore = defineStore("ui", {
   state: () => ({
+    mainNavOpen: false,
     hideBalance: useLocalStorage<boolean>("cashu.ui.hideBalance", false),
     tickerLong: "Satoshis",
     showInvoiceDetails: false,
@@ -48,6 +49,15 @@ export const useUiStore = defineStore("ui", {
     lastBalanceCached: useLocalStorage("cashu.ui.lastBalanceCached", 0),
   }),
   actions: {
+    toggleMainNav() {
+      this.mainNavOpen = !this.mainNavOpen;
+    },
+    openMainNav() {
+      this.mainNavOpen = true;
+    },
+    closeMainNav() {
+      this.mainNavOpen = false;
+    },
     closeDialogs() {
       this.showInvoiceDetails = false;
       this.showSendDialog = false;
