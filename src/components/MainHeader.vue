@@ -1,6 +1,6 @@
 <template>
   <q-header class="bg-transparent">
-    <q-toolbar class="app-toolbar" dense>
+    <q-toolbar class="app-toolbar app-toolbar--grid" dense>
       <div class="left-controls row items-center no-wrap">
         <template v-if="showBackButton">
           <q-btn
@@ -38,15 +38,14 @@
           @click="ui.toggleMainNav"
           :disable="ui.globalMutexLock"
         />
-        <!-- NEW: Chats sidebar toggle (only on Messenger) -->
         <q-btn
           v-if="isMessengerPage"
           flat
           dense
           round
-          icon="view_sidebar"
-          color="primary"
-          aria-label="Toggle chats sidebar"
+          :icon="messenger.drawerMini ? 'menu' : 'menu_open'"
+          :color="$q.dark.isActive ? 'white' : 'primary'"
+          aria-label="Toggle chat menu"
           @click.stop="toggleMessengerDrawer"
           class="q-ml-xs"
         />
@@ -256,18 +255,20 @@ export default defineComponent({
 .app-toolbar {
   padding-inline: 8px;
   min-height: 48px;
-  /* helps the title feel centered visually */
+}
+
+.app-toolbar--grid {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
 }
 
 .app-title {
+  text-align: center;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  text-align: center; /* center the title itself */
 }
 
 .left-controls,
