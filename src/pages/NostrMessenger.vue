@@ -5,17 +5,6 @@
     v-touch-swipe.right="openDrawer"
   >
     <div :class="['col column', $q.screen.gt.xs ? 'q-pa-lg' : 'q-pa-md']">
-      <!-- Top-left menu button within the page so Messenger has a nav entry point -->
-      <q-btn
-        v-if="$q.screen.gt.xs"
-        class="q-ml-sm q-mb-sm"
-        flat
-        dense
-        round
-        icon="menu"
-        aria-label="Open menu"
-        @click="ui.toggleMainNav"
-      />
       <q-banner v-if="connecting && !loading" dense class="bg-grey-3">
         Connecting...
       </q-banner>
@@ -49,16 +38,16 @@
       style="bottom: 16px; left: 16px"
       @click="openDrawer"
     />
-    <q-page-sticky v-if="$q.screen.xs" position="top-left" :offset="[12, 12]">
-      <q-btn
-        round
-        dense
-        icon="menu"
-        color="primary"
-        aria-label="Open menu"
-        @click="ui.toggleMainNav"
-      />
-    </q-page-sticky>
+    <q-btn
+      v-if="$q.screen.lt.md && !$q.screen.lt.sm"
+      fab
+      icon="menu"
+      color="primary"
+      class="fixed bottom-right"
+      style="bottom: 16px; right: 16px"
+      aria-label="Menu"
+      @click="toggleMainMenu"
+    />
   </q-page>
   <NostrSetupWizard v-model="showSetupWizard" @complete="setupComplete" />
 </template>
@@ -84,7 +73,6 @@ import MessageInput from "components/MessageInput.vue";
 import ChatSendTokenDialog from "components/ChatSendTokenDialog.vue";
 import NostrSetupWizard from "components/NostrSetupWizard.vue";
 import { useQuasar, TouchSwipe } from "quasar";
-import { useUiStore } from "src/stores/ui";
 
 export default defineComponent({
   name: "NostrMessenger",
@@ -103,7 +91,6 @@ export default defineComponent({
     const nostr = useNostrStore();
     const showSetupWizard = ref(false);
     const $q = useQuasar();
-    const ui = useUiStore();
 
     const ndkRef = ref<NDK | null>(null);
     const now = ref(Date.now());
@@ -167,6 +154,10 @@ export default defineComponent({
       if ($q.screen.lt.md) {
         messenger.setDrawer(true);
       }
+    };
+
+    const toggleMainMenu = () => {
+      window.dispatchEvent(new CustomEvent("toggle-left-drawer"));
     };
 
     const selected = computed(() => messenger.currentConversation);
@@ -269,7 +260,7 @@ export default defineComponent({
       nextReconnectIn,
       setupComplete,
       openDrawer,
-      ui,
+      toggleMainMenu,
     };
   },
 });
