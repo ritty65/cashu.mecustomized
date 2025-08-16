@@ -7,14 +7,16 @@
     <div :class="['col column', $q.screen.gt.xs ? 'q-pa-lg' : 'q-pa-md']">
       <q-header elevated class="q-mb-md bg-transparent">
         <q-toolbar>
-          <q-btn
-            flat
-            round
-            dense
-            icon="menu"
-            @click="toggleDrawer"
-          />
-          <q-btn flat round dense icon="arrow_back" @click="goBack" />
+          <div class="row items-center no-wrap header-controls">
+            <q-btn
+              flat
+              round
+              dense
+              icon="menu"
+              @click="toggleDrawer"
+            />
+            <q-btn flat round dense icon="arrow_back" @click="goBack" />
+          </div>
           <q-toolbar-title class="text-h6 ellipsis">
             Nostr Messenger
             <q-badge
@@ -294,5 +296,9 @@ export default defineComponent({
 .q-toolbar {
   flex-wrap: nowrap;
 }
-  
+
+.header-controls {
+  flex-shrink: 0;
+}
+
 </style>
