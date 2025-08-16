@@ -39,12 +39,13 @@
       @click="openDrawer"
     />
     <q-btn
-      v-if="$q.screen.lt.md"
+      v-if="$q.screen.lt.md && !$q.screen.lt.sm"
       fab
       icon="menu"
       color="primary"
       class="fixed bottom-right"
       style="bottom: 16px; right: 16px"
+      aria-label="Menu"
       @click="toggleMainMenu"
     />
   </q-page>

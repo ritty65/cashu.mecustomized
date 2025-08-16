@@ -8,6 +8,7 @@
         dense
         icon="menu"
         class="q-mr-sm"
+        aria-label="Menu"
         @click="toggleMainMenu"
       />
       <q-btn
