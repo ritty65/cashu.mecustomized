@@ -21,22 +21,24 @@
       ]"
     >
       <div class="column no-wrap full-height">
-        <div class="row items-center justify-between q-mb-md">
-          <div class="text-subtitle1">Chats</div>
-          <q-btn flat dense round icon="add" @click="openNewChatDialog" />
+        <div v-show="!messenger.drawerMini">
+          <div class="row items-center justify-between q-mb-md">
+            <div class="text-subtitle1">Chats</div>
+            <q-btn flat dense round icon="add" @click="openNewChatDialog" />
+          </div>
+          <q-input
+            dense
+            rounded
+            debounce="300"
+            v-model="conversationSearch"
+            placeholder="Search"
+            class="q-mb-md"
+          >
+            <template #prepend>
+              <q-icon name="search" />
+            </template>
+          </q-input>
         </div>
-        <q-input
-          dense
-          rounded
-          debounce="300"
-          v-model="conversationSearch"
-          placeholder="Search"
-          class="q-mb-md"
-        >
-          <template #prepend>
-            <q-icon name="search" />
-          </template>
-        </q-input>
         <q-scroll-area class="col" style="min-height: 0; min-width: 0">
           <Suspense>
             <template #default>
@@ -51,7 +53,7 @@
             </template>
           </Suspense>
         </q-scroll-area>
-        <UserInfo />
+        <UserInfo v-show="!messenger.drawerMini" />
       </div>
       <!-- Desktop resizer handle (hidden on <md and when mini) -->
       <div
@@ -205,6 +207,10 @@ export default defineComponent({
 .messenger-drawer {
   overflow: hidden;
   position: relative;
+}
+
+.messenger-drawer.drawer-collapsed {
+  padding: 8px 6px !important;
 }
 
 .messenger-drawer :deep(.column),
