@@ -8,7 +8,9 @@
         dense
         icon="menu"
         class="q-mr-sm"
-        aria-label="Menu"
+        aria-label="Open menu"
+        :aria-expanded="String(ui.mainNavOpen)"
+        aria-controls="app-nav"
         @click="toggleMainMenu"
       />
       <q-btn
@@ -89,11 +91,13 @@ import ChatSendTokenDialog from "./ChatSendTokenDialog.vue";
 import { nip19 } from "nostr-tools";
 import ProfileInfoDialog from "./ProfileInfoDialog.vue";
 import RelayManagerDialog from "./RelayManagerDialog.vue";
+import { useUiStore } from "src/stores/ui";
 
 const props = defineProps<{ pubkey: string }>();
 const nostr = useNostrStore();
 const messenger = useMessengerStore();
 const $q = useQuasar();
+const ui = useUiStore();
 const profile = ref<any>(null);
 
 const loadProfile = async () => {
@@ -145,7 +149,7 @@ const relayManagerDialogRef = ref<InstanceType<
 const showProfileDialog = ref(false);
 
 function toggleMainMenu() {
-  window.dispatchEvent(new CustomEvent("toggle-left-drawer"));
+  ui.toggleMainNav();
 }
 
 function openSendTokenDialog() {

@@ -18,7 +18,9 @@
             round
             icon="menu"
             color="primary"
-            aria-label="Menu"
+            aria-label="Open menu"
+            :aria-expanded="String(ui.mainNavOpen)"
+            aria-controls="app-nav"
             @click="ui.toggleMainNav"
             :disable="ui.globalMutexLock"
           />
@@ -30,7 +32,9 @@
           round
           icon="menu"
           color="primary"
-          aria-label="Menu"
+          aria-label="Open menu"
+          :aria-expanded="String(ui.mainNavOpen)"
+          aria-controls="app-nav"
           @click="ui.toggleMainNav"
           :disable="ui.globalMutexLock"
         />
@@ -126,197 +130,22 @@
     </q-toolbar>
   </q-header>
 
-  <!-- Drawer positioned on the left for main navigation -->
-  <q-drawer
-    v-model="ui.mainNavOpen"
-    side="left"
-    show-if-above
-    :overlay="$q.screen.lt.md"
-    :breakpoint="1024"
-    bordered
-  >
-    <q-list>
-      <q-item-label header>{{
-        $t("MainHeader.menu.settings.title")
-      }}</q-item-label>
-      <q-item clickable @click="gotoWallet">
-        <q-item-section avatar>
-          <q-icon name="account_balance_wallet" />
-        </q-item-section>
-        <q-item-section>
-          <q-item-label>
-            {{ $t("FullscreenHeader.actions.back.label") }}
-          </q-item-label>
-        </q-item-section>
-      </q-item>
-      <q-item clickable to="/settings">
-        <q-item-section avatar>
-          <q-icon name="settings" />
-        </q-item-section>
-        <q-item-section>
-          <q-item-label>{{
-            $t("MainHeader.menu.settings.settings.title")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("MainHeader.menu.settings.settings.caption")
-          }}</q-item-label>
-        </q-item-section>
-      </q-item>
-      <q-item clickable @click="gotoFindCreators">
-        <q-item-section avatar>
-          <q-icon name="img:icons/find-creators.svg" color="white" />
-        </q-item-section>
-        <q-item-section>
-          <q-item-label>{{
-            $t("MainHeader.menu.findCreators.findCreators.title")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("MainHeader.menu.findCreators.findCreators.caption")
-          }}</q-item-label>
-        </q-item-section>
-      </q-item>
-      <q-item clickable @click="gotoCreatorHub">
-        <q-item-section avatar>
-          <q-icon name="img:icons/creator-hub.svg" color="white" />
-        </q-item-section>
-        <q-item-section>
-          <q-item-label>{{
-            $t("MainHeader.menu.creatorHub.title")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("MainHeader.menu.creatorHub.caption")
-          }}</q-item-label>
-        </q-item-section>
-      </q-item>
-      <q-item clickable @click="gotoMyProfile">
-        <q-item-section avatar>
-          <q-icon name="person" />
-        </q-item-section>
-        <q-item-section>
-          <q-item-label>{{
-            $t("MainHeader.menu.myProfile.myProfile.title")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("MainHeader.menu.myProfile.myProfile.caption")
-          }}</q-item-label>
-        </q-item-section>
-      </q-item>
-      <q-item clickable @click="gotoBuckets">
-        <q-item-section avatar>
-          <q-icon name="inventory_2" />
-        </q-item-section>
-        <q-item-section>
-          <q-item-label>{{
-            $t("MainHeader.menu.buckets.buckets.title")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("MainHeader.menu.buckets.buckets.caption")
-          }}</q-item-label>
-        </q-item-section>
-      </q-item>
-      <q-item clickable @click="gotoSubscriptions">
-        <q-item-section avatar>
-          <q-icon name="auto_awesome_motion" />
-        </q-item-section>
-        <q-item-section>
-          <q-item-label>{{
-            $t("MainHeader.menu.subscriptions.subscriptions.title")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("MainHeader.menu.subscriptions.subscriptions.caption")
-          }}</q-item-label>
-        </q-item-section>
-      </q-item>
-      <q-item clickable @click="gotoChats">
-        <q-item-section avatar>
-          <q-icon name="chat" />
-        </q-item-section>
-        <q-item-section>
-          <q-item-label>Chats</q-item-label>
-        </q-item-section>
-      </q-item>
-      <q-item v-if="needsNostrLogin" clickable @click="gotoNostrLogin">
-        <q-item-section avatar>
-          <q-icon name="vpn_key" />
-        </q-item-section>
-        <q-item-section>
-          <q-item-label>Setup Nostr Identity</q-item-label>
-        </q-item-section>
-      </q-item>
-      <q-item-label header>{{
-        $t("MainHeader.menu.terms.title")
-      }}</q-item-label>
-      <q-item clickable to="/terms">
-        <q-item-section avatar>
-          <q-icon name="gavel" />
-        </q-item-section>
-        <q-item-section>
-          <q-item-label>{{
-            $t("MainHeader.menu.terms.terms.title")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("MainHeader.menu.terms.terms.caption")
-          }}</q-item-label>
-        </q-item-section>
-      </q-item>
-      <q-item-label header>{{
-        $t("MainHeader.menu.about.title")
-      }}</q-item-label>
-      <q-item clickable to="/about">
-        <q-item-section avatar>
-          <q-icon name="info" />
-        </q-item-section>
-        <q-item-section>
-          <q-item-label>{{
-            $t("MainHeader.menu.about.about.title")
-          }}</q-item-label>
-          <q-item-label caption>{{
-            $t("MainHeader.menu.about.about.caption")
-          }}</q-item-label>
-        </q-item-section>
-      </q-item>
-      <q-item-label header>{{
-        $t("MainHeader.menu.links.title")
-      }}</q-item-label>
-      <EssentialLink
-        v-for="link in essentialLinks"
-        :key="link.title"
-        v-bind="link"
-      />
-    </q-list>
-  </q-drawer>
 </template>
 
 <script>
-import {
-  defineComponent,
-  ref,
-  computed,
-  onMounted,
-  onUnmounted,
-  getCurrentInstance,
-} from "vue";
-import { useRouter, useRoute } from "vue-router";
-import EssentialLink from "components/EssentialLink.vue";
+import { defineComponent, ref, computed, getCurrentInstance } from "vue";
+import { useRoute } from "vue-router";
 import { useUiStore } from "src/stores/ui";
-import { useNostrStore } from "src/stores/nostr";
 import { useMessengerStore } from "src/stores/messenger";
-import { useI18n } from "vue-i18n";
 import { useQuasar } from "quasar";
 
 export default defineComponent({
   name: "MainHeader",
   mixins: [windowMixin],
-  components: {
-    EssentialLink,
-  },
   setup() {
     const vm = getCurrentInstance()?.proxy;
     const ui = useUiStore();
-    const { t } = useI18n();
-    const router = useRouter();
     const route = useRoute();
-    const nostrStore = useNostrStore();
     const messenger = useMessengerStore();
     const $q = useQuasar();
     const toggleDarkMode = () => {
@@ -329,9 +158,6 @@ export default defineComponent({
     };
     const darkIcon = computed(() =>
       $q.dark.isActive ? "wb_sunny" : "brightness_3",
-    );
-    const needsNostrLogin = computed(
-      () => !nostrStore.privateKeySignerPrivateKey,
     );
     const isMessengerPage = computed(() =>
       route.path.startsWith("/nostr-messenger"),
@@ -349,52 +175,6 @@ export default defineComponent({
     const reloading = ref(false);
     let countdownInterval;
 
-    const essentialLinks = [
-      {
-        title: t("MainHeader.menu.links.fundstrCreator.title"),
-        caption: t("MainHeader.menu.links.fundstrCreator.caption"),
-        icon: "web",
-        link: "https://primal.net/KalonAxiarch",
-      },
-      {
-        title: t("MainHeader.menu.links.cashuSpace.title"),
-        caption: t("MainHeader.menu.links.cashuSpace.caption"),
-        icon: "web",
-        link: "https://cashu.space",
-      },
-      {
-        title: t("MainHeader.menu.links.github.title"),
-        caption: t("MainHeader.menu.links.github.caption"),
-        icon: "code",
-        link: "https://github.com/cashubtc/cashu.me",
-      },
-      {
-        title: t("MainHeader.menu.links.telegram.title"),
-        caption: t("MainHeader.menu.links.telegram.caption"),
-        icon: "chat",
-        link: "https://t.me/CashuMe",
-      },
-      {
-        title: t("MainHeader.menu.links.twitter.title"),
-        caption: t("MainHeader.menu.links.twitter.caption"),
-        icon: "rss_feed",
-        link: "https://twitter.com/CashuBTC",
-      },
-      {
-        title: t("MainHeader.menu.links.donate.title"),
-        caption: t("MainHeader.menu.links.donate.caption"),
-        icon: "favorite",
-        link: "https://docs.cashu.space/contribute",
-      },
-    ];
-
-    onMounted(() => {
-      window.addEventListener("toggle-left-drawer", ui.toggleMainNav);
-    });
-
-    onUnmounted(() => {
-      window.removeEventListener("toggle-left-drawer", ui.toggleMainNav);
-    });
 
     const toggleMessengerDrawer = () => {
       console.log("toggleMessengerDrawer", messenger.drawerMini);
@@ -446,65 +226,15 @@ export default defineComponent({
       }, 1000);
     };
 
-    const gotoBuckets = () => {
-      router.push("/buckets");
-      ui.closeMainNav();
-    };
-
-    const gotoFindCreators = () => {
-      router.push("/find-creators");
-      ui.closeMainNav();
-    };
-
-    const gotoCreatorHub = () => {
-      router.push("/creator-hub");
-      ui.closeMainNav();
-    };
-
-    const gotoMyProfile = () => {
-      router.push("/my-profile");
-      ui.closeMainNav();
-    };
-
-    const gotoSubscriptions = () => {
-      router.push("/subscriptions");
-      ui.closeMainNav();
-    };
-
-    const gotoChats = () => {
-      router.push("/nostr-messenger");
-      ui.closeMainNav();
-    };
-
-    const gotoNostrLogin = () => {
-      router.push("/nostr-login");
-      ui.closeMainNav();
-    };
-
-    const gotoWallet = () => {
-      router.push("/wallet");
-      ui.closeMainNav();
-    };
-
     return {
-      essentialLinks,
       isStaging,
       reload,
       countdown,
       reloading,
       ui,
-      gotoBuckets,
-      gotoFindCreators,
-      gotoCreatorHub,
-      gotoMyProfile,
-      gotoSubscriptions,
-      gotoChats,
-      gotoNostrLogin,
-      gotoWallet,
       showBackButton,
       backRoute,
       currentTitle,
-      needsNostrLogin,
       toggleMessengerDrawer,
       isMessengerPage,
       toggleDarkMode,

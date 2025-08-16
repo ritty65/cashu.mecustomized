@@ -13,6 +13,8 @@
         round
         icon="menu"
         aria-label="Open menu"
+        :aria-expanded="String(ui.mainNavOpen)"
+        aria-controls="app-nav"
         @click="ui.toggleMainNav"
       />
       <q-banner v-if="connecting && !loading" dense class="bg-grey-3">
@@ -55,6 +57,8 @@
         icon="menu"
         color="primary"
         aria-label="Open menu"
+        :aria-expanded="String(ui.mainNavOpen)"
+        aria-controls="app-nav"
         @click="ui.toggleMainNav"
       />
     </q-page-sticky>

@@ -4,6 +4,7 @@
     :class="$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark'"
   >
     <MainHeader />
+    <AppNavDrawer />
     <q-page-container class="text-body1">
       <router-view />
     </q-page-container>
@@ -19,6 +20,7 @@
 import { defineComponent, computed } from "vue";
 import { useRoute } from "vue-router";
 import MainHeader from "components/MainHeader.vue";
+import AppNavDrawer from "components/AppNavDrawer.vue";
 import PublishBar from "components/PublishBar.vue";
 import { useCreatorHub } from "src/composables/useCreatorHub";
 
@@ -27,6 +29,7 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     MainHeader,
+    AppNavDrawer,
     PublishBar,
   },
   setup() {
