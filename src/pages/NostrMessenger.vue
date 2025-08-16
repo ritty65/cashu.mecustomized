@@ -4,19 +4,7 @@
     :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark']"
     v-touch-swipe.right="openDrawer"
   >
-    <div :class="['col column', $q.screen.gt.xs ? 'q-pa-lg' : 'q-pa-md']">
-      <q-btn
-        v-if="$q.screen.gt.xs"
-        class="q-ml-sm"
-        flat
-        dense
-        round
-        icon="menu"
-        aria-label="Open menu"
-        :aria-expanded="String(ui.mainNavOpen)"
-        aria-controls="app-nav"
-        @click="ui.toggleMainNav"
-      />
+    <div :class="['col column', $q.screen.gt.xs ? 'q-pt-sm q-px-lg q-pb-md' : 'q-pt-xs q-px-md q-pb-md']">
       <q-banner v-if="connecting && !loading" dense class="bg-grey-3">
         Connecting...
       </q-banner>
@@ -50,18 +38,6 @@
       style="bottom: 16px; left: 16px"
       @click="openDrawer"
     />
-    <q-page-sticky v-if="$q.screen.xs" position="top-left" :offset="[12, 12]">
-      <q-btn
-        round
-        dense
-        icon="menu"
-        color="primary"
-        aria-label="Open menu"
-        :aria-expanded="String(ui.mainNavOpen)"
-        aria-controls="app-nav"
-        @click="ui.toggleMainNav"
-      />
-    </q-page-sticky>
   </q-page>
   <NostrSetupWizard v-model="showSetupWizard" @complete="setupComplete" />
 </template>

@@ -1,5 +1,5 @@
 <template>
-  <div class="q-pa-sm row items-center justify-between">
+  <div class="q-pa-xs row items-center justify-between">
     <div class="row items-center">
       <q-btn
         v-if="$q.screen.lt.sm"
