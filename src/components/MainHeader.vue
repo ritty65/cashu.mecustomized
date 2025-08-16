@@ -2,8 +2,29 @@
   <q-header class="bg-transparent z-10">
     <q-toolbar class="app-toolbar" dense>
       <div class="left-controls header-gutter row items-center no-wrap">
+        <template v-if="showBackButton">
+          <q-btn
+            flat
+            dense
+            round
+            icon="arrow_back_ios_new"
+            :to="backRoute"
+            color="primary"
+            aria-label="Back"
+          />
+          <q-btn
+            flat
+            dense
+            round
+            icon="menu"
+            color="primary"
+            aria-label="Menu"
+            @click="toggleLeftDrawer"
+            :disable="uiStore.globalMutexLock"
+          />
+        </template>
         <q-btn
-          v-if="!showBackButton"
+          v-else
           flat
           dense
           round
@@ -12,16 +33,6 @@
           aria-label="Menu"
           @click="toggleLeftDrawer"
           :disable="uiStore.globalMutexLock"
-        />
-        <q-btn
-          v-else-if="showBackButton"
-          flat
-          dense
-          round
-          icon="arrow_back_ios_new"
-          :to="backRoute"
-          color="primary"
-          aria-label="Back"
         />
       </div>
 
