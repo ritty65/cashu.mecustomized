@@ -454,9 +454,10 @@ const deleteItem = () => emit('delete', nostr.resolvePubkey(props.pubkey))
 /* Mini (collapsed) drawer polish */
 .drawer-collapsed .conversation-item {
   justify-content: center;
-  padding: 10px 8px;
+  padding: 10px 6px;
   gap: 0;
   border-left-color: transparent;
+  border-bottom: none;
 }
 .drawer-collapsed .avatar-col,
 .drawer-collapsed .q-item__section--avatar {
