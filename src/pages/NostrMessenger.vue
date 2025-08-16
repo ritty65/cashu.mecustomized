@@ -4,7 +4,7 @@
     :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark']"
     v-touch-swipe.right="openDrawer"
   >
-    <div :class="['col column', $q.screen.gt.xs ? 'q-pt-sm q-px-lg q-pb-md' : 'q-pt-xs q-px-md q-pb-md']">
+    <div :class="['col column', $q.screen.gt.xs ? 'q-pt-xs q-px-lg q-pb-md' : 'q-pt-none q-px-md q-pb-md']">
       <q-banner v-if="connecting && !loading" dense class="bg-grey-3">
         Connecting...
       </q-banner>
