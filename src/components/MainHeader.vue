@@ -1,7 +1,7 @@
 <template>
   <q-header class="bg-transparent z-10">
     <q-toolbar class="app-toolbar" dense>
-      <div class="left-controls header-gutter row items-center no-wrap">
+      <div class="left-controls">
         <template v-if="showBackButton">
           <q-btn
             flat
@@ -19,8 +19,8 @@
             icon="menu"
             color="primary"
             aria-label="Menu"
-            @click="toggleLeftDrawer"
-            :disable="uiStore.globalMutexLock"
+            @click="ui.toggleMainNav"
+            :disable="ui.globalMutexLock"
           />
         </template>
         <q-btn
@@ -31,14 +31,14 @@
           icon="menu"
           color="primary"
           aria-label="Menu"
-          @click="toggleLeftDrawer"
-          :disable="uiStore.globalMutexLock"
+          @click="ui.toggleMainNav"
+          :disable="ui.globalMutexLock"
         />
       </div>
 
-      <q-toolbar-title class="toolbar-title">{{ currentTitle }}</q-toolbar-title>
+      <q-toolbar-title class="app-title">{{ currentTitle }}</q-toolbar-title>
 
-      <div class="right-controls header-gutter row items-center no-wrap">
+      <div class="right-controls">
         <q-btn
           v-if="isMessengerPage"
           flat
@@ -104,7 +104,7 @@
           aria-label="Refresh"
           @click.stop="reload"
           :loading="reloading"
-          :disable="uiStore.globalMutexLock && countdown === 0"
+          :disable="ui.globalMutexLock && countdown === 0"
         >
           <q-tooltip>{{ $t("MainHeader.reload.tooltip") }}</q-tooltip>
           <template v-slot:loading>
@@ -127,7 +127,14 @@
   </q-header>
 
   <!-- Drawer positioned on the left for main navigation -->
-  <q-drawer v-model="leftDrawerOpen" side="left" bordered>
+  <q-drawer
+    v-model="ui.mainNavOpen"
+    side="left"
+    show-if-above
+    :overlay="$q.screen.lt.md"
+    :breakpoint="1024"
+    bordered
+  >
     <q-list>
       <q-item-label header>{{
         $t("MainHeader.menu.settings.title")
@@ -281,14 +288,7 @@
 </template>
 
 <script>
-import {
-  defineComponent,
-  ref,
-  computed,
-  onMounted,
-  onUnmounted,
-  getCurrentInstance,
-} from "vue";
+import { defineComponent, ref, computed, getCurrentInstance } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import EssentialLink from "components/EssentialLink.vue";
 import { useUiStore } from "src/stores/ui";
@@ -305,8 +305,7 @@ export default defineComponent({
   },
   setup() {
     const vm = getCurrentInstance()?.proxy;
-    const leftDrawerOpen = ref(false);
-    const uiStore = useUiStore();
+    const ui = useUiStore();
     const { t } = useI18n();
     const router = useRouter();
     const route = useRoute();
@@ -382,17 +381,7 @@ export default defineComponent({
       },
     ];
 
-    const toggleLeftDrawer = () => {
-      leftDrawerOpen.value = !leftDrawerOpen.value;
-    };
-
-    onMounted(() => {
-      window.addEventListener("toggle-left-drawer", toggleLeftDrawer);
-    });
-
-    onUnmounted(() => {
-      window.removeEventListener("toggle-left-drawer", toggleLeftDrawer);
-    });
+    
 
     const toggleMessengerDrawer = () => {
       console.log("toggleMessengerDrawer", messenger.drawerMini);
@@ -412,7 +401,7 @@ export default defineComponent({
         "countdown:",
         countdown.value,
         "mutex:",
-        uiStore.globalMutexLock,
+        ui.globalMutexLock,
       );
       if (countdown.value > 0) {
         try {
@@ -421,12 +410,12 @@ export default defineComponent({
           reloading.value = false;
           vm?.notifyWarning("Reload cancelled");
         } finally {
-          uiStore.unlockMutex();
+          ui.unlockMutex();
         }
         return;
       }
-      if (uiStore.globalMutexLock) return;
-      uiStore.lockMutex();
+      if (ui.globalMutexLock) return;
+      ui.lockMutex();
       reloading.value = true;
       countdown.value = 3;
       vm?.notify("Reloading in 3 seconds…");
@@ -438,7 +427,7 @@ export default defineComponent({
           try {
             location.reload();
           } finally {
-            uiStore.unlockMutex();
+            ui.unlockMutex();
           }
         }
       }, 1000);
@@ -446,53 +435,51 @@ export default defineComponent({
 
     const gotoBuckets = () => {
       router.push("/buckets");
-      leftDrawerOpen.value = false;
+      ui.closeMainNav();
     };
 
     const gotoFindCreators = () => {
       router.push("/find-creators");
-      leftDrawerOpen.value = false;
+      ui.closeMainNav();
     };
 
     const gotoCreatorHub = () => {
       router.push("/creator-hub");
-      leftDrawerOpen.value = false;
+      ui.closeMainNav();
     };
 
     const gotoMyProfile = () => {
       router.push("/my-profile");
-      leftDrawerOpen.value = false;
+      ui.closeMainNav();
     };
 
     const gotoSubscriptions = () => {
       router.push("/subscriptions");
-      leftDrawerOpen.value = false;
+      ui.closeMainNav();
     };
 
     const gotoChats = () => {
       router.push("/nostr-messenger");
-      leftDrawerOpen.value = false;
+      ui.closeMainNav();
     };
 
     const gotoNostrLogin = () => {
       router.push("/nostr-login");
-      leftDrawerOpen.value = false;
+      ui.closeMainNav();
     };
 
     const gotoWallet = () => {
       router.push("/wallet");
-      leftDrawerOpen.value = false;
+      ui.closeMainNav();
     };
 
     return {
       essentialLinks,
-      leftDrawerOpen,
-      toggleLeftDrawer,
       isStaging,
       reload,
       countdown,
       reloading,
-      uiStore,
+      ui,
       gotoBuckets,
       gotoFindCreators,
       gotoCreatorHub,
@@ -526,30 +513,23 @@ export default defineComponent({
   min-height: 48px;
 }
 
-.app-toolbar,
-.toolbar-title {
+.app-title {
   min-width: 0;
-}
-
-.header-gutter {
-  flex: 0 0 96px;
-}
-
-.left-controls {
-  gap: 4px;
-}
-
-.right-controls {
-  gap: 4px;
-  justify-content: flex-end;
-}
-
-/* CRITICAL: let the middle title shrink and ellipsis instead of overflowing */
-.toolbar-title {
-  flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   text-align: center;
+}
+
+.left-controls,
+.right-controls {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.right-controls {
+  justify-content: flex-end;
 }
 </style>
