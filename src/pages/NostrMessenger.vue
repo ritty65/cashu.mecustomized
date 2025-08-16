@@ -6,8 +6,8 @@
   >
     <div :class="['col column', $q.screen.gt.xs ? 'q-pa-lg' : 'q-pa-md']">
       <q-header elevated class="q-mb-md bg-transparent">
-        <q-toolbar>
-          <div class="row items-center no-wrap header-controls">
+        <div class="page-toolbar q-pa-sm">
+          <div class="header-controls">
             <q-btn
               flat
               round
@@ -17,7 +17,8 @@
             />
             <q-btn flat round dense icon="arrow_back" @click="goBack" />
           </div>
-          <q-toolbar-title class="text-h6 ellipsis">
+
+          <div class="toolbar-title">
             Nostr Messenger
             <q-badge
               :color="messenger.connected ? 'positive' : 'negative'"
@@ -25,8 +26,10 @@
             >
               {{ messenger.connected ? "Online" : "Offline" }}
             </q-badge>
-          </q-toolbar-title>
-        </q-toolbar>
+          </div>
+
+          <div class="toolbar-right-ghost" aria-hidden="true"></div>
+        </div>
       </q-header>
       <q-banner v-if="connecting && !loading" dense class="bg-grey-3">
         Connecting...
@@ -293,12 +296,27 @@ export default defineComponent({
 });
 </script>
 <style scoped>
-.q-toolbar {
-  flex-wrap: nowrap;
+.page-toolbar {
+  display: grid;
+  grid-template-columns: auto 1fr auto; /* left / title / right */
+  align-items: center;
+  column-gap: 8px;
 }
 
 .header-controls {
-  flex-shrink: 0;
+  display: flex;
+  gap: 4px;
 }
 
+.toolbar-title {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+}
+
+.toolbar-right-ghost {
+  width: 72px;
+}
 </style>
