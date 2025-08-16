@@ -4,7 +4,7 @@
     :class="$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark'"
   >
     <MainHeader />
-    <MainNavDrawer />
+    <AppNavDrawer />
     <q-drawer
       v-model="messenger.drawerOpen"
       :mini="messenger.drawerMini"
@@ -82,7 +82,7 @@ import { defineComponent, ref, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useQuasar, LocalStorage } from "quasar";
 import MainHeader from "components/MainHeader.vue";
-import MainNavDrawer from "components/MainNavDrawer.vue";
+import AppNavDrawer from "components/AppNavDrawer.vue";
 import ConversationList from "components/ConversationList.vue";
 import UserInfo from "components/UserInfo.vue";
 import NewChatDialog from "components/NewChatDialog.vue";
@@ -95,7 +95,7 @@ export default defineComponent({
   mixins: [windowMixin],
   components: {
     MainHeader,
-    MainNavDrawer,
+    AppNavDrawer,
     ConversationList,
     UserInfo,
     NewChatDialog,
