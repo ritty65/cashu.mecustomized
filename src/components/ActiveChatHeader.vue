@@ -2,21 +2,30 @@
   <div class="q-pa-sm row items-center justify-between">
     <div class="row items-center">
       <q-btn
-        flat
-        round
-        dense
-        icon="payments"
-        class="q-mr-sm"
-        @click="openSendTokenDialog"
-      />
-      <q-btn
         v-if="$q.screen.lt.sm"
         flat
         round
         dense
         icon="menu"
         class="q-mr-sm"
+        @click="toggleMainMenu"
+      />
+      <q-btn
+        v-if="$q.screen.lt.sm"
+        flat
+        round
+        dense
+        icon="chat"
+        class="q-mr-sm"
         @click="messenger.toggleDrawer()"
+      />
+      <q-btn
+        flat
+        round
+        dense
+        icon="payments"
+        class="q-mr-sm"
+        @click="openSendTokenDialog"
       />
       <template v-if="pubkey">
         <q-avatar size="md" class="q-mr-sm relative-position">
@@ -133,6 +142,10 @@ const relayManagerDialogRef = ref<InstanceType<
   typeof RelayManagerDialog
 > | null>(null);
 const showProfileDialog = ref(false);
+
+function toggleMainMenu() {
+  window.dispatchEvent(new CustomEvent("toggle-left-drawer"));
+}
 
 function openSendTokenDialog() {
   if (!props.pubkey) return;
