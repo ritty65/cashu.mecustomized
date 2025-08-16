@@ -2,31 +2,22 @@
   <q-header class="bg-transparent">
     <q-toolbar class="app-toolbar" dense>
       <div class="left-controls row items-center no-wrap">
-        <template v-if="showBackButton">
-          <q-btn
-            flat
-            dense
-            round
-            icon="arrow_back_ios_new"
-            :to="backRoute"
-            color="primary"
-            aria-label="Back"
-          />
-          <q-btn
-            flat
-            dense
-            round
-            icon="menu"
-            color="primary"
-            aria-label="Open main menu"
-            :aria-expanded="String(ui.mainNavOpen)"
-            aria-controls="app-nav"
-            @click="ui.toggleMainNav"
-            :disable="ui.globalMutexLock"
-          />
-        </template>
         <q-btn
-          v-else
+          v-if="isMessengerPage"
+          flat
+          dense
+          round
+          icon="menu"
+          color="primary"
+          aria-label="Toggle chat menu"
+          @click.stop="toggleMessengerDrawer"
+        />
+      </div>
+
+      <q-space />
+
+      <div class="title-group row items-center no-wrap">
+        <q-btn
           flat
           dense
           round
@@ -38,21 +29,10 @@
           @click="ui.toggleMainNav"
           :disable="ui.globalMutexLock"
         />
-        <!-- NEW: Chats sidebar toggle (only on Messenger) -->
-        <q-btn
-          v-if="isMessengerPage"
-          flat
-          dense
-          round
-          icon="view_sidebar"
-          color="primary"
-          aria-label="Toggle chats sidebar"
-          @click.stop="toggleMessengerDrawer"
-          class="q-ml-xs"
-        />
+        <div class="app-title q-ml-sm">{{ currentTitle }}</div>
       </div>
 
-      <q-toolbar-title class="app-title">{{ currentTitle }}</q-toolbar-title>
+      <q-space />
 
       <div class="right-controls row items-center no-wrap">
         <transition
@@ -163,10 +143,6 @@ export default defineComponent({
     const isMessengerPage = computed(() =>
       route.path.startsWith("/nostr-messenger"),
     );
-    const showBackButton = computed(
-      () => isMessengerPage.value && $q.screen.lt.md,
-    );
-    const backRoute = computed(() => "/wallet");
     const currentTitle = computed(() => {
       if (isMessengerPage.value) return "Nostr Messenger";
       if (route.path.startsWith("/wallet")) return "Wallet";
@@ -178,11 +154,14 @@ export default defineComponent({
 
 
     const toggleMessengerDrawer = () => {
-      console.log("toggleMessengerDrawer", messenger.drawerMini);
-      messenger.toggleDrawer();
-      vm?.notify(
-        messenger.drawerMini ? "Messenger collapsed" : "Messenger expanded",
-      );
+      if ($q.screen.lt.md) {
+        messenger.setDrawer(true);
+      } else {
+        messenger.toggleDrawer();
+        vm?.notify(
+          messenger.drawerMini ? "Messenger collapsed" : "Messenger expanded",
+        );
+      }
     };
 
     const isStaging = () => {
@@ -233,8 +212,6 @@ export default defineComponent({
       countdown,
       reloading,
       ui,
-      showBackButton,
-      backRoute,
       currentTitle,
       toggleMessengerDrawer,
       isMessengerPage,
@@ -256,9 +233,7 @@ export default defineComponent({
 .app-toolbar {
   padding-inline: 8px;
   min-height: 48px;
-  /* helps the title feel centered visually */
-  display: grid;
-  grid-template-columns: auto 1fr auto;
+  display: flex;
   align-items: center;
 }
 
@@ -267,7 +242,12 @@ export default defineComponent({
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  text-align: center; /* center the title itself */
+}
+
+.title-group {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
 }
 
 .left-controls,

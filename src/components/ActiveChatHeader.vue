@@ -1,27 +1,6 @@
 <template>
-  <div class="q-pa-xs row items-center justify-between">
+  <div class="row items-center justify-between q-pt-xs q-pb-none q-px-sm">
     <div class="row items-center">
-      <q-btn
-        v-if="$q.screen.lt.sm"
-        flat
-        round
-        dense
-        icon="menu"
-        class="q-mr-sm"
-        aria-label="Open menu"
-        :aria-expanded="String(ui.mainNavOpen)"
-        aria-controls="app-nav"
-        @click="toggleMainMenu"
-      />
-      <q-btn
-        v-if="$q.screen.lt.sm"
-        flat
-        round
-        dense
-        icon="chat"
-        class="q-mr-sm"
-        @click="messenger.toggleDrawer()"
-      />
       <q-btn
         flat
         round
@@ -84,28 +63,24 @@
 
 <script lang="ts" setup>
 import { ref, watch, computed } from "vue";
-import { useQuasar } from "quasar";
 import { useNostrStore } from "src/stores/nostr";
 import { useMessengerStore } from "src/stores/messenger";
 import ChatSendTokenDialog from "./ChatSendTokenDialog.vue";
 import { nip19 } from "nostr-tools";
 import ProfileInfoDialog from "./ProfileInfoDialog.vue";
 import RelayManagerDialog from "./RelayManagerDialog.vue";
-import { useUiStore } from "src/stores/ui";
 
 const props = defineProps<{ pubkey: string }>();
 const nostr = useNostrStore();
 const messenger = useMessengerStore();
-const $q = useQuasar();
-const ui = useUiStore();
 const profile = ref<any>(null);
 
 const loadProfile = async () => {
-  if (props.pubkey) {
-    profile.value = await nostr.getProfile(props.pubkey);
-  } else {
-    profile.value = null;
-  }
+      if (props.pubkey) {
+        profile.value = await nostr.getProfile(props.pubkey);
+      } else {
+        profile.value = null;
+      }
 };
 
 watch(
@@ -147,10 +122,6 @@ const relayManagerDialogRef = ref<InstanceType<
   typeof RelayManagerDialog
 > | null>(null);
 const showProfileDialog = ref(false);
-
-function toggleMainMenu() {
-  ui.toggleMainNav();
-}
 
 function openSendTokenDialog() {
   if (!props.pubkey) return;
