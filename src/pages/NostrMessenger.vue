@@ -4,7 +4,7 @@
     :class="[$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark']"
     v-touch-swipe.right="openDrawer"
   >
-    <div class="col column q-px-md q-pt-xs q-pb-md">
+    <div :class="['col column', $q.screen.gt.xs ? 'q-pa-lg' : 'q-pa-md']">
       <q-btn
         v-if="$q.screen.gt.xs"
         class="q-ml-sm"
