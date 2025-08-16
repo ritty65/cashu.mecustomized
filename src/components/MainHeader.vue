@@ -1,8 +1,9 @@
 <template>
   <q-header class="bg-transparent z-10">
     <q-toolbar class="main-toolbar" dense>
-      <div class="left-controls row items-center no-wrap">
+      <div class="left-controls header-gutter row items-center no-wrap">
         <q-btn
+          v-if="!showBackButton"
           flat
           dense
           round
@@ -13,32 +14,20 @@
           :disable="uiStore.globalMutexLock"
         />
         <q-btn
-          v-if="showBackButton"
+          v-else
           flat
           dense
-          rounded
+          round
           icon="arrow_back_ios_new"
           :to="backRoute"
           color="primary"
           aria-label="Back"
-          no-caps
-          class="q-ml-sm"
-        >
-          <span class="q-mx-md text-weight-bold">
-            {{ $t("FullscreenHeader.actions.back.label") }}
-          </span>
-        </q-btn>
+        />
       </div>
 
-      <q-space />
+      <q-toolbar-title class="toolbar-title">{{ currentTitle }}</q-toolbar-title>
 
-      <div class="toolbar-title ellipsis">
-        <q-toolbar-title />
-      </div>
-
-      <q-space />
-
-      <div class="right-controls row items-center no-wrap">
+      <div class="right-controls header-gutter row items-center no-wrap">
         <q-btn
           v-if="isMessengerPage"
           flat
@@ -330,8 +319,15 @@ export default defineComponent({
     const isMessengerPage = computed(() =>
       route.path.startsWith("/nostr-messenger"),
     );
-    const showBackButton = computed(() => isMessengerPage.value);
+    const showBackButton = computed(
+      () => isMessengerPage.value && $q.screen.lt.md,
+    );
     const backRoute = computed(() => "/wallet");
+    const currentTitle = computed(() => {
+      if (isMessengerPage.value) return "Nostr Messenger";
+      if (route.path.startsWith("/wallet")) return "Wallet";
+      return "Cashu";
+    });
     const countdown = ref(0);
     const reloading = ref(false);
     let countdownInterval;
@@ -496,6 +492,7 @@ export default defineComponent({
       gotoWallet,
       showBackButton,
       backRoute,
+      currentTitle,
       needsNostrLogin,
       toggleMessengerDrawer,
       isMessengerPage,
@@ -513,10 +510,18 @@ export default defineComponent({
   overflow-x: hidden;
 }
 
-.main-toolbar { padding-inline: 8px; min-height: 48px; }
-/* Reserve space for left controls so title never collides on click/ripple */
-.left-controls { gap: 4px; flex: 0 0 auto; }
-.right-controls { gap: 4px; flex: 0 0 auto; }
+.main-toolbar { padding-inline: 8px; min-height: 48px; min-width: 0; }
+.header-gutter { flex: 0 0 96px; }
+.left-controls { gap: 4px; }
+.right-controls { gap: 4px; justify-content: flex-end; }
 /* CRITICAL: let the middle title shrink and ellipsis instead of overflowing */
-.toolbar-title { min-width: 0; max-width: min(56vw, 640px); text-align: center; font-weight: 600; }
+.toolbar-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+  font-weight: 600;
+}
 </style>
