@@ -46,7 +46,6 @@ export const useUiStore = defineStore("ui", {
     globalMutexLock: false,
     showDebugConsole: useLocalStorage("cashu.ui.showDebugConsole", false),
     lastBalanceCached: useLocalStorage("cashu.ui.lastBalanceCached", 0),
-    mainNavOpen: false,
   }),
   actions: {
     closeDialogs() {
@@ -157,15 +156,6 @@ export const useUiStore = defineStore("ui", {
       } else {
         navigator.vibrate(200);
       }
-    },
-    toggleMainNav() {
-      this.mainNavOpen = !this.mainNavOpen;
-    },
-    openMainNav() {
-      this.mainNavOpen = true;
-    },
-    closeMainNav() {
-      this.mainNavOpen = false;
     },
   },
   getters: {

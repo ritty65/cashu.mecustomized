@@ -89,14 +89,12 @@ import ChatSendTokenDialog from "./ChatSendTokenDialog.vue";
 import { nip19 } from "nostr-tools";
 import ProfileInfoDialog from "./ProfileInfoDialog.vue";
 import RelayManagerDialog from "./RelayManagerDialog.vue";
-import { useUiStore } from "src/stores/ui";
 
 const props = defineProps<{ pubkey: string }>();
 const nostr = useNostrStore();
 const messenger = useMessengerStore();
 const $q = useQuasar();
 const profile = ref<any>(null);
-const ui = useUiStore();
 
 const loadProfile = async () => {
   if (props.pubkey) {
@@ -147,7 +145,7 @@ const relayManagerDialogRef = ref<InstanceType<
 const showProfileDialog = ref(false);
 
 function toggleMainMenu() {
-  ui.toggleMainNav();
+  window.dispatchEvent(new CustomEvent("toggle-left-drawer"));
 }
 
 function openSendTokenDialog() {
