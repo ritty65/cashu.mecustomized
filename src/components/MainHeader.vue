@@ -1,7 +1,18 @@
 <template>
   <q-header class="bg-transparent z-10">
-    <q-toolbar class="app-toolbar" dense>
+    <q-toolbar class="app-toolbar toolbar-grid" dense>
       <div class="left-controls row items-center no-wrap">
+        <q-btn
+          v-if="isMessengerPage"
+          flat
+          dense
+          round
+          icon="menu"
+          color="white"
+          aria-label="Toggle Conversations"
+          @click.stop="toggleMessengerDrawer"
+          class="q-mr-xs"
+        />
         <template v-if="showBackButton">
           <q-btn
             flat
@@ -43,17 +54,6 @@
       <q-toolbar-title class="app-title">{{ currentTitle }}</q-toolbar-title>
 
       <div class="right-controls row items-center no-wrap">
-        <q-btn
-          v-if="isMessengerPage"
-          flat
-          dense
-          round
-          icon="menu"
-          color="primary"
-          aria-label="Toggle Chat Menu"
-          @click.stop="toggleMessengerDrawer"
-          class="q-mr-sm"
-        />
         <transition
           appear
           enter-active-class="animated wobble"
@@ -256,16 +256,23 @@ export default defineComponent({
   min-height: 48px;
 }
 
+.toolbar-grid {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+}
+
 .app-title {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-align: center;
+  justify-self: center;
 }
 
 .left-controls,
 .right-controls {
-  flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
   gap: 6px;
