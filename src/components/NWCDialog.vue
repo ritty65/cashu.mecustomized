@@ -9,7 +9,7 @@
       class="q-px-lg q-pt-md q-pb-md qcard"
     >
       <div class="text-center q-mb-md q-mt-none q-pt-none">
-        <a :href="showNWCData.connectionString">
+        <a :href="safeConnectionString" rel="noopener noreferrer">
           <q-responsive :ratio="1" class="q-mx-md q-mt-none q-pt-none">
             <vue-qrcode
               :value="showNWCData.connectionString"
@@ -86,6 +86,10 @@ export default defineComponent({
   computed: {
     ...mapState(useNWCStore, ["showNWCData"]),
     ...mapWritableState(useNWCStore, ["showNWCDialog"]),
+    safeConnectionString() {
+      const url = this.showNWCData.connectionString || "";
+      return /^(nostr\+walletconnect:|https?:)/i.test(url) ? url : "#";
+    },
   },
   methods: {},
 });
