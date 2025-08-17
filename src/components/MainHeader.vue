@@ -3,36 +3,35 @@
     <q-toolbar class="app-toolbar" dense>
       <div class="left-controls row items-center no-wrap">
         <q-btn
-          v-if="isMessengerPage"
           flat
           dense
           round
           icon="menu"
-          color="primary"
-          aria-label="Toggle chat menu"
+          :color="chatButtonColor"
+          aria-label="Toggle Chats"
           @click.stop="toggleMessengerDrawer"
-        />
-      </div>
-
-      <q-space />
-
-      <div class="title-group row items-center no-wrap">
+        >
+          <q-tooltip>Chats</q-tooltip>
+        </q-btn>
         <q-btn
           flat
           dense
           round
           icon="menu"
           color="primary"
-          aria-label="Open main menu"
+          aria-label="Toggle main menu"
           :aria-expanded="String(ui.mainNavOpen)"
           aria-controls="app-nav"
           @click="ui.toggleMainNav"
           :disable="ui.globalMutexLock"
-        />
-        <div class="app-title q-ml-sm">{{ currentTitle }}</div>
+        >
+          <q-tooltip>Menu</q-tooltip>
+        </q-btn>
       </div>
 
-      <q-space />
+      <q-toolbar-title class="app-title text-center">{{
+        currentTitle
+      }}</q-toolbar-title>
 
       <div class="right-controls row items-center no-wrap">
         <transition
@@ -110,7 +109,6 @@
       </div>
     </q-toolbar>
   </q-header>
-
 </template>
 
 <script>
@@ -148,14 +146,16 @@ export default defineComponent({
       if (route.path.startsWith("/wallet")) return "Wallet";
       return "Cashu";
     });
+    const chatButtonColor = computed(() =>
+      $q.dark.isActive ? "white" : "primary",
+    );
     const countdown = ref(0);
     const reloading = ref(false);
     let countdownInterval;
 
-
     const toggleMessengerDrawer = () => {
       if ($q.screen.lt.md) {
-        messenger.setDrawer(true);
+        messenger.setDrawer(!messenger.drawerOpen);
       } else {
         messenger.toggleDrawer();
         vm?.notify(
@@ -214,9 +214,9 @@ export default defineComponent({
       ui,
       currentTitle,
       toggleMessengerDrawer,
-      isMessengerPage,
       toggleDarkMode,
       darkIcon,
+      chatButtonColor,
     };
   },
 });
@@ -242,12 +242,6 @@ export default defineComponent({
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.title-group {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
 }
 
 .left-controls,

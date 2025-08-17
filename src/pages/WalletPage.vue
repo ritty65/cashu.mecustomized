@@ -1,7 +1,7 @@
 <template>
   <Suspense>
     <template #default>
-      <div class="row q-col-gutter-y-md justify-center q-pt-sm q-pb-md">
+      <div class="row q-col-gutter-y-md justify-center q-pb-md">
         <div class="col-12 col-sm-11 col-md-8 text-center q-gutter-y-md">
           <ActivityOrb />
           <NoMintWarnBanner v-if="mints.length == 0" />
