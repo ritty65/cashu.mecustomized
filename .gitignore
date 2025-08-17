@@ -40,3 +40,7 @@ yarn-error.log*
 src/**/node_modules/
 dist/
 backups/
+
+# Local artifacts
+output.txt
+rollup-plugin-visualizer/
