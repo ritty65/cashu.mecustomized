@@ -40,13 +40,14 @@
       class="tooltip"
       :style="{ left: tooltip.x + 'px', top: tooltip.y + 'px' }"
     >
-      <div v-html="tooltip.content"></div>
+      <div v-safe-html="tooltip.content"></div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref, computed, onMounted, watch } from "vue";
+import { sanitizeHtml } from "src/utils/safe-markdown";
 
 interface SwapEventRead {
   id: number;
@@ -413,11 +414,11 @@ export default defineComponent({
         show: true,
         x: event.clientX + 10,
         y: event.clientY + 10,
-        content: `
+        content: sanitizeHtml(`
           <div><b>Swaps:</b> ${bucket.count}</div>
           <div><b>Success rate:</b> ${successRate}% (${bucket.successCount}/${bucket.count})</div>
           <div><b>Time range:</b> ${timeRange}</div>
-        `,
+        `),
       };
     };
 

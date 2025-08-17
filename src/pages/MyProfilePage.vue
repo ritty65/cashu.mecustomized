@@ -133,7 +133,7 @@
         </div>
         <div
           class="text-caption"
-          v-html="renderMarkdown(tier.description)"
+          v-safe-html="renderMarkdownSafe(tier.description)"
         ></div>
         <q-btn color="primary" dense class="q-mt-sm" @click="editProfile">
           {{ $t("CreatorHub.profile.edit") }}
@@ -159,11 +159,12 @@ import { usePriceStore } from "stores/price";
 import { useUiStore } from "stores/ui";
 import { useMintsStore } from "stores/mints";
 import { useBucketsStore } from "stores/buckets";
-import { renderMarkdown as renderMarkdownFn } from "src/js/simple-markdown";
+import { renderMarkdownSafe as renderMarkdownSafeFn } from "src/utils/safe-markdown";
 import { notifySuccess, notifyError } from "src/js/notify";
 import { shortenString } from "src/js/string-utils";
 import CreatorProfileForm from "components/CreatorProfileForm.vue";
 import P2PKDialog from "components/P2PKDialog.vue";
+import { isTrustedUrl } from "src/utils/sanitize-url";
 
 export default defineComponent({
   name: "MyProfilePage",
@@ -218,6 +219,9 @@ export default defineComponent({
       if (!npub.value) return;
       const p = await nostr.getProfile(npub.value);
       if (p) {
+        if (p.picture && !isTrustedUrl(p.picture)) {
+          delete (p as any).picture;
+        }
         profile.value = { ...p };
         profileStore.setProfile(p);
         profileStore.markClean();
@@ -234,8 +238,8 @@ export default defineComponent({
       initProfile();
     });
 
-    function renderMarkdown(text: string): string {
-      return renderMarkdownFn(text || "");
+    function renderMarkdownSafeWrapper(text: string): string {
+      return renderMarkdownSafeFn(text || "");
     }
 
     function formatFiat(sats: number): string {
@@ -294,7 +298,7 @@ export default defineComponent({
       bucketCount,
       walletBalanceFormatted,
       shortenString,
-      renderMarkdown,
+      renderMarkdownSafe: renderMarkdownSafeWrapper,
       formatFiat,
       openP2PKDialog,
       showP2PKKeyEntry,
