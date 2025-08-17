@@ -63,7 +63,7 @@ export const useStorageStore = defineStore("storage", {
       const fileName = `cashu_me_backup_${currentDateStr()}.json`;
       var downloadLink = document.createElement("a");
       downloadLink.download = fileName;
-      downloadLink.innerHTML = "Download File";
+      downloadLink.textContent = "Download File";
       downloadLink.href = textToSaveAsURL;
       downloadLink.onclick = function () {
         document.body.removeChild(event.target as Node);

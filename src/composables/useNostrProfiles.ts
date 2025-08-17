@@ -2,6 +2,7 @@ import { reactive } from "vue";
 import type { NDKUserProfile as Profile } from "@nostr-dev-kit/ndk";
 import profileCache from "src/js/profile-cache";
 import { useNostrStore } from "stores/nostr";
+import { isTrustedUrl } from "src/utils/sanitize-url";
 
 const LOCAL_TTL = 24 * 60 * 60 * 1000;
 const STORAGE_PREFIX = "nostr-profile:";
@@ -10,6 +11,9 @@ const profiles = reactive(new Map<string, Profile>());
 const pending = new Map<string, Promise<void>>();
 
 function save(npub: string, profile: Profile) {
+  if (profile.picture && !isTrustedUrl(profile.picture)) {
+    delete (profile as any).picture;
+  }
   profiles.set(npub, profile);
   profileCache.set(npub, profile);
   try {
@@ -42,6 +46,9 @@ function load(npub: string): Profile | undefined {
     if (Date.now() - timestamp > LOCAL_TTL) {
       localStorage.removeItem(STORAGE_PREFIX + npub);
       return undefined;
+    }
+    if (profile.picture && !isTrustedUrl(profile.picture)) {
+      delete (profile as any).picture;
     }
     profiles.set(npub, profile);
     profileCache.set(npub, profile);

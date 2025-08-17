@@ -116,9 +116,9 @@ import { useUiStore } from "stores/ui";
 import SubscribeDialog from "components/SubscribeDialog.vue";
 import SubscriptionReceipt from "components/SubscriptionReceipt.vue";
 import { useI18n } from "vue-i18n";
-import { renderMarkdown as renderMarkdownFn } from "src/js/simple-markdown";
 import PaywalledContent from "components/PaywalledContent.vue";
 import MediaPreview from "components/MediaPreview.vue";
+import { isTrustedUrl } from "src/utils/sanitize-url";
 
 export default defineComponent({
   name: "PublicCreatorProfilePage",
@@ -153,7 +153,12 @@ export default defineComponent({
     const loadProfile = async () => {
       await creators.fetchTierDefinitions(creatorHex);
       const p = await nostr.getProfile(creatorHex);
-      if (p) profile.value = { ...p };
+      if (p) {
+        if (p.picture && !isTrustedUrl(p.picture)) {
+          delete (p as any).picture;
+        }
+        profile.value = { ...p };
+      }
       followers.value = await nostr.fetchFollowerCount(creatorHex);
       following.value = await nostr.fetchFollowingCount(creatorHex);
     };
@@ -184,9 +189,6 @@ export default defineComponent({
       // Transaction already processed in SubscribeDialog.
       showSubscribeDialog.value = false;
     };
-    function renderMarkdown(text: string): string {
-      return renderMarkdownFn(text || "");
-    }
 
     function formatFiat(sats: number): string {
       if (!priceStore.bitcoinPrice) return "";
@@ -211,7 +213,7 @@ export default defineComponent({
       following,
       bitcoinPrice,
       priceStore,
-      renderMarkdown,
+      // no markdown rendering needed
       formatFiat,
       getPrice,
       openSubscribe,

@@ -368,7 +368,7 @@
         currentSearchAbortController = new AbortController();
         const { signal } = currentSearchAbortController;
 
-        resultsListElement.innerHTML = "";
+        resultsListElement.textContent = "";
         statusMessageElement.classList.add("hidden");
         retryButtonElement.classList.add("hidden");
         loaderElement.style.display = "block";
@@ -722,7 +722,7 @@
       }
 
       function renderProfiles(profiles, targetElement, isFeatured) {
-        targetElement.innerHTML = "";
+        targetElement.textContent = "";
         if (profiles.length === 0) return;
 
         profiles.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
@@ -737,9 +737,9 @@
           const avatarImg = document.createElement("img");
           avatarImg.className = "avatar";
           const avatarLetter = (profile.name || "N")[0]?.toUpperCase();
-          avatarImg.src =
-            profile.picture ||
-            `https://placehold.co/50x50/A0AEC0/FFFFFF?text=${avatarLetter}`;
+          avatarImg.src = isTrustedUrl(profile.picture)
+            ? profile.picture
+            : `https://placehold.co/50x50/A0AEC0/FFFFFF?text=${avatarLetter}`;
           avatarImg.alt = profile.name || "Nostr User";
           avatarImg.onerror = function () {
             this.src = `https://placehold.co/50x50/A0AEC0/FFFFFF?text=${avatarLetter}`;
@@ -755,7 +755,10 @@
             npub.length - 5,
           )}`;
           const npubElement = document.createElement("p");
-          npubElement.innerHTML = `<strong>Npub:</strong> ${npubShort}`;
+          const npubStrong = document.createElement("strong");
+          npubStrong.textContent = "Npub:";
+          npubElement.appendChild(npubStrong);
+          npubElement.append(` ${npubShort}`);
           npubElement.title = npub;
           const copyNpubButton = document.createElement("button");
           copyNpubButton.textContent = "Copy";
@@ -769,7 +772,14 @@
           infoDiv.appendChild(npubElement);
           if (profile.nip05) {
             const nip05Element = document.createElement("p");
-            nip05Element.innerHTML = `<strong>NIP-05:</strong> <span class="nip05">${profile.nip05}</span>`;
+            const nip05Strong = document.createElement("strong");
+            nip05Strong.textContent = "NIP-05:";
+            nip05Element.appendChild(nip05Strong);
+            const nip05Span = document.createElement("span");
+            nip05Span.className = "nip05";
+            nip05Span.textContent = profile.nip05;
+            nip05Element.append(" ");
+            nip05Element.appendChild(nip05Span);
             infoDiv.appendChild(nip05Element);
           }
           if (profile.about) {
@@ -778,13 +788,18 @@
               profile.about.length > (isFeatured ? 80 : 150)
                 ? profile.about.substring(0, isFeatured ? 80 : 150) + "..."
                 : profile.about;
-            aboutElement.innerHTML = `<em>${escapeHtml(aboutText)}</em>`;
+            const aboutEm = document.createElement("em");
+            aboutEm.textContent = aboutText;
+            aboutElement.appendChild(aboutEm);
             aboutElement.title = profile.about;
             infoDiv.appendChild(aboutElement);
           }
           if (profile.lud16) {
             const lud16Element = document.createElement("p");
-            lud16Element.innerHTML = `<strong>LN:</strong> ${profile.lud16}`;
+            const lud16Strong = document.createElement("strong");
+            lud16Strong.textContent = "LN:";
+            lud16Element.appendChild(lud16Strong);
+            lud16Element.append(` ${profile.lud16}`);
             infoDiv.appendChild(lud16Element);
           }
           profileHeaderDiv.appendChild(avatarImg);
@@ -841,6 +856,15 @@
           .replace(/>/g, "&gt;")
           .replace(/"/g, "&quot;")
           .replace(/'/g, "&#039;");
+      }
+
+      function isTrustedUrl(url) {
+        try {
+          const parsed = new URL(url, window.location.origin);
+          return parsed.protocol === "http:" || parsed.protocol === "https:";
+        } catch (e) {
+          return false;
+        }
       }
 
       function copyToClipboard(text, buttonElement) {

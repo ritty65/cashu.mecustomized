@@ -11,7 +11,7 @@
 import { configure } from "quasar/wrappers";
 import path from "path";
 
-export default configure(function (/* ctx */) {
+export default configure(function (ctx) {
   return {
     alias: { buffer: "buffer", process: "process/browser" },
     eslint: {
@@ -30,6 +30,8 @@ export default configure(function (/* ctx */) {
     // --> boot files are part of "main.js"
     // https://v2.quasar.dev/quasar-cli/boot-files
     boot: [
+      "trusted-types",
+      "safe-html",
       "buffer",
       "polyfills",
       "ndk",
@@ -96,6 +98,23 @@ export default configure(function (/* ctx */) {
             "vue-chartjs",
           ],
         };
+
+        const csp = ctx.dev
+          ? "default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' wss:; frame-ancestors 'none'; object-src 'none'; base-uri 'self';"
+          : "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' wss:; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; require-trusted-types-for 'script';";
+        const header = ctx.dev
+          ? 'Content-Security-Policy-Report-Only'
+          : 'Content-Security-Policy';
+        viteConf.plugins = viteConf.plugins || [];
+        viteConf.plugins.push({
+          name: 'html-transform-csp',
+          transformIndexHtml(html) {
+            return html.replace(
+              '<head>',
+              `<head><meta http-equiv="${header}" content="${csp}">`,
+            );
+          },
+        });
       },
       // viteVuePluginOptions: {},
 
