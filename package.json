@@ -116,5 +116,16 @@
     "node": ">=16.11.0",
     "npm": ">= 6.13.4",
     "yarn": ">= 1.21.1"
+  },
+  "pnpm": {
+    "overrides": {
+      "form-data": "^4.0.4",
+      "semver-regex": "^3.1.4",
+      "http-cache-semantics": "^4.1.1",
+      "cross-spawn": "^7.0.3",
+      "phin": "^3.7.1",
+      "on-headers": "^1.1.0",
+      "tmp": "^0.2.4"
+    }
   }
 }
