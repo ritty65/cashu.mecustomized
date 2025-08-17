@@ -16,7 +16,7 @@
       <br />
       <span class="text-caption">
         To learn more about the auditor or support a future audit, visit
-        <a :href="auditUrl">audit.8333.space</a> or click
+        <a :href="auditUrl" rel="noopener noreferrer">audit.8333.space</a> or click
         <span
           class="text-bold cursor-pointer text-primary"
           @click="getAuditorPaymentRequestsAndHandle"
@@ -78,8 +78,8 @@
       <!-- Donate ecash to the auditor -->
       <div class="q-mt-md text-grey-6 text-caption">
         Audit information is made available by
-        <a :href="auditUrl">{{ auditUrlShort }}</a
-        >. The current balance held by the auditor for this mint is
+        <a :href="auditUrl" rel="noopener noreferrer">{{ auditUrlShort }}</a>
+        . The current balance held by the auditor for this mint is
         <span class="text-bold">{{ mintInfo.balance }} sats</span>, with a total
         of
         <span class="text-bold">{{ mintInfo.sum_donations }} sats</span>
@@ -134,6 +134,7 @@ import { useWalletStore } from "../stores/wallet";
 import { useMintsStore } from "../stores/mints";
 import { useSettingsStore } from "../stores/settings";
 import { getShortUrl } from "../js/wallet-helpers";
+import { isTrustedUrl } from "src/utils/sanitize-url";
 
 export default {
   name: "MintAuditInfo",
@@ -151,7 +152,9 @@ export default {
     const settingsStore = useSettingsStore();
     return {
       auditorApiUrl: settingsStore.auditorApiUrl,
-      auditUrl: settingsStore.auditorUrl,
+      auditUrl: isTrustedUrl(settingsStore.auditorUrl)
+        ? settingsStore.auditorUrl
+        : "#",
       auditUrlShort: getShortUrl(settingsStore.auditorUrl),
       mintNotAudited: false,
       loading: true,

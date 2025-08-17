@@ -52,8 +52,9 @@
             />
             <template v-else-if="isFile">
               <a
-                :href="message.content"
+                :href="attachmentUrl"
                 target="_blank"
+                rel="noopener noreferrer"
                 :download="attachmentName"
               >
                 {{ attachmentName }}
@@ -169,6 +170,9 @@ const deliveryColor = computed(() =>
 );
 
 const isDataUrl = computed(() => props.message.content.startsWith("data:"));
+const isSafeDataUrl = computed(() =>
+  /^data:(image|audio|video)\//i.test(props.message.content),
+);
 const isImageDataUrl = computed(() =>
   props.message.content.startsWith("data:image"),
 );
@@ -181,7 +185,10 @@ const isImageLink = computed(
 const imageSrc = computed(() =>
   isImageDataUrl.value || isImageLink.value ? props.message.content : "",
 );
-const isFile = computed(() => isDataUrl.value || isHttpUrl.value);
+const isFile = computed(() => isSafeDataUrl.value || isHttpUrl.value);
+const attachmentUrl = computed(() =>
+  isFile.value ? props.message.content : "#",
+);
 const attachmentName = computed(
   () =>
     props.message.attachment?.name ||
