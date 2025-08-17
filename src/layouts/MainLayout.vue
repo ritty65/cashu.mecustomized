@@ -6,6 +6,7 @@
     <MainHeader />
     <AppNavDrawer />
     <q-drawer
+      v-if="isMessengerRoute"
       v-model="messenger.drawerOpen"
       :mini="messenger.drawerMini"
       mini-width="80"
@@ -73,7 +74,11 @@
         <router-view />
       </div>
     </q-page-container>
-    <NewChatDialog ref="newChatDialogRef" @start="startChat" />
+    <NewChatDialog
+      v-if="isMessengerRoute"
+      ref="newChatDialogRef"
+      @start="startChat"
+    />
   </q-layout>
 </template>
 
