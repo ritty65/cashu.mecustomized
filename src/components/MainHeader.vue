@@ -3,6 +3,7 @@
     <q-toolbar class="app-toolbar" dense>
       <div class="left-controls row items-center no-wrap">
         <q-btn
+          v-if="isMessengerPage"
           flat
           dense
           round
@@ -213,6 +214,7 @@ export default defineComponent({
       reloading,
       ui,
       currentTitle,
+      isMessengerPage,
       toggleMessengerDrawer,
       toggleDarkMode,
       darkIcon,
