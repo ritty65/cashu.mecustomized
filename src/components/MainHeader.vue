@@ -1,5 +1,5 @@
 <template>
-  <q-header class="bg-transparent" :class="{ 'nav-open': ui.mainNavOpen }">
+  <q-header class="bg-transparent">
     <q-toolbar class="app-toolbar" dense>
       <div class="left-controls row items-center no-wrap">
         <q-btn
@@ -230,11 +230,6 @@ export default defineComponent({
   /* Keep header above Quasar drawer/scrim layers on mobile overlays */
   z-index: 11000;
   overflow-x: hidden;
-}
-
-.q-header.nav-open {
-  /* Let the main navigation drawer overlay the header */
-  z-index: 1;
 }
 
 .app-toolbar {
