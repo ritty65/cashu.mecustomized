@@ -6,7 +6,6 @@
       'wallet-layout',
     ]"
   >
-    <Sidebar />
     <HeaderBar />
     <q-page-container class="q-pa-md">
       <BucketManager />
@@ -25,7 +24,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { storeToRefs } from "pinia";
-import Sidebar from "components/Sidebar.vue";
 import HeaderBar from "components/HeaderBar.vue";
 import BucketManager from "components/BucketManager.vue";
 import { useBucketsStore } from "stores/buckets";
