@@ -64,7 +64,7 @@ export const messages = {
     notifications: {
       balance_too_low: "Balance is too low",
       received: "Received {amount}",
-      fee: " (fee: {fee})",
+      fee: " (fee {fee})",
       could_not_request_mint: "Could not request mint",
       invoice_still_pending: "Invoice still pending",
       paid_lightning: "Paid {amount} via Lightning",
@@ -359,7 +359,7 @@ export const messages = {
     p2pk_features: {
       title: "P2PK",
       description:
-        "Generate a key pair to receive P2PK-locked ecash. Warning: This feature is experimental. Only use with small amounts. If you lose your private keys, nobody will be able to unlock the ecash locked to it anymore.",
+        "Generate a key pair to receive P2PK-locked ecash. Warning - This feature is experimental. Only use with small amounts. If you lose your private keys, nobody will be able to unlock the ecash locked to it anymore.",
       generate_button: "Generate key",
       import_button: "Import nsec",
       publish_profile_button: "Publish Nutzap profile",
@@ -507,7 +507,7 @@ export const messages = {
         reset_wallet: {
           button: "Reset wallet data",
           description:
-            "Reset your wallet data. Warning: This will delete everything! Make sure you create a backup first.",
+            "Reset your wallet data. Warning - This will delete everything! Make sure you create a backup first.",
           confirm_question: "Are you sure you want to delete your wallet data?",
           cancel: "Cancel",
           confirm: "Delete wallet",
@@ -575,7 +575,7 @@ export const messages = {
   },
   ErrorNotFound: {
     title: "404",
-    text: "This page doesn't exist. Try the links below for help:",
+    text: "This page doesn't exist. Try the links below for help",
     links: {
       docs: "Documentation",
       tips: "Tips & Tricks",
@@ -601,64 +601,13 @@ export const messages = {
       tooltip: "Check all pending tokens",
     },
   },
-  Welcome: {
-    actions: {
-      previous: { label: "Previous" },
-      next: { label: "Next" },
-      skip: { label: "Skip" },
-      finish: { label: "Finish" },
-      restore: { label: "Restore" },
-    },
-    progress: {
-      step: "Step { current } of { total }",
-    },
-    hints: {
-      dragDrop:
-        "You can also drag & drop a backup file anywhere on this screen.",
-    },
-    slides: {
-      privacy: {
-        title: "Cashu & Privacy",
-        text: "Cashu uses blinded tokens so mints can't track your payments.",
-        learn_more: "To learn more, visit the About page.",
-      },
-      mints: {
-        title: "Mints",
-        text: "Add a mint to start receiving tokens.",
-      },
-      proofs: {
-        title: "Proofs",
-        text: "Proofs are the tokens you can send and receive.",
-      },
-      buckets: {
-        title: "Buckets",
-        text: "Use buckets to organize your tokens.",
-      },
-      backup: {
-        title: "Backup your Seed",
-        text: "Your recovery phrase backs up your wallet. Keep it safe.",
-        checkbox: { label: "I understand I must back up my recovery/seed." },
-      },
-      terms: {
-        title: "Terms of Service",
-        text: "You must accept the Terms of Service to use this wallet.",
-        checkbox: { label: "I accept the Terms of Service." },
-        link: { label: "Read Terms of Service" },
-      },
-      pwa: {
-        title: "Install as App",
-        text: "Install this app on your device for quicker access.",
-      },
-      finish: {
-        title: "You're ready!",
-        text: "Choose what to do next:",
-        actions: {
-          add_mint: { label: "Add a Mint" },
-          restore: { label: "Restore from backup" },
-          about: { label: "Learn more on About" },
-        },
-      },
-    },
+  iOSPWAPrompt: {
+    text: "Tap { icon } and { buttonText }",
+    buttonText: "Add to Home Screen",
+  },
+  AndroidPWAPrompt: {
+    text: "Tap { icon } and { buttonText }",
+    buttonText: "Add to Home Screen",
   },
   RestoreView: {
     seed_phrase: {
@@ -693,13 +642,13 @@ export const messages = {
       restore: {
         label: "Restore",
         in_progress: "Restoring mint …",
-        error: "Error restoring mint: { error }",
+        error: "Error restoring mint - { error }",
       },
       restore_all_mints: {
         label: "Restore All Mints",
         in_progress: "Restoring mint { index } of { length } …",
         success: "Restore finished successfully",
-        error: "Error restoring mints: { error }",
+        error: "Error restoring mints - { error }",
       },
     },
   },
@@ -998,7 +947,7 @@ export const messages = {
       caption: "P2PK Key",
       description: "Receive ecash locked to this key",
       used_warning_text:
-        "Warning: This key was used before. Use a new key for better privacy.",
+        "Warning - This key was used before. Use a new key for better privacy.",
     },
     actions: {
       copy: {
@@ -1068,7 +1017,7 @@ export const messages = {
       description:
         "Control your wallet remotely with NWC. Press the QR code to link your wallet with a compatible app.",
       warning_text:
-        "Warning: anyone with access to this connection string can initiate payments from your wallet. Do not share!",
+        "Warning - anyone with access to this connection string can initiate payments from your wallet. Do not share!",
     },
     actions: {
       copy: {
@@ -1709,7 +1658,7 @@ export const messages = {
   },
   restore: {
     mnemonic_error_text: "Please enter a mnemonic",
-    restore_mint_error_text: "Error restoring mint: { error }",
+    restore_mint_error_text: "Error restoring mint - { error }",
     prepare_info_text: "Preparing restore process …",
     restored_proofs_for_keyset_info_text:
       "Restored { restoreCounter } proofs for keyset { keysetId }",
@@ -1931,6 +1880,91 @@ export const messages = {
     urlListHint: "Press Enter after typing each URL",
     required: "Required",
     invalidUrl: "Invalid URL",
+  },
+  Welcome: {
+    footer: {
+      restoreCta: "Restore from Backup",
+      hint: "You can also drag & drop a backup file anywhere on this screen.",
+      previous: "Previous",
+      next: "Next",
+      skip: "Skip",
+      finish: "Finish",
+      step: "Step {n} of {total}",
+      language: "Language",
+    },
+    privacy: {
+      title: "Cashu & Privacy",
+      lead: "Cashu uses blinded tokens so mints can’t see who you are or what you pay.",
+      bullets: [
+        "Your wallet blinds requests; the mint signs without seeing your data.",
+        "Anyone can verify tokens locally without asking the mint again.",
+        "You control which mints you trust; you can move funds across mints.",
+      ],
+      ctaLearn: "To learn more, visit the About page.",
+    },
+    mints: {
+      title: "Mints",
+      lead: "A mint is a server that issues and redeems Cashu tokens.",
+      bullets: [
+        "Add one or more mints to receive, send, and swap tokens.",
+        "Each mint defines fees, limits, and availability.",
+        "You can remove or switch mints at any time.",
+      ],
+      ctaPrimary: "Add a Mint",
+      ctaSecondary: "What is a mint?",
+    },
+    proofs: {
+      title: "Proofs",
+      lead: "Proofs are the bearer tokens you send and receive.",
+      bullets: [
+        "A proof proves ownership of value without exposing identity.",
+        "Splitting/merging happens locally to match exact amounts.",
+        "Treat proofs like cash—anyone who has them can spend them.",
+      ],
+      tip: "Never post your tokens publicly. If you paste one, anyone can redeem it.",
+    },
+    buckets: {
+      title: "Buckets",
+      lead: "Use buckets to organize your tokens by purpose.",
+      bullets: [
+        "Create buckets like “Spending”, “Savings”, or “Tips”.",
+        "Move tokens between buckets without leaving the wallet.",
+        "Buckets are local only; they don’t affect mint balances.",
+      ],
+      ctaPrimary: "Create Starter Buckets",
+    },
+    backup: {
+      title: "Backup your seed",
+      lead: "Your recovery phrase is the only way to restore your wallet.",
+      bullets: [
+        "Write it down and store it offline. Anyone with it can spend your funds.",
+        "You can also export an encrypted backup file.",
+        "We can’t recover your seed—keep it safe.",
+      ],
+      revealSeed: "Reveal Recovery Phrase",
+      downloadBackup: "Download Backup",
+      acknowledge: "I understand I must back up my recovery/seed.",
+    },
+    terms: {
+      title: "Terms of Service",
+      link: "Read Terms",
+      accept: "I accept the Terms of Service.",
+    },
+    pwa: {
+      title: "Install as App",
+      lead: "Install this wallet as a Progressive Web App for a better experience.",
+      ctaInstall: "Install",
+      ctaSkip: "Not now",
+    },
+    finish: {
+      title: "You’re ready!",
+      ctas: {
+        addMint: "Add a Mint",
+        restore: "Restore from Backup",
+        openWallet: "Open Wallet",
+        about: "Learn more on About",
+      },
+    },
   },
 };
 

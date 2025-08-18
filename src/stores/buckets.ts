@@ -200,6 +200,17 @@ export const useBucketsStore = defineStore("buckets", {
       this.buckets.push(newBucket);
       return newBucket;
     },
+    createStarterBuckets(names: string[] = ["Spending", "Savings", "Tips"]) {
+      for (const name of names) {
+        if (
+          !this.buckets.some(
+            (b) => b.name.toLowerCase() === name.toLowerCase(),
+          )
+        ) {
+          this.addBucket({ name });
+        }
+      }
+    },
     editBucket(id: string, updates: Partial<Omit<Bucket, "id">>) {
       const index = this.buckets.findIndex((b) => b.id === id);
       if (index === -1) return;

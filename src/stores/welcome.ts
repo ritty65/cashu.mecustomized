@@ -33,8 +33,8 @@ export const useWelcomeStore = defineStore("welcome", {
     isLastSlide: (state) => state.currentSlide === state.slides.length - 1,
     canGoNext: (state) => {
       const key = state.slides[state.currentSlide];
-      if (key === "backup") return state.seedAcknowledged;
-      if (key === "terms") return state.termsAccepted;
+      if (key === "backup" && !state.seedAcknowledged) return false;
+      if (key === "terms" && !state.termsAccepted) return false;
       return true;
     },
   },
