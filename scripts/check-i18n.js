@@ -18,7 +18,8 @@ async function collectFiles(dir) {
 }
 
 function extractKeys(src) {
-  const re = /\$t\(\s*['"`]([^'"`]+)['"`]\s*\)|i18n\.t\(\s*['"`]([^'"`]+)['"`]\s*\)/g;
+  const re =
+    /\$t\(\s*['"`]([^'"`]+)['"`]\s*\)|i18n\.t\(\s*['"`]([^'"`]+)['"`]\s*\)/g;
   const keys = new Set();
   let m;
   while ((m = re.exec(src)) !== null) {
@@ -41,10 +42,7 @@ async function loadLocaleKeys() {
   const content = await fs.readFile(LOCALE_FILE, "utf8");
   const match = content.match(/export const messages = (\{[\s\S]*?\n\});/);
   if (!match) throw new Error("Could not parse locale file");
-  const jsonLike = match[1]
-    .replace(/(\w+)\s*:/g, '"$1":')
-    .replace(/,\s*([}\]])/g, '$1');
-  const messages = JSON.parse(jsonLike);
+  const messages = new Function(`return ${match[1]}`)();
   return flatten(messages);
 }
 
@@ -68,4 +66,3 @@ main().catch((e) => {
   console.error(e);
   process.exit(1);
 });
-

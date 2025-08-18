@@ -1,21 +1,26 @@
 <template>
-  <div class="q-pa-md flex flex-center">
+  <section role="region" :aria-labelledby="id" class="q-pa-md flex flex-center">
     <div class="text-center">
       <q-icon name="visibility_off" size="4em" color="primary" />
-      <h2 class="q-mt-md">{{ $t("WelcomeSlidePrivacy.title") }}</h2>
-      <p class="q-mt-sm">{{ $t("WelcomeSlidePrivacy.text") }}</p>
+      <h1 :id="id" tabindex="-1" class="q-mt-md">
+        {{ $t("Welcome.slides.privacy.title") }}
+      </h1>
+      <p class="q-mt-sm">{{ $t("Welcome.slides.privacy.text") }}</p>
+      <p class="q-mt-sm">
+        <router-link to="/about" class="text-primary">
+          {{ $t("Welcome.slides.privacy.about") }}
+        </router-link>
+      </p>
     </div>
-  </div>
+  </section>
 </template>
 
-<script>
-export default {
-  name: "WelcomeSlidePrivacy",
-};
+<script setup lang="ts">
+const id = "welcome-privacy-title";
 </script>
 
 <style scoped>
-h2 {
+h1 {
   font-weight: bold;
 }
 </style>

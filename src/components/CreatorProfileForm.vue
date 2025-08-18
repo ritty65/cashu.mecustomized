@@ -48,12 +48,14 @@
         </template>
         <template #after-options>
           <q-item clickable @click="generateP2PK">
-          <q-item-section>{{ $t('creatorHub.generateNewKey') }}</q-item-section>
+            <q-item-section>{{
+              $t("creatorHub.generateNewKey")
+            }}</q-item-section>
           </q-item>
         </template>
       </q-select>
       <div v-else class="row items-center q-gutter-sm">
-        <div class="text-caption">{{ $t('creatorHub.noP2pkPublicKey') }}</div>
+        <div class="text-caption">{{ $t("creatorHub.noP2pkPublicKey") }}</div>
         <q-btn
           flat
           dense
@@ -82,7 +84,7 @@
     >
       <template #label>
         <div class="row items-center no-wrap">
-          <span>{{ $t('creatorHub.trustedMints') }}</span>
+          <span>{{ $t("creatorHub.trustedMints") }}</span>
           <InfoTooltip class="q-ml-xs" :text="$t('creatorHub.mintUrlInfo')" />
         </div>
       </template>
@@ -103,11 +105,8 @@
     >
       <template #label>
         <div class="row items-center no-wrap">
-          <span>{{ $t('creatorHub.relays') }}</span>
-          <InfoTooltip
-            class="q-ml-xs"
-            :text="$t('creatorHub.relayUrlInfo')"
-          />
+          <span>{{ $t("creatorHub.relays") }}</span>
+          <InfoTooltip class="q-ml-xs" :text="$t('creatorHub.relayUrlInfo')" />
         </div>
       </template>
     </q-select>

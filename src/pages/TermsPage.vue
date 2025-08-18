@@ -1,51 +1,8 @@
-<!-- src/components/WelcomePage.vue -->
 <template>
-  <q-card
-    :class="$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark'"
-    class="q-pa-none"
-    style="height: 100%"
-  >
-    <WelcomeSlide4 />
-  </q-card>
-  <q-dialog persistent transition-show="slide-up" transition-hide="fadeOut">
-  </q-dialog>
+  <q-page class="q-pa-md" role="main">
+    <h1 class="text-h5 q-mb-md">Terms of Service</h1>
+    <p>This is a placeholder for the Terms of Service.</p>
+  </q-page>
 </template>
 
-<script>
-import { ref } from "vue";
-import WelcomeSlide4 from "./welcome/WelcomeSlide4.vue";
-
-export default {
-  name: "TermsPage",
-  components: {
-    WelcomeSlide4,
-  },
-  setup() {
-    return {};
-  },
-};
-</script>
-
-<style scoped>
-.q-dialog__inner {
-  height: 100%;
-  width: 100%;
-  margin: 0; /* Align dialog to cover the entire viewport */
-}
-
-.q-card {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.q-carousel {
-  flex: 1;
-}
-
-.custom-navigation {
-  display: flex;
-  justify-content: space-between;
-  padding: 16px;
-}
-</style>
+<script setup></script>

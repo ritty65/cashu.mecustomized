@@ -142,8 +142,8 @@ const statusIcon = computed(() =>
   props.subscription.status === "active"
     ? "check"
     : props.subscription.status === "pending"
-      ? "schedule"
-      : "close",
+    ? "schedule"
+    : "close",
 );
 
 const renewsText = computed(() => {

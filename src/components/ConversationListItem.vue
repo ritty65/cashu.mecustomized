@@ -63,11 +63,7 @@
           <span class="time text-caption">{{ timeExact }}</span>
         </div>
 
-        <q-item-label
-          caption
-          class="snippet ellipsis"
-          :title="displaySnippet"
-        >
+        <q-item-label caption class="snippet ellipsis" :title="displaySnippet">
           <template v-if="snippet.icon">
             <q-icon :name="snippet.icon" size="14px" class="q-mr-xs" />
           </template>
@@ -136,11 +132,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue'
-import { useQuasar, QBadge, QBtn } from 'quasar'
-import { useMessengerStore } from 'src/stores/messenger'
-import { useNostrStore } from 'src/stores/nostr'
-import { parseMessageSnippet } from 'src/utils/message-snippet'
+import { computed, ref } from "vue";
+import { useQuasar, QBadge, QBtn } from "quasar";
+import { useMessengerStore } from "src/stores/messenger";
+import { useNostrStore } from "src/stores/nostr";
+import { parseMessageSnippet } from "src/utils/message-snippet";
 
 /**
  * Exact time formatter for drawer:
@@ -150,29 +146,29 @@ import { parseMessageSnippet } from 'src/utils/message-snippet'
  * 'lastMsg' prop (already provided here) contains created_at in seconds (Nostr).
  */
 function formatExactTime(createdAt?: number | string | null): string {
-  if (!createdAt && createdAt !== 0) return ''
-  const sec = Number(createdAt)
-  const d = new Date((isFinite(sec) ? sec : Date.now() / 1000) * 1000)
-  const now = new Date()
-  const sameDay = d.toDateString() === now.toDateString()
-  const sameYear = d.getFullYear() === now.getFullYear()
+  if (!createdAt && createdAt !== 0) return "";
+  const sec = Number(createdAt);
+  const d = new Date((isFinite(sec) ? sec : Date.now() / 1000) * 1000);
+  const now = new Date();
+  const sameDay = d.toDateString() === now.toDateString();
+  const sameYear = d.getFullYear() === now.getFullYear();
   if (sameDay) {
     return new Intl.DateTimeFormat(undefined, {
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(d)
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(d);
   }
   if (sameYear) {
     return new Intl.DateTimeFormat(undefined, {
-      month: 'short',
-      day: 'numeric'
-    }).format(d)
+      month: "short",
+      day: "numeric",
+    }).format(d);
   }
   return new Intl.DateTimeFormat(undefined, {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  }).format(d)
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  }).format(d);
 }
 
 /**
@@ -185,93 +181,96 @@ function formatExactTime(createdAt?: number | string | null): string {
  *  - Otherwise: the original text trimmed.
  */
 function humanizeSnippet(raw: unknown): string {
-  if (!raw) return ''
-  const t = String(raw).trim()
+  if (!raw) return "";
+  const t = String(raw).trim();
   // Try JSON first (ignore errors)
-  if (t.startsWith('{') || t.startsWith('[')) {
+  if (t.startsWith("{") || t.startsWith("[")) {
     try {
-      const obj = JSON.parse(t)
-      if (obj && typeof obj === 'object') {
-        const o: any = obj
-        if (o.cashu || o.token || o.proofs || o.mint) return 'Sent a Cashu token'
+      const obj = JSON.parse(t);
+      if (obj && typeof obj === "object") {
+        const o: any = obj;
+        if (o.cashu || o.token || o.proofs || o.mint)
+          return "Sent a Cashu token";
         if (o.cashu_subscription || o.subscription || o.recurrence)
-          return 'Subscription payment'
+          return "Subscription payment";
       }
     } catch {
       // fall through
     }
   }
   // Heuristics on plain text
-  if (/"token"\s*:/.test(t) || /\bcashu\b/i.test(t)) return 'Sent a Cashu token'
-  if (/\bsubscription\b/i.test(t)) return 'Subscription payment'
-  if (/https?:\/\/\S{40,}/i.test(t)) return 'Link'
-  return t
+  if (/"token"\s*:/.test(t) || /\bcashu\b/i.test(t))
+    return "Sent a Cashu token";
+  if (/\bsubscription\b/i.test(t)) return "Subscription payment";
+  if (/https?:\/\/\S{40,}/i.test(t)) return "Link";
+  return t;
 }
 
 const props = defineProps({
   pubkey: { type: String, required: true },
   lastMsg: { type: Object as () => any, default: () => ({}) },
-  selected: { type: Boolean, default: false }
-})
+  selected: { type: Boolean, default: false },
+});
 
-const emit = defineEmits(['click', 'pin', 'delete'])
+const emit = defineEmits(["click", "pin", "delete"]);
 
-const messenger = useMessengerStore()
-const nostr = useNostrStore()
-const $q = useQuasar()
+const messenger = useMessengerStore();
+const nostr = useNostrStore();
+const $q = useQuasar();
 
-const isOnline = computed(() => messenger.connected)
-const isPinned = computed(() => messenger.pinned[props.pubkey])
-const unreadCount = computed(() => messenger.unreadCounts[props.pubkey] || 0)
-const selected = computed(() => props.selected)
-const isMini = computed(() => messenger.drawerMini)
+const isOnline = computed(() => messenger.connected);
+const isPinned = computed(() => messenger.pinned[props.pubkey]);
+const unreadCount = computed(() => messenger.unreadCounts[props.pubkey] || 0);
+const selected = computed(() => props.selected);
+const isMini = computed(() => messenger.drawerMini);
 
 const profile = computed(() => {
-  const entry: any = (nostr.profiles as any)[props.pubkey]
-  return entry?.profile ?? entry ?? {}
-})
+  const entry: any = (nostr.profiles as any)[props.pubkey];
+  return entry?.profile ?? entry ?? {};
+});
 
-const alias = computed(() => messenger.aliases[props.pubkey])
+const alias = computed(() => messenger.aliases[props.pubkey]);
 const profileName = computed(() => {
-  const p: any = profile.value
+  const p: any = profile.value;
   return (
     p?.name ||
     p?.displayName ||
     p?.display_name ||
-    props.pubkey.slice(0, 8) + '…'
-  )
-})
-const displayName = computed(() => alias.value || profileName.value)
+    props.pubkey.slice(0, 8) + "…"
+  );
+});
+const displayName = computed(() => alias.value || profileName.value);
 
 const initials = computed(() => {
-  const name = displayName.value
-  const words = name.split(/\s+/).filter(Boolean)
-  const letters = words.slice(0, 2).map((w) => w[0])
-  return letters.join('').toUpperCase()
-})
+  const name = displayName.value;
+  const words = name.split(/\s+/).filter(Boolean);
+  const letters = words.slice(0, 2).map((w) => w[0]);
+  return letters.join("").toUpperCase();
+});
 
 // consider profile fetched once the key exists, even if it has no fields
-const loaded = computed(() => profile.value !== undefined)
+const loaded = computed(() => profile.value !== undefined);
 
 const snippet = computed(() =>
-  parseMessageSnippet(props.lastMsg?.content || '')
-)
+  parseMessageSnippet(props.lastMsg?.content || ""),
+);
 
 // Build display snippet (we already humanize elsewhere)
-const displaySnippet = computed(() => humanizeSnippet(snippet.value?.text))
+const displaySnippet = computed(() => humanizeSnippet(snippet.value?.text));
 
 // Exact time for the last message
 const timeExact = computed(() => {
-  const ts = (props.lastMsg && (props.lastMsg.created_at ?? props.lastMsg.timestamp)) as any
-  return formatExactTime(ts)
-})
+  const ts = (props.lastMsg &&
+    (props.lastMsg.created_at ?? props.lastMsg.timestamp)) as any;
+  return formatExactTime(ts);
+});
 
-const showRaw = ref(false)
-const menu = ref(false)
+const showRaw = ref(false);
+const menu = ref(false);
 
-const onClick = () => emit('click', nostr.resolvePubkey(props.pubkey))
-const togglePin = () => emit('pin', nostr.resolvePubkey(props.pubkey))
-const deleteItem = () => emit('delete', nostr.resolvePubkey(props.pubkey))
+const onClick = () => emit("click", nostr.resolvePubkey(props.pubkey));
+const togglePin = () => emit("pin", nostr.resolvePubkey(props.pubkey));
+const deleteItem = () => emit("delete", nostr.resolvePubkey(props.pubkey));
 </script>
 
 <style scoped>
@@ -293,12 +292,16 @@ const deleteItem = () => emit('delete', nostr.resolvePubkey(props.pubkey))
 /* Unread badge overlay on avatar (top-right) */
 .unread-overlay {
   position: absolute;
-  top: -3px; right: -3px;
+  top: -3px;
+  right: -3px;
   z-index: 1;
-  min-width: 18px; height: 18px; line-height: 18px;
+  min-width: 18px;
+  height: 18px;
+  line-height: 18px;
   padding: 0 4px;
-  font-size: 10px; font-weight: 700;
-  box-shadow: 0 0 0 2px var(--q-color-dark), 0 2px 4px rgba(0,0,0,.15);
+  font-size: 10px;
+  font-weight: 700;
+  box-shadow: 0 0 0 2px var(--q-color-dark), 0 2px 4px rgba(0, 0, 0, 0.15);
   pointer-events: none; /* don’t block avatar clicks */
 }
 .conversation-item.selected {
@@ -366,15 +369,20 @@ const deleteItem = () => emit('delete', nostr.resolvePubkey(props.pubkey))
 }
 
 /* Base: ensure icon buttons can actually shrink when container is narrow */
-.action-btn { min-width: 0; padding: 0; }
-.action-btn .q-icon { line-height: 1; }
+.action-btn {
+  min-width: 0;
+  padding: 0;
+}
+.action-btn .q-icon {
+  line-height: 1;
+}
 
 /* Reveal-on-hover/focus behavior (desktop only) */
 @media (hover: hover) and (pointer: fine) {
   .meta-actions--overlay {
     opacity: 0;
     visibility: hidden;
-    transition: opacity .15s ease;
+    transition: opacity 0.15s ease;
   }
   .conversation-item:hover .meta-actions--overlay,
   .conversation-item:focus-within .meta-actions--overlay {
@@ -411,27 +419,40 @@ const deleteItem = () => emit('delete', nostr.resolvePubkey(props.pubkey))
 /* Container-responsive sizing based on row width (i.e., drawer width) */
 @container (max-width: 420px) {
   .unread-overlay {
-    min-width: 16px; height: 16px; line-height: 16px;
+    min-width: 16px;
+    height: 16px;
+    line-height: 16px;
     font-size: 9px;
-    top: -2px; right: -2px;
+    top: -2px;
+    right: -2px;
   }
 }
 @container (max-width: 360px) {
   .unread-overlay {
-    min-width: 14px; height: 14px; line-height: 14px;
+    min-width: 14px;
+    height: 14px;
+    line-height: 14px;
     font-size: 8px;
-    top: -1px; right: -1px;
+    top: -1px;
+    right: -1px;
   }
 }
 
 /* Touch devices: keep tap targets comfy (badge still non-interactive) */
 @media (hover: none) and (pointer: coarse) {
-  .action-btn { width: 32px; height: 32px; }
+  .action-btn {
+    width: 32px;
+    height: 32px;
+  }
   .unread-overlay {
-    min-width: 20px; height: 20px; line-height: 20px;
+    min-width: 20px;
+    height: 20px;
+    line-height: 20px;
     font-size: 11px;
   }
-  .conversation-item { padding-right: 48px; } /* reserve space so overlay doesn't obscure text */
+  .conversation-item {
+    padding-right: 48px;
+  } /* reserve space so overlay doesn't obscure text */
 }
 
 /* Main content column (title + time / snippet) */

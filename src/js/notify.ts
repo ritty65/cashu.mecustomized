@@ -57,7 +57,7 @@ async function notifyError(msg: any, caption?: any) {
   Notify.create({
     color: "red",
     message:
-      typeof msg === "string" ? msg : (msg?.message ?? JSON.stringify(msg)),
+      typeof msg === "string" ? msg : msg?.message ?? JSON.stringify(msg),
     caption: caption !== undefined ? String(caption) : undefined,
     position: "top",
     progress: true,

@@ -173,8 +173,8 @@ import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useClipboard } from "src/composables/useClipboard";
 import { defineAsyncComponent } from "vue";
-const VueQrcode = defineAsyncComponent(
-  () => import("@chenfengyuan/vue-qrcode"),
+const VueQrcode = defineAsyncComponent(() =>
+  import("@chenfengyuan/vue-qrcode"),
 );
 
 import { useWalletStore } from "src/stores/wallet";

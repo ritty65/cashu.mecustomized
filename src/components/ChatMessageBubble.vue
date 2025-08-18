@@ -3,7 +3,11 @@
     class="row message-row"
     :class="message.outgoing ? 'justify-end' : 'justify-start'"
   >
-    <q-avatar v-if="!message.outgoing && showAvatar" size="32px" class="q-mr-sm">
+    <q-avatar
+      v-if="!message.outgoing && showAvatar"
+      size="32px"
+      class="q-mr-sm"
+    >
       <img v-if="profile?.picture" :src="profile.picture" />
       <span v-else>{{ initials }}</span>
     </q-avatar>
@@ -11,7 +15,10 @@
       class="flex column"
       :class="message.outgoing ? 'items-end' : 'items-start'"
     >
-      <div class="bubble" :class="message.outgoing ? 'bubble-outgoing' : 'bubble-incoming'">
+      <div
+        class="bubble"
+        :class="message.outgoing ? 'bubble-outgoing' : 'bubble-incoming'"
+      >
         <div class="bubble-content">
           <template v-if="message.subscriptionPayment">
             <TokenCarousel
@@ -20,7 +27,10 @@
               :message="message"
               @redeem="redeemPayment"
             />
-            <div v-if="unlockTime && remaining > 0" class="text-caption q-mt-xs">
+            <div
+              v-if="unlockTime && remaining > 0"
+              class="text-caption q-mt-xs"
+            >
               Unlocks in {{ countdown }}
             </div>
             <q-toggle
@@ -86,7 +96,11 @@
           :color="deliveryColor"
         />
       </div>
-      <q-avatar v-if="message.outgoing && showAvatar" size="32px" class="q-ml-sm">
+      <q-avatar
+        v-if="message.outgoing && showAvatar"
+        size="32px"
+        class="q-ml-sm"
+      >
         <img v-if="profile?.picture" :src="profile.picture" />
         <span v-else>{{ initials }}</span>
       </q-avatar>

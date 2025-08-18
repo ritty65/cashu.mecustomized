@@ -394,7 +394,7 @@ export const useWalletStore = defineStore("wallet", {
       }
 
       return selectedProofs.map(
-        (p) => ({ ...p, reserved: false }) as WalletProof,
+        (p) => ({ ...p, reserved: false } as WalletProof),
       );
     },
     spendableProofs: function (proofs: WalletProof[], amount: number) {

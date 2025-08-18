@@ -44,7 +44,11 @@ import { useMessengerStore } from "src/stores/messenger";
 import { useNostrStore } from "src/stores/nostr";
 import ConversationListItem from "./ConversationListItem.vue";
 
-const props = defineProps<{ selectedPubkey: string; search?: string; mini?: boolean }>();
+const props = defineProps<{
+  selectedPubkey: string;
+  search?: string;
+  mini?: boolean;
+}>();
 
 const emit = defineEmits(["select"]);
 const messenger = useMessengerStore();

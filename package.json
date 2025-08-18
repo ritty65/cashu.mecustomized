@@ -20,7 +20,8 @@
     "types": "tsc -p tsconfig.local.json --noEmit",
     "ci:verify": "pnpm run types && pnpm run lint && pnpm run build && pnpm run build:pwa",
     "lint:fix": "eslint . --fix",
-    "check:i18n": "node scripts/check-i18n.js"
+    "check:i18n": "node scripts/check-i18n.js",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@capacitor/android": "^6.2.0",

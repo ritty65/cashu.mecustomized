@@ -142,8 +142,8 @@ export const useCreatorHubStore = defineStore("creatorHub", {
               intervalDays: frequencyToDays(updates.frequency as any),
             }
           : updates.intervalDays !== undefined
-            ? { intervalDays: updates.intervalDays }
-            : {}),
+          ? { intervalDays: updates.intervalDays }
+          : {}),
         ...(updates.price_sats === undefined && updates.price !== undefined
           ? { price_sats: updates.price }
           : {}),

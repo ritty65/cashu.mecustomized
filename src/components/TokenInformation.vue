@@ -18,7 +18,11 @@
         >
           <q-icon name="account_balance" size="xs" class="q-mr-xs" />
           {{ tokenMintUrl }}
-          <q-spinner-hourglass v-if="addMintBlocking" size="sm" class="q-ml-sm" />
+          <q-spinner-hourglass
+            v-if="addMintBlocking"
+            size="sm"
+            class="q-ml-sm"
+          />
           <q-icon
             v-if="
               showMintCheck && mintKnownToUs(proofsToShow) && !addMintBlocking

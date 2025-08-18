@@ -171,15 +171,6 @@
           <QrcodeReader @decode="decodeQR" />
         </q-dialog>
 
-        <!-- WELCOME DIALOG  -->
-        <WelcomeDialog
-          :welcome-dialog="welcomeDialog"
-          :trigger-pwa-install="triggerPwaInstall"
-          :set-tab="setTab"
-          :get-pwa-display-mode="getPwaDisplayMode"
-          :set-welcome-dialog-seen="setWelcomeDialogSeen"
-        />
-
         <!-- INVOICE DETAILS  -->
         <InvoiceDetailDialog v-model="showInvoiceDetails" />
 
@@ -263,7 +254,6 @@ import MintSettings from "components/MintSettings.vue";
 import InvoicesTable from "components/InvoicesTable.vue";
 import HistoryTable from "components/HistoryTable.vue";
 import NoMintWarnBanner from "components/NoMintWarnBanner.vue";
-import WelcomeDialog from "components/WelcomeDialog.vue";
 import SendTokenDialog from "components/SendTokenDialog.vue";
 import PayInvoiceDialog from "components/PayInvoiceDialog.vue";
 import InvoiceDetailDialog from "components/InvoiceDetailDialog.vue";
@@ -324,7 +314,6 @@ export default {
     InvoicesTable,
     HistoryTable,
     NoMintWarnBanner,
-    WelcomeDialog,
     SendTokenDialog,
     ReceiveTokenDialog,
     PayInvoiceDialog,
@@ -363,9 +352,6 @@ export default {
       },
       payments: [],
       paymentsChart: {
-        show: false,
-      },
-      welcomeDialog: {
         show: false,
       },
       baseHost: location.protocol + "//" + location.host,
@@ -535,11 +521,6 @@ export default {
         this.$router.push("/welcome" + currentQuery + currentHash);
       }
     },
-    setWelcomeDialogSeen: function () {
-      // mark the welcome dialog as seen and close it
-      const welcomeStore = useWelcomeStore();
-      welcomeStore.closeWelcome();
-    },
     setTab: function (to) {
       this.tab = to;
     },
@@ -612,7 +593,6 @@ export default {
       this.deferredPWAInstallPrompt.userChoice.then((choiceResult) => {
         if (choiceResult.outcome === "accepted") {
           debug("User accepted the install prompt");
-          this.setWelcomeDialogSeen();
         } else {
           debug("User dismissed the install prompt");
         }

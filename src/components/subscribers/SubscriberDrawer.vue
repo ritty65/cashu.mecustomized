@@ -54,12 +54,16 @@
               <tbody>
                 <tr>
                   <td>{{ t("CreatorSubscribers.columns.tier") }}</td>
-                  <td class="text-right break-word">{{ subscriber.tierName }}</td>
+                  <td class="text-right break-word">
+                    {{ subscriber.tierName }}
+                  </td>
                 </tr>
                 <tr>
                   <td>{{ t("CreatorSubscribers.columns.frequency") }}</td>
                   <td class="text-right break-word">
-                    {{ t("CreatorSubscribers.frequency." + subscriber.frequency) }}
+                    {{
+                      t("CreatorSubscribers.frequency." + subscriber.frequency)
+                    }}
                   </td>
                 </tr>
                 <tr>
@@ -69,14 +73,22 @@
                   </td>
                 </tr>
                 <tr>
-                  <td>{{ t("CreatorSubscribers.drawer.overview.amountPerInterval") }}</td>
+                  <td>
+                    {{
+                      t("CreatorSubscribers.drawer.overview.amountPerInterval")
+                    }}
+                  </td>
                   <td class="text-right break-word">
                     {{ subscriber.amountSat }} sat /
-                    {{ t("CreatorSubscribers.frequency." + subscriber.frequency) }}
+                    {{
+                      t("CreatorSubscribers.frequency." + subscriber.frequency)
+                    }}
                   </td>
                 </tr>
                 <tr>
-                  <td>{{ t("CreatorSubscribers.drawer.overview.nextRenewal") }}</td>
+                  <td>
+                    {{ t("CreatorSubscribers.drawer.overview.nextRenewal") }}
+                  </td>
                   <td class="text-right break-word">
                     {{
                       subscriber.nextRenewal
@@ -86,7 +98,9 @@
                   </td>
                 </tr>
                 <tr>
-                  <td>{{ t("CreatorSubscribers.drawer.overview.lifetimeTotal") }}</td>
+                  <td>
+                    {{ t("CreatorSubscribers.drawer.overview.lifetimeTotal") }}
+                  </td>
                   <td class="text-right break-word">
                     {{ subscriber.lifetimeSat }} sat
                   </td>
@@ -144,9 +158,7 @@
               <tbody>
                 <tr v-for="a in activity" :key="a.ts">
                   <td class="break-word">{{ a.text }}</td>
-                  <td
-                    class="text-right text-caption text-secondary"
-                  >
+                  <td class="text-right text-caption text-secondary">
                     {{ distToNow(a.ts) }}
                   </td>
                 </tr>
@@ -207,8 +219,8 @@ const { t } = useI18n();
 const router = useRouter();
 const $q = useQuasar();
 
-const drawerWidth = computed(() =>
-  props.width ?? ($q.screen.lt.md ? 320 : 400),
+const drawerWidth = computed(
+  () => props.width ?? ($q.screen.lt.md ? 320 : 400),
 );
 
 function initials(name: string) {

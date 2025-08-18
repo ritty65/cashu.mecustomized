@@ -268,17 +268,14 @@ export default defineComponent({
   display: flex;
   flex-direction: column;
   min-height: 220px;
-  transition:
-    transform 0.2s ease-in-out,
-    box-shadow 0.2s ease-in-out;
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
   cursor: pointer;
   position: relative;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
 }
 .bucket-card:hover {
   transform: scale(1.03);
-  box-shadow:
-    0 20px 25px -5px rgba(0, 0, 0, 0.4),
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4),
     0 10px 10px -5px rgba(0, 0, 0, 0.3);
 }
 .bucket-card.selected {
