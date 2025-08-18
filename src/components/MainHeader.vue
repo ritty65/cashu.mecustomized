@@ -234,8 +234,7 @@ export default defineComponent({
 
 .app-toolbar {
   padding-inline: 8px;
-  min-height: var(--app-header-height);
-  height: var(--app-header-height);
+  min-height: 48px;
   display: flex;
   align-items: center;
 }
