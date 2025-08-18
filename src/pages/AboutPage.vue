@@ -52,18 +52,19 @@
             v-for="card in siteOverviewCards"
             :key="card.route"
             :to="card.route"
-            class="interactive-card p-6 md:p-8 flex flex-col cursor-pointer"
+            class="interactive-card block no-underline p-6 md:p-8 flex flex-col cursor-pointer"
+            :aria-label="$t(card.titleKey)"
           >
             <q-icon
-              :name="$t(card.iconKey)"
+              :name="card.icon"
               size="2.5rem"
               class="text-white mb-4"
             />
             <p class="text-accent font-semibold">
-              {{ $t(card.titleKey) }}
+              {{ tOr(card.titleKey) }}
             </p>
             <p class="text-sm mt-2">
-              {{ $t(card.descriptionKey) }}
+              {{ tOr(card.descriptionKey) }}
             </p>
           </router-link>
         </div>
@@ -826,12 +827,16 @@ const dialogStep2 = ref(false);
 const dialogStep3 = ref(false);
 
 const { t } = useI18n();
+const tOr = (key: string, fallback = "") => {
+  const val = t(key) as string;
+  return val && val !== key ? val : fallback;
+};
 
 interface SiteOverviewCard {
   route: string;
   titleKey: string;
   descriptionKey: string;
-  iconKey: string;
+  icon: string;
 }
 
 const siteOverviewCards: SiteOverviewCard[] = [
@@ -839,79 +844,79 @@ const siteOverviewCards: SiteOverviewCard[] = [
     route: "/wallet",
     titleKey: "MainHeader.menu.wallet.title",
     descriptionKey: "AboutPage.siteOverview.wallet.description",
-    iconKey: "AboutPage.siteOverview.wallet.icon",
+    icon: "account_balance_wallet",
   },
   {
     route: "/find-creators",
     titleKey: "MainHeader.menu.findCreators.title",
     descriptionKey: "AboutPage.siteOverview.findCreators.description",
-    iconKey: "AboutPage.siteOverview.findCreators.icon",
+    icon: "img:icons/find-creators.svg",
   },
   {
     route: "/creator-hub",
     titleKey: "MainHeader.menu.creatorHub.title",
     descriptionKey: "AboutPage.siteOverview.creatorHub.description",
-    iconKey: "AboutPage.siteOverview.creatorHub.icon",
+    icon: "img:icons/creator-hub.svg",
   },
   {
     route: "/my-profile",
     titleKey: "MainHeader.menu.myProfile.title",
     descriptionKey: "AboutPage.siteOverview.myProfile.description",
-    iconKey: "AboutPage.siteOverview.myProfile.icon",
+    icon: "person",
   },
   {
     route: "/buckets",
     titleKey: "MainHeader.menu.buckets.title",
     descriptionKey: "AboutPage.siteOverview.buckets.description",
-    iconKey: "AboutPage.siteOverview.buckets.icon",
+    icon: "inventory_2",
   },
   {
     route: "/subscriptions",
     titleKey: "MainHeader.menu.subscriptions.title",
     descriptionKey: "AboutPage.siteOverview.subscriptions.description",
-    iconKey: "AboutPage.siteOverview.subscriptions.icon",
+    icon: "auto_awesome_motion",
   },
   {
     route: "/nostr-messenger",
     titleKey: "MainHeader.menu.nostrMessenger.title",
     descriptionKey: "AboutPage.siteOverview.nostrMessenger.description",
-    iconKey: "AboutPage.siteOverview.nostrMessenger.icon",
+    icon: "chat",
   },
   {
     route: "/settings",
     titleKey: "MainHeader.menu.settings.title",
     descriptionKey: "AboutPage.siteOverview.settings.description",
-    iconKey: "AboutPage.siteOverview.settings.icon",
+    icon: "settings",
   },
   {
     route: "/restore",
     titleKey: "MainHeader.menu.restore.title",
     descriptionKey: "AboutPage.siteOverview.restore.description",
-    iconKey: "AboutPage.siteOverview.restore.icon",
+    icon: "settings_backup_restore",
   },
   {
     route: "/already-running",
     titleKey: "MainHeader.menu.alreadyRunning.title",
     descriptionKey: "AboutPage.siteOverview.alreadyRunning.description",
-    iconKey: "AboutPage.siteOverview.alreadyRunning.icon",
+    icon: "warning",
   },
   {
     route: "/welcome",
     titleKey: "MainHeader.menu.welcome.title",
     descriptionKey: "AboutPage.siteOverview.welcome.description",
-    iconKey: "AboutPage.siteOverview.welcome.icon",
+    icon: "info",
   },
   {
     route: "/terms",
     titleKey: "MainHeader.menu.terms.title",
     descriptionKey: "AboutPage.siteOverview.terms.description",
-    iconKey: "AboutPage.siteOverview.terms.icon",
+    icon: "gavel",
   },
   {
     route: "/nostr-login",
     titleKey: "MainHeader.menu.nostrLogin.title",
     descriptionKey: "AboutPage.siteOverview.nostrLogin.description",
-    iconKey: "AboutPage.siteOverview.nostrLogin.icon",
+    icon: "vpn_key",
   },
 ];
 
@@ -1074,12 +1079,19 @@ onMounted(() => {
   border: 1px solid #1e293b;
   border-radius: 0.75rem;
   transition: all 0.3s ease;
+  text-decoration: none;
 }
 
 .interactive-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 0 25px rgba(var(--color-accent-rgb), 0.2);
   border-color: rgba(var(--color-accent-rgb), 0.4);
+  text-decoration: none;
+}
+
+.interactive-card p {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .accordion-item {
