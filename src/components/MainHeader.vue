@@ -303,8 +303,8 @@ export default defineComponent({
 }
 
 .left-controls {
-  /* No layout shifting; drawer overlays content */
-  transition: none;
+  transition: transform 0.2s ease;
+  transform: translateX(var(--nav-offset-x, 0));
 }
 
 .mobile-nav-toggle {
