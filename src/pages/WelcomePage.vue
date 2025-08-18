@@ -108,9 +108,10 @@ import { useMintsStore } from "src/stores/mints";
 import { useBucketsStore } from "src/stores/buckets";
 import { useMnemonicStore } from "src/stores/mnemonic";
 import WelcomeSlidePrivacy from "./welcome/WelcomeSlidePrivacy.vue";
-import WelcomeSlideMints from "./welcome/WelcomeSlideMints.vue";
+// Mints & Buckets are now optional actions on the Finish slide.
+// import WelcomeSlideMints from "./welcome/WelcomeSlideMints.vue";
 import WelcomeSlideProofs from "./welcome/WelcomeSlideProofs.vue";
-import WelcomeSlideBuckets from "./welcome/WelcomeSlideBuckets.vue";
+// import WelcomeSlideBuckets from "./welcome/WelcomeSlideBuckets.vue";
 import WelcomeSlideBackup from "./welcome/WelcomeSlideBackup.vue";
 import WelcomeSlideTerms from "./welcome/WelcomeSlideTerms.vue";
 import WelcomeSlidePwa from "./welcome/WelcomeSlidePwa.vue";
@@ -147,17 +148,7 @@ const slides = ref<{ key: string; component: any; props?: any }[]>([]);
 function buildSlides() {
   const arr = [
     { key: "privacy", component: WelcomeSlidePrivacy },
-    {
-      key: "mints",
-      component: WelcomeSlideMints,
-      props: { onAddMint: openAddMintDialog },
-    },
     { key: "proofs", component: WelcomeSlideProofs },
-    {
-      key: "buckets",
-      component: WelcomeSlideBuckets,
-      props: { onCreateBuckets: createStarterBuckets },
-    },
     {
       key: "backup",
       component: WelcomeSlideBackup,
@@ -174,7 +165,11 @@ function buildSlides() {
     {
       key: "finish",
       component: WelcomeSlideFinish,
-      props: { onAddMint: openAddMintDialog, onRestore: openFileDialog },
+      props: {
+        onAddMint: openAddMintDialog,
+        onCreateBuckets: createStarterBuckets,
+        onRestore: openFileDialog,
+      },
     },
   ].filter(Boolean) as any[];
   slides.value = arr;
@@ -272,7 +267,8 @@ onUnmounted(() => {
 watch(
   () => welcomeStore.currentSlide,
   () => {
-    showSkip.value = ["privacy", "mints", "proofs", "buckets"].includes(
+    // Only optional step is PWA; allow Skip there for a calmer experience.
+    showSkip.value = ["pwa"].includes(
       slides.value[welcomeStore.currentSlide]?.key,
     );
     nextTick(() => {
