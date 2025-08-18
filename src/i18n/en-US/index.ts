@@ -601,134 +601,63 @@ export const messages = {
       tooltip: "Check all pending tokens",
     },
   },
-  WelcomePage: {
+  Welcome: {
     actions: {
-      previous: {
-        label: "Previous",
-      },
-      next: {
-        label: "Next",
-      },
-      skip: {
-        label: "Skip",
-      },
+      previous: { label: "Previous" },
+      next: { label: "Next" },
+      skip: { label: "Skip" },
+      finish: { label: "Finish" },
+      restore: { label: "Restore" },
     },
-  },
-  WelcomeSlide1: {
-    title: "Welcome to Cashu",
-    text: "Cashu.me is a free and open-source Bitcoin wallet that uses ecash to keep your funds secure and private.",
-    actions: {
-      more: {
-        label: "Click to learn more",
+    progress: {
+      step: "Step { current } of { total }",
+    },
+    hints: {
+      dragDrop: "You can also drag & drop a backup file anywhere on this screen.",
+    },
+    slides: {
+      privacy: {
+        title: "Cashu & Privacy",
+        text: "Cashu uses blinded tokens so mints can't track your payments.",
+        learn_more: "To learn more, visit the About page.",
       },
-    },
-    p1: {
-      text: "Cashu is a free and open-source ecash protocol for Bitcoin. You can learn more about it at { link }.",
-      link: {
-        text: "cashu.space",
+      mints: {
+        title: "Mints",
+        text: "Add a mint to start receiving tokens.",
       },
-    },
-    p2: {
-      text: "This wallet is not affiliated with any mint. To use this wallet, you need to connect to one or more Cashu mints that you trust.",
-    },
-    p3: {
-      text: "This wallet stores ecash that only you have access to. If you delete your browser data without a seed phrase backup, you will lose your tokens.",
-    },
-    p4: {
-      text: "This wallet is in beta. We hold no responsibility for people losing access to funds. Use at your own risk! This code is open-source and licensed under the MIT license.",
-    },
-  },
-  WelcomeSlide2: {
-    title: "Install PWA",
-    instruction: {
-      intro: {
-        text: "For the best experience, use this wallet with your device's native web browser to install it as a Progressive Web App. Do this right now.",
+      proofs: {
+        title: "Proofs",
+        text: "Proofs are the tokens you can send and receive.",
       },
-      android: {
-        title: "Android (Chrome)",
-        step1: {
-          item: "1. { icon } { text }",
-          text: "Tap the menu (top right)",
-        },
-        step2: {
-          item: "2. { icon } { text }",
-          text: "Press { buttonText }",
-          buttonText: "@:AndroidPWAPrompt.buttonText",
-        },
+      buckets: {
+        title: "Buckets",
+        text: "Use buckets to organize your tokens.",
       },
-      ios: {
-        title: "iOS (Safari)",
-        step1: {
-          item: "1. { icon } { text }",
-          text: "Tap share (bottom)",
-        },
-        step2: {
-          item: "2. { icon } { text }",
-          text: "Press { buttonText }",
-          buttonText: "@:iOSPWAPrompt.buttonText",
+      backup: {
+        title: "Backup your Seed",
+        text: "Your recovery phrase backs up your wallet. Keep it safe.",
+        checkbox: { label: "I understand I must back up my recovery/seed." },
+      },
+      terms: {
+        title: "Terms of Service",
+        text: "You must accept the Terms of Service to use this wallet.",
+        checkbox: { label: "I accept the Terms of Service." },
+        link: { label: "Read Terms of Service" },
+      },
+      pwa: {
+        title: "Install as App",
+        text: "Install this app on your device for quicker access.",
+      },
+      finish: {
+        title: "You're ready!",
+        text: "Choose what to do next:",
+        actions: {
+          add_mint: { label: "Add a Mint" },
+          restore: { label: "Restore from backup" },
+          about: { label: "Learn more on About" },
         },
       },
-      outro: {
-        text: "Once you installed this app on your device, close this browser window and use the app from your home screen.",
-      },
     },
-    pwa: {
-      success: {
-        title: "Success!",
-        text: "You are using Cashu as a PWA. Close any other open browser windows and use the app from your home screen.",
-      },
-    },
-  },
-  iOSPWAPrompt: {
-    text: "Tap { icon } and { buttonText }",
-    buttonText: "Add to Home Screen",
-  },
-  AndroidPWAPrompt: {
-    text: "Tap { icon } and { buttonText }",
-    buttonText: "Add to Home Screen",
-  },
-  WelcomeSlide3: {
-    title: "Your Seed Phrase",
-    text: "Store your seed phrase in a password manager or on paper. Your seed phrase is the only way to recover your funds if you lose access to this device.",
-    inputs: {
-      seed_phrase: {
-        label: "Seed Phrase",
-        caption: "You can see your seed phrase in the settings.",
-        tooltip: "This phrase restores your wallet. Keep it private",
-      },
-      checkbox: {
-        label: "I have written it down",
-      },
-    },
-  },
-  WelcomeSlide4: {
-    title: "Terms",
-    actions: {
-      more: {
-        label: "Read Terms of Service",
-      },
-    },
-    inputs: {
-      checkbox: {
-        label: "I've read and accept these terms and conditions",
-      },
-    },
-  },
-  WelcomeSlidePrivacy: {
-    title: "Cashu & Privacy",
-    text: "Cashu uses blinded tokens so mints can't track your payments.",
-  },
-  WelcomeSlideMints: {
-    title: "Mints",
-    text: "Add a mint to start receiving tokens.",
-  },
-  WelcomeSlideProofs: {
-    title: "Proofs",
-    text: "Proofs are the tokens you can send and receive.",
-  },
-  WelcomeSlideBuckets: {
-    title: "Buckets",
-    text: "Use buckets to organize your tokens.",
   },
   RestoreView: {
     seed_phrase: {

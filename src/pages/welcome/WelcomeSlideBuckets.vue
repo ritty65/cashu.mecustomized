@@ -1,21 +1,25 @@
 <template>
-  <div class="q-pa-md flex flex-center">
+  <section
+    class="q-pa-md flex flex-center"
+    role="region"
+    :aria-labelledby="headingId"
+  >
     <div class="text-center">
       <q-icon name="inventory" size="4em" color="primary" />
-      <h2 class="q-mt-md">{{ $t("WelcomeSlideBuckets.title") }}</h2>
-      <p class="q-mt-sm">{{ $t("WelcomeSlideBuckets.text") }}</p>
+      <h1 :id="headingId" tabindex="-1" class="q-mt-md">
+        {{ $t("Welcome.slides.buckets.title") }}
+      </h1>
+      <p class="q-mt-sm">{{ $t("Welcome.slides.buckets.text") }}</p>
     </div>
-  </div>
+  </section>
 </template>
 
-<script>
-export default {
-  name: "WelcomeSlideBuckets",
-};
+<script setup>
+defineProps<{ headingId: string }>();
 </script>
 
 <style scoped>
-h2 {
+h1 {
   font-weight: bold;
 }
 </style>

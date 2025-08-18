@@ -1,21 +1,25 @@
 <template>
-  <div class="q-pa-md flex flex-center">
+  <section
+    class="q-pa-md flex flex-center"
+    role="region"
+    :aria-labelledby="headingId"
+  >
     <div class="text-center">
       <q-icon name="factory" size="4em" color="primary" />
-      <h2 class="q-mt-md">{{ $t("WelcomeSlideMints.title") }}</h2>
-      <p class="q-mt-sm">{{ $t("WelcomeSlideMints.text") }}</p>
+      <h1 :id="headingId" tabindex="-1" class="q-mt-md">
+        {{ $t("Welcome.slides.mints.title") }}
+      </h1>
+      <p class="q-mt-sm">{{ $t("Welcome.slides.mints.text") }}</p>
     </div>
-  </div>
+  </section>
 </template>
 
-<script>
-export default {
-  name: "WelcomeSlideMints",
-};
+<script setup>
+defineProps<{ headingId: string }>();
 </script>
 
 <style scoped>
-h2 {
+h1 {
   font-weight: bold;
 }
 </style>

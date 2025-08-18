@@ -1,6 +1,6 @@
 <template>
   <q-header class="bg-transparent">
-    <q-toolbar class="app-toolbar" dense>
+    <q-toolbar v-if="!isWelcomePage" class="app-toolbar" dense>
       <div class="left-controls row items-center no-wrap">
         <q-btn
           v-if="isMessengerPage"
@@ -110,6 +110,9 @@
         />
       </div>
     </q-toolbar>
+    <q-toolbar v-else class="app-toolbar" dense>
+      <q-toolbar-title class="app-title text-center">Cashu</q-toolbar-title>
+    </q-toolbar>
   </q-header>
   <div
     v-if="$q.screen.lt.md"
@@ -186,6 +189,7 @@ export default defineComponent({
     const isMessengerPage = computed(() =>
       route.path.startsWith("/nostr-messenger"),
     );
+    const isWelcomePage = computed(() => route.path.startsWith("/welcome"));
     const currentTitle = computed(() => {
       if (isMessengerPage.value) return "Nostr Messenger";
       if (route.path.startsWith("/wallet")) return "Wallet";
@@ -259,6 +263,7 @@ export default defineComponent({
       ui,
       currentTitle,
       isMessengerPage,
+      isWelcomePage,
       toggleMessengerDrawer,
       toggleDarkMode,
       darkIcon,
