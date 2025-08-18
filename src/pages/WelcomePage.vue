@@ -1,196 +1,161 @@
 <template>
-  <q-dialog
-    v-model="welcomeStore.showWelcome"
-    persistent
-    transition-show="slide-up"
-    transition-hide="fadeOut"
-    full-screen
+  <div
+    class="full-width flex flex-center q-px-sm"
     @drop.prevent="dragFile"
     @dragover.prevent
   >
-    <q-card
-      class="q-pa-none flex flex-column"
-      style="height: 100%; max-width: 768px; margin: 0 auto"
-    >
-      <q-carousel v-model="welcomeStore.currentSlide" animated class="col">
+    <q-card class="q-pa-none column full-width" style="max-width: 768px">
+      <q-carousel
+        v-model="welcomeStore.currentSlide"
+        animated
+        class="col"
+      >
         <q-carousel-slide
-          v-for="(s, index) in slides"
-          :key="s.id"
+          v-for="(slide, index) in slides"
+          :key="slide.key"
           :name="index"
         >
-          <component
-            :is="s.component"
-            :heading-id="s.id"
-            @add-mint="openAddMint"
-            @restore="triggerRestore"
-            @about="goAbout"
-          />
+          <component :is="slide.component" v-bind="slide.props" />
         </q-carousel-slide>
       </q-carousel>
-
-      <div
-        class="q-pa-md row items-center justify-between"
-        style="min-height: 64px"
-      >
-        <div class="row items-center">
+      <footer class="q-pa-sm row items-center no-wrap">
+        <div class="col-auto column items-start q-gutter-xs">
           <q-select
             v-model="selectedLanguage"
             :options="languageOptions"
             emit-value
-            dense
             map-options
+            dense
+            outlined
+            style="width: 150px"
             @update:model-value="changeLanguage"
-            style="max-width: 150px"
           />
           <q-btn
             flat
             size="sm"
-            :label="t('Welcome.actions.restore')"
-            class="q-ml-sm"
-            @click="triggerRestore"
+            class="q-px-none"
+            @click="openFileDialog"
+            :label="$t('Welcome.actions.restore')"
           />
         </div>
-
-        <div
-          class="column items-center justify-center q-mx-sm"
-          style="flex: 1"
-          aria-live="polite"
-        >
-          <div>
+        <div class="col text-center">
+          <div aria-live="polite">
             {{
-              t("Welcome.progress.step", {
+              $t('Welcome.progress', {
                 current: welcomeStore.currentSlide + 1,
                 total: welcomeStore.totalSlides,
               })
             }}
           </div>
           <q-linear-progress
-            :value="(welcomeStore.currentSlide + 1) / welcomeStore.totalSlides"
             class="q-mt-xs"
+            color="primary"
+            track-color="grey-3"
+            :value="(welcomeStore.currentSlide + 1) / welcomeStore.totalSlides"
           />
         </div>
-
-        <div class="row items-center">
+        <div class="col-auto row items-center q-gutter-sm">
           <q-btn
             flat
-            icon="arrow_left"
-            :label="t('Welcome.actions.previous')"
-            :disable="!welcomeStore.canGoPrev"
+            :label="$t('Welcome.actions.previous')"
+            :disable="welcomeStore.currentSlide === 0"
             @click="welcomeStore.goToPrevSlide"
-            :aria-label="t('Welcome.actions.previous')"
+            v-if="welcomeStore.currentSlide > 0"
           />
           <q-btn
             flat
-            icon="arrow_right"
-            :label="nextLabel"
+            color="primary"
+            :label="
+              welcomeStore.isLastSlide
+                ? $t('Welcome.actions.finish')
+                : $t('Welcome.actions.next')
+            "
             :disable="!welcomeStore.canGoNext"
             @click="welcomeStore.goToNextSlide"
-            :aria-label="nextLabel"
-            class="q-ml-sm"
           />
           <q-btn
-            v-if="showSkip"
             flat
-            icon="close"
-            :label="t('Welcome.actions.skip')"
+            v-if="showSkip"
+            :label="$t('Welcome.actions.skip')"
             @click="welcomeStore.skipTutorial"
-            :aria-label="t('Welcome.actions.skip')"
-            class="q-ml-sm"
           />
         </div>
+      </footer>
+      <div class="text-caption text-center q-pb-sm">
+        {{ $t('Welcome.hint') }}
       </div>
-      <div class="text-center text-caption q-pb-sm">
-        {{ t("Welcome.hints.dragDrop") }}
-      </div>
-      <input
-        ref="fileUpload"
-        type="file"
-        class="hidden"
-        @change="onChangeFileUpload"
-      />
     </q-card>
-  </q-dialog>
+    <input
+      type="file"
+      ref="fileUpload"
+      class="hidden"
+      @change="onChangeFileUpload"
+    />
+  </div>
 </template>
 
-<script setup lang="ts">
-import {
-  ref,
-  computed,
-  onMounted,
-  watch,
-  nextTick,
-  onBeforeUnmount,
-} from "vue";
-import { useI18n } from "vue-i18n";
-import { useWelcomeStore } from "src/stores/welcome";
-import { useStorageStore } from "src/stores/storage";
-import { useMintsStore } from "src/stores/mints";
-import WelcomeSlidePrivacy from "./welcome/WelcomeSlidePrivacy.vue";
-import WelcomeSlideMints from "./welcome/WelcomeSlideMints.vue";
-import WelcomeSlideProofs from "./welcome/WelcomeSlideProofs.vue";
-import WelcomeSlideBuckets from "./welcome/WelcomeSlideBuckets.vue";
-import WelcomeSlideBackup from "./welcome/WelcomeSlideBackup.vue";
-import WelcomeSlideTerms from "./welcome/WelcomeSlideTerms.vue";
-import WelcomeSlidePwa from "./welcome/WelcomeSlidePwa.vue";
-import WelcomeSlideFinish from "./welcome/WelcomeSlideFinish.vue";
+<script setup>
+import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue';
+import { useQuasar } from 'quasar';
+import { useI18n } from 'vue-i18n';
+import { useWelcomeStore } from 'src/stores/welcome';
+import { useStorageStore } from 'src/stores/storage';
+import WelcomeSlidePrivacy from './welcome/WelcomeSlidePrivacy.vue';
+import WelcomeSlideMints from './welcome/WelcomeSlideMints.vue';
+import WelcomeSlideProofs from './welcome/WelcomeSlideProofs.vue';
+import WelcomeSlideBuckets from './welcome/WelcomeSlideBuckets.vue';
+import WelcomeSlideBackup from './welcome/WelcomeSlideBackup.vue';
+import WelcomeSlideTerms from './welcome/WelcomeSlideTerms.vue';
+import WelcomeSlidePwa from './welcome/WelcomeSlidePwa.vue';
+import WelcomeSlideFinish from './welcome/WelcomeSlideFinish.vue';
 
-const { t, locale } = useI18n();
+const $q = useQuasar();
+const { locale, t } = useI18n();
 const welcomeStore = useWelcomeStore();
 const storageStore = useStorageStore();
-const mintsStore = useMintsStore();
-
 const fileUpload = ref<HTMLInputElement | null>(null);
-
-const slides = computed(() => {
-  const arr = [
-    { id: "welcome-privacy", component: WelcomeSlidePrivacy },
-    { id: "welcome-mints", component: WelcomeSlideMints },
-    { id: "welcome-proofs", component: WelcomeSlideProofs },
-    { id: "welcome-buckets", component: WelcomeSlideBuckets },
-    { id: "welcome-backup", component: WelcomeSlideBackup },
-    { id: "welcome-terms", component: WelcomeSlideTerms },
-  ];
-  if (welcomeStore.pwaSlideEligible) {
-    arr.push({ id: "welcome-pwa", component: WelcomeSlidePwa });
-  }
-  arr.push({ id: "welcome-finish", component: WelcomeSlideFinish });
-  return arr;
-});
-
-watch(
-  () => welcomeStore.currentSlide,
-  (idx) => {
-    nextTick(() => {
-      const id = slides.value[idx].id;
-      document.getElementById(id)?.focus();
-    });
-  },
-);
-
-const selectedLanguage = ref("");
+const selectedLanguage = ref('');
 const languageOptions = [
-  { label: "English", value: "en-US" },
-  { label: "Español", value: "es-ES" },
-  { label: "Italiano", value: "it-IT" },
-  { label: "Deutsch", value: "de-DE" },
-  { label: "Français", value: "fr-FR" },
-  { label: "Svenska", value: "sv-SE" },
-  { label: "Ελληνικά", value: "el-GR" },
-  { label: "Türkçe", value: "tr-TR" },
-  { label: "ไทย", value: "th-TH" },
-  { label: "العربية", value: "ar-SA" },
-  { label: "中文", value: "zh-CN" },
-  { label: "日本語", value: "ja-JP" },
+  { label: 'English', value: 'en-US' },
+  { label: 'Español', value: 'es-ES' },
+  { label: 'Italiano', value: 'it-IT' },
+  { label: 'Deutsch', value: 'de-DE' },
+  { label: 'Français', value: 'fr-FR' },
+  { label: 'Svenska', value: 'sv-SE' },
+  { label: 'Ελληνικά', value: 'el-GR' },
+  { label: 'Türkçe', value: 'tr-TR' },
+  { label: 'ไทย', value: 'th-TH' },
+  { label: 'العربية', value: 'ar-SA' },
+  { label: '中文', value: 'zh-CN' },
+  { label: '日本語', value: 'ja-JP' },
 ];
 
-function changeLanguage(l: string) {
-  if (l === "en") l = "en-US";
-  locale.value = l;
-  localStorage.setItem("cashu.language", l);
+const deferredPrompt = ref<any>(null);
+const slides = ref<{ key: string; component: any; props?: any }[]>([]);
+
+function buildSlides() {
+  const arr = [
+    { key: 'privacy', component: WelcomeSlidePrivacy },
+    { key: 'mints', component: WelcomeSlideMints },
+    { key: 'proofs', component: WelcomeSlideProofs },
+    { key: 'buckets', component: WelcomeSlideBuckets },
+    { key: 'backup', component: WelcomeSlideBackup },
+    { key: 'terms', component: WelcomeSlideTerms },
+  ];
+  if (welcomeStore.pwaSlideEligible) {
+    arr.push({ key: 'pwa', component: WelcomeSlidePwa, props: { triggerInstall } });
+  }
+  arr.push({ key: 'finish', component: WelcomeSlideFinish, props: { restore: openFileDialog } });
+  slides.value = arr;
+  welcomeStore.setSlides(arr.map((s) => s.key));
 }
 
-function triggerRestore() {
-  fileUpload.value?.click();
+function changeLanguage(lang: string) {
+  if (lang === 'en') {
+    lang = 'en-US';
+  }
+  locale.value = lang;
+  localStorage.setItem('cashu.language', lang);
 }
 
 function onChangeFileUpload() {
@@ -202,10 +167,11 @@ function readFile(file: File) {
   const reader = new FileReader();
   reader.onload = (f) => {
     try {
-      const backup = JSON.parse(f.target?.result as string);
+      const backup = JSON.parse(String(f.target?.result));
       storageStore.restoreFromBackup(backup);
+      $q.notify({ type: 'positive', message: t('Welcome.restore.success') });
     } catch (e) {
-      console.error(e);
+      $q.notify({ type: 'negative', message: t('Welcome.restore.error') });
     }
   };
   reader.readAsText(file);
@@ -216,35 +182,33 @@ function dragFile(ev: DragEvent) {
   if (file) readFile(file);
 }
 
-function openAddMint() {
-  welcomeStore.finishTutorial().then(() => {
-    mintsStore.showAddMintDialog = true;
-  });
+function openFileDialog() {
+  fileUpload.value?.click();
 }
 
-function goAbout() {
-  welcomeStore.finishTutorial("/about");
+function triggerInstall() {
+  if (deferredPrompt.value) {
+    deferredPrompt.value.prompt();
+    deferredPrompt.value.userChoice.finally(() => {
+      deferredPrompt.value = null;
+    });
+  }
 }
 
-const showSkip = computed(() => welcomeStore.currentSlide < 4);
-const nextLabel = computed(() =>
-  welcomeStore.isLastSlide
-    ? t("Welcome.actions.finish")
-    : t("Welcome.actions.next"),
-);
+const showSkip = ref(false);
 
-function handleKey(e: KeyboardEvent) {
-  if (e.key === "ArrowRight") {
-    welcomeStore.goToNextSlide();
-  } else if (e.key === "ArrowLeft") {
+function handleKeydown(e: KeyboardEvent) {
+  if (e.key === 'ArrowLeft') {
     welcomeStore.goToPrevSlide();
-  } else if (e.key === "Enter") {
+  } else if (e.key === 'ArrowRight') {
     if (welcomeStore.canGoNext) welcomeStore.goToNextSlide();
-  } else if (e.key === "Escape") {
+  } else if (e.key === 'Enter') {
+    if (welcomeStore.canGoNext) welcomeStore.goToNextSlide();
+  } else if (e.key === 'Escape') {
     if (showSkip.value) {
       welcomeStore.skipTutorial();
     } else if (welcomeStore.isLastSlide) {
-      welcomeStore.goToNextSlide();
+      welcomeStore.finishTutorial();
     } else {
       e.preventDefault();
     }
@@ -253,26 +217,41 @@ function handleKey(e: KeyboardEvent) {
 
 onMounted(() => {
   welcomeStore.initializeWelcome();
-  const stored = localStorage.getItem("cashu.language");
-  const initLocale = stored || locale.value || navigator.language || "en-US";
-  locale.value = initLocale === "en" ? "en-US" : initLocale;
-  selectedLanguage.value = locale.value;
-  window.addEventListener("keydown", handleKey);
-  nextTick(() => {
-    const id = slides.value[welcomeStore.currentSlide].id;
-    document.getElementById(id)?.focus();
+  const stored = localStorage.getItem('cashu.language');
+  const initLocale = stored || navigator.language || 'en-US';
+  selectedLanguage.value = initLocale === 'en' ? 'en-US' : initLocale;
+  changeLanguage(selectedLanguage.value);
+  window.addEventListener('keydown', handleKeydown);
+  window.addEventListener('beforeinstallprompt', (e: any) => {
+    e.preventDefault();
+    deferredPrompt.value = e;
   });
+  buildSlides();
 });
 
-onBeforeUnmount(() => {
-  window.removeEventListener("keydown", handleKey);
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeydown);
 });
+
+watch(
+  () => welcomeStore.currentSlide,
+  () => {
+    showSkip.value = ['privacy', 'mints', 'proofs', 'buckets'].includes(
+      slides.value[welcomeStore.currentSlide]?.key,
+    );
+    nextTick(() => {
+      const key = slides.value[welcomeStore.currentSlide]?.key;
+      const el = document.getElementById(`welcome-${key}-title`);
+      el?.focus();
+    });
+  },
+  { immediate: true },
+);
 </script>
 
 <style scoped>
 .q-card {
-  display: flex;
-  flex-direction: column;
+  height: 100%;
 }
 .q-carousel {
   flex: 1;

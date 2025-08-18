@@ -1,10 +1,9 @@
 <template>
-  <div class="q-pa-md">
+  <q-page class="q-pa-md" role="main">
     <h1 class="text-h5 q-mb-md">Terms of Service</h1>
-    <p>This page will contain the Terms of Service.</p>
-  </div>
+    <p>This is a placeholder for the Terms of Service.</p>
+  </q-page>
 </template>
 
-<script>
-export default { name: "TermsPage" };
+<script setup>
 </script>

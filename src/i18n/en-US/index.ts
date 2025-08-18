@@ -64,7 +64,7 @@ export const messages = {
     notifications: {
       balance_too_low: "Balance is too low",
       received: "Received {amount}",
-      fee: " (fee: {fee})",
+      fee: " (fee {fee})",
       could_not_request_mint: "Could not request mint",
       invoice_still_pending: "Invoice still pending",
       paid_lightning: "Paid {amount} via Lightning",
@@ -359,7 +359,7 @@ export const messages = {
     p2pk_features: {
       title: "P2PK",
       description:
-        "Generate a key pair to receive P2PK-locked ecash. Warning: This feature is experimental. Only use with small amounts. If you lose your private keys, nobody will be able to unlock the ecash locked to it anymore.",
+        "Generate a key pair to receive P2PK-locked ecash. Warning - This feature is experimental. Only use with small amounts. If you lose your private keys, nobody will be able to unlock the ecash locked to it anymore.",
       generate_button: "Generate key",
       import_button: "Import nsec",
       publish_profile_button: "Publish Nutzap profile",
@@ -493,12 +493,12 @@ export const messages = {
         keyset_counters: {
           title: "Increment keyset counters",
           description:
-            'Click the keyset ID to increment the derivation path counters for the keysets in your wallet. This is useful if you see the "outputs have already been signed" error.',
+            "Click the keyset ID to increment the derivation path counters for the keysets in your wallet. This is useful if you see the \"outputs have already been signed\" error.",
         },
         unset_reserved: {
           button: "Unset all reserved tokens",
           description:
-            'This wallet marks pending outgoing ecash as reserved (and subtracts it from your balance) to prevent double-spend attempts. This button will unset all reserved tokens so they can be used again. If you do this, your wallet might include spent proofs. Press the "Remove spent proofs" button to get rid of them.',
+            "This wallet marks pending outgoing ecash as reserved (and subtracts it from your balance) to prevent double-spend attempts. This button will unset all reserved tokens so they can be used again. If you do this, your wallet might include spent proofs. Press the \"Remove spent proofs\" button to get rid of them.",
         },
         show_onboarding: {
           button: "Show onboarding",
@@ -507,7 +507,7 @@ export const messages = {
         reset_wallet: {
           button: "Reset wallet data",
           description:
-            "Reset your wallet data. Warning: This will delete everything! Make sure you create a backup first.",
+            "Reset your wallet data. Warning - This will delete everything! Make sure you create a backup first.",
           confirm_question: "Are you sure you want to delete your wallet data?",
           cancel: "Cancel",
           confirm: "Delete wallet",
@@ -575,7 +575,7 @@ export const messages = {
   },
   ErrorNotFound: {
     title: "404",
-    text: "This page doesn't exist. Try the links below for help:",
+    text: "This page doesn't exist. Try the links below for help",
     links: {
       docs: "Documentation",
       tips: "Tips & Tricks",
@@ -603,24 +603,23 @@ export const messages = {
   },
   Welcome: {
     actions: {
-      previous: { label: "Previous" },
-      next: { label: "Next" },
-      skip: { label: "Skip" },
-      finish: { label: "Finish" },
-      restore: { label: "Restore" },
+      previous: "Previous",
+      next: "Next",
+      skip: "Skip",
+      finish: "Finish",
+      restore: "Restore from backup",
     },
-    progress: {
-      step: "Step { current } of { total }",
-    },
-    hints: {
-      dragDrop:
-        "You can also drag & drop a backup file anywhere on this screen.",
+    progress: "Step {current} of {total}",
+    hint: "You can also drag & drop a backup file anywhere on this screen.",
+    restore: {
+      success: "Backup restored",
+      error: "Invalid backup file",
     },
     slides: {
       privacy: {
         title: "Cashu & Privacy",
         text: "Cashu uses blinded tokens so mints can't track your payments.",
-        learn_more: "To learn more, visit the About page.",
+        about: "To learn more, visit the About page.",
       },
       mints: {
         title: "Mints",
@@ -635,30 +634,36 @@ export const messages = {
         text: "Use buckets to organize your tokens.",
       },
       backup: {
-        title: "Backup your Seed",
-        text: "Your recovery phrase backs up your wallet. Keep it safe.",
-        checkbox: { label: "I understand I must back up my recovery/seed." },
+        title: "Backup your seed",
+        text: "Your recovery phrase is the only way to restore your wallet.",
+        checkbox: "I understand I must back up my recovery/seed.",
       },
       terms: {
         title: "Terms of Service",
-        text: "You must accept the Terms of Service to use this wallet.",
-        checkbox: { label: "I accept the Terms of Service." },
-        link: { label: "Read Terms of Service" },
+        text: "Please read and accept the Terms of Service to continue.",
+        checkbox: "I accept the Terms of Service.",
+        link: "Read Terms",
       },
       pwa: {
         title: "Install as App",
-        text: "Install this app on your device for quicker access.",
+        text: "Install this wallet as a Progressive Web App for a better experience.",
+        install: { label: "Install" },
       },
       finish: {
         title: "You're ready!",
-        text: "Choose what to do next:",
-        actions: {
-          add_mint: { label: "Add a Mint" },
-          restore: { label: "Restore from backup" },
-          about: { label: "Learn more on About" },
-        },
+        addMint: { label: "Add a Mint" },
+        restore: { label: "Restore from backup" },
+        about: { label: "Learn more on About" },
       },
     },
+  },
+  iOSPWAPrompt: {
+    text: "Tap { icon } and { buttonText }",
+    buttonText: "Add to Home Screen",
+  },
+  AndroidPWAPrompt: {
+    text: "Tap { icon } and { buttonText }",
+    buttonText: "Add to Home Screen",
   },
   RestoreView: {
     seed_phrase: {
@@ -681,7 +686,7 @@ export const messages = {
     restore_mints: {
       label: "Restore Mints",
       caption:
-        'Select the mint to restore. You can add more mints in the main screen under "Mints" and restore them here.',
+        "Select the mint to restore. You can add more mints in the main screen under \"Mints\" and restore them here.",
     },
     actions: {
       paste: {
@@ -693,13 +698,13 @@ export const messages = {
       restore: {
         label: "Restore",
         in_progress: "Restoring mint …",
-        error: "Error restoring mint: { error }",
+        error: "Error restoring mint - { error }",
       },
       restore_all_mints: {
         label: "Restore All Mints",
         in_progress: "Restoring mint { index } of { length } …",
         success: "Restore finished successfully",
-        error: "Error restoring mints: { error }",
+        error: "Error restoring mints - { error }",
       },
     },
   },
@@ -998,7 +1003,7 @@ export const messages = {
       caption: "P2PK Key",
       description: "Receive ecash locked to this key",
       used_warning_text:
-        "Warning: This key was used before. Use a new key for better privacy.",
+        "Warning - This key was used before. Use a new key for better privacy.",
     },
     actions: {
       copy: {
@@ -1068,7 +1073,7 @@ export const messages = {
       description:
         "Control your wallet remotely with NWC. Press the QR code to link your wallet with a compatible app.",
       warning_text:
-        "Warning: anyone with access to this connection string can initiate payments from your wallet. Do not share!",
+        "Warning - anyone with access to this connection string can initiate payments from your wallet. Do not share!",
     },
     actions: {
       copy: {
@@ -1709,7 +1714,7 @@ export const messages = {
   },
   restore: {
     mnemonic_error_text: "Please enter a mnemonic",
-    restore_mint_error_text: "Error restoring mint: { error }",
+    restore_mint_error_text: "Error restoring mint - { error }",
     prepare_info_text: "Preparing restore process …",
     restored_proofs_for_keyset_info_text:
       "Restored { restoreCounter } proofs for keyset { keysetId }",

@@ -8,14 +8,13 @@ export type WelcomeState = {
   seedAcknowledged: boolean;
   termsAccepted: boolean;
   pwaSlideEligible: boolean;
+  slides: string[];
 };
 
 export const useWelcomeStore = defineStore("welcome", {
   state: (): WelcomeState => ({
-    showWelcome: useLocalStorage<boolean>("cashu.welcome.showWelcome", true)
-      .value,
-    currentSlide: useLocalStorage<number>("cashu.welcome.currentSlide", 0)
-      .value,
+    showWelcome: useLocalStorage<boolean>("cashu.welcome.showWelcome", true).value,
+    currentSlide: useLocalStorage<number>("cashu.welcome.currentSlide", 0).value,
     seedAcknowledged: useLocalStorage<boolean>(
       "cashu.welcome.seedAcknowledged",
       false,
@@ -25,37 +24,35 @@ export const useWelcomeStore = defineStore("welcome", {
       false,
     ).value,
     pwaSlideEligible: false,
+    slides: [],
   }),
   getters: {
-    totalSlides: (state) => (state.pwaSlideEligible ? 8 : 7),
-    isLastSlide(): boolean {
-      return this.currentSlide === this.totalSlides - 1;
-    },
-    canGoNext(state): boolean {
-      if (state.currentSlide === 4) return state.seedAcknowledged;
-      if (state.currentSlide === 5) return state.termsAccepted;
+    totalSlides: (state) => state.slides.length,
+    isLastSlide: (state) => state.currentSlide === state.slides.length - 1,
+    canGoNext: (state) => {
+      const key = state.slides[state.currentSlide];
+      if (key === "backup") return state.seedAcknowledged;
+      if (key === "terms") return state.termsAccepted;
       return true;
     },
-    canGoPrev: (state) => state.currentSlide > 0,
   },
   actions: {
     initializeWelcome() {
-      this.pwaSlideEligible = !window.matchMedia("(display-mode: standalone)")
-        .matches;
+      const displayModeStandalone = window.matchMedia(
+        "(display-mode: standalone)",
+      ).matches;
+      // @ts-ignore
+      const navigatorStandalone = window.navigator.standalone;
+      this.pwaSlideEligible = !(displayModeStandalone || navigatorStandalone);
       if (!this.showWelcome) {
         router.push("/wallet");
       }
     },
-    resetWelcome() {
-      this.showWelcome = true;
-      this.currentSlide = 0;
-      this.seedAcknowledged = false;
-      this.termsAccepted = false;
-      this.pwaSlideEligible = !window.matchMedia("(display-mode: standalone)")
-        .matches;
+    setSlides(slides: string[]) {
+      this.slides = slides;
     },
     goToPrevSlide() {
-      if (this.canGoPrev) {
+      if (this.currentSlide > 0) {
         this.currentSlide -= 1;
       }
     },
@@ -70,9 +67,15 @@ export const useWelcomeStore = defineStore("welcome", {
     skipTutorial() {
       this.finishTutorial();
     },
-    finishTutorial(target = "/wallet") {
+    finishTutorial() {
       this.showWelcome = false;
-      return router.push(target);
+      router.push("/wallet");
+    },
+    resetWelcome() {
+      this.showWelcome = true;
+      this.currentSlide = 0;
+      this.seedAcknowledged = false;
+      this.termsAccepted = false;
     },
   },
 });
