@@ -329,16 +329,3 @@ body.body--dark .received {
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 1.5rem;
 }
-
-/* Nav drawer motion tokens */
-:root {
-  --nav-anim: 220ms;
-  --nav-ease: cubic-bezier(.2, .8, .2, 1);
-}
-
-/* Ensure drawer & its scrim share the same feel */
-.q-drawer,
-.q-drawer__backdrop {
-  transition-duration: var(--nav-anim) !important;
-  transition-timing-function: var(--nav-ease) !important;
-}

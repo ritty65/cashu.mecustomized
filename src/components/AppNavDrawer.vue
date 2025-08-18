@@ -2,16 +2,16 @@
   <q-drawer
     v-model="ui.mainNavOpen"
     side="left"
-    overlay
-    elevated
-    bordered
+    :overlay="$q.screen.lt.md"
+    :breakpoint="1024"
     :width="NAV_DRAWER_WIDTH"
-    :breakpoint="NAV_DRAWER_BREAKPOINT"
-    behavior="desktop"
+    bordered
+    behavior="mobile"
     :no-swipe-backdrop="false"
     :no-swipe-open="false"
     class="app-nav-drawer"
     id="app-nav"
+    elevated
     tabindex="0"
     :content-class="drawerContentClass"
     @hide="ui.closeMainNav()"
@@ -178,10 +178,7 @@ import { useNostrStore } from "src/stores/nostr";
 import { useI18n } from "vue-i18n";
 import { useQuasar } from "quasar";
 import EssentialLink from "components/EssentialLink.vue";
-import {
-  NAV_DRAWER_WIDTH,
-  NAV_DRAWER_BREAKPOINT,
-} from "src/constants/layout";
+import { NAV_DRAWER_WIDTH } from "src/constants/layout";
 
 const ui = useUiStore();
 const router = useRouter();
@@ -207,9 +204,8 @@ const gotoAbout = () => goto("/about");
 
 const needsNostrLogin = computed(() => !nostrStore.privateKeySignerPrivateKey);
 
-// Keep the safe-area padding for small screens only
 const drawerContentClass = computed(() =>
-  $q.screen.lt.md ? "main-nav-safe" : "q-pt-sm"
+  $q.screen.lt.md ? "main-nav-safe" : "q-pt-sm",
 );
 
 const essentialLinks = [
@@ -255,9 +251,7 @@ const essentialLinks = [
 <style scoped>
 .app-nav-drawer {
   z-index: 1000;
-  /* unify motion across pages */
-  transition: transform var(--nav-anim, 220ms) var(--nav-ease, cubic-bezier(.2,.8,.2,1)),
-              opacity   var(--nav-anim, 220ms) var(--nav-ease, cubic-bezier(.2,.8,.2,1));
+  transition: transform 0.18s ease, opacity 0.18s ease;
   backdrop-filter: saturate(1.2);
   box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
   border-right: 1px solid rgba(0, 0, 0, 0.12);
