@@ -3,9 +3,9 @@
     <div class="text-center">
       <q-icon name="install_mobile" size="4em" color="primary" />
       <h1 :id="id" tabindex="-1" class="q-mt-md">
-        {{ $t('Welcome.slides.pwa.title') }}
+        {{ $t("Welcome.slides.pwa.title") }}
       </h1>
-      <p class="q-mt-sm">{{ $t('Welcome.slides.pwa.text') }}</p>
+      <p class="q-mt-sm">{{ $t("Welcome.slides.pwa.text") }}</p>
       <q-btn
         class="q-mt-md"
         color="primary"
@@ -17,9 +17,9 @@
   </section>
 </template>
 
-<script setup>
+<script setup lang="ts">
 const props = defineProps<{ triggerInstall: () => void }>();
-const id = 'welcome-pwa-title';
+const id = "welcome-pwa-title";
 
 function triggerInstall() {
   props.triggerInstall();

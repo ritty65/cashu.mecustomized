@@ -3,15 +3,15 @@
     <div class="text-center">
       <q-icon name="confirmation_number" size="4em" color="primary" />
       <h1 :id="id" tabindex="-1" class="q-mt-md">
-        {{ $t('Welcome.slides.proofs.title') }}
+        {{ $t("Welcome.slides.proofs.title") }}
       </h1>
-      <p class="q-mt-sm">{{ $t('Welcome.slides.proofs.text') }}</p>
+      <p class="q-mt-sm">{{ $t("Welcome.slides.proofs.text") }}</p>
     </div>
   </section>
 </template>
 
-<script setup>
-const id = 'welcome-proofs-title';
+<script setup lang="ts">
+const id = "welcome-proofs-title";
 </script>
 
 <style scoped>

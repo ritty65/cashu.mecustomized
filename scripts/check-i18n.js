@@ -18,7 +18,8 @@ async function collectFiles(dir) {
 }
 
 function extractKeys(src) {
-  const re = /\$t\(\s*['"`]([^'"`]+)['"`]\s*\)|i18n\.t\(\s*['"`]([^'"`]+)['"`]\s*\)/g;
+  const re =
+    /\$t\(\s*['"`]([^'"`]+)['"`]\s*\)|i18n\.t\(\s*['"`]([^'"`]+)['"`]\s*\)/g;
   const keys = new Set();
   let m;
   while ((m = re.exec(src)) !== null) {
@@ -65,4 +66,3 @@ main().catch((e) => {
   console.error(e);
   process.exit(1);
 });
-

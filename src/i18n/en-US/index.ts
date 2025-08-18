@@ -493,12 +493,12 @@ export const messages = {
         keyset_counters: {
           title: "Increment keyset counters",
           description:
-            "Click the keyset ID to increment the derivation path counters for the keysets in your wallet. This is useful if you see the \"outputs have already been signed\" error.",
+            'Click the keyset ID to increment the derivation path counters for the keysets in your wallet. This is useful if you see the "outputs have already been signed" error.',
         },
         unset_reserved: {
           button: "Unset all reserved tokens",
           description:
-            "This wallet marks pending outgoing ecash as reserved (and subtracts it from your balance) to prevent double-spend attempts. This button will unset all reserved tokens so they can be used again. If you do this, your wallet might include spent proofs. Press the \"Remove spent proofs\" button to get rid of them.",
+            'This wallet marks pending outgoing ecash as reserved (and subtracts it from your balance) to prevent double-spend attempts. This button will unset all reserved tokens so they can be used again. If you do this, your wallet might include spent proofs. Press the "Remove spent proofs" button to get rid of them.',
         },
         show_onboarding: {
           button: "Show onboarding",
@@ -686,7 +686,7 @@ export const messages = {
     restore_mints: {
       label: "Restore Mints",
       caption:
-        "Select the mint to restore. You can add more mints in the main screen under \"Mints\" and restore them here.",
+        'Select the mint to restore. You can add more mints in the main screen under "Mints" and restore them here.',
     },
     actions: {
       paste: {

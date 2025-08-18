@@ -13,8 +13,10 @@ export type WelcomeState = {
 
 export const useWelcomeStore = defineStore("welcome", {
   state: (): WelcomeState => ({
-    showWelcome: useLocalStorage<boolean>("cashu.welcome.showWelcome", true).value,
-    currentSlide: useLocalStorage<number>("cashu.welcome.currentSlide", 0).value,
+    showWelcome: useLocalStorage<boolean>("cashu.welcome.showWelcome", true)
+      .value,
+    currentSlide: useLocalStorage<number>("cashu.welcome.currentSlide", 0)
+      .value,
     seedAcknowledged: useLocalStorage<boolean>(
       "cashu.welcome.seedAcknowledged",
       false,

@@ -1,10 +1,7 @@
 <template>
   <q-header class="bg-transparent">
     <q-toolbar class="app-toolbar" dense>
-      <div
-        class="left-controls row items-center no-wrap"
-        v-if="!isWelcomePage"
-      >
+      <div class="left-controls row items-center no-wrap" v-if="!isWelcomePage">
         <q-btn
           v-if="isMessengerPage"
           flat
@@ -117,10 +114,7 @@
       </div>
     </q-toolbar>
   </q-header>
-  <div
-    v-if="$q.screen.lt.md"
-    class="mobile-nav-toggle"
-  >
+  <div v-if="$q.screen.lt.md" class="mobile-nav-toggle">
     <q-btn
       ref="mobileNavBtn"
       round
@@ -174,9 +168,7 @@ export default defineComponent({
     };
 
     onMounted(() => window.addEventListener("keydown", onKeydown));
-    onBeforeUnmount(() =>
-      window.removeEventListener("keydown", onKeydown),
-    );
+    onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown));
 
     const toggleDarkMode = () => {
       console.log("toggleDarkMode", $q.dark.isActive);

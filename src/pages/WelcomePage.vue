@@ -5,11 +5,7 @@
     @dragover.prevent
   >
     <q-card class="q-pa-none column full-width" style="max-width: 768px">
-      <q-carousel
-        v-model="welcomeStore.currentSlide"
-        animated
-        class="col"
-      >
+      <q-carousel v-model="welcomeStore.currentSlide" animated class="col">
         <q-carousel-slide
           v-for="(slide, index) in slides"
           :key="slide.key"
@@ -41,7 +37,7 @@
         <div class="col text-center">
           <div aria-live="polite">
             {{
-              $t('Welcome.progress', {
+              $t("Welcome.progress", {
                 current: welcomeStore.currentSlide + 1,
                 total: welcomeStore.totalSlides,
               })
@@ -82,7 +78,7 @@
         </div>
       </footer>
       <div class="text-caption text-center q-pb-sm">
-        {{ $t('Welcome.hint') }}
+        {{ $t("Welcome.hint") }}
       </div>
     </q-card>
     <input
@@ -94,40 +90,40 @@
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue';
-import { useQuasar } from 'quasar';
-import { useI18n } from 'vue-i18n';
-import { useWelcomeStore } from 'src/stores/welcome';
-import { useStorageStore } from 'src/stores/storage';
-import WelcomeSlidePrivacy from './welcome/WelcomeSlidePrivacy.vue';
-import WelcomeSlideMints from './welcome/WelcomeSlideMints.vue';
-import WelcomeSlideProofs from './welcome/WelcomeSlideProofs.vue';
-import WelcomeSlideBuckets from './welcome/WelcomeSlideBuckets.vue';
-import WelcomeSlideBackup from './welcome/WelcomeSlideBackup.vue';
-import WelcomeSlideTerms from './welcome/WelcomeSlideTerms.vue';
-import WelcomeSlidePwa from './welcome/WelcomeSlidePwa.vue';
-import WelcomeSlideFinish from './welcome/WelcomeSlideFinish.vue';
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted, watch, nextTick } from "vue";
+import { useQuasar } from "quasar";
+import { useI18n } from "vue-i18n";
+import { useWelcomeStore } from "src/stores/welcome";
+import { useStorageStore } from "src/stores/storage";
+import WelcomeSlidePrivacy from "./welcome/WelcomeSlidePrivacy.vue";
+import WelcomeSlideMints from "./welcome/WelcomeSlideMints.vue";
+import WelcomeSlideProofs from "./welcome/WelcomeSlideProofs.vue";
+import WelcomeSlideBuckets from "./welcome/WelcomeSlideBuckets.vue";
+import WelcomeSlideBackup from "./welcome/WelcomeSlideBackup.vue";
+import WelcomeSlideTerms from "./welcome/WelcomeSlideTerms.vue";
+import WelcomeSlidePwa from "./welcome/WelcomeSlidePwa.vue";
+import WelcomeSlideFinish from "./welcome/WelcomeSlideFinish.vue";
 
 const $q = useQuasar();
 const { locale, t } = useI18n();
 const welcomeStore = useWelcomeStore();
 const storageStore = useStorageStore();
 const fileUpload = ref<HTMLInputElement | null>(null);
-const selectedLanguage = ref('');
+const selectedLanguage = ref("");
 const languageOptions = [
-  { label: 'English', value: 'en-US' },
-  { label: 'Español', value: 'es-ES' },
-  { label: 'Italiano', value: 'it-IT' },
-  { label: 'Deutsch', value: 'de-DE' },
-  { label: 'Français', value: 'fr-FR' },
-  { label: 'Svenska', value: 'sv-SE' },
-  { label: 'Ελληνικά', value: 'el-GR' },
-  { label: 'Türkçe', value: 'tr-TR' },
-  { label: 'ไทย', value: 'th-TH' },
-  { label: 'العربية', value: 'ar-SA' },
-  { label: '中文', value: 'zh-CN' },
-  { label: '日本語', value: 'ja-JP' },
+  { label: "English", value: "en-US" },
+  { label: "Español", value: "es-ES" },
+  { label: "Italiano", value: "it-IT" },
+  { label: "Deutsch", value: "de-DE" },
+  { label: "Français", value: "fr-FR" },
+  { label: "Svenska", value: "sv-SE" },
+  { label: "Ελληνικά", value: "el-GR" },
+  { label: "Türkçe", value: "tr-TR" },
+  { label: "ไทย", value: "th-TH" },
+  { label: "العربية", value: "ar-SA" },
+  { label: "中文", value: "zh-CN" },
+  { label: "日本語", value: "ja-JP" },
 ];
 
 const deferredPrompt = ref<any>(null);
@@ -135,27 +131,35 @@ const slides = ref<{ key: string; component: any; props?: any }[]>([]);
 
 function buildSlides() {
   const arr = [
-    { key: 'privacy', component: WelcomeSlidePrivacy },
-    { key: 'mints', component: WelcomeSlideMints },
-    { key: 'proofs', component: WelcomeSlideProofs },
-    { key: 'buckets', component: WelcomeSlideBuckets },
-    { key: 'backup', component: WelcomeSlideBackup },
-    { key: 'terms', component: WelcomeSlideTerms },
+    { key: "privacy", component: WelcomeSlidePrivacy },
+    { key: "mints", component: WelcomeSlideMints },
+    { key: "proofs", component: WelcomeSlideProofs },
+    { key: "buckets", component: WelcomeSlideBuckets },
+    { key: "backup", component: WelcomeSlideBackup },
+    { key: "terms", component: WelcomeSlideTerms },
   ];
   if (welcomeStore.pwaSlideEligible) {
-    arr.push({ key: 'pwa', component: WelcomeSlidePwa, props: { triggerInstall } });
+    arr.push({
+      key: "pwa",
+      component: WelcomeSlidePwa,
+      props: { triggerInstall },
+    });
   }
-  arr.push({ key: 'finish', component: WelcomeSlideFinish, props: { restore: openFileDialog } });
+  arr.push({
+    key: "finish",
+    component: WelcomeSlideFinish,
+    props: { restore: openFileDialog },
+  });
   slides.value = arr;
   welcomeStore.setSlides(arr.map((s) => s.key));
 }
 
 function changeLanguage(lang: string) {
-  if (lang === 'en') {
-    lang = 'en-US';
+  if (lang === "en") {
+    lang = "en-US";
   }
   locale.value = lang;
-  localStorage.setItem('cashu.language', lang);
+  localStorage.setItem("cashu.language", lang);
 }
 
 function onChangeFileUpload() {
@@ -169,9 +173,9 @@ function readFile(file: File) {
     try {
       const backup = JSON.parse(String(f.target?.result));
       storageStore.restoreFromBackup(backup);
-      $q.notify({ type: 'positive', message: t('Welcome.restore.success') });
+      $q.notify({ type: "positive", message: t("Welcome.restore.success") });
     } catch (e) {
-      $q.notify({ type: 'negative', message: t('Welcome.restore.error') });
+      $q.notify({ type: "negative", message: t("Welcome.restore.error") });
     }
   };
   reader.readAsText(file);
@@ -198,13 +202,13 @@ function triggerInstall() {
 const showSkip = ref(false);
 
 function handleKeydown(e: KeyboardEvent) {
-  if (e.key === 'ArrowLeft') {
+  if (e.key === "ArrowLeft") {
     welcomeStore.goToPrevSlide();
-  } else if (e.key === 'ArrowRight') {
+  } else if (e.key === "ArrowRight") {
     if (welcomeStore.canGoNext) welcomeStore.goToNextSlide();
-  } else if (e.key === 'Enter') {
+  } else if (e.key === "Enter") {
     if (welcomeStore.canGoNext) welcomeStore.goToNextSlide();
-  } else if (e.key === 'Escape') {
+  } else if (e.key === "Escape") {
     if (showSkip.value) {
       welcomeStore.skipTutorial();
     } else if (welcomeStore.isLastSlide) {
@@ -217,12 +221,12 @@ function handleKeydown(e: KeyboardEvent) {
 
 onMounted(() => {
   welcomeStore.initializeWelcome();
-  const stored = localStorage.getItem('cashu.language');
-  const initLocale = stored || navigator.language || 'en-US';
-  selectedLanguage.value = initLocale === 'en' ? 'en-US' : initLocale;
+  const stored = localStorage.getItem("cashu.language");
+  const initLocale = stored || navigator.language || "en-US";
+  selectedLanguage.value = initLocale === "en" ? "en-US" : initLocale;
   changeLanguage(selectedLanguage.value);
-  window.addEventListener('keydown', handleKeydown);
-  window.addEventListener('beforeinstallprompt', (e: any) => {
+  window.addEventListener("keydown", handleKeydown);
+  window.addEventListener("beforeinstallprompt", (e: any) => {
     e.preventDefault();
     deferredPrompt.value = e;
   });
@@ -230,13 +234,13 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeydown);
+  window.removeEventListener("keydown", handleKeydown);
 });
 
 watch(
   () => welcomeStore.currentSlide,
   () => {
-    showSkip.value = ['privacy', 'mints', 'proofs', 'buckets'].includes(
+    showSkip.value = ["privacy", "mints", "proofs", "buckets"].includes(
       slides.value[welcomeStore.currentSlide]?.key,
     );
     nextTick(() => {
