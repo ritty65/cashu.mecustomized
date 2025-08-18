@@ -41,10 +41,7 @@ async function loadLocaleKeys() {
   const content = await fs.readFile(LOCALE_FILE, "utf8");
   const match = content.match(/export const messages = (\{[\s\S]*?\n\});/);
   if (!match) throw new Error("Could not parse locale file");
-  const jsonLike = match[1]
-    .replace(/(\w+)\s*:/g, '"$1":')
-    .replace(/,\s*([}\]])/g, '$1');
-  const messages = JSON.parse(jsonLike);
+  const messages = new Function(`return ${match[1]}`)();
   return flatten(messages);
 }
 

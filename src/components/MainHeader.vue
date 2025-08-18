@@ -1,7 +1,10 @@
 <template>
   <q-header class="bg-transparent">
     <q-toolbar class="app-toolbar" dense>
-      <div class="left-controls row items-center no-wrap">
+      <div
+        class="left-controls row items-center no-wrap"
+        v-if="!isWelcomePage"
+      >
         <q-btn
           v-if="isMessengerPage"
           flat
@@ -31,11 +34,14 @@
         </q-btn>
       </div>
 
-      <q-toolbar-title class="app-title text-center">{{
-        currentTitle
-      }}</q-toolbar-title>
+      <q-toolbar-title class="app-title text-center">
+        {{ isWelcomePage ? appName : currentTitle }}
+      </q-toolbar-title>
 
-      <div class="right-controls row items-center no-wrap">
+      <div
+        class="right-controls row items-center no-wrap"
+        v-if="!isWelcomePage"
+      >
         <transition
           appear
           enter-active-class="animated wobble"
@@ -186,6 +192,8 @@ export default defineComponent({
     const isMessengerPage = computed(() =>
       route.path.startsWith("/nostr-messenger"),
     );
+    const isWelcomePage = computed(() => route.path.startsWith("/welcome"));
+    const appName = "Cashu.me";
     const currentTitle = computed(() => {
       if (isMessengerPage.value) return "Nostr Messenger";
       if (route.path.startsWith("/wallet")) return "Wallet";
@@ -258,6 +266,8 @@ export default defineComponent({
       reloading,
       ui,
       currentTitle,
+      isWelcomePage,
+      appName,
       isMessengerPage,
       toggleMessengerDrawer,
       toggleDarkMode,

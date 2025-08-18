@@ -82,7 +82,7 @@ export const LOCAL_STORAGE_KEYS = {
   CASHU_UI_SHOWNFCBUTTONINDRAWER: "cashu.ui.showNfcButtonInDrawer",
   CASHU_UI_TAB: "cashu.ui.tab",
   CASHU_WELCOME_CURRENTSLIDE: "cashu.welcome.currentSlide",
-  CASHU_WELCOME_SEEDPHRASEVALIDATED: "cashu.welcome.seedPhraseValidated",
+  CASHU_WELCOME_SEEDACKNOWLEDGED: "cashu.welcome.seedAcknowledged",
   CASHU_WELCOME_SHOWWELCOME: "cashu.welcome.showWelcome",
   CASHU_WELCOME_TERMSACCEPTED: "cashu.welcome.termsAccepted",
   CASHU_WORKER_INVOICES_LASTPENDINGINVOICECHECK:
