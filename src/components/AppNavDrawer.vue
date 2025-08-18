@@ -2,15 +2,19 @@
   <q-drawer
     v-model="ui.mainNavOpen"
     side="left"
-    overlay
+    :overlay="$q.screen.lt.md"
     bordered
     behavior="mobile"
+    :breakpoint="1024"
     :no-swipe-backdrop="false"
     :no-swipe-open="false"
     class="app-nav-drawer"
+    content-class="main-nav-drawer-content"
     id="app-nav"
     elevated
+    tabindex="0"
     @hide="ui.closeMainNav()"
+    @keyup.esc="ui.closeMainNav()"
   >
     <q-list>
       <q-item-label header>{{ $t('MainHeader.menu.settings.title') }}</q-item-label>
@@ -129,12 +133,14 @@ import { useRouter } from 'vue-router'
 import { useUiStore } from 'src/stores/ui'
 import { useNostrStore } from 'src/stores/nostr'
 import { useI18n } from 'vue-i18n'
+import { useQuasar } from 'quasar'
 import EssentialLink from 'components/EssentialLink.vue'
 
 const ui = useUiStore()
 const router = useRouter()
 const nostrStore = useNostrStore()
 const { t } = useI18n()
+const $q = useQuasar()
 
 function goto(path: string) {
   router.push(path)
@@ -199,5 +205,15 @@ const essentialLinks = [
   z-index: 4000;
   transition: transform .18s ease, opacity .18s ease;
   backdrop-filter: saturate(1.2);
+}
+
+.main-nav-drawer-content {
+  padding-top: 8px;
+}
+
+@media (max-width: 1023px) {
+  .main-nav-drawer-content {
+    padding-left: 56px;
+  }
 }
 </style>
