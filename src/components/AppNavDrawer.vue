@@ -2,7 +2,8 @@
   <q-drawer
     v-model="ui.mainNavOpen"
     side="left"
-    overlay
+    :overlay="$q.screen.lt.md"
+    :breakpoint="1024"
     bordered
     behavior="mobile"
     :no-swipe-backdrop="false"
@@ -10,7 +11,10 @@
     class="app-nav-drawer"
     id="app-nav"
     elevated
+    tabindex="0"
+    :content-class="drawerContentClass"
     @hide="ui.closeMainNav()"
+    @keyup.esc="ui.closeMainNav()"
   >
     <q-list>
       <q-item-label header>{{ $t('MainHeader.menu.settings.title') }}</q-item-label>
@@ -129,12 +133,14 @@ import { useRouter } from 'vue-router'
 import { useUiStore } from 'src/stores/ui'
 import { useNostrStore } from 'src/stores/nostr'
 import { useI18n } from 'vue-i18n'
+import { useQuasar } from 'quasar'
 import EssentialLink from 'components/EssentialLink.vue'
 
 const ui = useUiStore()
 const router = useRouter()
 const nostrStore = useNostrStore()
 const { t } = useI18n()
+const $q = useQuasar()
 
 function goto(path: string) {
   router.push(path)
@@ -153,6 +159,10 @@ const gotoTerms = () => goto('/terms')
 const gotoAbout = () => goto('/about')
 
 const needsNostrLogin = computed(() => !nostrStore.privateKeySignerPrivateKey)
+
+const drawerContentClass = computed(() =>
+  $q.screen.lt.md ? 'main-nav-safe' : undefined,
+)
 
 const essentialLinks = [
   {
@@ -199,5 +209,10 @@ const essentialLinks = [
   z-index: 4000;
   transition: transform .18s ease, opacity .18s ease;
   backdrop-filter: saturate(1.2);
+}
+
+.main-nav-safe {
+  padding-left: calc(env(safe-area-inset-left) + 60px);
+  padding-top: calc(env(safe-area-inset-top) + 8px);
 }
 </style>
