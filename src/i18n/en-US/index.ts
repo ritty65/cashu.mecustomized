@@ -1740,57 +1740,48 @@ export const messages = {
       title: "Site Overview",
       wallet: {
         description: "Manage your ecash balance.",
-        icon: "account_balance_wallet",
       },
       findCreators: {
         description: "Discover creators to support.",
-        icon: "img:icons/find-creators.svg",
       },
-
+      creatorHub: {
+        description:
+          "Post, track goals, and withdraw—your creator tools.",
+      },
       myProfile: {
         description: "View and edit your profile.",
-        icon: "person",
       },
       buckets: {
         description: "Organize funds into buckets.",
-        icon: "inventory_2",
       },
       subscriptions: {
         description: "Manage your subscriptions.",
-        icon: "auto_awesome_motion",
       },
       nostrMessengerTitle: "Nostr Messenger",
       nostrMessenger: {
         description: "Chat privately with Nostr.",
-        icon: "chat",
       },
       settings: {
         description: "Configure the app.",
-        icon: "settings",
       },
       restoreTitle: "Restore",
       restore: {
         description: "Recover your wallet from a backup.",
-        icon: "settings_backup_restore",
       },
       alreadyRunningTitle: "Already Running",
       alreadyRunning: {
         description: "Warning when another session is active.",
-        icon: "warning",
       },
       welcomeTitle: "Welcome",
       welcome: {
         description: "Introductory guide to Fundstr.",
-        icon: "info",
       },
       terms: {
         description: "Review the terms of service.",
-        icon: "gavel",
       },
       nostrLoginTitle: "Nostr Login",
       nostrLogin: {
         description: "Authenticate using your Nostr keys.",
-        icon: "vpn_key",
       },
     },
     navigation: {
