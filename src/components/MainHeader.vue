@@ -24,6 +24,7 @@
           :aria-expanded="String(ui.mainNavOpen)"
           aria-controls="app-nav"
           @click="ui.toggleMainNav"
+          ref="mainNavBtn"
           :disable="ui.globalMutexLock"
         >
           <q-tooltip>Menu</q-tooltip>
@@ -110,10 +111,35 @@
       </div>
     </q-toolbar>
   </q-header>
+  <div
+    v-if="$q.screen.lt.md"
+    class="mobile-nav-toggle"
+  >
+    <q-btn
+      ref="mobileNavBtn"
+      round
+      flat
+      :icon="ui.mainNavOpen ? 'close' : 'menu'"
+      color="primary"
+      class="mobile-nav-btn"
+      aria-label="Toggle main menu"
+      aria-controls="app-nav"
+      :aria-expanded="String(ui.mainNavOpen)"
+      @click="ui.toggleMainNav"
+    />
+  </div>
 </template>
 
 <script>
-import { defineComponent, ref, computed, getCurrentInstance } from "vue";
+import {
+  defineComponent,
+  ref,
+  computed,
+  getCurrentInstance,
+  onMounted,
+  onBeforeUnmount,
+  nextTick,
+} from "vue";
 import { useRoute } from "vue-router";
 import { useUiStore } from "src/stores/ui";
 import { useMessengerStore } from "src/stores/messenger";
@@ -128,6 +154,24 @@ export default defineComponent({
     const route = useRoute();
     const messenger = useMessengerStore();
     const $q = useQuasar();
+    const mainNavBtn = ref(null);
+    const mobileNavBtn = ref(null);
+
+    const focusNavBtn = () => {
+      (mobileNavBtn.value || mainNavBtn.value)?.focus();
+    };
+    const onKeydown = (e) => {
+      if (e.key === "Escape" && ui.mainNavOpen) {
+        ui.closeMainNav();
+        nextTick(focusNavBtn);
+      }
+    };
+
+    onMounted(() => window.addEventListener("keydown", onKeydown));
+    onBeforeUnmount(() =>
+      window.removeEventListener("keydown", onKeydown),
+    );
+
     const toggleDarkMode = () => {
       console.log("toggleDarkMode", $q.dark.isActive);
       $q.dark.toggle();
@@ -219,6 +263,8 @@ export default defineComponent({
       toggleDarkMode,
       darkIcon,
       chatButtonColor,
+      mainNavBtn,
+      mobileNavBtn,
     };
   },
 });
@@ -252,5 +298,17 @@ export default defineComponent({
   display: inline-flex;
   align-items: center;
   gap: 6px;
+}
+
+.mobile-nav-toggle {
+  position: fixed;
+  top: calc(env(safe-area-inset-top) + 8px);
+  left: calc(env(safe-area-inset-left) + 8px);
+  z-index: 12000;
+}
+
+.mobile-nav-btn {
+  width: 44px;
+  height: 44px;
 }
 </style>
