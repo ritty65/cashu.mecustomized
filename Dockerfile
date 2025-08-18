@@ -21,6 +21,10 @@ FROM nginx
 # Copy the built PWA files from the builder stage
 COPY --from=builder /app/dist/pwa /usr/share/nginx/html
 
+# security headers and default server
+COPY deploy/nginx/security-headers.conf /etc/nginx/conf.d/security-headers.conf
+COPY deploy/nginx/default.conf          /etc/nginx/conf.d/default.conf
+
 # Expose the port your app will run on
 EXPOSE 80
 
