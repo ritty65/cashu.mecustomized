@@ -197,7 +197,9 @@ const essentialLinks = [
 <style scoped>
 .app-nav-drawer {
   z-index: 4000;
-  transition: transform .18s ease, opacity .18s ease;
+  top: var(--app-header-height);
+  height: calc(100vh - var(--app-header-height));
+  transition: transform 0.18s ease, opacity 0.18s ease;
   backdrop-filter: saturate(1.2);
 }
 </style>
