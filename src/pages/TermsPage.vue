@@ -1,8 +1,10 @@
 <template>
   <q-page class="q-pa-md" role="main">
-    <h1 class="text-h5 q-mb-md">Terms of Service</h1>
-    <p>This is a placeholder for the Terms of Service.</p>
+    <h1 class="text-h5 q-mb-md">Fundstr — Terms of Service</h1>
+    <TermsContent />
   </q-page>
 </template>
 
-<script setup></script>
+<script setup>
+import TermsContent from "src/components/TermsContent.vue";
+</script>

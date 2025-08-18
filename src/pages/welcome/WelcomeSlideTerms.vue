@@ -30,7 +30,7 @@
                 <p class="q-mb-md">
                   {{ $t('Welcome.terms.summary') || 'Please review the terms below.' }}
                 </p>
-                <!-- Insert terms text/markup here (static). -->
+                <TermsContent />
               </div>
             </q-scroll-area>
           </q-card-section>
@@ -51,6 +51,7 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
+import TermsContent from "src/components/TermsContent.vue";
 import { useWelcomeStore } from "src/stores/welcome";
 
 const welcomeStore = useWelcomeStore();
