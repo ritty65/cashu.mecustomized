@@ -16,12 +16,6 @@
           @click="addMint"
           :label="$t('Welcome.mints.ctaPrimary')"
         />
-        <q-btn
-          flat
-          color="primary"
-          :label="$t('Welcome.mints.ctaSecondary')"
-          to="/about"
-        />
       </div>
     </div>
   </section>

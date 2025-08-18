@@ -1900,7 +1900,7 @@ export const messages = {
         "Anyone can verify tokens locally without asking the mint again.",
         "You control which mints you trust; you can move funds across mints.",
       ],
-      ctaLearn: "To learn more, visit the About page.",
+      ctaLearn: "Learn more",
     },
     mints: {
       title: "Mints",
@@ -1947,7 +1947,8 @@ export const messages = {
     },
     terms: {
       title: "Terms of Service",
-      link: "Read Terms",
+      link: "View Terms",
+      summary: "Please review the terms below.",
       accept: "I accept the Terms of Service.",
     },
     pwa: {
@@ -1958,11 +1959,12 @@ export const messages = {
     },
     finish: {
       title: "You’re ready!",
+      optional: "Optional next steps",
       ctas: {
         addMint: "Add a Mint",
+        createBuckets: "Create starter buckets",
         restore: "Restore from Backup",
-        openWallet: "Open Wallet",
-        about: "Learn more on About",
+        openWallet: "Start using wallet",
       },
     },
   },
