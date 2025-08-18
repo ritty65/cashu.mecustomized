@@ -5,7 +5,7 @@
     :style="navStyleVars"
   >
     <MainHeader />
-    <AppNavDrawer v-model="ui.mainNavOpen" />
+    <AppNavDrawer />
     <q-drawer
       v-if="isMessengerRoute"
       v-model="messenger.drawerOpen"
@@ -203,7 +203,6 @@ export default defineComponent({
 
     return {
       messenger,
-      ui,
       conversationSearch,
       newChatDialogRef,
       openNewChatDialog,
