@@ -4,7 +4,7 @@
     :class="$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark'"
   >
     <MainHeader />
-    <AppNavDrawer v-model="ui.mainNavOpen" />
+    <AppNavDrawer />
     <q-page-container class="text-body1">
       <div class="max-w-7xl mx-auto">
         <router-view />
