@@ -2,7 +2,6 @@
   <q-layout
     view="lHh Lpr lFf"
     :class="$q.dark.isActive ? 'bg-dark text-white' : 'bg-white text-dark'"
-    :style="navStyleVars"
   >
     <MainHeader />
     <AppNavDrawer />
@@ -95,8 +94,6 @@ import NewChatDialog from "components/NewChatDialog.vue";
 import { useNostrStore } from "src/stores/nostr";
 import { useNutzapStore } from "src/stores/nutzap";
 import { useMessengerStore } from "src/stores/messenger";
-import { useUiStore } from "src/stores/ui";
-import { NAV_DRAWER_WIDTH, NAV_DRAWER_GUTTER } from "src/constants/layout";
 
 export default defineComponent({
   name: "MainLayout",
@@ -114,15 +111,6 @@ export default defineComponent({
     const conversationSearch = ref("");
     const newChatDialogRef = ref(null);
     const $q = useQuasar();
-    const ui = useUiStore();
-
-    const navStyleVars = computed(() => ({
-      "--nav-drawer-width": `${NAV_DRAWER_WIDTH}px`,
-      "--nav-offset-x":
-        ui.mainNavOpen && $q.screen.width >= 1024
-          ? `calc(var(--nav-drawer-width) + ${NAV_DRAWER_GUTTER}px)`
-          : "0px",
-    }));
 
     // Persisted width just for this layout (keep store unchanged)
     const DEFAULT_DESKTOP = 440;
@@ -211,7 +199,6 @@ export default defineComponent({
       isMessengerRoute,
       computedDrawerWidth,
       onResizeStart,
-      navStyleVars,
     };
   },
   async mounted() {
