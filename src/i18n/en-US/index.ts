@@ -601,62 +601,6 @@ export const messages = {
       tooltip: "Check all pending tokens",
     },
   },
-  Welcome: {
-    actions: {
-      previous: "Previous",
-      next: "Next",
-      skip: "Skip",
-      finish: "Finish",
-      restore: "Restore from backup",
-    },
-    progress: "Step {current} of {total}",
-    hint: "You can also drag & drop a backup file anywhere on this screen.",
-    restore: {
-      success: "Backup restored",
-      error: "Invalid backup file",
-    },
-    slides: {
-      privacy: {
-        title: "Cashu & Privacy",
-        text: "Cashu uses blinded tokens so mints can't track your payments.",
-        about: "To learn more, visit the About page.",
-      },
-      mints: {
-        title: "Mints",
-        text: "Add a mint to start receiving tokens.",
-      },
-      proofs: {
-        title: "Proofs",
-        text: "Proofs are the tokens you can send and receive.",
-      },
-      buckets: {
-        title: "Buckets",
-        text: "Use buckets to organize your tokens.",
-      },
-      backup: {
-        title: "Backup your seed",
-        text: "Your recovery phrase is the only way to restore your wallet.",
-        checkbox: "I understand I must back up my recovery/seed.",
-      },
-      terms: {
-        title: "Terms of Service",
-        text: "Please read and accept the Terms of Service to continue.",
-        checkbox: "I accept the Terms of Service.",
-        link: "Read Terms",
-      },
-      pwa: {
-        title: "Install as App",
-        text: "Install this wallet as a Progressive Web App for a better experience.",
-        install: { label: "Install" },
-      },
-      finish: {
-        title: "You're ready!",
-        addMint: { label: "Add a Mint" },
-        restore: { label: "Restore from backup" },
-        about: { label: "Learn more on About" },
-      },
-    },
-  },
   iOSPWAPrompt: {
     text: "Tap { icon } and { buttonText }",
     buttonText: "Add to Home Screen",
@@ -1936,6 +1880,91 @@ export const messages = {
     urlListHint: "Press Enter after typing each URL",
     required: "Required",
     invalidUrl: "Invalid URL",
+  },
+  Welcome: {
+    footer: {
+      restoreCta: "Restore from Backup",
+      hint: "You can also drag & drop a backup file anywhere on this screen.",
+      previous: "Previous",
+      next: "Next",
+      skip: "Skip",
+      finish: "Finish",
+      step: "Step {n} of {total}",
+      language: "Language",
+    },
+    privacy: {
+      title: "Cashu & Privacy",
+      lead: "Cashu uses blinded tokens so mints can’t see who you are or what you pay.",
+      bullets: [
+        "Your wallet blinds requests; the mint signs without seeing your data.",
+        "Anyone can verify tokens locally without asking the mint again.",
+        "You control which mints you trust; you can move funds across mints.",
+      ],
+      ctaLearn: "To learn more, visit the About page.",
+    },
+    mints: {
+      title: "Mints",
+      lead: "A mint is a server that issues and redeems Cashu tokens.",
+      bullets: [
+        "Add one or more mints to receive, send, and swap tokens.",
+        "Each mint defines fees, limits, and availability.",
+        "You can remove or switch mints at any time.",
+      ],
+      ctaPrimary: "Add a Mint",
+      ctaSecondary: "What is a mint?",
+    },
+    proofs: {
+      title: "Proofs",
+      lead: "Proofs are the bearer tokens you send and receive.",
+      bullets: [
+        "A proof proves ownership of value without exposing identity.",
+        "Splitting/merging happens locally to match exact amounts.",
+        "Treat proofs like cash—anyone who has them can spend them.",
+      ],
+      tip: "Never post your tokens publicly. If you paste one, anyone can redeem it.",
+    },
+    buckets: {
+      title: "Buckets",
+      lead: "Use buckets to organize your tokens by purpose.",
+      bullets: [
+        "Create buckets like “Spending”, “Savings”, or “Tips”.",
+        "Move tokens between buckets without leaving the wallet.",
+        "Buckets are local only; they don’t affect mint balances.",
+      ],
+      ctaPrimary: "Create Starter Buckets",
+    },
+    backup: {
+      title: "Backup your seed",
+      lead: "Your recovery phrase is the only way to restore your wallet.",
+      bullets: [
+        "Write it down and store it offline. Anyone with it can spend your funds.",
+        "You can also export an encrypted backup file.",
+        "We can’t recover your seed—keep it safe.",
+      ],
+      revealSeed: "Reveal Recovery Phrase",
+      downloadBackup: "Download Backup",
+      acknowledge: "I understand I must back up my recovery/seed.",
+    },
+    terms: {
+      title: "Terms of Service",
+      link: "Read Terms",
+      accept: "I accept the Terms of Service.",
+    },
+    pwa: {
+      title: "Install as App",
+      lead: "Install this wallet as a Progressive Web App for a better experience.",
+      ctaInstall: "Install",
+      ctaSkip: "Not now",
+    },
+    finish: {
+      title: "You’re ready!",
+      ctas: {
+        addMint: "Add a Mint",
+        restore: "Restore from Backup",
+        openWallet: "Open Wallet",
+        about: "Learn more on About",
+      },
+    },
   },
 };
 

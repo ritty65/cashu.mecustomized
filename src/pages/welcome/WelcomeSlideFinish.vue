@@ -3,30 +3,34 @@
     <div class="text-center">
       <q-icon name="check_circle" size="4em" color="primary" />
       <h1 :id="id" tabindex="-1" class="q-mt-md">
-        {{ $t("Welcome.slides.finish.title") }}
+        {{ $t("Welcome.finish.title") }}
       </h1>
       <div class="q-mt-lg column items-center">
         <q-btn
           color="primary"
           class="q-mb-sm"
           @click="addMint"
-          :label="$t('Welcome.slides.finish.addMint.label')"
-          aria-label="$t('Welcome.slides.finish.addMint.label')"
+          :label="$t('Welcome.finish.ctas.addMint')"
         />
         <q-btn
           flat
           color="primary"
           class="q-mb-sm"
           @click="restore"
-          :label="$t('Welcome.slides.finish.restore.label')"
-          aria-label="$t('Welcome.slides.finish.restore.label')"
+          :label="$t('Welcome.finish.ctas.restore')"
         />
         <q-btn
           flat
           color="primary"
-          :label="$t('Welcome.slides.finish.about.label')"
+          class="q-mb-sm"
+          @click="openWallet"
+          :label="$t('Welcome.finish.ctas.openWallet')"
+        />
+        <q-btn
+          flat
+          color="primary"
+          :label="$t('Welcome.finish.ctas.about')"
           to="/about"
-          aria-label="$t('Welcome.slides.finish.about.label')"
         />
       </div>
     </div>
@@ -34,21 +38,22 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter } from "vue-router";
 import { useWelcomeStore } from "src/stores/welcome";
 
-const props = defineProps<{ restore: () => void }>();
-const router = useRouter();
+const props = defineProps<{ onAddMint?: () => void; onRestore?: () => void }>();
 const welcomeStore = useWelcomeStore();
 const id = "welcome-finish-title";
 
 function addMint() {
-  welcomeStore.finishTutorial();
-  router.push("/wallet?mint=");
+  props.onAddMint?.();
 }
 
 function restore() {
-  props.restore();
+  props.onRestore?.();
+}
+
+function openWallet() {
+  welcomeStore.finishTutorial();
 }
 </script>
 

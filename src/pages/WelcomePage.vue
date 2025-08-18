@@ -24,6 +24,7 @@
             dense
             outlined
             style="width: 150px"
+            :label="$t('Welcome.footer.language')"
             @update:model-value="changeLanguage"
           />
           <q-btn
@@ -31,14 +32,14 @@
             size="sm"
             class="q-px-none"
             @click="openFileDialog"
-            :label="$t('Welcome.actions.restore')"
+            :label="$t('Welcome.footer.restoreCta')"
           />
         </div>
         <div class="col text-center">
           <div aria-live="polite">
             {{
-              $t("Welcome.progress", {
-                current: welcomeStore.currentSlide + 1,
+              $t("Welcome.footer.step", {
+                n: welcomeStore.currentSlide + 1,
                 total: welcomeStore.totalSlides,
               })
             }}
@@ -53,7 +54,7 @@
         <div class="col-auto row items-center q-gutter-sm">
           <q-btn
             flat
-            :label="$t('Welcome.actions.previous')"
+            :label="$t('Welcome.footer.previous')"
             :disable="welcomeStore.currentSlide === 0"
             @click="welcomeStore.goToPrevSlide"
             v-if="welcomeStore.currentSlide > 0"
@@ -63,8 +64,8 @@
             color="primary"
             :label="
               welcomeStore.isLastSlide
-                ? $t('Welcome.actions.finish')
-                : $t('Welcome.actions.next')
+                ? $t('Welcome.footer.finish')
+                : $t('Welcome.footer.next')
             "
             :disable="!welcomeStore.canGoNext"
             @click="welcomeStore.goToNextSlide"
@@ -72,15 +73,22 @@
           <q-btn
             flat
             v-if="showSkip"
-            :label="$t('Welcome.actions.skip')"
+            :label="$t('Welcome.footer.skip')"
             @click="welcomeStore.skipTutorial"
           />
         </div>
       </footer>
       <div class="text-caption text-center q-pb-sm">
-        {{ $t("Welcome.hint") }}
+        {{ $t("Welcome.footer.hint") }}
       </div>
     </q-card>
+    <AddMintDialog
+      :addMintData="mintsStore.addMintData"
+      :showAddMintDialog="mintsStore.showAddMintDialog"
+      @update:showAddMintDialog="mintsStore.showAddMintDialog = $event"
+      :addMintBlocking="mintsStore.addMintBlocking"
+      @add="mintsStore.addMint"
+    />
     <input
       type="file"
       ref="fileUpload"
@@ -96,6 +104,9 @@ import { useQuasar } from "quasar";
 import { useI18n } from "vue-i18n";
 import { useWelcomeStore } from "src/stores/welcome";
 import { useStorageStore } from "src/stores/storage";
+import { useMintsStore } from "src/stores/mints";
+import { useBucketsStore } from "src/stores/buckets";
+import { useMnemonicStore } from "src/stores/mnemonic";
 import WelcomeSlidePrivacy from "./welcome/WelcomeSlidePrivacy.vue";
 import WelcomeSlideMints from "./welcome/WelcomeSlideMints.vue";
 import WelcomeSlideProofs from "./welcome/WelcomeSlideProofs.vue";
@@ -104,11 +115,15 @@ import WelcomeSlideBackup from "./welcome/WelcomeSlideBackup.vue";
 import WelcomeSlideTerms from "./welcome/WelcomeSlideTerms.vue";
 import WelcomeSlidePwa from "./welcome/WelcomeSlidePwa.vue";
 import WelcomeSlideFinish from "./welcome/WelcomeSlideFinish.vue";
+import AddMintDialog from "src/components/AddMintDialog.vue";
 
 const $q = useQuasar();
 const { locale, t } = useI18n();
 const welcomeStore = useWelcomeStore();
 const storageStore = useStorageStore();
+const mintsStore = useMintsStore();
+const bucketsStore = useBucketsStore();
+const mnemonicStore = useMnemonicStore();
 const fileUpload = ref<HTMLInputElement | null>(null);
 const selectedLanguage = ref("");
 const languageOptions = [
@@ -132,24 +147,36 @@ const slides = ref<{ key: string; component: any; props?: any }[]>([]);
 function buildSlides() {
   const arr = [
     { key: "privacy", component: WelcomeSlidePrivacy },
-    { key: "mints", component: WelcomeSlideMints },
+    {
+      key: "mints",
+      component: WelcomeSlideMints,
+      props: { onAddMint: openAddMintDialog },
+    },
     { key: "proofs", component: WelcomeSlideProofs },
-    { key: "buckets", component: WelcomeSlideBuckets },
-    { key: "backup", component: WelcomeSlideBackup },
+    {
+      key: "buckets",
+      component: WelcomeSlideBuckets,
+      props: { onCreateBuckets: createStarterBuckets },
+    },
+    {
+      key: "backup",
+      component: WelcomeSlideBackup,
+      props: { onRevealSeed, onDownloadBackup },
+    },
     { key: "terms", component: WelcomeSlideTerms },
-  ];
-  if (welcomeStore.pwaSlideEligible) {
-    arr.push({
-      key: "pwa",
-      component: WelcomeSlidePwa,
-      props: { triggerInstall },
-    });
-  }
-  arr.push({
-    key: "finish",
-    component: WelcomeSlideFinish,
-    props: { restore: openFileDialog },
-  });
+    welcomeStore.pwaSlideEligible
+      ? {
+          key: "pwa",
+          component: WelcomeSlidePwa,
+          props: { deferredPrompt },
+        }
+      : null,
+    {
+      key: "finish",
+      component: WelcomeSlideFinish,
+      props: { onAddMint: openAddMintDialog, onRestore: openFileDialog },
+    },
+  ].filter(Boolean) as any[];
   slides.value = arr;
   welcomeStore.setSlides(arr.map((s) => s.key));
 }
@@ -173,10 +200,7 @@ function readFile(file: File) {
     try {
       const backup = JSON.parse(String(f.target?.result));
       storageStore.restoreFromBackup(backup);
-      $q.notify({ type: "positive", message: t("Welcome.restore.success") });
-    } catch (e) {
-      $q.notify({ type: "negative", message: t("Welcome.restore.error") });
-    }
+    } catch (e) {}
   };
   reader.readAsText(file);
 }
@@ -190,13 +214,21 @@ function openFileDialog() {
   fileUpload.value?.click();
 }
 
-function triggerInstall() {
-  if (deferredPrompt.value) {
-    deferredPrompt.value.prompt();
-    deferredPrompt.value.userChoice.finally(() => {
-      deferredPrompt.value = null;
-    });
-  }
+function openAddMintDialog() {
+  mintsStore.showAddMintDialog = true;
+}
+
+function createStarterBuckets() {
+  bucketsStore.createStarterBuckets();
+  $q.notify({ type: "positive", message: t("Welcome.buckets.ctaPrimary") });
+}
+
+function onRevealSeed() {
+  $q.dialog({ title: t("Welcome.backup.revealSeed"), message: mnemonicStore.mnemonic });
+}
+
+function onDownloadBackup() {
+  storageStore.exportWalletState();
 }
 
 const showSkip = ref(false);
