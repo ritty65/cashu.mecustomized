@@ -15,6 +15,7 @@
           <q-tooltip>Chats</q-tooltip>
         </q-btn>
         <q-btn
+          ref="toolbarMainNavBtn"
           flat
           dense
           round
@@ -24,6 +25,7 @@
           :aria-expanded="String(ui.mainNavOpen)"
           aria-controls="app-nav"
           @click="ui.toggleMainNav"
+          @keyup.esc.stop="ui.closeMainNav"
           :disable="ui.globalMutexLock"
         >
           <q-tooltip>Menu</q-tooltip>
@@ -110,10 +112,33 @@
       </div>
     </q-toolbar>
   </q-header>
+  <div v-if="$q.screen.lt.md" class="mobile-main-nav-btn">
+    <q-btn
+      ref="stickyMainNavBtn"
+      round
+      flat
+      color="primary"
+      :icon="ui.mainNavOpen ? 'close' : 'menu'"
+      aria-label="Toggle main menu"
+      :aria-expanded="String(ui.mainNavOpen)"
+      aria-controls="app-nav"
+      @click="ui.toggleMainNav"
+      @keyup.esc.stop="ui.closeMainNav"
+      :disable="ui.globalMutexLock"
+      class="main-nav-btn"
+    />
+  </div>
 </template>
 
 <script>
-import { defineComponent, ref, computed, getCurrentInstance } from "vue";
+import {
+  defineComponent,
+  ref,
+  computed,
+  getCurrentInstance,
+  watch,
+  nextTick,
+} from "vue";
 import { useRoute } from "vue-router";
 import { useUiStore } from "src/stores/ui";
 import { useMessengerStore } from "src/stores/messenger";
@@ -128,6 +153,9 @@ export default defineComponent({
     const route = useRoute();
     const messenger = useMessengerStore();
     const $q = useQuasar();
+    const toolbarMainNavBtn = ref(null);
+    const stickyMainNavBtn = ref(null);
+
     const toggleDarkMode = () => {
       console.log("toggleDarkMode", $q.dark.isActive);
       $q.dark.toggle();
@@ -153,6 +181,20 @@ export default defineComponent({
     const countdown = ref(0);
     const reloading = ref(false);
     let countdownInterval;
+
+    watch(
+      () => ui.mainNavOpen,
+      (open) => {
+        if (!open) {
+          nextTick(() => {
+            const btn = $q.screen.lt.md
+              ? stickyMainNavBtn.value
+              : toolbarMainNavBtn.value;
+            btn?.$el?.focus();
+          });
+        }
+      },
+    );
 
     const toggleMessengerDrawer = () => {
       if ($q.screen.lt.md) {
@@ -219,6 +261,8 @@ export default defineComponent({
       toggleDarkMode,
       darkIcon,
       chatButtonColor,
+      toolbarMainNavBtn,
+      stickyMainNavBtn,
     };
   },
 });
@@ -252,5 +296,17 @@ export default defineComponent({
   display: inline-flex;
   align-items: center;
   gap: 6px;
+}
+
+.mobile-main-nav-btn {
+  position: fixed;
+  top: calc(env(safe-area-inset-top) + 8px);
+  left: calc(env(safe-area-inset-left) + 8px);
+  z-index: 12000;
+}
+
+.mobile-main-nav-btn .main-nav-btn {
+  width: 44px;
+  height: 44px;
 }
 </style>
