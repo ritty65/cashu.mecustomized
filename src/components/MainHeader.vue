@@ -300,6 +300,11 @@ export default defineComponent({
   gap: 6px;
 }
 
+.left-controls {
+  transition: transform 0.2s ease;
+  transform: translateX(var(--nav-offset-x, 0));
+}
+
 .mobile-nav-toggle {
   position: fixed;
   top: calc(env(safe-area-inset-top) + 8px);

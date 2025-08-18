@@ -4,6 +4,7 @@
     side="left"
     :overlay="$q.screen.lt.md"
     :breakpoint="1024"
+    :width="NAV_DRAWER_WIDTH"
     bordered
     behavior="mobile"
     :no-swipe-backdrop="false"
@@ -135,6 +136,7 @@ import { useNostrStore } from 'src/stores/nostr'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import EssentialLink from 'components/EssentialLink.vue'
+import { NAV_DRAWER_WIDTH } from 'src/constants/layout'
 
 const ui = useUiStore()
 const router = useRouter()
@@ -161,7 +163,7 @@ const gotoAbout = () => goto('/about')
 const needsNostrLogin = computed(() => !nostrStore.privateKeySignerPrivateKey)
 
 const drawerContentClass = computed(() =>
-  $q.screen.lt.md ? 'main-nav-safe' : undefined,
+  $q.screen.lt.md ? 'main-nav-safe' : 'q-pt-sm',
 )
 
 const essentialLinks = [
@@ -206,9 +208,15 @@ const essentialLinks = [
 
 <style scoped>
 .app-nav-drawer {
-  z-index: 4000;
+  z-index: 1000;
   transition: transform .18s ease, opacity .18s ease;
   backdrop-filter: saturate(1.2);
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+  border-right: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.body--dark .app-nav-drawer {
+  border-right: 1px solid rgba(255, 255, 255, 0.24);
 }
 
 .main-nav-safe {
