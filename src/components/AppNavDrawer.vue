@@ -205,7 +205,7 @@ const gotoAbout = () => goto("/about");
 const needsNostrLogin = computed(() => !nostrStore.privateKeySignerPrivateKey);
 
 const drawerContentClass = computed(() =>
-  $q.screen.lt.md ? "main-nav-safe" : "q-pt-sm",
+  $q.screen.lt.md ? "main-nav-safe" : "q-pt-sm"
 );
 
 const essentialLinks = [
