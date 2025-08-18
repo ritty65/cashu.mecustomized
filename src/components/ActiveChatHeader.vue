@@ -76,11 +76,11 @@ const messenger = useMessengerStore();
 const profile = ref<any>(null);
 
 const loadProfile = async () => {
-      if (props.pubkey) {
-        profile.value = await nostr.getProfile(props.pubkey);
-      } else {
-        profile.value = null;
-      }
+  if (props.pubkey) {
+    profile.value = await nostr.getProfile(props.pubkey);
+  } else {
+    profile.value = null;
+  }
 };
 
 watch(

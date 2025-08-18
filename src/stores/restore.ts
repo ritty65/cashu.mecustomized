@@ -127,8 +127,9 @@ export const useRestoreStore = defineStore("restore", {
             },
           );
           const checkRestoreProofs = restoreProofs.slice(i, i + BATCH_SIZE);
-          const proofStates =
-            await wallet.checkProofsStates(checkRestoreProofs);
+          const proofStates = await wallet.checkProofsStates(
+            checkRestoreProofs,
+          );
           const spentProofs = checkRestoreProofs.filter(
             (p, i) => proofStates[i].state === CheckStateEnum.SPENT,
           );

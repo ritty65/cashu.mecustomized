@@ -12,8 +12,10 @@ export type WelcomeState = {
 
 export const useWelcomeStore = defineStore("welcome", {
   state: (): WelcomeState => ({
-    showWelcome: useLocalStorage<boolean>("cashu.welcome.showWelcome", true).value,
-    currentSlide: useLocalStorage<number>("cashu.welcome.currentSlide", 0).value,
+    showWelcome: useLocalStorage<boolean>("cashu.welcome.showWelcome", true)
+      .value,
+    currentSlide: useLocalStorage<number>("cashu.welcome.currentSlide", 0)
+      .value,
     seedAcknowledged: useLocalStorage<boolean>(
       "cashu.welcome.seedAcknowledged",
       false,
@@ -38,7 +40,8 @@ export const useWelcomeStore = defineStore("welcome", {
   },
   actions: {
     initializeWelcome() {
-      this.pwaSlideEligible = !window.matchMedia("(display-mode: standalone)").matches;
+      this.pwaSlideEligible = !window.matchMedia("(display-mode: standalone)")
+        .matches;
       if (!this.showWelcome) {
         router.push("/wallet");
       }
@@ -48,7 +51,8 @@ export const useWelcomeStore = defineStore("welcome", {
       this.currentSlide = 0;
       this.seedAcknowledged = false;
       this.termsAccepted = false;
-      this.pwaSlideEligible = !window.matchMedia("(display-mode: standalone)").matches;
+      this.pwaSlideEligible = !window.matchMedia("(display-mode: standalone)")
+        .matches;
     },
     goToPrevSlide() {
       if (this.canGoPrev) {

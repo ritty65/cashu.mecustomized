@@ -211,7 +211,7 @@ export const useBucketsStore = defineStore("buckets", {
         isArchived:
           updates.isArchived !== undefined
             ? updates.isArchived
-            : (current.isArchived ?? false),
+            : current.isArchived ?? false,
       };
       this.buckets[index] = next;
     },

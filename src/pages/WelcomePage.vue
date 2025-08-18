@@ -58,7 +58,7 @@
         >
           <div>
             {{
-              t('Welcome.progress.step', {
+              t("Welcome.progress.step", {
                 current: welcomeStore.currentSlide + 1,
                 total: welcomeStore.totalSlides,
               })
@@ -100,7 +100,7 @@
         </div>
       </div>
       <div class="text-center text-caption q-pb-sm">
-        {{ t('Welcome.hints.dragDrop') }}
+        {{ t("Welcome.hints.dragDrop") }}
       </div>
       <input
         ref="fileUpload"
@@ -120,19 +120,19 @@ import {
   watch,
   nextTick,
   onBeforeUnmount,
-} from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useWelcomeStore } from 'src/stores/welcome';
-import { useStorageStore } from 'src/stores/storage';
-import { useMintsStore } from 'src/stores/mints';
-import WelcomeSlidePrivacy from './welcome/WelcomeSlidePrivacy.vue';
-import WelcomeSlideMints from './welcome/WelcomeSlideMints.vue';
-import WelcomeSlideProofs from './welcome/WelcomeSlideProofs.vue';
-import WelcomeSlideBuckets from './welcome/WelcomeSlideBuckets.vue';
-import WelcomeSlideBackup from './welcome/WelcomeSlideBackup.vue';
-import WelcomeSlideTerms from './welcome/WelcomeSlideTerms.vue';
-import WelcomeSlidePwa from './welcome/WelcomeSlidePwa.vue';
-import WelcomeSlideFinish from './welcome/WelcomeSlideFinish.vue';
+} from "vue";
+import { useI18n } from "vue-i18n";
+import { useWelcomeStore } from "src/stores/welcome";
+import { useStorageStore } from "src/stores/storage";
+import { useMintsStore } from "src/stores/mints";
+import WelcomeSlidePrivacy from "./welcome/WelcomeSlidePrivacy.vue";
+import WelcomeSlideMints from "./welcome/WelcomeSlideMints.vue";
+import WelcomeSlideProofs from "./welcome/WelcomeSlideProofs.vue";
+import WelcomeSlideBuckets from "./welcome/WelcomeSlideBuckets.vue";
+import WelcomeSlideBackup from "./welcome/WelcomeSlideBackup.vue";
+import WelcomeSlideTerms from "./welcome/WelcomeSlideTerms.vue";
+import WelcomeSlidePwa from "./welcome/WelcomeSlidePwa.vue";
+import WelcomeSlideFinish from "./welcome/WelcomeSlideFinish.vue";
 
 const { t, locale } = useI18n();
 const welcomeStore = useWelcomeStore();
@@ -143,17 +143,17 @@ const fileUpload = ref<HTMLInputElement | null>(null);
 
 const slides = computed(() => {
   const arr = [
-    { id: 'welcome-privacy', component: WelcomeSlidePrivacy },
-    { id: 'welcome-mints', component: WelcomeSlideMints },
-    { id: 'welcome-proofs', component: WelcomeSlideProofs },
-    { id: 'welcome-buckets', component: WelcomeSlideBuckets },
-    { id: 'welcome-backup', component: WelcomeSlideBackup },
-    { id: 'welcome-terms', component: WelcomeSlideTerms },
+    { id: "welcome-privacy", component: WelcomeSlidePrivacy },
+    { id: "welcome-mints", component: WelcomeSlideMints },
+    { id: "welcome-proofs", component: WelcomeSlideProofs },
+    { id: "welcome-buckets", component: WelcomeSlideBuckets },
+    { id: "welcome-backup", component: WelcomeSlideBackup },
+    { id: "welcome-terms", component: WelcomeSlideTerms },
   ];
   if (welcomeStore.pwaSlideEligible) {
-    arr.push({ id: 'welcome-pwa', component: WelcomeSlidePwa });
+    arr.push({ id: "welcome-pwa", component: WelcomeSlidePwa });
   }
-  arr.push({ id: 'welcome-finish', component: WelcomeSlideFinish });
+  arr.push({ id: "welcome-finish", component: WelcomeSlideFinish });
   return arr;
 });
 
@@ -167,26 +167,26 @@ watch(
   },
 );
 
-const selectedLanguage = ref('');
+const selectedLanguage = ref("");
 const languageOptions = [
-  { label: 'English', value: 'en-US' },
-  { label: 'Español', value: 'es-ES' },
-  { label: 'Italiano', value: 'it-IT' },
-  { label: 'Deutsch', value: 'de-DE' },
-  { label: 'Français', value: 'fr-FR' },
-  { label: 'Svenska', value: 'sv-SE' },
-  { label: 'Ελληνικά', value: 'el-GR' },
-  { label: 'Türkçe', value: 'tr-TR' },
-  { label: 'ไทย', value: 'th-TH' },
-  { label: 'العربية', value: 'ar-SA' },
-  { label: '中文', value: 'zh-CN' },
-  { label: '日本語', value: 'ja-JP' },
+  { label: "English", value: "en-US" },
+  { label: "Español", value: "es-ES" },
+  { label: "Italiano", value: "it-IT" },
+  { label: "Deutsch", value: "de-DE" },
+  { label: "Français", value: "fr-FR" },
+  { label: "Svenska", value: "sv-SE" },
+  { label: "Ελληνικά", value: "el-GR" },
+  { label: "Türkçe", value: "tr-TR" },
+  { label: "ไทย", value: "th-TH" },
+  { label: "العربية", value: "ar-SA" },
+  { label: "中文", value: "zh-CN" },
+  { label: "日本語", value: "ja-JP" },
 ];
 
 function changeLanguage(l: string) {
-  if (l === 'en') l = 'en-US';
+  if (l === "en") l = "en-US";
   locale.value = l;
-  localStorage.setItem('cashu.language', l);
+  localStorage.setItem("cashu.language", l);
 }
 
 function triggerRestore() {
@@ -223,24 +223,24 @@ function openAddMint() {
 }
 
 function goAbout() {
-  welcomeStore.finishTutorial('/about');
+  welcomeStore.finishTutorial("/about");
 }
 
 const showSkip = computed(() => welcomeStore.currentSlide < 4);
 const nextLabel = computed(() =>
   welcomeStore.isLastSlide
-    ? t('Welcome.actions.finish')
-    : t('Welcome.actions.next'),
+    ? t("Welcome.actions.finish")
+    : t("Welcome.actions.next"),
 );
 
 function handleKey(e: KeyboardEvent) {
-  if (e.key === 'ArrowRight') {
+  if (e.key === "ArrowRight") {
     welcomeStore.goToNextSlide();
-  } else if (e.key === 'ArrowLeft') {
+  } else if (e.key === "ArrowLeft") {
     welcomeStore.goToPrevSlide();
-  } else if (e.key === 'Enter') {
+  } else if (e.key === "Enter") {
     if (welcomeStore.canGoNext) welcomeStore.goToNextSlide();
-  } else if (e.key === 'Escape') {
+  } else if (e.key === "Escape") {
     if (showSkip.value) {
       welcomeStore.skipTutorial();
     } else if (welcomeStore.isLastSlide) {
@@ -253,11 +253,11 @@ function handleKey(e: KeyboardEvent) {
 
 onMounted(() => {
   welcomeStore.initializeWelcome();
-  const stored = localStorage.getItem('cashu.language');
-  const initLocale = stored || locale.value || navigator.language || 'en-US';
-  locale.value = initLocale === 'en' ? 'en-US' : initLocale;
+  const stored = localStorage.getItem("cashu.language");
+  const initLocale = stored || locale.value || navigator.language || "en-US";
+  locale.value = initLocale === "en" ? "en-US" : initLocale;
   selectedLanguage.value = locale.value;
-  window.addEventListener('keydown', handleKey);
+  window.addEventListener("keydown", handleKey);
   nextTick(() => {
     const id = slides.value[welcomeStore.currentSlide].id;
     document.getElementById(id)?.focus();
@@ -265,7 +265,7 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
-  window.removeEventListener('keydown', handleKey);
+  window.removeEventListener("keydown", handleKey);
 });
 </script>
 

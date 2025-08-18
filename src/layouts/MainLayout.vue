@@ -20,7 +20,7 @@
       :overlay="$q.screen.lt.md"
       :class="[
         'q-pa-md column messenger-drawer',
-        { 'drawer-collapsed': messenger.drawerMini }
+        { 'drawer-collapsed': messenger.drawerMini },
       ]"
     >
       <div class="column no-wrap full-height">
@@ -126,7 +126,7 @@ export default defineComponent({
 
     // Persisted width just for this layout (keep store unchanged)
     const DEFAULT_DESKTOP = 440;
-    const DEFAULT_TABLET  = 320;
+    const DEFAULT_TABLET = 320;
     const MIN_W = 320;
     const MAX_W = 640;
 
@@ -135,8 +135,8 @@ export default defineComponent({
       typeof saved === "number"
         ? saved
         : $q.screen.lt.md
-          ? DEFAULT_TABLET
-          : DEFAULT_DESKTOP,
+        ? DEFAULT_TABLET
+        : DEFAULT_DESKTOP,
     );
 
     const computedDrawerWidth = computed(() => {
@@ -153,7 +153,8 @@ export default defineComponent({
       () => $q.screen.lt.md,
       (isLt) => {
         if (isLt && drawerWidth.value > 420) drawerWidth.value = DEFAULT_TABLET;
-        if (!isLt && drawerWidth.value < MIN_W) drawerWidth.value = DEFAULT_DESKTOP;
+        if (!isLt && drawerWidth.value < MIN_W)
+          drawerWidth.value = DEFAULT_DESKTOP;
       },
     );
 
@@ -255,7 +256,7 @@ export default defineComponent({
   z-index: 3;
 }
 .drawer-resizer::after {
-  content: '';
+  content: "";
   position: absolute;
   top: 50%;
   right: 2px;

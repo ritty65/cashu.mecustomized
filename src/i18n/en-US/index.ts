@@ -613,7 +613,8 @@ export const messages = {
       step: "Step { current } of { total }",
     },
     hints: {
-      dragDrop: "You can also drag & drop a backup file anywhere on this screen.",
+      dragDrop:
+        "You can also drag & drop a backup file anywhere on this screen.",
     },
     slides: {
       privacy: {

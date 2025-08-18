@@ -16,7 +16,8 @@
       <br />
       <span class="text-caption">
         To learn more about the auditor or support a future audit, visit
-        <a :href="auditUrl" rel="noopener noreferrer">audit.8333.space</a> or click
+        <a :href="auditUrl" rel="noopener noreferrer">audit.8333.space</a> or
+        click
         <span
           class="text-bold cursor-pointer text-primary"
           @click="getAuditorPaymentRequestsAndHandle"

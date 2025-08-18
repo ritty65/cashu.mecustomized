@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -25,8 +25,7 @@
         padding: 2rem;
         background-color: white;
         border-radius: 0.75rem; /* Tailwind rounded-xl */
-        box-shadow:
-          0 10px 15px -3px rgba(0, 0, 0, 0.1),
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
           0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Tailwind shadow-lg */
       }
       .search-input {
@@ -35,9 +34,7 @@
         border: 1px solid #e2e8f0; /* Tailwind gray-300 */
         border-radius: 0.5rem; /* Tailwind rounded-lg */
         font-size: 1rem;
-        transition:
-          border-color 0.2s ease-in-out,
-          box-shadow 0.2s ease-in-out;
+        transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
         color: #2d3748; /* Tailwind gray-800 */
       }
       .search-input:focus {
@@ -72,8 +69,7 @@
         gap: 0.5rem; /* Reduced gap for tighter layout within card */
       }
       .creator-card {
-        box-shadow:
-          0 4px 6px -1px rgba(0, 0, 0, 0.07),
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07),
           0 2px 4px -1px rgba(0, 0, 0, 0.04);
         position: relative;
       }
@@ -85,8 +81,7 @@
         background-color: #f0f5ff; /* Lighter blue hover */
         border-color: #bee3f8; /* Tailwind blue-200 */
         transform: translateY(-2px);
-        box-shadow:
-          0 8px 25px -5px rgba(0, 0, 0, 0.1),
+        box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1),
           0 10px 10px -5px rgba(0, 0, 0, 0.04);
       }
       .profile-header {
@@ -424,8 +419,8 @@
               error.message && error.message.includes("Failed to fetch")
                 ? "Network error: could not reach relays."
                 : error.name === "AbortError"
-                  ? "Search timed out."
-                  : `Search failed: ${error.message}`;
+                ? "Search timed out."
+                : `Search failed: ${error.message}`;
             updateStatus(msg, false, true);
           }
         } finally {

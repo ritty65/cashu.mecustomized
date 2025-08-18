@@ -48,9 +48,7 @@ const $q = useQuasar();
 <style scoped>
 .kpi-card {
   border-radius: 16px;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 .kpi-card:hover {
   transform: translateY(-2px);

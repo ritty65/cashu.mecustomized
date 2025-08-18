@@ -89,8 +89,8 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
       const interval = subscription?.intervalDays
         ? subscription.intervalDays
         : subscription?.frequency
-          ? frequencyToDays(subscription.frequency)
-          : frequencyToDays("monthly");
+        ? frequencyToDays(subscription.frequency)
+        : frequencyToDays("monthly");
       for (let i = 0; i < months; i++) {
         const locktime = base + i * interval * 24 * 60 * 60;
         const { locked } = await p2pkStore.sendToLock(

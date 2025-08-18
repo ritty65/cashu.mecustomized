@@ -114,10 +114,7 @@
       <q-toolbar-title class="app-title text-center">Cashu</q-toolbar-title>
     </q-toolbar>
   </q-header>
-  <div
-    v-if="$q.screen.lt.md"
-    class="mobile-nav-toggle"
-  >
+  <div v-if="$q.screen.lt.md" class="mobile-nav-toggle">
     <q-btn
       ref="mobileNavBtn"
       round
@@ -171,9 +168,7 @@ export default defineComponent({
     };
 
     onMounted(() => window.addEventListener("keydown", onKeydown));
-    onBeforeUnmount(() =>
-      window.removeEventListener("keydown", onKeydown),
-    );
+    onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown));
 
     const toggleDarkMode = () => {
       console.log("toggleDarkMode", $q.dark.isActive);

@@ -19,7 +19,7 @@
   </section>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { useWelcomeStore } from "src/stores/welcome";
 const welcomeStore = useWelcomeStore();
 defineProps<{ headingId: string }>();

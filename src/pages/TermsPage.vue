@@ -6,5 +6,5 @@
 </template>
 
 <script>
-export default { name: 'TermsPage' };
+export default { name: "TermsPage" };
 </script>

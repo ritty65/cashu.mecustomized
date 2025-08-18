@@ -35,7 +35,7 @@
   </section>
 </template>
 
-<script setup>
+<script setup lang="ts">
 defineProps<{ headingId: string }>();
 const emit = defineEmits(["add-mint", "restore", "about"]);
 </script>

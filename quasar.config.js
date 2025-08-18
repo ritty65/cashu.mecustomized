@@ -103,14 +103,14 @@ export default configure(function (ctx) {
           ? "default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' wss:; frame-ancestors 'none'; object-src 'none'; base-uri 'self';"
           : "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' wss:; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; require-trusted-types-for 'script';";
         const header = ctx.dev
-          ? 'Content-Security-Policy-Report-Only'
-          : 'Content-Security-Policy';
+          ? "Content-Security-Policy-Report-Only"
+          : "Content-Security-Policy";
         viteConf.plugins = viteConf.plugins || [];
         viteConf.plugins.push({
-          name: 'html-transform-csp',
+          name: "html-transform-csp",
           transformIndexHtml(html) {
             return html.replace(
-              '<head>',
+              "<head>",
               `<head><meta http-equiv="${header}" content="${csp}">`,
             );
           },

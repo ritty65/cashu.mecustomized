@@ -98,8 +98,8 @@
               payInvoiceData.meltQuote.error != ''
                 ? $t('PayInvoiceDialog.invoice.actions.pay.error')
                 : !payInvoiceData.blocking
-                  ? $t('PayInvoiceDialog.invoice.actions.pay.label')
-                  : $t('PayInvoiceDialog.invoice.actions.pay.in_progress')
+                ? $t('PayInvoiceDialog.invoice.actions.pay.label')
+                : $t('PayInvoiceDialog.invoice.actions.pay.in_progress')
             "
             :loading="globalMutexLock && !payInvoiceData.blocking"
             class="q-px-lg"
