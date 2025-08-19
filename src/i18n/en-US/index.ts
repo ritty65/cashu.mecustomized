@@ -1889,11 +1889,7 @@ export const messages = {
       bullets: {
         creatorHub: {
           label: "CreatorHub",
-          desc: "Publish your profile.",
-        },
-        findCreators: {
-          label: "Find Creators",
-          desc: "Discover creators to support.",
+          desc: "Publish your profile and find creators.",
         },
         subscriptions: {
           label: "Subscriptions",
@@ -1905,7 +1901,7 @@ export const messages = {
         },
       },
       relation:
-        "Publish your profile in CreatorHub, discover creators in Find Creators, and subscribe to them in Subscriptions.",
+        "Browse creators in CreatorHub and subscribe to them in Subscriptions.",
     },
     privacy: {
       title: "Cashu & Privacy",
