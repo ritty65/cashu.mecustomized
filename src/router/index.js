@@ -6,6 +6,8 @@ import {
   createWebHashHistory,
 } from "vue-router";
 import routes from "./routes";
+import { useOnboardingStore } from "src/stores/onboarding";
+import { useRestoreStore } from "src/stores/restore";
 
 /*
  * If not building with SSR mode, you can
@@ -31,6 +33,22 @@ export default route(function (/* { store, ssrContext } */) {
     // quasar.conf.js -> build -> vueRouterMode
     // quasar.conf.js -> build -> publicPath
     history: createHistory(process.env.VUE_ROUTER_BASE),
+  });
+
+  Router.beforeEach((to, from, next) => {
+    const onboarding = useOnboardingStore();
+    const restore = useRestoreStore();
+    if (
+      onboarding.isNewOnboardingEnabled &&
+      !onboarding.hasCompletedOnboarding &&
+      to.path !== "/onboarding" &&
+      !restore.restoringState &&
+      to.path !== "/restore"
+    ) {
+      next("/onboarding");
+    } else {
+      next();
+    }
   });
 
   return Router;
