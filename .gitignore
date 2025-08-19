@@ -44,3 +44,4 @@ backups/
 # Local artifacts
 output.txt
 rollup-plugin-visualizer/
+.icon_swap_backups/
