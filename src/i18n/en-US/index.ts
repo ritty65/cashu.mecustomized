@@ -1983,6 +1983,79 @@ export const messages = {
       },
     },
   },
+  onb: {
+    1: {
+      title: "Private money for the open internet",
+      subtitle:
+        "You hold ecash on your device (cash-like privacy). A mint bridges you to Lightning for deposits and payments. Nostr connects you with creators and supporters—no accounts, no surveillance.",
+      badge: {
+        private: "Private",
+        p2p: "Peer-to-peer",
+        cr: "Censorship-resistant",
+        client: "Client-side",
+      },
+    },
+    2: {
+      title: "Use a Nostr key, not an account",
+      body: "Publish and subscribe with a Nostr pubkey. Generate a fresh key or import your own. Keys never leave your device.",
+      cta: {
+        fresh: "Use a fresh key",
+        import: "Import my key",
+      },
+    },
+    3: {
+      title: "Pick who bridges you to Lightning",
+      body: "The mint converts Lightning payments ↔ ecash. You can switch later.",
+      cta: {
+        recommended: "Use recommended mint",
+        custom: "Choose custom mint",
+      },
+    },
+    4: {
+      title: "Deposit via Lightning, receive as ecash",
+      body: "Scan or pay a Lightning invoice—your mint issues ecash tokens to your device instantly.",
+      cta: {
+        preset: "Deposit 1,000 sats",
+        custom: "Enter custom amount",
+      },
+    },
+    5: {
+      title: "Pay Lightning or send tokens directly",
+      body: "Paste a Lightning invoice to pay via the mint, or send ecash to a friend (QR/DM) for fast, private transfers—even offline-friendly.",
+      cta: {
+        testpay: "Try a test payment",
+        token: "Create a token to share",
+      },
+    },
+    6: {
+      title: "Publish privately, support directly",
+      body: "Creators publish a profile; supporters discover and subscribe. Payments ride over Nostr (encrypted DMs or Lightning). No platforms.",
+      cta: {
+        profile: "Create my profile",
+        find: "Find creators",
+      },
+    },
+    7: {
+      title: "Stay organized and safe",
+      body: "Manage who you support, organize funds with Buckets, and back up your wallet (export file or Nostr-based sync, if enabled).",
+      cta: {
+        backup: "Export a backup now",
+        subs: "Open Subscriptions",
+      },
+    },
+    footer: {
+      restore: "Restore from Backup",
+      draghint:
+        "You can also drag & drop a backup file anywhere on this screen.",
+      step: "Step {current} of {total}",
+      language: "Language",
+    },
+    nav: {
+      next: "Next",
+      back: "Back",
+      skip: "Skip",
+    },
+  },
 };
 
 export default {

@@ -1805,7 +1805,7 @@ import { usePRStore } from "../stores/payment-request";
 import { useRestoreStore } from "src/stores/restore";
 import { useDexieStore } from "../stores/dexie";
 import { useReceiveTokensStore } from "../stores/receiveTokensStore";
-import { useWelcomeStore } from "src/stores/welcome";
+import { useOnboardingStore } from "src/stores/onboarding";
 import { useStorageStore } from "src/stores/storage";
 import { useI18n } from "vue-i18n";
 
@@ -2115,9 +2115,9 @@ export default defineComponent({
       await this.generateNPCConnection();
     },
     showOnboarding: function () {
-      const welcomeStore = useWelcomeStore();
-      welcomeStore.resetWelcome();
-      this.$router.push("/welcome");
+      const store = useOnboardingStore();
+      store.reset();
+      this.$router.push("/onboarding");
     },
     nukeWallet: async function () {
       // create a backup just in case
