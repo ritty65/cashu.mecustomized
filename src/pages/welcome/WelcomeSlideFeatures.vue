@@ -6,21 +6,19 @@
       <p class="q-mt-sm">{{ $t("Welcome.features.lead") }}</p>
       <ul class="q-mt-md text-left" style="display: inline-block">
         <li>
-          <router-link to="/creator-hub">
-            {{ $t("Welcome.features.bullets.creatorHub.label") }}
-          </router-link>
+          <strong>{{ $t("Welcome.features.bullets.creatorHub.label") }}</strong>
           - {{ $t("Welcome.features.bullets.creatorHub.desc") }}
         </li>
         <li>
-          <router-link to="/subscriptions">
-            {{ $t("Welcome.features.bullets.subscriptions.label") }}
-          </router-link>
+          <strong>{{ $t("Welcome.features.bullets.findCreators.label") }}</strong>
+          - {{ $t("Welcome.features.bullets.findCreators.desc") }}
+        </li>
+        <li>
+          <strong>{{ $t("Welcome.features.bullets.subscriptions.label") }}</strong>
           - {{ $t("Welcome.features.bullets.subscriptions.desc") }}
         </li>
         <li>
-          <router-link to="/buckets">
-            {{ $t("Welcome.features.bullets.buckets.label") }}
-          </router-link>
+          <strong>{{ $t("Welcome.features.bullets.buckets.label") }}</strong>
           - {{ $t("Welcome.features.bullets.buckets.desc") }}
         </li>
       </ul>
