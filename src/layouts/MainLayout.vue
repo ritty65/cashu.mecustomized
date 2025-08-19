@@ -26,7 +26,7 @@
       <div class="column no-wrap full-height">
         <div
           v-show="!messenger.drawerMini"
-          class="row items-center justify-between q-mb-md"
+          class="row items-center justify-between q-mt-md q-mb-md"
         >
           <div class="text-subtitle1">Chats</div>
           <q-btn flat dense round icon="add" @click="openNewChatDialog" />
