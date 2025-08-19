@@ -81,10 +81,6 @@ type KeysetCounter = {
   counter: number;
 };
 
-const receiveStore = useReceiveTokensStore();
-const tokenStore = useTokensStore();
-const proofsStore = useProofsStore();
-
 export const useWalletStore = defineStore("wallet", {
   state: () => {
     const t = i18n.global.t;
@@ -541,6 +537,8 @@ export const useWalletStore = defineStore("wallet", {
       const uIStore = useUiStore();
       const mintStore = useMintsStore();
       const p2pkStore = useP2PKStore();
+      const proofsStore = useProofsStore();
+      const tokenStore = useTokensStore();
 
       const receiveStore = useReceiveTokensStore();
 
