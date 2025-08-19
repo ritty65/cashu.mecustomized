@@ -81,9 +81,6 @@ type KeysetCounter = {
   counter: number;
 };
 
-const receiveStore = useReceiveTokensStore();
-const tokenStore = useTokensStore();
-const proofsStore = useProofsStore();
 
 export const useWalletStore = defineStore("wallet", {
   state: () => {
@@ -543,6 +540,8 @@ export const useWalletStore = defineStore("wallet", {
       const p2pkStore = useP2PKStore();
 
       const receiveStore = useReceiveTokensStore();
+      const tokenStore = useTokensStore();
+      const proofsStore = useProofsStore();
 
       const bucketId = receiveStore.receiveData.bucketId ?? DEFAULT_BUCKET_ID;
 

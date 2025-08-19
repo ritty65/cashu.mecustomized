@@ -12,6 +12,12 @@ import { configure } from "quasar/wrappers";
 import path from "path";
 
 export default configure(function (ctx) {
+  const csp = ctx.dev
+    ? "default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' wss:; frame-ancestors 'none'; object-src 'none'; base-uri 'self';"
+    : "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' wss:; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; require-trusted-types-for 'script';";
+  const cspHeader = ctx.dev
+    ? "Content-Security-Policy-Report-Only"
+    : "Content-Security-Policy";
   return {
     alias: { buffer: "buffer", process: "process/browser" },
     eslint: {
@@ -99,22 +105,6 @@ export default configure(function (ctx) {
           ],
         };
 
-        const csp = ctx.dev
-          ? "default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' wss:; frame-ancestors 'none'; object-src 'none'; base-uri 'self';"
-          : "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' wss:; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; require-trusted-types-for 'script';";
-        const header = ctx.dev
-          ? "Content-Security-Policy-Report-Only"
-          : "Content-Security-Policy";
-        viteConf.plugins = viteConf.plugins || [];
-        viteConf.plugins.push({
-          name: "html-transform-csp",
-          transformIndexHtml(html) {
-            return html.replace(
-              "<head>",
-              `<head><meta http-equiv="${header}" content="${csp}">`,
-            );
-          },
-        });
       },
       // viteVuePluginOptions: {},
 
@@ -128,6 +118,7 @@ export default configure(function (ctx) {
       https: true,
       open: true, // opens browser window automatically
       port: 8080,
+      headers: { [cspHeader]: csp },
     },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-js#framework
