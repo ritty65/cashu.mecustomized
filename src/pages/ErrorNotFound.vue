@@ -14,13 +14,13 @@
         <div class="q-mt-md">
           <a
             class="q-pr-md"
-            href="https://docs.cashu.me"
+            href="https://docs.Fundstr"
             target="_blank"
             rel="noopener"
           >
             {{ $t("ErrorNotFound.links.docs") }}
           </a>
-          <a href="https://cashu.me" target="_blank" rel="noopener">
+          <a href="https://Fundstr" target="_blank" rel="noopener">
             {{ $t("ErrorNotFound.links.tips") }}
           </a>
         </div>

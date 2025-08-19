@@ -91,7 +91,7 @@
                 :close-label="$t('global.actions.close.label')"
               />
               <a
-                href="https://github.com/cashu-community/cashu.me/blob/main/README.md#media-previews-for-tiers"
+                href="https://github.com/cashu-community/Fundstr/blob/main/README.md#media-previews-for-tiers"
                 target="_blank"
                 class="text-primary text-caption q-ml-sm"
                 >Learn more</a

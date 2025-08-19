@@ -185,7 +185,7 @@ export default defineComponent({
       route.path.startsWith("/nostr-messenger"),
     );
     const isWelcomePage = computed(() => route.path.startsWith("/welcome"));
-    const appName = "Cashu.me";
+    const appName = "Fundstr";
     const currentTitle = computed(() => {
       if (isMessengerPage.value) return "Nostr Messenger";
       if (route.path.startsWith("/wallet")) return "Wallet";

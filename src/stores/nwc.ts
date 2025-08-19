@@ -100,7 +100,7 @@ export const useNWCStore = defineStore("nwc", {
       return {
         result_type: "get_info",
         result: {
-          alias: "Cashu.me",
+          alias: "Fundstr",
           color: "#FF0000",
           pubkey: this.connections[0].walletPublicKey,
           network: "mainnet",
