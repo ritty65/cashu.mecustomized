@@ -106,7 +106,7 @@ describe("Nutzap store", () => {
     await store.send({
       npub: "receiver",
       amount: 1,
-      months: 3,
+      periods: 3,
       startDate: start,
     });
 
@@ -140,7 +140,7 @@ describe("Nutzap store", () => {
     const ok = await store.subscribeToTier({
       creator: { nostrPubkey: "creator", cashuP2pk: "pk" },
       tierId: "tier",
-      months: 2,
+      periods: 2,
       price: 1,
       startDate: start,
       relayList: [],
@@ -165,7 +165,7 @@ describe("Nutzap store", () => {
       store.subscribeToTier({
         creator: { nostrPubkey: "creator", cashuP2pk: "bad" },
         tierId: "tier",
-        months: 1,
+        periods: 1,
         price: 1,
         startDate: 0,
         relayList: [],
@@ -176,7 +176,7 @@ describe("Nutzap store", () => {
   it("queues token when DM send fails", async () => {
     sendDm = vi.fn(async () => ({ success: false }));
     const store = useNutzapStore();
-    await store.send({ npub: "receiver", amount: 1, months: 1, startDate: 0 });
+    await store.send({ npub: "receiver", amount: 1, periods: 1, startDate: 0 });
     expect(store.sendQueue.length).toBe(1);
     expect(store.sendQueue[0].npub).toBe("hex");
   });

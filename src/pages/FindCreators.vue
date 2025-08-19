@@ -281,7 +281,7 @@ function retryFetchTiers() {
   creators.fetchTierDefinitions(dialogPubkey.value);
 }
 
-function confirmSubscribe({ bucketId, months, amount, startDate, total }: any) {
+function confirmSubscribe({ bucketId, periods, amount, startDate, total }: any) {
   // Nutzap transaction is handled within SubscribeDialog.
   // Close surrounding dialogs and process any additional UI updates here.
   showSubscribeDialog.value = false;
@@ -293,7 +293,7 @@ function handleDonate({
   locked,
   type,
   amount,
-  months,
+  periods,
   message,
 }: any) {
   if (!selectedPubkey.value) return;
@@ -310,7 +310,7 @@ function handleDonate({
     sendTokensStore.showSendTokens = true;
   } else {
     donationStore.createDonationPreset(
-      months,
+      periods,
       amount,
       selectedPubkey.value,
       bucketId,

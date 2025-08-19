@@ -2,9 +2,14 @@ import { defineStore } from "pinia";
 import { cashuDb } from "./dexie";
 import { liveQuery } from "dexie";
 import { ref, watch } from "vue";
+import { addMonths } from "date-fns";
 import { useCreatorsStore } from "./creators";
 
-function daysToFrequency(days: number): "weekly" | "biweekly" | "monthly" {
+function daysToFrequency(
+  days: number,
+  frequency?: "weekly" | "biweekly" | "monthly",
+): "weekly" | "biweekly" | "monthly" {
+  if (frequency) return frequency;
   if (days === 7) return "weekly";
   if (days === 14) return "biweekly";
   return "monthly";
@@ -82,7 +87,7 @@ export const useCreatorSubscriptionsStore = defineStore(
                   (t) => t.id === row.tierId,
                 )?.name ||
                 FALLBACK_TIER_NAME,
-              frequency: daysToFrequency(intervalDays),
+              frequency: daysToFrequency(intervalDays, row.frequency as any),
               intervalDays,
               totalPeriods: row.totalPeriods ?? null,
               receivedPeriods: 0,
@@ -113,8 +118,14 @@ export const useCreatorSubscriptionsStore = defineStore(
         }
         const arr = Array.from(map.values()).map((s) => {
           const periodSeconds = s.intervalDays * 24 * 60 * 60;
-          const nextRenewal =
-            s.latestUnlock != null ? s.latestUnlock + periodSeconds : null;
+          const nextRenewal = s.latestUnlock != null
+            ? s.frequency === "monthly"
+              ? Math.floor(
+                  addMonths(new Date(s.latestUnlock * 1000), 1).getTime() /
+                    1000,
+                )
+              : s.latestUnlock + periodSeconds
+            : null;
           const total = s.totalPeriods ?? s.receivedPeriods;
           const remaining = total - s.receivedPeriods;
           return {

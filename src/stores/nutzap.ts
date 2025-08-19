@@ -24,8 +24,8 @@ import type { NostrEvent, NDKSubscription } from "@nostr-dev-kit/ndk";
 import {
   addMinutes,
   addDays,
+  addMonths,
   fromUnixTime,
-  isAfter,
   startOfDay,
 } from "date-fns";
 import { notifyError, notifyWarning } from "src/js/notify";
@@ -35,19 +35,26 @@ import {
   type SubscriptionFrequency,
 } from "src/constants/subscriptionFrequency";
 
-export function calcUnlock(base: number, i: number, intervalDays = 30): number {
+export function calcUnlock(
+  base: number,
+  i: number,
+  intervalDays = 30,
+  frequency: SubscriptionFrequency = "monthly",
+): number {
   const first = addMinutes(startOfDay(fromUnixTime(base)), 30);
-  const now = addMinutes(new Date(), 30);
-  const ref = isAfter(first, now) ? first : now;
-  return Math.floor(addDays(ref, i * intervalDays).getTime() / 1000);
+  if (frequency === "monthly") {
+    return Math.floor(addMonths(first, i).getTime() / 1000);
+  }
+  return Math.floor(addDays(first, i * intervalDays).getTime() / 1000);
 }
 
 interface SendParams {
   npub: string; // receiver's npub (Bech32)
   amount: number; // sats per period
-  months: number; // number of periods
+  periods: number; // number of periods
   startDate: number; // unix timestamp for first unlock
   intervalDays?: number; // days between periods
+  frequency?: SubscriptionFrequency;
 }
 
 export interface NutzapQueuedSend {
@@ -177,7 +184,7 @@ export const useNutzapStore = defineStore("nutzap", {
     async subscribeToTier({
       creator,
       tierId,
-      months,
+      periods,
       price,
       startDate,
       relayList,
@@ -211,8 +218,8 @@ export const useNutzapStore = defineStore("nutzap", {
       const proofsStore = useProofsStore();
       const lockedTokens: DexieLockedToken[] = [];
 
-      for (let i = 0; i < months; i++) {
-        const unlockDate = calcUnlock(startDate, i, intervalDays);
+      for (let i = 0; i < periods; i++) {
+        const unlockDate = calcUnlock(startDate, i, intervalDays, frequency as SubscriptionFrequency);
         const mint = wallet.findSpendableMint(price);
         if (!mint)
           throw new Error(
@@ -225,7 +232,7 @@ export const useNutzapStore = defineStore("nutzap", {
         );
 
         const htlcData = htlc
-          ? createP2PKHTLC(price, creator.cashuP2pk, months, startDate)
+          ? createP2PKHTLC(price, creator.cashuP2pk, periods, startDate)
           : null;
 
         const tokenStr = proofsStore.serializeProofs(sendProofs);
@@ -240,7 +247,7 @@ export const useNutzapStore = defineStore("nutzap", {
                   subscription_id: subscriptionId,
                   tier_id: tierId,
                   month_index: i + 1,
-                  total_months: months,
+                  total_months: periods,
                 },
                 htlcData?.hash,
               ),
@@ -285,7 +292,7 @@ export const useNutzapStore = defineStore("nutzap", {
           subscriptionEventId: null,
           subscriptionId,
           monthIndex: i + 1,
-          totalPeriods: months,
+          totalPeriods: periods,
           frequency: (frequency as SubscriptionFrequency) || "monthly",
           intervalDays,
           label: "Subscription payment",
@@ -309,7 +316,7 @@ export const useNutzapStore = defineStore("nutzap", {
         frequency: (frequency as SubscriptionFrequency) || "monthly",
         intervalDays,
         startDate,
-        commitmentLength: months,
+        commitmentLength: periods,
         ...(tierName ? { tierName } : {}),
         ...(benefits ? { benefits } : {}),
         ...(creatorName ? { creatorName } : {}),
@@ -325,7 +332,7 @@ export const useNutzapStore = defineStore("nutzap", {
           subscriptionId,
           tierId,
           monthIndex: idx + 1,
-          totalPeriods: months,
+          totalPeriods: periods,
           htlcHash: t.htlcHash ?? null,
           htlcSecret: t.htlcSecret ?? null,
         })),
@@ -335,9 +342,16 @@ export const useNutzapStore = defineStore("nutzap", {
     },
 
     /** High-level entry from UI – fan pledges to creator */
-    async send({ npub, amount, months, startDate, intervalDays }: SendParams) {
+    async send({ npub, amount, periods, startDate, intervalDays, frequency }: SendParams) {
       try {
-        intervalDays = intervalDays ?? 30;
+        frequency =
+          frequency ??
+          (intervalDays === 7
+            ? "weekly"
+            : intervalDays === 14
+            ? "biweekly"
+            : "monthly");
+        intervalDays = intervalDays ?? frequencyToDays(frequency);
         this.loading = true;
         let profile = null;
         try {
@@ -367,8 +381,8 @@ export const useNutzapStore = defineStore("nutzap", {
         const subscriptionId = uuidv4();
         const lockedTokens: DexieLockedToken[] = [];
 
-        for (let i = 0; i < months; i++) {
-          const unlockDate = calcUnlock(startDate, i, intervalDays);
+        for (let i = 0; i < periods; i++) {
+          const unlockDate = calcUnlock(startDate, i, intervalDays, frequency);
           const mint = wallet.findSpendableMint(amount, trustedMints);
           if (!mint)
             throw new Error(
@@ -390,7 +404,7 @@ export const useNutzapStore = defineStore("nutzap", {
                   subscription_id: subscriptionId,
                   tier_id: "nutzap",
                   month_index: i + 1,
-                  total_months: months,
+                  total_months: periods,
                 }),
               ),
               trustedRelays,
@@ -432,7 +446,7 @@ export const useNutzapStore = defineStore("nutzap", {
             subscriptionEventId: null,
             subscriptionId,
             monthIndex: i + 1,
-            totalPeriods: months,
+            totalPeriods: periods,
             frequency: "monthly",
             intervalDays,
             label: "Subscription payment",
@@ -458,7 +472,7 @@ export const useNutzapStore = defineStore("nutzap", {
           frequency: "monthly",
           intervalDays,
           startDate,
-          commitmentLength: months,
+          commitmentLength: periods,
           intervals: lockedTokens.map((t, idx) => ({
             intervalKey: String(idx + 1),
             lockedTokenId: t.id,

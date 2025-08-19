@@ -14,14 +14,14 @@ import {
 } from "src/constants/subscriptionFrequency";
 
 export type DonationPreset = {
-  months: number;
+  periods: number;
 };
 
 const DEFAULT_PRESETS: DonationPreset[] = [
-  { months: 1 },
-  { months: 3 },
-  { months: 6 },
-  { months: 12 },
+  { periods: 1 },
+  { periods: 3 },
+  { periods: 6 },
+  { periods: 12 },
 ];
 
 export const useDonationPresetsStore = defineStore("donationPresets", {
@@ -30,8 +30,8 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
       "cashu.donationPresets",
       DEFAULT_PRESETS,
     );
-    if (!presets.value.find((p) => p.months === 1)) {
-      presets.value.unshift({ months: 1 });
+    if (!presets.value.find((p) => p.periods === 1)) {
+      presets.value.unshift({ periods: 1 });
     }
     return { presets };
   },
@@ -42,7 +42,7 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
      * the function returns the serialized token(s) as a single string.
      */
     async createDonationPreset(
-      months: number | undefined,
+      periods: number | undefined,
       amount: number,
       pubkey: string,
       bucketId: string = DEFAULT_BUCKET_ID,
@@ -68,7 +68,7 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
         (p) => p.bucketId === bucketId,
       );
 
-      const totalAmount = !months || months <= 0 ? amount : amount * months;
+      const totalAmount = !periods || periods <= 0 ? amount : amount * periods;
       const available = proofs.reduce((s, p) => s + p.amount, 0);
       if (available < totalAmount) {
         throw new Error("Insufficient balance");
@@ -76,7 +76,7 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
 
       const tokens: LockedToken[] = [];
 
-      if (!months || months <= 0) {
+      if (!periods || periods <= 0) {
         const { locked } = await p2pkStore.sendToLock(
           amount,
           convertedPubkey,
@@ -91,7 +91,7 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
         : subscription?.frequency
         ? frequencyToDays(subscription.frequency)
         : frequencyToDays("monthly");
-      for (let i = 0; i < months; i++) {
+      for (let i = 0; i < periods; i++) {
         const locktime = base + i * interval * 24 * 60 * 60;
         const { locked } = await p2pkStore.sendToLock(
           amount,
@@ -117,7 +117,7 @@ export const useDonationPresetsStore = defineStore("donationPresets", {
               ? frequencyToDays(subscription.frequency)
               : frequencyToDays("monthly")),
           startDate: base,
-          commitmentLength: months,
+          commitmentLength: periods,
           intervals: tokens.map((t, idx) => ({
             intervalKey: String(idx),
             lockedTokenId: t.id,

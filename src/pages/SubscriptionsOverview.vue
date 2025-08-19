@@ -709,8 +709,8 @@ function extendSubscription(pubkey: string) {
     },
     cancel: true,
     persistent: true,
-  }).onOk(async (months: number) => {
-    if (!months || months <= 0) return;
+  }).onOk(async (periods: number) => {
+    if (!periods || periods <= 0) return;
     const future = row.tokens
       .filter((t) => t.locktime)
       .sort((a, b) => (a.locktime || 0) - (b.locktime || 0));
@@ -735,10 +735,11 @@ function extendSubscription(pubkey: string) {
       }
       const newTokens = await nutzap.send({
         npub: pubkey,
-        months,
+        periods,
         amount: row.monthly,
         startDate,
         intervalDays: sub.intervalDays,
+        frequency: sub.frequency as any,
       });
       receiptList.value = newTokens as any[];
       showReceiptDialog.value = true;

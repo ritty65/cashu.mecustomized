@@ -152,19 +152,19 @@ describe("Nutzap subscriptions", () => {
     await store.send({
       npub: "npub",
       amount: 1,
-      months: 2,
+      periods: 2,
       startDate: start,
       intervalDays: 7,
     });
 
     expect(sendDm).toHaveBeenCalledTimes(2);
-    expect(sendToLock).toHaveBeenCalledWith(1, "pk", calcUnlock(start, 0, 7));
+    expect(sendToLock).toHaveBeenCalledWith(1, "pk", calcUnlock(start, 0, 7, "weekly"));
     const p1 = JSON.parse(sendDm.mock.calls[0][1]);
     const p2 = JSON.parse(sendDm.mock.calls[1][1]);
     const id = p1.subscription_id;
     const expected1 = subscriptionPayload(
-      `tok-${calcUnlock(start, 0, 7)}`,
-      calcUnlock(start, 0, 7),
+      `tok-${calcUnlock(start, 0, 7, "weekly")}`,
+      calcUnlock(start, 0, 7, "weekly"),
       {
         subscription_id: id,
         tier_id: "nutzap",
@@ -173,8 +173,8 @@ describe("Nutzap subscriptions", () => {
       },
     );
     const expected2 = subscriptionPayload(
-      `tok-${calcUnlock(start, 1, 7)}`,
-      calcUnlock(start, 1, 7),
+      `tok-${calcUnlock(start, 1, 7, "weekly")}`,
+      calcUnlock(start, 1, 7, "weekly"),
       {
         subscription_id: id,
         tier_id: "nutzap",
@@ -194,7 +194,7 @@ describe("Nutzap subscriptions", () => {
     });
     cashuDb.lockedTokens.bulkAdd = vi.fn();
     const store = useNutzapStore();
-    await store.send({ npub: "npub", amount: 1, months: 1, startDate: 0 });
+    await store.send({ npub: "npub", amount: 1, periods: 1, startDate: 0 });
     expect(setBootError).toHaveBeenCalled();
     expect(store.sendQueue.length).toBe(1);
   });
@@ -327,7 +327,7 @@ describe("Nutzap subscriptions", () => {
     await subStore.subscribeToTier({
       creator: { nostrPubkey: "npub", cashuP2pk: "pk" },
       tierId: "tier",
-      months: 1,
+      periods: 1,
       price: 1,
       startDate: 0,
       relayList: [],

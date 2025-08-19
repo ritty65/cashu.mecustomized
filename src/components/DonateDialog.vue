@@ -55,7 +55,7 @@
           dense
           class="q-mt-md"
           :label="$t('DonateDialog.inputs.preset')"
-          :hint="$t('DonateDialog.helper.months')"
+          hint="Number of periods"
         />
       </q-card-section>
       <q-card-actions align="right">
@@ -99,7 +99,7 @@ export default defineComponent({
     const type = ref<"one-time" | "schedule">("one-time");
     const amount = ref<number>(0);
     const message = ref<string>("");
-    const preset = ref<number>(donationStore.presets[0]?.months || 0);
+    const preset = ref<number>(donationStore.presets[0]?.periods || 0);
 
     const model = computed({
       get: () => props.modelValue,
@@ -128,8 +128,8 @@ export default defineComponent({
 
     const presetOptions = computed(() =>
       donationStore.presets.map((p) => ({
-        label: `${p.months}m`,
-        value: p.months,
+        label: `${p.periods}p`,
+        value: p.periods,
       })),
     );
 
@@ -143,7 +143,7 @@ export default defineComponent({
         locked: locked.value === "locked",
         type: type.value,
         amount: amount.value,
-        months: preset.value,
+        periods: preset.value,
         message: message.value,
       });
       emit("update:modelValue", false);
