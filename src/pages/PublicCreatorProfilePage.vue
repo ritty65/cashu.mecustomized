@@ -181,7 +181,7 @@ export default defineComponent({
 
     const confirmSubscribe = ({
       bucketId,
-      months,
+      periods,
       amount,
       startDate,
       total,

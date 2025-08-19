@@ -83,7 +83,7 @@ describe("subscribeToTier", () => {
     await store.subscribeToTier({
       creator: { nostrPubkey: "1975".repeat(16), cashuP2pk: pk },
       tierId: "tier",
-      months: 1,
+      periods: 1,
       price: 1,
       startDate: 0,
       relayList: [],
@@ -108,7 +108,7 @@ describe("subscribeToTier", () => {
     await store.subscribeToTier({
       creator: { nostrPubkey: "9999".repeat(16), cashuP2pk: pk },
       tierId: "tier",
-      months: 1,
+      periods: 1,
       price: 1,
       startDate: 0,
       relayList: [],

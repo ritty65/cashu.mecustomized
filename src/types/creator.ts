@@ -10,7 +10,7 @@ export function isValidCashuP2pk(key: string): boolean {
 export interface SubscribeTierOptions {
   creator: CreatorIdentity;
   tierId: string;
-  months: number;
+  periods: number;
   price: number;
   startDate: number;
   relayList: string[];

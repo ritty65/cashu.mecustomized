@@ -16,14 +16,14 @@
           :label="$t('bucket.name')"
         />
         <q-select
-          v-model="months"
+          v-model="periods"
           :options="presetOptions"
           emit-value
           map-options
           outlined
           dense
           class="q-mt-md"
-          :label="$t('DonateDialog.inputs.preset')"
+          label="Number of periods"
         />
         <q-input
           v-model="startDate"
@@ -32,7 +32,8 @@
           dense
           class="q-mt-md"
           label="Start Date"
-          :min="today"
+          :error="!!startDateError"
+          :error-message="startDateError"
           required
         />
         <div class="q-mt-sm text-caption">
@@ -97,7 +98,7 @@ export default defineComponent({
     const { bucketList, bucketBalances } = storeToRefs(bucketsStore);
     const { activeUnit } = storeToRefs(mintsStore);
 
-    const months = ref(donationStore.presets[0]?.months || 0);
+    const periods = ref(donationStore.presets[0]?.periods || 0);
     const tierPrice = computed(
       () => props.tier?.price_sats ?? (props.tier as any)?.price ?? 0,
     );
@@ -122,7 +123,12 @@ export default defineComponent({
     const bucketId = ref<string>(DEFAULT_BUCKET_ID);
     const today = new Date().toISOString().slice(0, 10);
     const startDate = ref(today);
-    const total = computed(() => tierPrice.value * months.value);
+    const total = computed(() => tierPrice.value * periods.value);
+    const startDateError = computed(() =>
+      new Date(startDate.value).getTime() < new Date(today).getTime()
+        ? "Start date is in the past"
+        : "",
+    );
 
     const hasSigner = computed(() => !!nostr.signer);
 
@@ -143,8 +149,8 @@ export default defineComponent({
 
     const presetOptions = computed(() =>
       donationStore.presets.map((p) => ({
-        label: `${p.months}m`,
-        value: p.months,
+        label: `${p.periods}p`,
+        value: p.periods,
       })),
     );
 
@@ -233,7 +239,7 @@ export default defineComponent({
           creator,
           tierId: props.tier?.id ?? props.tier?.name ?? "tier",
           price: tierPrice.value,
-          months: months.value,
+          periods: periods.value,
           startDate: Math.floor(new Date(startDate.value).getTime() / 1000),
           relayList: profile.relays ?? [],
           frequency: frequency.value,
@@ -247,7 +253,7 @@ export default defineComponent({
           notifySuccess(t("FindCreators.notifications.subscription_success"));
           emit("confirm", {
             bucketId: bucketId.value,
-            months: months.value,
+            periods: periods.value,
             startDate: Math.floor(new Date(startDate.value).getTime() / 1000),
             total: total.value,
           });
@@ -272,7 +278,7 @@ export default defineComponent({
       bucketId,
       bucketOptions,
       showBucketSelect,
-      months,
+      periods,
       presetOptions,
       intervalDays,
       frequency,
@@ -280,6 +286,7 @@ export default defineComponent({
       startDate,
       today,
       total,
+      startDateError,
       hasSigner,
       cancel,
       confirm,

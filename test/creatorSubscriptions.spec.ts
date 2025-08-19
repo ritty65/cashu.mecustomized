@@ -10,6 +10,8 @@ vi.mock("../src/stores/creators", () => ({
 
 const WEEK = 7 * 24 * 60 * 60;
 const BIWEEK = 14 * 24 * 60 * 60;
+const FEB_29_2024 = Math.floor(new Date("2024-02-29T00:00:00Z").getTime() / 1000);
+const JAN_31_2024 = Math.floor(new Date("2024-01-31T00:00:00Z").getTime() / 1000);
 
 beforeEach(async () => {
   setActivePinia(createPinia());
@@ -106,6 +108,57 @@ describe("creatorSubscriptions store", () => {
     expect(biweekly?.receivedPeriods).toBe(2);
     expect(biweekly?.nextRenewal).toBe(BIWEEK * 2);
     expect(biweekly?.status).toBe("active");
+  });
+
+  it("computes monthly subscriptions correctly without drift", async () => {
+    const store = useCreatorSubscriptionsStore();
+
+    await cashuDb.lockedTokens.bulkAdd([
+      {
+        id: "m1",
+        tokenString: "tokm1",
+        amount: 1,
+        owner: "creator",
+        subscriberNpub: "npub",
+        tierId: "tier",
+        tierName: "Tier",
+        intervalKey: "m1",
+        unlockTs: JAN_31_2024,
+        status: "unlockable",
+        subscriptionEventId: null,
+        subscriptionId: "subM",
+        totalPeriods: 3,
+        intervalDays: 30,
+        frequency: "monthly",
+      },
+      {
+        id: "m2",
+        tokenString: "tokm2",
+        amount: 1,
+        owner: "creator",
+        subscriberNpub: "npub",
+        tierId: "tier",
+        tierName: "Tier",
+        intervalKey: "m2",
+        unlockTs: FEB_29_2024,
+        status: "unlockable",
+        subscriptionEventId: null,
+        subscriptionId: "subM",
+        totalPeriods: 3,
+        intervalDays: 30,
+        frequency: "monthly",
+      },
+    ] as any);
+
+    await new Promise((r) => setTimeout(r, 20));
+
+    const monthly = store.subscriptions.find((s) => s.subscriptionId === "subM");
+    expect(monthly?.frequency).toBe("monthly");
+    const expectedNext = Math.floor(
+      new Date("2024-03-29T00:00:00Z").getTime() / 1000,
+    );
+    expect(monthly?.nextRenewal).toBe(expectedNext);
+    expect(monthly?.status).toBe("pending");
   });
 
   it("falls back to Unknown Tier when tier data is missing", async () => {

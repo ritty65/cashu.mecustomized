@@ -39,7 +39,7 @@ describe("Donation presets", () => {
   it("has default presets", () => {
     const store = useDonationPresetsStore();
     expect(store.presets.length).toBe(4);
-    expect(store.presets[0].months).toBe(1);
+    expect(store.presets[0].periods).toBe(1);
   });
 
   it("calls sendToLock with sequential locktimes", async () => {
@@ -55,7 +55,7 @@ describe("Donation presets", () => {
     expect(third).toBeGreaterThan(second);
   });
 
-  it("skips schedule when months is 0 and returns token", async () => {
+  it("skips schedule when periods is 0 and returns token", async () => {
     const store = useDonationPresetsStore();
     const wallet = useWalletStore();
     const spy = wallet.sendToLock as any;

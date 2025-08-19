@@ -67,7 +67,7 @@ describe("subscribeToTier", () => {
     await store.subscribeToTier({
       creator: { nostrPubkey: "c", cashuP2pk: "pk" },
       tierId: "tier",
-      months: 1,
+      periods: 1,
       price: 1,
       startDate: 0,
       relayList: [],

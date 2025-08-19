@@ -81,14 +81,14 @@ function hash(secret: string, receiver: string): string {
 function createP2PKHTLC(
   amount: number,
   receiverP2PK: string,
-  months: number,
+  periods: number,
   startDate: number,
 ) {
   const lockSecret = crypto.randomUUID();
   const token = JSON.stringify({
     amount,
     receiverP2PK,
-    months,
+    periods,
     startDate,
     lockSecret,
   });
