@@ -108,6 +108,7 @@ import { useMintsStore } from "src/stores/mints";
 import { useBucketsStore } from "src/stores/buckets";
 import { useMnemonicStore } from "src/stores/mnemonic";
 import WelcomeSlidePrivacy from "./welcome/WelcomeSlidePrivacy.vue";
+import WelcomeSlideFeatures from "./welcome/WelcomeSlideFeatures.vue";
 // Mints & Buckets are now optional actions on the Finish slide.
 // import WelcomeSlideMints from "./welcome/WelcomeSlideMints.vue";
 import WelcomeSlideProofs from "./welcome/WelcomeSlideProofs.vue";
@@ -147,6 +148,7 @@ const slides = ref<{ key: string; component: any; props?: any }[]>([]);
 
 function buildSlides() {
   const arr = [
+    { key: "features", component: WelcomeSlideFeatures },
     { key: "privacy", component: WelcomeSlidePrivacy },
     { key: "proofs", component: WelcomeSlideProofs },
     {
