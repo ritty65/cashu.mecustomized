@@ -1883,6 +1883,26 @@ export const messages = {
       step: "Step {n} of {total}",
       language: "Language",
     },
+    features: {
+      title: "Get to Know the App",
+      lead: "Explore these key sections to start using the wallet:",
+      bullets: {
+        creatorHub: {
+          label: "CreatorHub",
+          desc: "Publish your profile and find creators.",
+        },
+        subscriptions: {
+          label: "Subscriptions",
+          desc: "Manage creators you support.",
+        },
+        buckets: {
+          label: "Buckets",
+          desc: "Organize your tokens.",
+        },
+      },
+      relation:
+        "Browse creators in CreatorHub and subscribe to them in Subscriptions.",
+    },
     privacy: {
       title: "Cashu & Privacy",
       lead: "Cashu uses blinded tokens so mints can’t see who you are or what you pay.",
