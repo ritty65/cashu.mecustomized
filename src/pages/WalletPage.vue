@@ -290,7 +290,6 @@ import { useDexieStore } from "src/stores/dexie";
 import { useStorageStore } from "src/stores/storage";
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
 import { useWelcomeStore } from "../stores/welcome";
-import { useOnboardingStore } from "../stores/onboarding";
 import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
 import { useLockedTokensRedeemWorker } from "src/stores/lockedTokensRedeemWorker";
 import { useSubscriptionRedeemWorker } from "src/stores/subscriptionRedeemWorker";
@@ -516,13 +515,6 @@ export default {
       this.focusInput("parseDialogInput");
     },
     showWelcomePage: function () {
-      const onboarding = useOnboardingStore();
-      if (onboarding.isNewOnboardingEnabled && !onboarding.hasCompletedOnboarding) {
-        const currentQuery = window.location.search;
-        const currentHash = window.location.hash;
-        this.$router.push("/onboarding" + currentQuery + currentHash);
-        return;
-      }
       if (useWelcomeStore().showWelcome) {
         const currentQuery = window.location.search;
         const currentHash = window.location.hash;
