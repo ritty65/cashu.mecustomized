@@ -225,7 +225,7 @@ const essentialLinks = [
     title: t("MainHeader.menu.links.github.title"),
     caption: t("MainHeader.menu.links.github.caption"),
     icon: "code",
-    link: "https://github.com/cashubtc/cashu.me",
+    link: "https://github.com/cashubtc/Fundstr",
   },
   {
     title: t("MainHeader.menu.links.telegram.title"),

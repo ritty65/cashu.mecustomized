@@ -1,6 +1,6 @@
 {
-  "name": "Cashu.me",
-  "short_name": "Cashu.me",
+  "name": "Fundstr",
+  "short_name": "Fundstr",
   "description": "A Cashu Ecash wallet for the web.",
   "display": "standalone",
   "orientation": "portrait",

@@ -1,9 +1,9 @@
 version: "2"
 services:
-  cashu.me:
-    image: cashu.me
+  Fundstr:
+    image: Fundstr
     build: .
-    container_name: cashu.me
+    container_name: Fundstr
     restart: always
     ports:
       - "127.0.0.1:3000:80"
