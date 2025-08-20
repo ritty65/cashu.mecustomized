@@ -447,6 +447,7 @@ export const messages = {
       theme: {
         title: "Appearance",
         description: "Change how your wallet looks.",
+        toggle: "Toggle dark mode",
         tooltips: {
           mono: "mono",
           cyber: "cyber",
@@ -460,6 +461,17 @@ export const messages = {
           modern: "modern",
         },
       },
+    },
+    relays: {
+      errors: {
+        duplicate: "Relay already added",
+        invalid: "Invalid relay URL",
+      },
+    },
+    notifications: {
+      reserved_unset: "All reserved proofs unset",
+      spent_removed: "Removed {count} spent proofs",
+      no_spent: "No spent proofs found",
     },
     advanced: {
       title: "Advanced",

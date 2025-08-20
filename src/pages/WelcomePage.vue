@@ -11,7 +11,12 @@
         />
       </div>
       <div class="col-12 col-md-8">
-        <WelcomeSlides />
+        <WelcomeSlides
+          @open-wallet="finish"
+          @add-mint="onFinishAddMint"
+          @create-buckets="onFinishCreateBuckets"
+          @restore="onFinishRestore"
+        />
       </div>
     </div>
 
@@ -31,6 +36,7 @@ import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useWelcomeStore } from 'src/stores/welcome'
+import { useMintsStore } from 'src/stores/mints'
 import type { WelcomeTask } from 'src/types/welcome'
 
 import TaskChecklist from 'src/components/welcome/TaskChecklist.vue'
@@ -49,6 +55,7 @@ const BucketQuickstartDialog = PlaceholderDialog
 const router = useRouter()
 const { t } = useI18n()
 const welcome = useWelcomeStore()
+const mintsStore = useMintsStore()
 
 const testSendDone = ref(false)
 const bucketDone = ref(false)
@@ -173,6 +180,22 @@ function runTask(task: WelcomeTask) {
 function finish() {
   welcome.markWelcomeCompleted()
   router.push('/wallet')
+}
+
+function onFinishAddMint() {
+  welcome.markWelcomeCompleted()
+  router.push('/wallet')
+  mintsStore.showAddMintDialog = true
+}
+
+function onFinishCreateBuckets() {
+  welcome.markWelcomeCompleted()
+  router.push('/buckets')
+}
+
+function onFinishRestore() {
+  welcome.markWelcomeCompleted()
+  router.push('/restore')
 }
 
 const showCreateKey = ref(false)

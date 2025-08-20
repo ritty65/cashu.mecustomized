@@ -305,6 +305,7 @@ import {
 } from "lucide-vue-next";
 
 import { useMigrationsStore } from "src/stores/migrations";
+import { useSignerStore } from "src/stores/signer";
 
 export default {
   mixins: [windowMixin],
@@ -587,6 +588,9 @@ export default {
       return "browser";
     },
     triggerPwaInstall: function () {
+      if (!this.deferredPWAInstallPrompt) {
+        return;
+      }
       // Show the install prompt
       // Note: this doesn't work with IOS, we do it with iOSPWAPrompt
       this.deferredPWAInstallPrompt.prompt();
@@ -624,22 +628,28 @@ export default {
       };
     },
     equalizeButtonWidths: function () {
+      if (typeof document === "undefined") {
+        return;
+      }
       this.$nextTick(() => {
-        const actionBtns = document.querySelectorAll(".wallet-action-btn");
-        if (actionBtns.length >= 2) {
-          actionBtns.forEach((btn) => {
-            btn.style.width = "auto";
-          });
-
-          let maxWidth = 0;
-          actionBtns.forEach((btn) => {
-            maxWidth = Math.max(maxWidth, btn.offsetWidth);
-          });
-
-          actionBtns.forEach((btn) => {
-            btn.style.width = `${maxWidth}px`;
-          });
+        const actionBtns = document.querySelectorAll(
+          ".wallet-action-btn",
+        ) as NodeListOf<HTMLElement>;
+        if (!actionBtns || actionBtns.length < 2) {
+          return;
         }
+        actionBtns.forEach((btn) => {
+          btn.style.width = "auto";
+        });
+
+        let maxWidth = 0;
+        actionBtns.forEach((btn) => {
+          maxWidth = Math.max(maxWidth, btn.offsetWidth);
+        });
+
+        actionBtns.forEach((btn) => {
+          btn.style.width = `${maxWidth}px`;
+        });
       });
     },
     handleLockedTokenMessage(event) {
