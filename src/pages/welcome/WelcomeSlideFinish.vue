@@ -37,9 +37,6 @@
 </template>
 
 <script setup lang="ts">
-import { useWelcomeStore } from "src/stores/welcome";
-
-const welcomeStore = useWelcomeStore();
 const id = "welcome-finish-title";
 const props = defineProps<{
   onAddMint?: () => void;
@@ -60,7 +57,7 @@ function restore() {
 }
 
 function openWallet() {
-  welcomeStore.finishTutorial();
+  /* handled by main welcome page */
 }
 </script>
 

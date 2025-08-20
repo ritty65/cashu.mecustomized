@@ -13,7 +13,7 @@
       </div>
       <q-checkbox
         class="q-mt-md"
-        v-model="welcomeStore.termsAccepted"
+        v-model="accepted"
         :label="$t('Welcome.terms.accept')"
         aria-label="$t('Welcome.terms.accept')"
       />
@@ -52,14 +52,13 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import TermsContent from "src/components/TermsContent.vue";
-import { useWelcomeStore } from "src/stores/welcome";
 
-const welcomeStore = useWelcomeStore();
 const id = "welcome-terms-title";
 const showTerms = ref(false);
+const accepted = ref(false);
 
 function acceptAndClose() {
-  welcomeStore.termsAccepted = true;
+  accepted.value = true;
   showTerms.value = false;
 }
 </script>

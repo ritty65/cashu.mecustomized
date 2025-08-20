@@ -1,4 +1,5 @@
 import { default as defaultLang } from "quasar/lang/en-US";
+import welcome from "./welcome.json";
 
 export const messages = {
   copied_to_clipboard: "Copied to clipboard!",
@@ -2052,6 +2053,7 @@ export const messages = {
       skip: "Skip",
     },
   },
+  welcome,
 };
 
 export default {

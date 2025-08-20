@@ -6,7 +6,7 @@ import {
   createWebHashHistory,
 } from "vue-router";
 import routes from "./routes";
-import { useOnboardingStore } from "src/stores/onboarding";
+import { useWelcomeStore } from "src/stores/welcome";
 import { useRestoreStore } from "src/stores/restore";
 
 /*
@@ -36,19 +36,18 @@ export default route(function (/* { store, ssrContext } */) {
   });
 
   Router.beforeEach((to, from, next) => {
-    const onboarding = useOnboardingStore();
+    const welcome = useWelcomeStore();
     const restore = useRestoreStore();
     if (
-      onboarding.isNewOnboardingEnabled &&
-      !onboarding.hasCompletedOnboarding &&
-      to.path !== "/onboarding" &&
+      to.path !== "/welcome" &&
+      ( !welcome.hasKey || !welcome.welcomeCompleted ) &&
       !restore.restoringState &&
       to.path !== "/restore"
     ) {
-      next("/onboarding");
-    } else {
-      next();
+      next("/welcome?first=1");
+      return;
     }
+    next();
   });
 
   return Router;

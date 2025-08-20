@@ -112,10 +112,7 @@ const routes = [
   },
   {
     path: "/onboarding",
-    component: () => import("layouts/BlankLayout.vue"),
-    children: [
-      { path: "", component: () => import("src/pages/OnboardingPage.vue") },
-    ],
+    redirect: "/welcome?first=1",
   },
   {
     path: "/terms",
