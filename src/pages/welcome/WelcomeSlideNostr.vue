@@ -77,6 +77,7 @@ async function generate() {
   welcome.nostrSetupCompleted = true
   npub.value = nostr.npub
   backupNsec.value = nostr.activePrivateKeyNsec
+  nsec.value = nostr.activePrivateKeyNsec
   showBackup.value = true
 }
 
