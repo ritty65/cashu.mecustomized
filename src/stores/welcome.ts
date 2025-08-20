@@ -1,83 +1,45 @@
-import { defineStore } from "pinia";
-import { useLocalStorage } from "@vueuse/core";
-import router from "src/router";
+import { defineStore } from 'pinia'
+import { useLocalStorage } from '@vueuse/core'
+import { useSignerStore } from './signer'
+import { useMintsStore } from './mints'
+import { useProofsStore } from './proofs'
+import { useCreatorProfileStore } from './creatorProfile'
 
-export type WelcomeState = {
-  showWelcome: boolean;
-  currentSlide: number;
-  seedAcknowledged: boolean;
-  termsAccepted: boolean;
-  pwaSlideEligible: boolean;
-  slides: string[];
-};
+export type UserRole = 'supporter' | 'creator' | 'wallet-only' | null
 
-export const useWelcomeStore = defineStore("welcome", {
-  state: (): WelcomeState => ({
-    showWelcome: useLocalStorage<boolean>("cashu.welcome.showWelcome", true)
-      .value,
-    currentSlide: useLocalStorage<number>("cashu.welcome.currentSlide", 0)
-      .value,
-    seedAcknowledged: useLocalStorage<boolean>(
-      "cashu.welcome.seedAcknowledged",
-      false,
-    ).value,
-    termsAccepted: useLocalStorage<boolean>(
-      "cashu.welcome.termsAccepted",
-      false,
-    ).value,
-    pwaSlideEligible: false,
-    slides: [],
+const backupKey = 'cashu.backup.completed'
+
+export const useWelcomeStore = defineStore('welcome', {
+  state: () => ({
+    firstRun: true as boolean,
+    role: useLocalStorage<UserRole>('cashu.welcome.role', null).value,
+    welcomeCompleted: useLocalStorage<boolean>('cashu.welcome.completed', false).value,
   }),
   getters: {
-    totalSlides: (state) => state.slides.length,
-    isLastSlide: (state) => state.currentSlide === state.slides.length - 1,
-    canGoNext: (state) => {
-      const key = state.slides[state.currentSlide];
-      if (key === "backup" && !state.seedAcknowledged) return false;
-      if (key === "terms" && !state.termsAccepted) return false;
-      return true;
+    hasKey: () => {
+      const signer = useSignerStore()
+      return signer.method !== null
+    },
+    hasBackup: () => localStorage.getItem(backupKey) === 'true',
+    hasMint: () => {
+      const mints = useMintsStore()
+      return mints.mints.length > 0
+    },
+    hasBalance: () => {
+      const proofs = useProofsStore()
+      return proofs.proofs.reduce((s, p) => s + p.amount, 0) > 0
+    },
+    hasProfile: () => {
+      const profile = useCreatorProfileStore()
+      return !!profile.display_name
     },
   },
   actions: {
-    initializeWelcome() {
-      const displayModeStandalone = window.matchMedia(
-        "(display-mode: standalone)",
-      ).matches;
-      // @ts-ignore
-      const navigatorStandalone = window.navigator.standalone;
-      this.pwaSlideEligible = !(displayModeStandalone || navigatorStandalone);
-      if (!this.showWelcome) {
-        router.push("/wallet");
-      }
+    setRole(role: UserRole) {
+      this.role = role
     },
-    setSlides(slides: string[]) {
-      this.slides = slides;
-    },
-    goToPrevSlide() {
-      if (this.currentSlide > 0) {
-        this.currentSlide -= 1;
-      }
-    },
-    goToNextSlide() {
-      if (!this.canGoNext) return;
-      if (this.isLastSlide) {
-        this.finishTutorial();
-      } else {
-        this.currentSlide += 1;
-      }
-    },
-    skipTutorial() {
-      this.finishTutorial();
-    },
-    finishTutorial() {
-      this.showWelcome = false;
-      router.push("/wallet");
-    },
-    resetWelcome() {
-      this.showWelcome = true;
-      this.currentSlide = 0;
-      this.seedAcknowledged = false;
-      this.termsAccepted = false;
+    markWelcomeCompleted() {
+      this.welcomeCompleted = true
     },
   },
-});
+})

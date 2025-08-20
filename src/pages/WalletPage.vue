@@ -515,7 +515,8 @@ export default {
       this.focusInput("parseDialogInput");
     },
     showWelcomePage: function () {
-      if (useWelcomeStore().showWelcome) {
+      const store = useWelcomeStore();
+      if (!store.hasKey || !store.welcomeCompleted) {
         const currentQuery = window.location.search;
         const currentHash = window.location.hash;
         this.$router.push("/welcome" + currentQuery + currentHash);

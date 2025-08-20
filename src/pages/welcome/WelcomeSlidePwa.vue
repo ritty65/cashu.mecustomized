@@ -26,23 +26,17 @@
 </template>
 
 <script setup lang="ts">
-import { useWelcomeStore } from "src/stores/welcome";
-
 const props = defineProps<{ deferredPrompt?: any }>();
-const welcomeStore = useWelcomeStore();
 const id = "welcome-pwa-title";
 
 function install() {
   if (props.deferredPrompt) {
     props.deferredPrompt.prompt();
-    props.deferredPrompt.userChoice.finally(() => {
-      welcomeStore.goToNextSlide();
-    });
   }
 }
 
 function skip() {
-  welcomeStore.goToNextSlide();
+  /* no-op in placeholder */
 }
 </script>
 

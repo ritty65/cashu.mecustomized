@@ -1,293 +1,215 @@
 <template>
-  <div
-    class="full-width flex flex-center q-px-sm"
-    @drop.prevent="dragFile"
-    @dragover.prevent
-  >
-    <q-card class="q-pa-none column full-width" style="max-width: 768px">
-      <q-carousel v-model="welcomeStore.currentSlide" animated class="col">
-        <q-carousel-slide
-          v-for="(slide, index) in slides"
-          :key="slide.key"
-          :name="index"
-        >
-          <component :is="slide.component" v-bind="slide.props" />
-        </q-carousel-slide>
-      </q-carousel>
-      <footer class="q-pa-sm row items-center no-wrap">
-        <div class="col-auto column items-start q-gutter-xs">
-          <q-select
-            v-model="selectedLanguage"
-            :options="languageOptions"
-            emit-value
-            map-options
-            dense
-            outlined
-            style="width: 150px"
-            :label="$t('Welcome.footer.language')"
-            @update:model-value="changeLanguage"
-          />
-          <q-btn
-            flat
-            size="sm"
-            class="q-px-none"
-            @click="openFileDialog"
-            :label="$t('Welcome.footer.restoreCta')"
-          />
-        </div>
-        <div class="col text-center">
-          <div aria-live="polite">
-            {{
-              $t("Welcome.footer.step", {
-                n: welcomeStore.currentSlide + 1,
-                total: welcomeStore.totalSlides,
-              })
-            }}
-          </div>
-          <q-linear-progress
-            class="q-mt-xs"
-            color="primary"
-            track-color="grey-3"
-            :value="(welcomeStore.currentSlide + 1) / welcomeStore.totalSlides"
-          />
-        </div>
-        <div class="col-auto row items-center q-gutter-sm">
-          <q-btn
-            flat
-            :label="$t('Welcome.footer.previous')"
-            :disable="welcomeStore.currentSlide === 0"
-            @click="welcomeStore.goToPrevSlide"
-            v-if="welcomeStore.currentSlide > 0"
-          />
-          <q-btn
-            flat
-            color="primary"
-            :label="
-              welcomeStore.isLastSlide
-                ? $t('Welcome.footer.finish')
-                : $t('Welcome.footer.next')
-            "
-            :disable="!welcomeStore.canGoNext"
-            @click="welcomeStore.goToNextSlide"
-          />
-          <q-btn
-            flat
-            v-if="showSkip"
-            :label="$t('Welcome.footer.skip')"
-            @click="welcomeStore.skipTutorial"
-          />
-        </div>
-      </footer>
-      <div class="text-caption text-center q-pb-sm">
-        {{ $t("Welcome.footer.hint") }}
+  <q-page class="q-pa-md welcome">
+    <div class="row q-col-gutter-md">
+      <div class="col-12 col-md-4">
+        <TaskChecklist
+          :tasks="tasks"
+          :progress="progressLabel"
+          :can-finish="canFinish"
+          @run="runTask"
+          @finish="finish"
+        />
       </div>
-    </q-card>
-    <AddMintDialog
-      :addMintData="mintsStore.addMintData"
-      :showAddMintDialog="mintsStore.showAddMintDialog"
-      @update:showAddMintDialog="mintsStore.showAddMintDialog = $event"
-      :addMintBlocking="mintsStore.addMintBlocking"
-      @add="mintsStore.addMint"
-    />
-    <input
-      type="file"
-      ref="fileUpload"
-      class="hidden"
-      @change="onChangeFileUpload"
-    />
-  </div>
+      <div class="col-12 col-md-8">
+        <WelcomeSlides />
+      </div>
+    </div>
+
+    <CreateKeyDialog v-model="showCreateKey" @done="onKeyCreated" />
+    <BackupDialog v-model="showBackup" @done="onBackupDone" />
+    <ChooseMintDrawer v-model="showChooseMint" @done="onMintChosen" />
+    <DepositDialog v-model="showDeposit" @done="onDepositPaid" />
+    <TestSendDialog v-model="showTestSend" @done="onTestSendOk" />
+    <RoleDialog v-model="showRole" @selected="onRoleSelected" />
+    <CreatorSetupDialog v-if="welcome.role === 'creator'" v-model="showCreator" @done="onCreatorDone" />
+    <BucketQuickstartDialog v-model="showBucketIntro" @done="onBucketDone" />
+  </q-page>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch, nextTick } from "vue";
-import { useQuasar } from "quasar";
-import { useI18n } from "vue-i18n";
-import { useWelcomeStore } from "src/stores/welcome";
-import { useStorageStore } from "src/stores/storage";
-import { useMintsStore } from "src/stores/mints";
-import { useBucketsStore } from "src/stores/buckets";
-import { useMnemonicStore } from "src/stores/mnemonic";
-import WelcomeSlidePrivacy from "./welcome/WelcomeSlidePrivacy.vue";
-import WelcomeSlideFeatures from "./welcome/WelcomeSlideFeatures.vue";
-// Mints & Buckets are now optional actions on the Finish slide.
-// import WelcomeSlideMints from "./welcome/WelcomeSlideMints.vue";
-import WelcomeSlideProofs from "./welcome/WelcomeSlideProofs.vue";
-// import WelcomeSlideBuckets from "./welcome/WelcomeSlideBuckets.vue";
-import WelcomeSlideBackup from "./welcome/WelcomeSlideBackup.vue";
-import WelcomeSlideTerms from "./welcome/WelcomeSlideTerms.vue";
-import WelcomeSlidePwa from "./welcome/WelcomeSlidePwa.vue";
-import WelcomeSlideFinish from "./welcome/WelcomeSlideFinish.vue";
-import AddMintDialog from "src/components/AddMintDialog.vue";
+import { computed, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import { useWelcomeStore } from 'src/stores/welcome'
+import type { WelcomeTask } from 'src/types/welcome'
 
-const $q = useQuasar();
-const { locale, t } = useI18n();
-const welcomeStore = useWelcomeStore();
-const storageStore = useStorageStore();
-const mintsStore = useMintsStore();
-const bucketsStore = useBucketsStore();
-const mnemonicStore = useMnemonicStore();
-const fileUpload = ref<HTMLInputElement | null>(null);
-const selectedLanguage = ref("");
-const languageOptions = [
-  { label: "English", value: "en-US" },
-  { label: "Español", value: "es-ES" },
-  { label: "Italiano", value: "it-IT" },
-  { label: "Deutsch", value: "de-DE" },
-  { label: "Français", value: "fr-FR" },
-  { label: "Svenska", value: "sv-SE" },
-  { label: "Ελληνικά", value: "el-GR" },
-  { label: "Türkçe", value: "tr-TR" },
-  { label: "ไทย", value: "th-TH" },
-  { label: "العربية", value: "ar-SA" },
-  { label: "中文", value: "zh-CN" },
-  { label: "日本語", value: "ja-JP" },
-];
+import TaskChecklist from 'src/components/welcome/TaskChecklist.vue'
+import WelcomeSlides from 'src/components/welcome/WelcomeSlides.vue'
+import PlaceholderDialog from 'src/components/welcome/PlaceholderDialog.vue'
 
-const deferredPrompt = ref<any>(null);
-const slides = ref<{ key: string; component: any; props?: any }[]>([]);
+const CreateKeyDialog = PlaceholderDialog
+const BackupDialog = PlaceholderDialog
+const ChooseMintDrawer = PlaceholderDialog
+const DepositDialog = PlaceholderDialog
+const TestSendDialog = PlaceholderDialog
+const RoleDialog = PlaceholderDialog
+const CreatorSetupDialog = PlaceholderDialog
+const BucketQuickstartDialog = PlaceholderDialog
 
-function buildSlides() {
-  const arr = [
-    { key: "features", component: WelcomeSlideFeatures },
-    { key: "privacy", component: WelcomeSlidePrivacy },
-    { key: "proofs", component: WelcomeSlideProofs },
+const router = useRouter()
+const { t } = useI18n()
+const welcome = useWelcomeStore()
+
+const testSendDone = ref(false)
+const bucketDone = ref(false)
+
+function buildTasks(store: ReturnType<typeof useWelcomeStore>): WelcomeTask[] {
+  return [
     {
-      key: "backup",
-      component: WelcomeSlideBackup,
-      props: { onRevealSeed, onDownloadBackup },
+      id: 'create-key',
+      icon: 'vpn_key',
+      title: t('welcome.tasks.createKey.title'),
+      desc: t('welcome.tasks.createKey.desc'),
+      done: () => store.hasKey,
+      ctas: [],
     },
-    { key: "terms", component: WelcomeSlideTerms },
-    welcomeStore.pwaSlideEligible
-      ? {
-          key: "pwa",
-          component: WelcomeSlidePwa,
-          props: { deferredPrompt },
-        }
-      : null,
     {
-      key: "finish",
-      component: WelcomeSlideFinish,
-      props: {
-        onAddMint: openAddMintDialog,
-        onCreateBuckets: createStarterBuckets,
-        onRestore: openFileDialog,
-      },
+      id: 'backup',
+      icon: 'save',
+      title: t('welcome.tasks.backup.title'),
+      desc: t('welcome.tasks.backup.desc'),
+      requires: ['create-key'],
+      done: () => store.hasBackup,
+      ctas: [],
     },
-  ].filter(Boolean) as any[];
-  slides.value = arr;
-  welcomeStore.setSlides(arr.map((s) => s.key));
+    {
+      id: 'pick-mint',
+      icon: 'account_balance',
+      title: t('welcome.tasks.chooseMint.title'),
+      desc: t('welcome.tasks.chooseMint.desc'),
+      done: () => store.hasMint,
+      ctas: [],
+    },
+    {
+      id: 'deposit',
+      icon: 'add_circle',
+      title: t('welcome.tasks.deposit.title'),
+      desc: t('welcome.tasks.deposit.desc'),
+      optional: true,
+      requires: ['pick-mint'],
+      done: () => store.hasBalance,
+      ctas: [],
+    },
+    {
+      id: 'test-send',
+      icon: 'send',
+      title: t('welcome.tasks.testSend.title'),
+      desc: t('welcome.tasks.testSend.desc'),
+      done: () => testSendDone.value,
+      ctas: [],
+    },
+    {
+      id: 'choose-role',
+      icon: 'person_search',
+      title: t('welcome.tasks.role.title'),
+      desc: t('welcome.tasks.role.desc'),
+      done: () => store.role !== null,
+      ctas: [],
+    },
+    {
+      id: 'creator-setup',
+      icon: 'badge',
+      title: t('welcome.tasks.creatorSetup.title'),
+      desc: t('welcome.tasks.creatorSetup.desc'),
+      requires: ['choose-role'],
+      done: () => store.hasProfile,
+      ctas: [],
+      optional: false,
+    },
+    {
+      id: 'bucket-quickstart',
+      icon: 'inventory_2',
+      title: t('welcome.tasks.buckets.title'),
+      desc: t('welcome.tasks.buckets.desc'),
+      optional: true,
+      done: () => bucketDone.value,
+      ctas: [],
+    },
+  ].filter((t) => (store.role === 'creator' ? true : t.id !== 'creator-setup'))
 }
 
-function changeLanguage(lang: string) {
-  if (lang === "en") {
-    lang = "en-US";
-  }
-  locale.value = lang;
-  localStorage.setItem("cashu.language", lang);
-}
+const tasks = computed<WelcomeTask[]>(() => buildTasks(welcome))
 
-function onChangeFileUpload() {
-  const file = fileUpload.value?.files?.[0];
-  if (file) readFile(file);
-}
+const progressLabel = computed(() => {
+  const required = tasks.value.filter((t) => !t.optional)
+  const done = required.filter((t) => t.done()).length
+  return t('welcome.taskList.progress', { done, total: required.length })
+})
 
-function readFile(file: File) {
-  const reader = new FileReader();
-  reader.onload = (f) => {
-    try {
-      const backup = JSON.parse(String(f.target?.result));
-      storageStore.restoreFromBackup(backup);
-    } catch (e) {}
-  };
-  reader.readAsText(file);
-}
+const canFinish = computed(() => {
+  const required = tasks.value.filter((t) => !t.optional)
+  return required.every((t) => t.done())
+})
 
-function dragFile(ev: DragEvent) {
-  const file = ev.dataTransfer?.files[0];
-  if (file) readFile(file);
-}
-
-function openFileDialog() {
-  fileUpload.value?.click();
-}
-
-function openAddMintDialog() {
-  mintsStore.showAddMintDialog = true;
-}
-
-function createStarterBuckets() {
-  bucketsStore.createStarterBuckets();
-  $q.notify({ type: "positive", message: t("Welcome.buckets.ctaPrimary") });
-}
-
-function onRevealSeed() {
-  $q.dialog({ title: t("Welcome.backup.revealSeed"), message: mnemonicStore.mnemonic });
-}
-
-function onDownloadBackup() {
-  storageStore.exportWalletState();
-}
-
-const showSkip = ref(false);
-
-function handleKeydown(e: KeyboardEvent) {
-  if (e.key === "ArrowLeft") {
-    welcomeStore.goToPrevSlide();
-  } else if (e.key === "ArrowRight") {
-    if (welcomeStore.canGoNext) welcomeStore.goToNextSlide();
-  } else if (e.key === "Enter") {
-    if (welcomeStore.canGoNext) welcomeStore.goToNextSlide();
-  } else if (e.key === "Escape") {
-    if (showSkip.value) {
-      welcomeStore.skipTutorial();
-    } else if (welcomeStore.isLastSlide) {
-      welcomeStore.finishTutorial();
-    } else {
-      e.preventDefault();
-    }
+function runTask(task: WelcomeTask) {
+  switch (task.id) {
+    case 'create-key':
+      showCreateKey.value = true
+      break
+    case 'backup':
+      showBackup.value = true
+      break
+    case 'pick-mint':
+      showChooseMint.value = true
+      break
+    case 'deposit':
+      showDeposit.value = true
+      break
+    case 'test-send':
+      showTestSend.value = true
+      break
+    case 'choose-role':
+      showRole.value = true
+      break
+    case 'creator-setup':
+      showCreator.value = true
+      break
+    case 'bucket-quickstart':
+      showBucketIntro.value = true
+      break
   }
 }
 
-onMounted(() => {
-  welcomeStore.initializeWelcome();
-  const stored = localStorage.getItem("cashu.language");
-  const initLocale = stored || navigator.language || "en-US";
-  selectedLanguage.value = initLocale === "en" ? "en-US" : initLocale;
-  changeLanguage(selectedLanguage.value);
-  window.addEventListener("keydown", handleKeydown);
-  window.addEventListener("beforeinstallprompt", (e: any) => {
-    e.preventDefault();
-    deferredPrompt.value = e;
-  });
-  buildSlides();
-});
+function finish() {
+  welcome.markWelcomeCompleted()
+  router.push('/wallet')
+}
 
-onUnmounted(() => {
-  window.removeEventListener("keydown", handleKeydown);
-});
+const showCreateKey = ref(false)
+const showBackup = ref(false)
+const showChooseMint = ref(false)
+const showDeposit = ref(false)
+const showTestSend = ref(false)
+const showRole = ref(false)
+const showCreator = ref(false)
+const showBucketIntro = ref(false)
 
-watch(
-  () => welcomeStore.currentSlide,
-  () => {
-    // Only optional step is PWA; allow Skip there for a calmer experience.
-    showSkip.value = ["pwa"].includes(
-      slides.value[welcomeStore.currentSlide]?.key,
-    );
-    nextTick(() => {
-      const key = slides.value[welcomeStore.currentSlide]?.key;
-      const el = document.getElementById(`welcome-${key}-title`);
-      el?.focus();
-    });
-  },
-  { immediate: true },
-);
+function onKeyCreated() {
+  showCreateKey.value = false
+  showBackup.value = true
+}
+function onBackupDone() {
+  showBackup.value = false
+}
+function onMintChosen() {
+  showChooseMint.value = false
+}
+function onDepositPaid() {
+  showDeposit.value = false
+}
+function onTestSendOk() {
+  testSendDone.value = true
+  showTestSend.value = false
+}
+function onRoleSelected(role?: any) {
+  if (role) welcome.setRole(role)
+  showRole.value = false
+}
+function onCreatorDone() {
+  showCreator.value = false
+}
+function onBucketDone() {
+  bucketDone.value = true
+  showBucketIntro.value = false
+}
 </script>
-
-<style scoped>
-.q-card {
-  height: 100%;
-}
-.q-carousel {
-  flex: 1;
-}
-</style>
