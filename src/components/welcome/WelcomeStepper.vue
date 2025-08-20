@@ -27,14 +27,7 @@
     </q-step>
     <q-step :name="3" title="Add sats (optional)" :done="welcome.balanceSats > 0">
       <div class="q-pa-md">
-        <div class="text-h4 text-weight-bold q-mb-md">
-          Add sats
-          <span
-            id="nostr-status-chip"
-            :class="chipClass"
-            >{{ welcome.nostrReady ? 'Nostr: Ready' : 'Nostr: Not set' }}</span
-          >
-        </div>
+        <div class="text-h4 text-weight-bold q-mb-md">Add sats</div>
         <TaskModalAddSats inline />
         <Coachmark title="Optional">
           You can also skip now and fund later from the Wallet page.
@@ -49,7 +42,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useWelcomeStore } from 'src/stores/welcome'
 import TaskModalIdentity from './TaskModalIdentity.vue'
@@ -60,12 +53,6 @@ import Coachmark from './Coachmark.vue'
 const welcome = useWelcomeStore()
 const router = useRouter()
 const step = ref(1)
-
-const chipClass = computed(() =>
-  welcome.nostrReady
-    ? 'ml-2 inline-flex items-center rounded-full bg-emerald-600 px-2 py-0.5 text-[11px] font-medium text-white'
-    : 'ml-2 inline-flex items-center rounded-full bg-slate-700 px-2 py-0.5 text-[11px] font-medium text-slate-300',
-)
 
 function nextIf(cond: boolean) {
   if (cond) step.value++
