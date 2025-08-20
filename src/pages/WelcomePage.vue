@@ -1,6 +1,12 @@
 <template>
   <q-page class="q-pa-md welcome">
-    <div class="row q-col-gutter-md">
+    <div class="q-mb-md">
+      <q-toggle v-model="guided" label="Guided setup" />
+    </div>
+    <div v-if="guided">
+      <WelcomeStepper />
+    </div>
+    <div v-else class="row q-col-gutter-md">
       <div class="col-12 col-md-4">
         <TaskChecklist
           :tasks="tasks"
@@ -14,20 +20,21 @@
         <LearnCards />
       </div>
     </div>
-    <TaskModalIdentity v-model="showIdentity" />
-    <TaskModalMint v-model="showMint" />
-    <TaskModalAddSats v-model="showAddSats" />
+    <TaskModalIdentity v-if="!guided" v-model="showIdentity" />
+    <TaskModalMint v-if="!guided" v-model="showMint" />
+    <TaskModalAddSats v-if="!guided" v-model="showAddSats" />
   </q-page>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import TaskChecklist from 'src/components/welcome/TaskChecklist.vue'
 import LearnCards from 'src/components/welcome/LearnCards.vue'
 import TaskModalIdentity from 'src/components/welcome/TaskModalIdentity.vue'
 import TaskModalMint from 'src/components/welcome/TaskModalMint.vue'
 import TaskModalAddSats from 'src/components/welcome/TaskModalAddSats.vue'
+import WelcomeStepper from 'src/components/welcome/WelcomeStepper.vue'
 import { useWelcomeStore } from 'src/stores/welcome'
 import type { WelcomeTask } from 'src/types/welcome'
 
@@ -37,6 +44,8 @@ const welcome = useWelcomeStore()
 const showIdentity = ref(false)
 const showMint = ref(false)
 const showAddSats = ref(false)
+const guided = ref(localStorage.getItem('cashu.welcome.guided') === 'true')
+watch(guided, v => localStorage.setItem('cashu.welcome.guided', String(v)))
 
 const tasks = computed<WelcomeTask[]>(() => [
   {

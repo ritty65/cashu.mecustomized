@@ -2004,7 +2004,7 @@ export const messages = {
       title: "Pick who bridges you to Lightning",
       body: "The mint converts Lightning payments ↔ ecash. You can switch later.",
       cta: {
-        recommended: "Use recommended mint",
+        recommended: "Browse mints",
         custom: "Choose custom mint",
       },
     },
