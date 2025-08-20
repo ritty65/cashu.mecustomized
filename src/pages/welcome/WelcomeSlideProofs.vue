@@ -7,7 +7,9 @@
       </h1>
       <p class="q-mt-sm">{{ $t("Welcome.proofs.lead") }}</p>
       <ul class="q-mt-md text-left" style="display: inline-block">
-        <li v-for="(b, i) in $tm('Welcome.proofs.bullets')" :key="i">{{ b }}</li>
+        <li v-for="(b, i) in $tm('Welcome.proofs.bullets')" :key="i">
+          {{ b }}
+        </li>
       </ul>
       <p class="q-mt-sm">{{ $t("Welcome.proofs.tip") }}</p>
     </div>

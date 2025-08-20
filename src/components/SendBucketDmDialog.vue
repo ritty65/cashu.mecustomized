@@ -106,101 +106,101 @@ const mode = ref<"amount" | "proofs">("amount");
 const selectedSecrets = ref<string[]>([]);
 
 const modeOptions = [
-  { label: t("SendBucketDmDialog.options.amount"), value: "amount" },
-  { label: t("SendBucketDmDialog.options.proofs"), value: "proofs" },
+	{ label: t("SendBucketDmDialog.options.amount"), value: "amount" },
+	{ label: t("SendBucketDmDialog.options.proofs"), value: "proofs" },
 ];
 
 const bucketProofs = computed<WalletProof[]>(() =>
-  proofsStore.proofs.filter(
-    (p) => p.bucketId === props.bucketId && !p.reserved,
-  ),
+	proofsStore.proofs.filter(
+		(p) => p.bucketId === props.bucketId && !p.reserved,
+	),
 );
 
 const formattedBalance = computed(() =>
-  uiStore.formatCurrency(
-    bucketBalances.value[props.bucketId] ?? 0,
-    activeUnit.value,
-  ),
+	uiStore.formatCurrency(
+		bucketBalances.value[props.bucketId] ?? 0,
+		activeUnit.value,
+	),
 );
 
 const isValidRecipient = computed(() =>
-  p2pkStore.isValidPubkey(recipient.value),
+	p2pkStore.isValidPubkey(recipient.value),
 );
 
 function formatCurrency(a: number, unit: string) {
-  return uiStore.formatCurrency(a, unit);
+	return uiStore.formatCurrency(a, unit);
 }
 
 function toggleProof(secret: string, val: boolean) {
-  if (val) {
-    if (!selectedSecrets.value.includes(secret))
-      selectedSecrets.value.push(secret);
-  } else {
-    selectedSecrets.value = selectedSecrets.value.filter((s) => s !== secret);
-  }
+	if (val) {
+		if (!selectedSecrets.value.includes(secret))
+			selectedSecrets.value.push(secret);
+	} else {
+		selectedSecrets.value = selectedSecrets.value.filter((s) => s !== secret);
+	}
 }
 
 const sendDisabled = computed(() => {
-  if (!isValidRecipient.value) return true;
-  if (mode.value === "amount") return !(amount.value && amount.value > 0);
-  return selectedSecrets.value.length === 0;
+	if (!isValidRecipient.value) return true;
+	if (mode.value === "amount") return !(amount.value && amount.value > 0);
+	return selectedSecrets.value.length === 0;
 });
 
 function reset() {
-  recipient.value = "";
-  amount.value = null;
-  memo.value = "";
-  mode.value = "amount";
-  selectedSecrets.value = [];
+	recipient.value = "";
+	amount.value = null;
+	memo.value = "";
+	mode.value = "amount";
+	selectedSecrets.value = [];
 }
 
 function showDialog(npub?: string) {
-  reset();
-  recipient.value = npub || props.prefillNpub || "";
-  show.value = true;
+	reset();
+	recipient.value = npub || props.prefillNpub || "";
+	show.value = true;
 }
 
 function hideDialog() {
-  show.value = false;
+	show.value = false;
 }
 
 defineExpose({ show: showDialog, hide: hideDialog });
 
 function cancel() {
-  hideDialog();
+	hideDialog();
 }
 
 async function confirm() {
-  if (!isValidRecipient.value) {
-    hideDialog();
-    return;
-  }
-  if (mode.value === "amount") {
-    if (!amount.value) {
-      hideDialog();
-      return;
-    }
-    await messenger.sendToken(
-      recipient.value,
-      amount.value,
-      props.bucketId,
-      memo.value.trim() || undefined,
-    );
-  } else {
-    const proofs = bucketProofs.value.filter((p) =>
-      selectedSecrets.value.includes(p.secret),
-    );
-    if (!proofs.length) {
-      hideDialog();
-      return;
-    }
-    await messenger.sendTokenFromProofs(
-      recipient.value,
-      proofs,
-      props.bucketId,
-      memo.value.trim() || undefined,
-    );
-  }
-  hideDialog();
+	if (!isValidRecipient.value) {
+		hideDialog();
+		return;
+	}
+	if (mode.value === "amount") {
+		if (!amount.value) {
+			hideDialog();
+			return;
+		}
+		await messenger.sendToken(
+			recipient.value,
+			amount.value,
+			props.bucketId,
+			memo.value.trim() || undefined,
+		);
+	} else {
+		const proofs = bucketProofs.value.filter((p) =>
+			selectedSecrets.value.includes(p.secret),
+		);
+		if (!proofs.length) {
+			hideDialog();
+			return;
+		}
+		await messenger.sendTokenFromProofs(
+			recipient.value,
+			proofs,
+			props.bucketId,
+			memo.value.trim() || undefined,
+		);
+	}
+	hideDialog();
 }
 </script>

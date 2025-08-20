@@ -1,9 +1,13 @@
-import { serializeProof, blindMessage } from './crypto/client/index.js';
-import { getSignedProofs } from './crypto/client/NUT11.js';
-import { hashToCurve, pointFromHex, type Proof as NUT11Proof } from './crypto/common/index.js';
-import { CashuMint } from './CashuMint.js';
-import { BlindedMessage } from './model/BlindedMessage.js';
-import { MintInfo } from './model/MintInfo.js';
+import { serializeProof, blindMessage } from "./crypto/client/index.js";
+import { getSignedProofs } from "./crypto/client/NUT11.js";
+import {
+	hashToCurve,
+	pointFromHex,
+	type Proof as NUT11Proof,
+} from "./crypto/common/index.js";
+import { CashuMint } from "./CashuMint.js";
+import { BlindedMessage } from "./model/BlindedMessage.js";
+import { MintInfo } from "./model/MintInfo.js";
 import {
 	GetInfoResponse,
 	MeltProofOptions,
@@ -34,24 +38,24 @@ import {
 	SwapTransaction,
 	LockedMintQuoteResponse,
 	PartialMintQuoteResponse,
-	PartialMeltQuoteResponse
-} from './model/types/index.js';
-import { SubscriptionCanceller } from './model/types/wallet/websocket.js';
+	PartialMeltQuoteResponse,
+} from "./model/types/index.js";
+import { SubscriptionCanceller } from "./model/types/wallet/websocket.js";
 import {
 	getDecodedToken,
 	getKeepAmounts,
 	hasValidDleq,
 	splitAmount,
 	stripDleq,
-	sumProofs
-} from './utils.js';
-import { signMintQuote } from './crypto/client/NUT20.js';
+	sumProofs,
+} from "./utils.js";
+import { signMintQuote } from "./crypto/client/NUT20.js";
 import {
 	OutputData,
 	OutputDataFactory,
 	OutputDataLike,
-	isOutputDataFactory
-} from './model/OutputData.js';
+	isOutputDataFactory,
+} from "./model/OutputData.js";
 
 /**
  * The default number of proofs per denomination to keep in a wallet.
@@ -61,7 +65,7 @@ const DEFAULT_DENOMINATION_TARGET = 3;
 /**
  * The default unit for the wallet, if not specified in constructor.
  */
-const DEFAULT_UNIT = 'sat';
+const DEFAULT_UNIT = "sat";
 
 /**
  * Class that represents a Cashu wallet.
@@ -100,7 +104,7 @@ class CashuWallet {
 			bip39seed?: Uint8Array;
 			denominationTarget?: number;
 			keepFactory?: OutputDataFactory;
-		}
+		},
 	) {
 		this.mint = mint;
 		let keys: Array<MintKeys> = [];
@@ -122,7 +126,7 @@ class CashuWallet {
 				this._seed = options.bip39seed;
 				return;
 			}
-			throw new Error('bip39seed must be a valid UInt8Array');
+			throw new Error("bip39seed must be a valid UInt8Array");
 		}
 		if (options?.keepFactory) {
 			this._keepFactory = options.keepFactory;
@@ -137,7 +141,7 @@ class CashuWallet {
 	}
 	get keysetId(): string {
 		if (!this._keysetId) {
-			throw new Error('No keysetId set');
+			throw new Error("No keysetId set");
 		}
 		return this._keysetId;
 	}
@@ -149,7 +153,7 @@ class CashuWallet {
 	}
 	get mintInfo(): MintInfo {
 		if (!this._mintInfo) {
-			throw new Error('Mint info not loaded');
+			throw new Error("Mint info not loaded");
 		}
 		return this._mintInfo;
 	}
@@ -196,13 +200,16 @@ class CashuWallet {
 		let activeKeysets = keysets.filter((k: MintKeyset) => k.active);
 
 		// we only consider keyset IDs that start with "00"
-		activeKeysets = activeKeysets.filter((k: MintKeyset) => k.id.startsWith('00'));
+		activeKeysets = activeKeysets.filter((k: MintKeyset) =>
+			k.id.startsWith("00"),
+		);
 
 		const activeKeyset = activeKeysets.sort(
-			(a: MintKeyset, b: MintKeyset) => (a.input_fee_ppk ?? 0) - (b.input_fee_ppk ?? 0)
+			(a: MintKeyset, b: MintKeyset) =>
+				(a.input_fee_ppk ?? 0) - (b.input_fee_ppk ?? 0),
 		)[0];
 		if (!activeKeyset) {
-			throw new Error('No active keyset found');
+			throw new Error("No active keyset found");
 		}
 		return activeKeyset;
 	}
@@ -213,7 +220,9 @@ class CashuWallet {
 	 */
 	async getKeySets(): Promise<Array<MintKeyset>> {
 		const allKeysets = await this.mint.getKeySets();
-		const unitKeysets = allKeysets.keysets.filter((k: MintKeyset) => k.unit === this._unit);
+		const unitKeysets = allKeysets.keysets.filter(
+			(k: MintKeyset) => k.unit === this._unit,
+		);
 		this._keysets = unitKeysets;
 		return this._keysets;
 	}
@@ -252,7 +261,9 @@ class CashuWallet {
 		if (!this._keysets.find((k: MintKeyset) => k.id === keysetId)) {
 			await this.getKeySets();
 			if (!this._keysets.find((k: MintKeyset) => k.id === keysetId)) {
-				throw new Error(`could not initialize keys. No keyset with id '${keysetId}' found`);
+				throw new Error(
+					`could not initialize keys. No keyset with id '${keysetId}' found`,
+				);
 			}
 		}
 
@@ -273,21 +284,35 @@ class CashuWallet {
 	 * @param {ReceiveOptions} [options] - Optional configuration for token processing
 	 * @returns New token with newly created proofs, token entries that had errors
 	 */
-	async receive(token: string | Token, options?: ReceiveOptions): Promise<Array<Proof>> {
-		const { requireDleq, keysetId, outputAmounts, counter, pubkey, privkey, outputData, p2pk } =
-			options || {};
+	async receive(
+		token: string | Token,
+		options?: ReceiveOptions,
+	): Promise<Array<Proof>> {
+		const {
+			requireDleq,
+			keysetId,
+			outputAmounts,
+			counter,
+			pubkey,
+			privkey,
+			outputData,
+			p2pk,
+		} = options || {};
 
-		if (typeof token === 'string') {
+		if (typeof token === "string") {
 			token = getDecodedToken(token);
 		}
 		const keys = await this.getKeys(keysetId);
 		if (requireDleq) {
 			if (token.proofs.some((p: Proof) => !hasValidDleq(p, keys))) {
-				throw new Error('Token contains proofs with invalid DLEQ');
+				throw new Error("Token contains proofs with invalid DLEQ");
 			}
 		}
-		const amount = sumProofs(token.proofs) - this.getFeesForProofs(token.proofs);
-		let newOutputData: { send: Array<OutputDataLike> | OutputDataFactory } | undefined = undefined;
+		const amount =
+			sumProofs(token.proofs) - this.getFeesForProofs(token.proofs);
+		let newOutputData:
+			| { send: Array<OutputDataLike> | OutputDataFactory }
+			| undefined = undefined;
 		if (outputData) {
 			newOutputData = { send: outputData };
 		} else if (this._keepFactory) {
@@ -302,10 +327,12 @@ class CashuWallet {
 			pubkey,
 			privkey,
 			newOutputData,
-			p2pk
+			p2pk,
 		);
 		const { signatures } = await this.mint.swap(swapTransaction.payload);
-		const proofs = swapTransaction.outputData.map((d, i) => d.toProof(signatures[i], keys));
+		const proofs = swapTransaction.outputData.map((d, i) =>
+			d.toProof(signatures[i], keys),
+		);
 		const orderedProofs: Array<Proof> = [];
 		swapTransaction.sortedIndices.forEach((s, o) => {
 			orderedProofs[s] = proofs[o];
@@ -320,7 +347,11 @@ class CashuWallet {
 	 * @param {SendOptions} [options] - Optional parameters for configuring the send operation
 	 * @returns {SendResponse}
 	 */
-	async send(amount: number, proofs: Array<Proof>, options?: SendOptions): Promise<SendResponse> {
+	async send(
+		amount: number,
+		proofs: Array<Proof>,
+		options?: SendOptions,
+	): Promise<SendResponse> {
 		const {
 			proofsWeHave,
 			offline,
@@ -330,20 +361,19 @@ class CashuWallet {
 			outputAmounts,
 			pubkey,
 			privkey,
-			outputData
+			outputData,
 		} = options || {};
 		if (includeDleq) {
 			proofs = proofs.filter((p: Proof) => p.dleq != undefined);
 		}
 		if (sumProofs(proofs) < amount) {
-			throw new Error('Not enough funds available to send');
+			throw new Error("Not enough funds available to send");
 		}
-		const { keep: keepProofsOffline, send: sendProofOffline } = this.selectProofsToSend(
-			proofs,
-			amount,
-			options?.includeFees
-		);
-		const expectedFee = includeFees ? this.getFeesForProofs(sendProofOffline) : 0;
+		const { keep: keepProofsOffline, send: sendProofOffline } =
+			this.selectProofsToSend(proofs, amount, options?.includeFees);
+		const expectedFee = includeFees
+			? this.getFeesForProofs(sendProofOffline)
+			: 0;
 		if (
 			!offline &&
 			(sumProofs(sendProofOffline) != amount + expectedFee || // if the exact amount cannot be selected
@@ -355,11 +385,8 @@ class CashuWallet {
 		) {
 			// we need to swap
 			// input selection, needs fees because of the swap
-			const { keep: keepProofsSelect, send: sendProofs } = this.selectProofsToSend(
-				proofs,
-				amount,
-				true
-			);
+			const { keep: keepProofsSelect, send: sendProofs } =
+				this.selectProofsToSend(proofs, amount, true);
 			proofsWeHave?.push(...keepProofsSelect);
 
 			const sendRes = await this.swap(amount, sendProofs, options);
@@ -375,7 +402,7 @@ class CashuWallet {
 		}
 
 		if (sumProofs(sendProofOffline) < amount + expectedFee) {
-			throw new Error('Not enough funds available to send');
+			throw new Error("Not enough funds available to send");
 		}
 
 		if (!includeDleq) {
@@ -388,9 +415,11 @@ class CashuWallet {
 	selectProofsToSend(
 		proofs: Array<Proof>,
 		amountToSend: number,
-		includeFees?: boolean
+		includeFees?: boolean,
 	): SendResponse {
-		const sortedProofs = proofs.sort((a: Proof, b: Proof) => a.amount - b.amount);
+		const sortedProofs = proofs.sort(
+			(a: Proof, b: Proof) => a.amount - b.amount,
+		);
 		const smallerProofs = sortedProofs
 			.filter((p: Proof) => p.amount <= amountToSend)
 			.sort((a: Proof, b: Proof) => b.amount - a.amount);
@@ -401,7 +430,7 @@ class CashuWallet {
 		if (!smallerProofs.length && nextBigger) {
 			return {
 				keep: proofs.filter((p: Proof) => p.secret !== nextBigger.secret),
-				send: [nextBigger]
+				send: [nextBigger],
 			};
 		}
 
@@ -418,20 +447,25 @@ class CashuWallet {
 			const { keep, send } = this.selectProofsToSend(
 				smallerProofs.slice(1),
 				remainder,
-				includeFees
+				includeFees,
 			);
 			selectedProofs.push(...send);
 			returnedProofs.push(...keep);
 		}
 
-		const selectedFeePPK = includeFees ? this.getFeesForProofs(selectedProofs) : 0;
-		if (sumProofs(selectedProofs) < amountToSend + selectedFeePPK && nextBigger) {
+		const selectedFeePPK = includeFees
+			? this.getFeesForProofs(selectedProofs)
+			: 0;
+		if (
+			sumProofs(selectedProofs) < amountToSend + selectedFeePPK &&
+			nextBigger
+		) {
 			selectedProofs = [nextBigger];
 		}
 
 		return {
 			keep: proofs.filter((p: Proof) => !selectedProofs.includes(p)),
-			send: selectedProofs
+			send: selectedProofs,
 		};
 	}
 
@@ -442,12 +476,14 @@ class CashuWallet {
 	 */
 	getFeesForProofs(proofs: Array<Proof>): number {
 		if (!this._keysets.length) {
-			throw new Error('Could not calculate fees. No keysets found');
+			throw new Error("Could not calculate fees. No keysets found");
 		}
 		const keysetIds = new Set(proofs.map((p: Proof) => p.id));
 		keysetIds.forEach((id: string) => {
 			if (!this._keysets.find((k: MintKeyset) => k.id === id)) {
-				throw new Error(`Could not calculate fees. No keyset found with id: ${id}`);
+				throw new Error(
+					`Could not calculate fees. No keyset found with id: ${id}`,
+				);
 			}
 		});
 
@@ -455,13 +491,15 @@ class CashuWallet {
 			Math.max(
 				(proofs.reduce(
 					(total: number, curr: Proof) =>
-						total + (this._keysets.find((k: MintKeyset) => k.id === curr.id)?.input_fee_ppk || 0),
-					0
+						total +
+						(this._keysets.find((k: MintKeyset) => k.id === curr.id)
+							?.input_fee_ppk || 0),
+					0,
 				) +
 					999) /
 					1000,
-				0
-			)
+				0,
+			),
 		);
 		return fees;
 	}
@@ -475,11 +513,13 @@ class CashuWallet {
 	getFeesForKeyset(nInputs: number, keysetId: string): number {
 		const fees = Math.floor(
 			Math.max(
-				(nInputs * (this._keysets.find((k: MintKeyset) => k.id === keysetId)?.input_fee_ppk || 0) +
+				(nInputs *
+					(this._keysets.find((k: MintKeyset) => k.id === keysetId)
+						?.input_fee_ppk || 0) +
 					999) /
 					1000,
-				0
-			)
+				0,
+			),
 		);
 		return fees;
 	}
@@ -491,25 +531,42 @@ class CashuWallet {
 	 *  @param {SwapOptions} [options] - Optional parameters for configuring the swap operation
 	 * @returns promise of the change- and send-proofs
 	 */
-	async swap(amount: number, proofs: Array<Proof>, options?: SwapOptions): Promise<SendResponse> {
+	async swap(
+		amount: number,
+		proofs: Array<Proof>,
+		options?: SwapOptions,
+	): Promise<SendResponse> {
 		let { outputAmounts } = options || {};
-		const { includeFees, keysetId, counter, pubkey, privkey, proofsWeHave, outputData, p2pk } =
-			options || {};
+		const {
+			includeFees,
+			keysetId,
+			counter,
+			pubkey,
+			privkey,
+			proofsWeHave,
+			outputData,
+			p2pk,
+		} = options || {};
 		const keyset = await this.getKeys(keysetId);
 
 		const proofsToSend = proofs;
 		let amountToSend = amount;
 		const amountAvailable = sumProofs(proofs);
-		let amountToKeep = amountAvailable - amountToSend - this.getFeesForProofs(proofsToSend);
+		let amountToKeep =
+			amountAvailable - amountToSend - this.getFeesForProofs(proofsToSend);
 		// send output selection
-		let sendAmounts = outputAmounts?.sendAmounts || splitAmount(amountToSend, keyset.keys);
+		let sendAmounts =
+			outputAmounts?.sendAmounts || splitAmount(amountToSend, keyset.keys);
 
 		// include the fees to spend the the outputs of the swap
 		if (includeFees) {
 			let outputFee = this.getFeesForKeyset(sendAmounts.length, keyset.id);
 			let sendAmountsFee = splitAmount(outputFee, keyset.keys);
 			while (
-				this.getFeesForKeyset(sendAmounts.concat(sendAmountsFee).length, keyset.id) > outputFee
+				this.getFeesForKeyset(
+					sendAmounts.concat(sendAmountsFee).length,
+					keyset.id,
+				) > outputFee
 			) {
 				outputFee++;
 				sendAmountsFee = splitAmount(outputFee, keyset.keys);
@@ -526,11 +583,14 @@ class CashuWallet {
 				proofsWeHave,
 				amountToKeep,
 				keyset.keys,
-				this._denominationTarget
+				this._denominationTarget,
 			);
 		} else if (outputAmounts) {
-			if (outputAmounts.keepAmounts?.reduce((a: number, b: number) => a + b, 0) != amountToKeep) {
-				throw new Error('Keep amounts do not match amount to keep');
+			if (
+				outputAmounts.keepAmounts?.reduce((a: number, b: number) => a + b, 0) !=
+				amountToKeep
+			) {
+				throw new Error("Keep amounts do not match amount to keep");
 			}
 			keepAmounts = outputAmounts.keepAmounts;
 		}
@@ -538,19 +598,22 @@ class CashuWallet {
 		if (amountToSend + this.getFeesForProofs(proofsToSend) > amountAvailable) {
 			console.error(
 				`Not enough funds available (${amountAvailable}) for swap amountToSend: ${amountToSend} + fee: ${this.getFeesForProofs(
-					proofsToSend
-				)} | length: ${proofsToSend.length}`
+					proofsToSend,
+				)} | length: ${proofsToSend.length}`,
 			);
 			throw new Error(`Not enough funds available for swap`);
 		}
 
-		if (amountToSend + this.getFeesForProofs(proofsToSend) + amountToKeep != amountAvailable) {
-			throw new Error('Amounts do not match for swap');
+		if (
+			amountToSend + this.getFeesForProofs(proofsToSend) + amountToKeep !=
+			amountAvailable
+		) {
+			throw new Error("Amounts do not match for swap");
 		}
 
 		outputAmounts = {
 			keepAmounts: keepAmounts,
-			sendAmounts: sendAmounts
+			sendAmounts: sendAmounts,
 		};
 
 		const keepOutputData = outputData?.keep || this._keepFactory;
@@ -565,10 +628,12 @@ class CashuWallet {
 			pubkey,
 			privkey,
 			{ keep: keepOutputData, send: sendOutputData },
-			p2pk
+			p2pk,
 		);
 		const { signatures } = await this.mint.swap(swapTransaction.payload);
-		const swapProofs = swapTransaction.outputData.map((d, i) => d.toProof(signatures[i], keyset));
+		const swapProofs = swapTransaction.outputData.map((d, i) =>
+			d.toProof(signatures[i], keyset),
+		);
 		const splitProofsToKeep: Array<Proof> = [];
 		const splitProofsToSend: Array<Proof> = [];
 		const reorderedKeepVector = Array(swapTransaction.keepVector.length);
@@ -586,7 +651,7 @@ class CashuWallet {
 		});
 		return {
 			keep: splitProofsToKeep,
-			send: splitProofsToSend
+			send: splitProofsToSend,
 		};
 	}
 
@@ -601,11 +666,16 @@ class CashuWallet {
 		amount: number,
 		proofs: Array<Proof>,
 		secret: string | Uint8Array,
-		options?: SwapOptions
+		options?: SwapOptions,
 	): Promise<SendResponse> {
-		const secretBytes = typeof secret === 'string' ? new TextEncoder().encode(secret) : secret;
+		const secretBytes =
+			typeof secret === "string" ? new TextEncoder().encode(secret) : secret;
 		const keyset = await this.getKeys(options?.keysetId);
-		const customOutput = this.createOutputDataFromSecret(amount, keyset, secretBytes);
+		const customOutput = this.createOutputDataFromSecret(
+			amount,
+			keyset,
+			secretBytes,
+		);
 		const keepData = options?.outputData?.keep || this._keepFactory;
 		const sendData = options?.outputData?.send;
 		const newOptions: SwapOptions = {
@@ -613,8 +683,10 @@ class CashuWallet {
 			outputAmounts: { sendAmounts: [amount] },
 			outputData: {
 				keep: keepData,
-				send: [customOutput].concat(sendData && Array.isArray(sendData) ? sendData : [])
-			}
+				send: [customOutput].concat(
+					sendData && Array.isArray(sendData) ? sendData : [],
+				),
+			},
 		};
 		return this.swap(amount, proofs, newOptions);
 	}
@@ -630,7 +702,7 @@ class CashuWallet {
 		gapLimit = 300,
 		batchSize = 100,
 		counter = 0,
-		keysetId?: string
+		keysetId?: string,
 	): Promise<{ proofs: Array<Proof>; lastCounterWithSignature?: number }> {
 		const requiredEmptyBatches = Math.ceil(gapLimit / batchSize);
 		const restoredProofs: Array<Proof> = [];
@@ -661,12 +733,14 @@ class CashuWallet {
 	async restore(
 		start: number,
 		count: number,
-		options?: RestoreOptions
+		options?: RestoreOptions,
 	): Promise<{ proofs: Array<Proof>; lastCounterWithSignature?: number }> {
 		const { keysetId } = options || {};
 		const keys = await this.getKeys(keysetId);
 		if (!this._seed) {
-			throw new Error('CashuWallet must be initialized with a seed to use restore');
+			throw new Error(
+				"CashuWallet must be initialized with a seed to use restore",
+			);
 		}
 		// create blank amounts for unknown restore amounts
 		const amounts = Array(count).fill(1);
@@ -675,11 +749,11 @@ class CashuWallet {
 			this._seed,
 			start,
 			keys,
-			amounts
+			amounts,
 		);
 
 		const { outputs, signatures } = await this.mint.restore({
-			outputs: outputData.map((d) => d.blindedMessage)
+			outputs: outputData.map((d) => d.blindedMessage),
 		});
 
 		const signatureMap: { [sig: string]: SerializedBlindedSignature } = {};
@@ -699,7 +773,7 @@ class CashuWallet {
 
 		return {
 			proofs: restoredProofs,
-			lastCounterWithSignature
+			lastCounterWithSignature,
 		};
 	}
 
@@ -710,14 +784,21 @@ class CashuWallet {
 	 * @param pubkey optional public key to lock the quote to
 	 * @returns the mint will return a mint quote with a Lightning invoice for minting tokens of the specified amount and unit
 	 */
-	async createMintQuote(amount: number, description?: string): Promise<MintQuoteResponse> {
+	async createMintQuote(
+		amount: number,
+		description?: string,
+	): Promise<MintQuoteResponse> {
 		const mintQuotePayload: MintQuotePayload = {
 			unit: this._unit,
 			amount: amount,
-			description: description
+			description: description,
 		};
 		const res = await this.mint.createMintQuote(mintQuotePayload);
-		return { ...res, amount: res.amount || amount, unit: res.unit || this.unit };
+		return {
+			...res,
+			amount: res.amount || amount,
+			unit: res.unit || this.unit,
+		};
 	}
 
 	/**
@@ -731,24 +812,29 @@ class CashuWallet {
 	async createLockedMintQuote(
 		amount: number,
 		pubkey: string,
-		description?: string
+		description?: string,
 	): Promise<LockedMintQuoteResponse> {
 		const { supported } = (await this.getMintInfo()).isSupported(20);
 		if (!supported) {
-			throw new Error('Mint does not support NUT-20');
+			throw new Error("Mint does not support NUT-20");
 		}
 		const mintQuotePayload: MintQuotePayload = {
 			unit: this._unit,
 			amount: amount,
 			description: description,
-			pubkey: pubkey
+			pubkey: pubkey,
 		};
 		const res = await this.mint.createMintQuote(mintQuotePayload);
-		if (typeof res.pubkey !== 'string') {
-			throw new Error('Mint returned unlocked mint quote');
+		if (typeof res.pubkey !== "string") {
+			throw new Error("Mint returned unlocked mint quote");
 		} else {
 			const pubkey = res.pubkey;
-			return { ...res, pubkey, amount: res.amount || amount, unit: res.unit || this.unit };
+			return {
+				...res,
+				pubkey,
+				amount: res.amount || amount,
+				unit: res.unit || this.unit,
+			};
 		}
 	}
 
@@ -760,14 +846,18 @@ class CashuWallet {
 	async checkMintQuote(quote: MintQuoteResponse): Promise<MintQuoteResponse>;
 	async checkMintQuote(quote: string): Promise<PartialMintQuoteResponse>;
 	async checkMintQuote(
-		quote: string | MintQuoteResponse
+		quote: string | MintQuoteResponse,
 	): Promise<MintQuoteResponse | PartialMintQuoteResponse> {
-		const quoteId = typeof quote === 'string' ? quote : quote.quote;
+		const quoteId = typeof quote === "string" ? quote : quote.quote;
 		const baseRes = await this.mint.checkMintQuote(quoteId);
-		if (typeof quote === 'string') {
+		if (typeof quote === "string") {
 			return baseRes;
 		}
-		return { ...baseRes, amount: baseRes.amount || quote.amount, unit: baseRes.unit || quote.unit };
+		return {
+			...baseRes,
+			amount: baseRes.amount || quote.amount,
+			unit: baseRes.unit || quote.unit,
+		};
 	}
 
 	/**
@@ -781,32 +871,49 @@ class CashuWallet {
 	async mintProofs(
 		amount: number,
 		quote: MintQuoteResponse,
-		options: MintProofOptions & { privateKey: string }
+		options: MintProofOptions & { privateKey: string },
 	): Promise<Array<Proof>>;
 	async mintProofs(
 		amount: number,
 		quote: string,
-		options?: MintProofOptions
+		options?: MintProofOptions,
 	): Promise<Array<Proof>>;
 	async mintProofs(
 		amount: number,
 		quote: string | MintQuoteResponse,
-		options?: MintProofOptions & { privateKey?: string }
+		options?: MintProofOptions & { privateKey?: string },
 	): Promise<Array<Proof>> {
 		let { outputAmounts } = options || {};
-		const { counter, pubkey, p2pk, keysetId, proofsWeHave, outputData, privateKey } = options || {};
+		const {
+			counter,
+			pubkey,
+			p2pk,
+			keysetId,
+			proofsWeHave,
+			outputData,
+			privateKey,
+		} = options || {};
 
 		const keyset = await this.getKeys(keysetId);
 		if (!outputAmounts && proofsWeHave) {
 			outputAmounts = {
-				keepAmounts: getKeepAmounts(proofsWeHave, amount, keyset.keys, this._denominationTarget),
-				sendAmounts: []
+				keepAmounts: getKeepAmounts(
+					proofsWeHave,
+					amount,
+					keyset.keys,
+					this._denominationTarget,
+				),
+				sendAmounts: [],
 			};
 		}
 		let newBlindingData: Array<OutputData> = [];
 		if (outputData) {
 			if (isOutputDataFactory(outputData)) {
-				const amounts = splitAmount(amount, keyset.keys, outputAmounts?.keepAmounts);
+				const amounts = splitAmount(
+					amount,
+					keyset.keys,
+					outputAmounts?.keepAmounts,
+				);
 				for (let i = 0; i < amounts.length; i++) {
 					newBlindingData.push(outputData(amounts[i], keyset));
 				}
@@ -814,7 +921,11 @@ class CashuWallet {
 				newBlindingData = outputData;
 			}
 		} else if (this._keepFactory) {
-			const amounts = splitAmount(amount, keyset.keys, outputAmounts?.keepAmounts);
+			const amounts = splitAmount(
+				amount,
+				keyset.keys,
+				outputAmounts?.keepAmounts,
+			);
 			for (let i = 0; i < amounts.length; i++) {
 				newBlindingData.push(this._keepFactory(amounts[i], keyset));
 			}
@@ -825,25 +936,29 @@ class CashuWallet {
 				counter,
 				pubkey,
 				outputAmounts?.keepAmounts,
-				p2pk
+				p2pk,
 			);
 		}
 		let mintPayload: MintPayload;
-		if (typeof quote !== 'string') {
+		if (typeof quote !== "string") {
 			if (!privateKey) {
-				throw new Error('Can not sign locked quote without private key');
+				throw new Error("Can not sign locked quote without private key");
 			}
 			const blindedMessages = newBlindingData.map((d) => d.blindedMessage);
-			const mintQuoteSignature = signMintQuote(privateKey, quote.quote, blindedMessages);
+			const mintQuoteSignature = signMintQuote(
+				privateKey,
+				quote.quote,
+				blindedMessages,
+			);
 			mintPayload = {
 				outputs: blindedMessages,
 				quote: quote.quote,
-				signature: mintQuoteSignature
+				signature: mintQuoteSignature,
 			};
 		} else {
 			mintPayload = {
 				outputs: newBlindingData.map((d) => d.blindedMessage),
-				quote: quote
+				quote: quote,
 			};
 		}
 		const { signatures } = await this.mint.mint(mintPayload);
@@ -858,13 +973,13 @@ class CashuWallet {
 	async createMeltQuote(invoice: string): Promise<MeltQuoteResponse> {
 		const meltQuotePayload: MeltQuotePayload = {
 			unit: this._unit,
-			request: invoice
+			request: invoice,
 		};
 		const meltQuote = await this.mint.createMeltQuote(meltQuotePayload);
 		return {
 			...meltQuote,
 			unit: meltQuote.unit || this.unit,
-			request: meltQuote.request || invoice
+			request: meltQuote.request || invoice,
 		};
 	}
 
@@ -876,25 +991,27 @@ class CashuWallet {
 	 */
 	async createMultiPathMeltQuote(
 		invoice: string,
-		millisatPartialAmount: number
+		millisatPartialAmount: number,
 	): Promise<MeltQuoteResponse> {
-		const { supported, params } = (await this.lazyGetMintInfo()).isSupported(15);
+		const { supported, params } = (await this.lazyGetMintInfo()).isSupported(
+			15,
+		);
 		if (!supported) {
-			throw new Error('Mint does not support NUT-15');
+			throw new Error("Mint does not support NUT-15");
 		}
-		if (!params?.some((p) => p.method === 'bolt11' && p.unit === this.unit)) {
+		if (!params?.some((p) => p.method === "bolt11" && p.unit === this.unit)) {
 			throw new Error(`Mint does not support MPP for bolt11 and ${this.unit}`);
 		}
 		const mppOption: MPPOption = {
-			amount: millisatPartialAmount
+			amount: millisatPartialAmount,
 		};
 		const meltOptions: MeltQuoteOptions = {
-			mpp: mppOption
+			mpp: mppOption,
 		};
 		const meltQuotePayload: MeltQuotePayload = {
 			unit: this._unit,
 			request: invoice,
-			options: meltOptions
+			options: meltOptions,
 		};
 		const meltQuote = await this.mint.createMeltQuote(meltQuotePayload);
 		return { ...meltQuote, request: invoice, unit: this._unit };
@@ -908,11 +1025,11 @@ class CashuWallet {
 	async checkMeltQuote(quote: string): Promise<PartialMeltQuoteResponse>;
 	async checkMeltQuote(quote: MeltQuoteResponse): Promise<MeltQuoteResponse>;
 	async checkMeltQuote(
-		quote: string | MeltQuoteResponse
+		quote: string | MeltQuoteResponse,
 	): Promise<MeltQuoteResponse | PartialMeltQuoteResponse> {
-		const quoteId = typeof quote === 'string' ? quote : quote.quote;
+		const quoteId = typeof quote === "string" ? quote : quote.quote;
 		const meltQuote = await this.mint.checkMeltQuote(quoteId);
-		if (typeof quote === 'string') {
+		if (typeof quote === "string") {
 			return meltQuote;
 		}
 		return { ...meltQuote, request: quote.request, unit: quote.unit };
@@ -929,7 +1046,7 @@ class CashuWallet {
 	async meltProofs(
 		meltQuote: MeltQuoteResponse,
 		proofsToSend: Array<Proof>,
-		options?: MeltProofOptions
+		options?: MeltProofOptions,
 	): Promise<MeltProofsResponse> {
 		const { keysetId, counter, privkey } = options || {};
 		const keys = await this.getKeys(keysetId);
@@ -937,7 +1054,7 @@ class CashuWallet {
 			sumProofs(proofsToSend) - meltQuote.amount,
 			keys,
 			counter,
-			this._keepFactory
+			this._keepFactory,
 		);
 		if (privkey != undefined) {
 			proofsToSend = getSignedProofs(
@@ -946,10 +1063,10 @@ class CashuWallet {
 						amount: p.amount,
 						C: pointFromHex(p.C),
 						id: p.id,
-						secret: new TextEncoder().encode(p.secret)
+						secret: new TextEncoder().encode(p.secret),
 					};
 				}),
-				privkey
+				privkey,
 			).map((p: NUT11Proof) => serializeProof(p));
 		}
 
@@ -958,12 +1075,18 @@ class CashuWallet {
 		const meltPayload: MeltPayload = {
 			quote: meltQuote.quote,
 			inputs: proofsToSend,
-			outputs: outputData.map((d) => d.blindedMessage)
+			outputs: outputData.map((d) => d.blindedMessage),
 		};
 		const meltResponse = await this.mint.melt(meltPayload);
 		return {
-			quote: { ...meltResponse, unit: meltQuote.unit, request: meltQuote.request },
-			change: meltResponse.change?.map((s, i) => outputData[i].toProof(s, keys)) ?? []
+			quote: {
+				...meltResponse,
+				unit: meltQuote.unit,
+				request: meltQuote.request,
+			},
+			change:
+				meltResponse.change?.map((s, i) => outputData[i].toProof(s, keys)) ??
+				[],
 		};
 	}
 
@@ -989,16 +1112,24 @@ class CashuWallet {
 			keep?: Array<OutputDataLike> | OutputDataFactory;
 			send?: Array<OutputDataLike> | OutputDataFactory;
 		},
-		p2pk?: { pubkey: string; locktime?: number; refundKeys?: Array<string> }
+		p2pk?: { pubkey: string; locktime?: number; refundKeys?: Array<string> },
 	): SwapTransaction {
-		const totalAmount = proofsToSend.reduce((total: number, curr: Proof) => total + curr.amount, 0);
-		if (outputAmounts && outputAmounts.sendAmounts && !outputAmounts.keepAmounts) {
+		const totalAmount = proofsToSend.reduce(
+			(total: number, curr: Proof) => total + curr.amount,
+			0,
+		);
+		if (
+			outputAmounts &&
+			outputAmounts.sendAmounts &&
+			!outputAmounts.keepAmounts
+		) {
 			outputAmounts.keepAmounts = splitAmount(
 				totalAmount - amount - this.getFeesForProofs(proofsToSend),
-				keyset.keys
+				keyset.keys,
 			);
 		}
-		const keepAmount = totalAmount - amount - this.getFeesForProofs(proofsToSend);
+		const keepAmount =
+			totalAmount - amount - this.getFeesForProofs(proofsToSend);
 		let keepOutputData: Array<OutputDataLike> = [];
 		let sendOutputData: Array<OutputDataLike> = [];
 
@@ -1020,7 +1151,7 @@ class CashuWallet {
 				undefined,
 				outputAmounts?.keepAmounts,
 				undefined,
-				this._keepFactory
+				this._keepFactory,
 			);
 		}
 
@@ -1041,7 +1172,7 @@ class CashuWallet {
 				counter ? counter + keepOutputData.length : undefined,
 				pubkey,
 				outputAmounts?.sendAmounts,
-				p2pk
+				p2pk,
 			);
 		}
 
@@ -1052,10 +1183,10 @@ class CashuWallet {
 						amount: p.amount,
 						C: pointFromHex(p.C),
 						id: p.id,
-						secret: new TextEncoder().encode(p.secret)
+						secret: new TextEncoder().encode(p.secret),
 					};
 				}),
-				privkey
+				privkey,
 			).map((p: NUT11Proof) => serializeProof(p));
 		}
 
@@ -1066,11 +1197,12 @@ class CashuWallet {
 			.map((_, i) => i)
 			.sort(
 				(a, b) =>
-					mergedBlindingData[a].blindedMessage.amount - mergedBlindingData[b].blindedMessage.amount
+					mergedBlindingData[a].blindedMessage.amount -
+					mergedBlindingData[b].blindedMessage.amount,
 			);
 		const keepVector = [
 			...Array(keepOutputData.length).fill(true),
-			...Array(sendOutputData.length).fill(false)
+			...Array(sendOutputData.length).fill(false),
 		];
 
 		const sortedOutputData = indices.map((i) => mergedBlindingData[i]);
@@ -1079,11 +1211,11 @@ class CashuWallet {
 		return {
 			payload: {
 				inputs: proofsToSend,
-				outputs: sortedOutputData.map((d) => d.blindedMessage)
+				outputs: sortedOutputData.map((d) => d.blindedMessage),
 			},
 			outputData: sortedOutputData,
 			keepVector: sortedKeepVector,
-			sortedIndices: indices
+			sortedIndices: indices,
 		};
 	}
 
@@ -1094,14 +1226,16 @@ class CashuWallet {
 	 */
 	async checkProofsStates(proofs: Array<Proof>): Promise<Array<ProofState>> {
 		const enc = new TextEncoder();
-		const Ys = proofs.map((p: Proof) => hashToCurve(enc.encode(p.secret)).toHex(true));
+		const Ys = proofs.map((p: Proof) =>
+			hashToCurve(enc.encode(p.secret)).toHex(true),
+		);
 		// TODO: Replace this with a value from the info endpoint of the mint eventually
 		const BATCH_SIZE = 100;
 		const states: Array<ProofState> = [];
 		for (let i = 0; i < Ys.length; i += BATCH_SIZE) {
 			const YsSlice = Ys.slice(i, i + BATCH_SIZE);
 			const { states: batchStates } = await this.mint.check({
-				Ys: YsSlice
+				Ys: YsSlice,
 			});
 			const stateMap: { [y: string]: ProofState } = {};
 			batchStates.forEach((s) => {
@@ -1110,7 +1244,9 @@ class CashuWallet {
 			for (let j = 0; j < YsSlice.length; j++) {
 				const state = stateMap[YsSlice[j]];
 				if (!state) {
-					throw new Error('Could not find state for proof with Y: ' + YsSlice[j]);
+					throw new Error(
+						"Could not find state for proof with Y: " + YsSlice[j],
+					);
 				}
 				states.push(state);
 			}
@@ -1128,16 +1264,16 @@ class CashuWallet {
 	async onMintQuoteUpdates(
 		quoteIds: Array<string>,
 		callback: (payload: MintQuoteResponse) => void,
-		errorCallback: (e: Error) => void
+		errorCallback: (e: Error) => void,
 	): Promise<SubscriptionCanceller> {
 		await this.mint.connectWebSocket();
 		if (!this.mint.webSocketConnection) {
-			throw new Error('failed to establish WebSocket connection.');
+			throw new Error("failed to establish WebSocket connection.");
 		}
 		const subId = this.mint.webSocketConnection.createSubscription(
-			{ kind: 'bolt11_mint_quote', filters: quoteIds },
+			{ kind: "bolt11_mint_quote", filters: quoteIds },
 			callback,
-			errorCallback
+			errorCallback,
 		);
 		return () => {
 			this.mint.webSocketConnection?.cancelSubscription(subId, callback);
@@ -1154,7 +1290,7 @@ class CashuWallet {
 	async onMeltQuotePaid(
 		quoteId: string,
 		callback: (payload: MeltQuoteResponse) => void,
-		errorCallback: (e: Error) => void
+		errorCallback: (e: Error) => void,
 	): Promise<SubscriptionCanceller> {
 		return this.onMeltQuoteUpdates(
 			[quoteId],
@@ -1163,7 +1299,7 @@ class CashuWallet {
 					callback(p);
 				}
 			},
-			errorCallback
+			errorCallback,
 		);
 	}
 
@@ -1177,7 +1313,7 @@ class CashuWallet {
 	async onMintQuotePaid(
 		quoteId: string,
 		callback: (payload: MintQuoteResponse) => void,
-		errorCallback: (e: Error) => void
+		errorCallback: (e: Error) => void,
 	): Promise<SubscriptionCanceller> {
 		return this.onMintQuoteUpdates(
 			[quoteId],
@@ -1186,7 +1322,7 @@ class CashuWallet {
 					callback(p);
 				}
 			},
-			errorCallback
+			errorCallback,
 		);
 	}
 
@@ -1200,16 +1336,16 @@ class CashuWallet {
 	async onMeltQuoteUpdates(
 		quoteIds: Array<string>,
 		callback: (payload: MeltQuoteResponse) => void,
-		errorCallback: (e: Error) => void
+		errorCallback: (e: Error) => void,
 	): Promise<SubscriptionCanceller> {
 		await this.mint.connectWebSocket();
 		if (!this.mint.webSocketConnection) {
-			throw new Error('failed to establish WebSocket connection.');
+			throw new Error("failed to establish WebSocket connection.");
 		}
 		const subId = this.mint.webSocketConnection.createSubscription(
-			{ kind: 'bolt11_melt_quote', filters: quoteIds },
+			{ kind: "bolt11_melt_quote", filters: quoteIds },
 			callback,
-			errorCallback
+			errorCallback,
 		);
 		return () => {
 			this.mint.webSocketConnection?.cancelSubscription(subId, callback);
@@ -1226,11 +1362,11 @@ class CashuWallet {
 	async onProofStateUpdates(
 		proofs: Array<Proof>,
 		callback: (payload: ProofState & { proof: Proof }) => void,
-		errorCallback: (e: Error) => void
+		errorCallback: (e: Error) => void,
 	): Promise<SubscriptionCanceller> {
 		await this.mint.connectWebSocket();
 		if (!this.mint.webSocketConnection) {
-			throw new Error('failed to establish WebSocket connection.');
+			throw new Error("failed to establish WebSocket connection.");
 		}
 		const enc = new TextEncoder();
 		const proofMap: { [y: string]: Proof } = {};
@@ -1240,11 +1376,11 @@ class CashuWallet {
 		}
 		const ys = Object.keys(proofMap);
 		const subId = this.mint.webSocketConnection.createSubscription(
-			{ kind: 'proof_state', filters: ys },
+			{ kind: "proof_state", filters: ys },
 			(p: ProofState) => {
 				callback({ ...p, proof: proofMap[p.Y] });
 			},
-			errorCallback
+			errorCallback,
 		);
 		return () => {
 			this.mint.webSocketConnection?.cancelSubscription(subId, callback);
@@ -1266,24 +1402,34 @@ class CashuWallet {
 		pubkey?: string,
 		outputAmounts?: Array<number>,
 		p2pk?: { pubkey: string; locktime?: number; refundKeys?: Array<string> },
-		factory?: OutputDataFactory
+		factory?: OutputDataFactory,
 	): Array<OutputDataLike> {
 		let outputData: Array<OutputDataLike>;
 		if (pubkey) {
-			outputData = OutputData.createP2PKData({ pubkey }, amount, keyset, outputAmounts);
+			outputData = OutputData.createP2PKData(
+				{ pubkey },
+				amount,
+				keyset,
+				outputAmounts,
+			);
 		} else if (counter || counter === 0) {
 			if (!this._seed) {
-				throw new Error('cannot create deterministic messages without seed');
+				throw new Error("cannot create deterministic messages without seed");
 			}
 			outputData = OutputData.createDeterministicData(
 				amount,
 				this._seed,
 				counter,
 				keyset,
-				outputAmounts
+				outputAmounts,
 			);
 		} else if (p2pk) {
-			outputData = OutputData.createP2PKData(p2pk, amount, keyset, outputAmounts);
+			outputData = OutputData.createP2PKData(
+				p2pk,
+				amount,
+				keyset,
+				outputAmounts,
+			);
 		} else if (factory) {
 			const amounts = splitAmount(amount, keyset.keys);
 			outputData = amounts.map((a) => factory(a, keyset));
@@ -1296,10 +1442,14 @@ class CashuWallet {
 	private createOutputDataFromSecret(
 		amount: number,
 		keyset: MintKeys,
-		secret: Uint8Array
+		secret: Uint8Array,
 	): OutputData {
 		const { r, B_ } = blindMessage(secret);
-		const blinded = new BlindedMessage(amount, B_, keyset.id).getSerializedBlindedMessage();
+		const blinded = new BlindedMessage(
+			amount,
+			B_,
+			keyset.id,
+		).getSerializedBlindedMessage();
 		return new OutputData(blinded, r, secret);
 	}
 
@@ -1315,7 +1465,7 @@ class CashuWallet {
 		amount: number,
 		keyset: MintKeys,
 		counter?: number,
-		factory?: OutputDataFactory
+		factory?: OutputDataFactory,
 	): Array<OutputDataLike> {
 		let count = Math.ceil(Math.log2(amount)) || 1;
 		//Prevent count from being -Infinity
@@ -1330,7 +1480,7 @@ class CashuWallet {
 			undefined,
 			amounts,
 			undefined,
-			factory
+			factory,
 		);
 	}
 }

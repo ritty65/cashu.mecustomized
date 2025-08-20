@@ -48,56 +48,56 @@ import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { EventBus } from "../js/eventBus";
 
 export default defineComponent({
-  name: "NoMintWarnBanner",
-  mixins: [windowMixin],
-  props: {
-    proofs: Array,
-    activeProofs: Array,
-    mints: Array,
-    tickerShort: String,
-    activeMintUrl: String,
-  },
-  computed: {
-    ...mapWritableState(useUiStore, [
-      "tab",
-      "expandHistory",
-      "showReceiveEcashDrawer",
-    ]),
-    ...mapWritableState(useReceiveTokensStore, [
-      "showReceiveTokens",
-      "receiveData",
-    ]),
-    balance: function () {
-      return this.activeProofs
-        .map((t) => t)
-        .flat()
-        .reduce((sum, el) => (sum += el.amount), 0);
-    },
-    getActiveMintUrlShort: function () {
-      return getShortUrl(this.activeMintUrl);
-    },
-    getBalance: function () {
-      var balance = this.activeProofs
-        .map((t) => t)
-        .flat()
-        .reduce((sum, el) => (sum += el.amount), 0);
-      return balance;
-    },
-  },
-  methods: {
-    // showReceiveTokensDialog: function () {
-    //   this.receiveData.tokensBase64 = "";
-    //   this.showReceiveTokens = true;
-    // },
-    handleReceiveEcash: function () {
-      this.showReceiveEcashDrawer = true;
-    },
-    handleAddMintClick: function () {
-      this.expandHistory = true;
-      this.tab = "mints";
-      EventBus.emit("scrollToAddMintDiv");
-    },
-  },
+	name: "NoMintWarnBanner",
+	mixins: [windowMixin],
+	props: {
+		proofs: Array,
+		activeProofs: Array,
+		mints: Array,
+		tickerShort: String,
+		activeMintUrl: String,
+	},
+	computed: {
+		...mapWritableState(useUiStore, [
+			"tab",
+			"expandHistory",
+			"showReceiveEcashDrawer",
+		]),
+		...mapWritableState(useReceiveTokensStore, [
+			"showReceiveTokens",
+			"receiveData",
+		]),
+		balance: function () {
+			return this.activeProofs
+				.map((t) => t)
+				.flat()
+				.reduce((sum, el) => (sum += el.amount), 0);
+		},
+		getActiveMintUrlShort: function () {
+			return getShortUrl(this.activeMintUrl);
+		},
+		getBalance: function () {
+			var balance = this.activeProofs
+				.map((t) => t)
+				.flat()
+				.reduce((sum, el) => (sum += el.amount), 0);
+			return balance;
+		},
+	},
+	methods: {
+		// showReceiveTokensDialog: function () {
+		//   this.receiveData.tokensBase64 = "";
+		//   this.showReceiveTokens = true;
+		// },
+		handleReceiveEcash: function () {
+			this.showReceiveEcashDrawer = true;
+		},
+		handleAddMintClick: function () {
+			this.expandHistory = true;
+			this.tab = "mints";
+			EventBus.emit("scrollToAddMintDiv");
+		},
+	},
 });
 </script>
 <style scoped>

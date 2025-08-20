@@ -1,6 +1,6 @@
 let _WS: typeof WebSocket;
 
-if (typeof WebSocket !== 'undefined') {
+if (typeof WebSocket !== "undefined") {
 	_WS = WebSocket;
 }
 

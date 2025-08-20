@@ -64,33 +64,33 @@ import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useClipboard } from "src/composables/useClipboard";
 import { defineAsyncComponent } from "vue";
-const VueQrcode = defineAsyncComponent(() =>
-  import("@chenfengyuan/vue-qrcode"),
+const VueQrcode = defineAsyncComponent(
+	() => import("@chenfengyuan/vue-qrcode"),
 );
 
 import { useNWCStore } from "src/stores/nwc";
 
 export default defineComponent({
-  name: "NWCDialog",
-  mixins: [windowMixin],
-  components: {
-    VueQrcode,
-  },
-  setup() {
-    const { copy } = useClipboard();
-    return { copy };
-  },
-  data: function () {
-    return {};
-  },
-  computed: {
-    ...mapState(useNWCStore, ["showNWCData"]),
-    ...mapWritableState(useNWCStore, ["showNWCDialog"]),
-    safeConnectionString() {
-      const url = this.showNWCData.connectionString || "";
-      return /^(nostr\+walletconnect:|https?:)/i.test(url) ? url : "#";
-    },
-  },
-  methods: {},
+	name: "NWCDialog",
+	mixins: [windowMixin],
+	components: {
+		VueQrcode,
+	},
+	setup() {
+		const { copy } = useClipboard();
+		return { copy };
+	},
+	data: function () {
+		return {};
+	},
+	computed: {
+		...mapState(useNWCStore, ["showNWCData"]),
+		...mapWritableState(useNWCStore, ["showNWCDialog"]),
+		safeConnectionString() {
+			const url = this.showNWCData.connectionString || "";
+			return /^(nostr\+walletconnect:|https?:)/i.test(url) ? url : "#";
+		},
+	},
+	methods: {},
 });
 </script>

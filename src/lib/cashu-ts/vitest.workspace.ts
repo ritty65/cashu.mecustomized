@@ -1,21 +1,21 @@
-import { defineWorkspace } from 'vitest/config';
+import { defineWorkspace } from "vitest/config";
 
 export default defineWorkspace([
 	{
 		test: {
-			name: 'node',
+			name: "node",
 			globals: true,
-			environment: 'node'
-		}
+			environment: "node",
+		},
 	},
 	{
 		test: {
-			name: 'browser',
+			name: "browser",
 			globals: true,
 			browser: {
-				provider: 'playwright',
-				name: 'chromium'
-			}
-		}
-	}
+				provider: "playwright",
+				name: "chromium",
+			},
+		},
+	},
 ]);

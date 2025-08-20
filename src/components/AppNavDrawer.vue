@@ -187,8 +187,8 @@ const { t } = useI18n();
 const $q = useQuasar();
 
 function goto(path: string) {
-  router.push(path);
-  ui.closeMainNav();
+	router.push(path);
+	ui.closeMainNav();
 }
 const gotoWallet = () => goto("/wallet");
 const gotoSettings = () => goto("/settings");
@@ -205,46 +205,46 @@ const gotoAbout = () => goto("/about");
 const needsNostrLogin = computed(() => !nostrStore.privateKeySignerPrivateKey);
 
 const drawerContentClass = computed(() =>
-  $q.screen.lt.md ? "main-nav-safe" : "q-pt-sm"
+	$q.screen.lt.md ? "main-nav-safe" : "q-pt-sm",
 );
 
 const essentialLinks = [
-  {
-    title: t("MainHeader.menu.links.fundstrCreator.title"),
-    caption: t("MainHeader.menu.links.fundstrCreator.caption"),
-    icon: "web",
-    link: "https://primal.net/KalonAxiarch",
-  },
-  {
-    title: t("MainHeader.menu.links.cashuSpace.title"),
-    caption: t("MainHeader.menu.links.cashuSpace.caption"),
-    icon: "web",
-    link: "https://cashu.space",
-  },
-  {
-    title: t("MainHeader.menu.links.github.title"),
-    caption: t("MainHeader.menu.links.github.caption"),
-    icon: "code",
-    link: "https://github.com/cashubtc/Fundstr",
-  },
-  {
-    title: t("MainHeader.menu.links.telegram.title"),
-    caption: t("MainHeader.menu.links.telegram.caption"),
-    icon: "chat",
-    link: "https://t.me/CashuMe",
-  },
-  {
-    title: t("MainHeader.menu.links.twitter.title"),
-    caption: t("MainHeader.menu.links.twitter.caption"),
-    icon: "rss_feed",
-    link: "https://twitter.com/CashuBTC",
-  },
-  {
-    title: t("MainHeader.menu.links.donate.title"),
-    caption: t("MainHeader.menu.links.donate.caption"),
-    icon: "favorite",
-    link: "https://docs.cashu.space/contribute",
-  },
+	{
+		title: t("MainHeader.menu.links.fundstrCreator.title"),
+		caption: t("MainHeader.menu.links.fundstrCreator.caption"),
+		icon: "web",
+		link: "https://primal.net/KalonAxiarch",
+	},
+	{
+		title: t("MainHeader.menu.links.cashuSpace.title"),
+		caption: t("MainHeader.menu.links.cashuSpace.caption"),
+		icon: "web",
+		link: "https://cashu.space",
+	},
+	{
+		title: t("MainHeader.menu.links.github.title"),
+		caption: t("MainHeader.menu.links.github.caption"),
+		icon: "code",
+		link: "https://github.com/cashubtc/Fundstr",
+	},
+	{
+		title: t("MainHeader.menu.links.telegram.title"),
+		caption: t("MainHeader.menu.links.telegram.caption"),
+		icon: "chat",
+		link: "https://t.me/CashuMe",
+	},
+	{
+		title: t("MainHeader.menu.links.twitter.title"),
+		caption: t("MainHeader.menu.links.twitter.caption"),
+		icon: "rss_feed",
+		link: "https://twitter.com/CashuBTC",
+	},
+	{
+		title: t("MainHeader.menu.links.donate.title"),
+		caption: t("MainHeader.menu.links.donate.caption"),
+		icon: "favorite",
+		link: "https://docs.cashu.space/contribute",
+	},
 ];
 </script>
 

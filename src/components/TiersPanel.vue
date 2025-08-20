@@ -45,39 +45,39 @@ const deleteId = ref("");
 const draggableTiers = ref<Tier[]>([]);
 
 watch(
-  () => store.getTierArray(),
-  (val) => {
-    draggableTiers.value = [...val];
-  },
-  { immediate: true },
+	() => store.getTierArray(),
+	(val) => {
+		draggableTiers.value = [...val];
+	},
+	{ immediate: true },
 );
 
 function updateOrder() {
-  store.setTierOrder(draggableTiers.value.map((t) => t.id));
+	store.setTierOrder(draggableTiers.value.map((t) => t.id));
 }
 
 function addTier() {
-  const id = uuidv4();
-  store.addTier({
-    id,
-    name: "",
-    price_sats: 0,
-    description: "",
-    welcomeMessage: "",
-    frequency: "monthly",
-    intervalDays: 30,
-  });
+	const id = uuidv4();
+	store.addTier({
+		id,
+		name: "",
+		price_sats: 0,
+		description: "",
+		welcomeMessage: "",
+		frequency: "monthly",
+		intervalDays: 30,
+	});
 }
 
 function confirmDelete(id: string) {
-  deleteId.value = id;
-  deleteDialog.value = true;
+	deleteId.value = id;
+	deleteDialog.value = true;
 }
 
 async function performDelete() {
-  if (!deleteId.value) return;
-  await store.removeTier(deleteId.value);
-  await store.publishTierDefinitions();
-  deleteDialog.value = false;
+	if (!deleteId.value) return;
+	await store.removeTier(deleteId.value);
+	await store.publishTierDefinitions();
+	deleteDialog.value = false;
 }
 </script>

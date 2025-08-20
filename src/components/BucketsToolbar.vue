@@ -39,29 +39,29 @@
 import { computed } from "vue";
 
 const props = defineProps<{
-  search: string;
-  viewMode: string;
-  sort: string;
+	search: string;
+	viewMode: string;
+	sort: string;
 }>();
 
 const emit = defineEmits<{
-  "update:search": [string];
-  "update:viewMode": [string];
-  "update:sort": [string];
-  "move-tokens": [];
+	"update:search": [string];
+	"update:viewMode": [string];
+	"update:sort": [string];
+	"move-tokens": [];
 }>();
 
 const modelSearch = computed({
-  get: () => props.search,
-  set: (val: string) => emit("update:search", val),
+	get: () => props.search,
+	set: (val: string) => emit("update:search", val),
 });
 const modelViewMode = computed({
-  get: () => props.viewMode,
-  set: (val: string) => emit("update:viewMode", val),
+	get: () => props.viewMode,
+	set: (val: string) => emit("update:viewMode", val),
 });
 const modelSort = computed({
-  get: () => props.sort,
-  set: (val: string) => emit("update:sort", val),
+	get: () => props.sort,
+	set: (val: string) => emit("update:sort", val),
 });
 </script>
 

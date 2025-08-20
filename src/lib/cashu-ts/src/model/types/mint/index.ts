@@ -1,7 +1,7 @@
-import { SerializedBlindedMessage } from '../wallet';
+import { SerializedBlindedMessage } from "../wallet";
 
-export * from './responses';
-export * from './keys';
+export * from "./responses";
+export * from "./keys";
 
 /**
  * Payload that needs to be sent to the mint when checking for spendable proofs

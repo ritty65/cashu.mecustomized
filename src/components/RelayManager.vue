@@ -65,68 +65,68 @@ const relayText = ref((messenger.relays ?? []).join("\n"));
 
 const ndkRef = ref<NDK | null>(null);
 onMounted(() => {
-  useNdk({ requireSigner: false }).then((n) => (ndkRef.value = n));
+	useNdk({ requireSigner: false }).then((n) => (ndkRef.value = n));
 });
 
 const now = ref(Date.now());
 let timer: ReturnType<typeof setInterval> | undefined;
 onMounted(() => {
-  timer = setInterval(() => (now.value = Date.now()), 1000);
+	timer = setInterval(() => (now.value = Date.now()), 1000);
 });
 onUnmounted(() => {
-  if (timer) clearInterval(timer);
+	if (timer) clearInterval(timer);
 });
 
 const relayStatuses = computed(() =>
-  (messenger.relays ?? []).map((url) => {
-    const relay = ndkRef.value?.pool.relays.get(url);
-    const statusNum = relay?.status;
-    const status =
-      typeof statusNum === "number" ? NDKRelayStatus[statusNum] : "UNKNOWN";
-    const nextReconnectAt = relay?.connectionStats.nextReconnectAt;
-    return {
-      url,
-      connected: relay?.connected === true,
-      status,
-      nextReconnectAt,
-    };
-  }),
+	(messenger.relays ?? []).map((url) => {
+		const relay = ndkRef.value?.pool.relays.get(url);
+		const statusNum = relay?.status;
+		const status =
+			typeof statusNum === "number" ? NDKRelayStatus[statusNum] : "UNKNOWN";
+		const nextReconnectAt = relay?.connectionStats.nextReconnectAt;
+		return {
+			url,
+			connected: relay?.connected === true,
+			status,
+			nextReconnectAt,
+		};
+	}),
 );
 
 watch(
-  () => messenger.relays,
-  (r) => {
-    relayText.value = (r ?? []).join("\n");
-  },
+	() => messenger.relays,
+	(r) => {
+		relayText.value = (r ?? []).join("\n");
+	},
 );
 
 const connect = async () => {
-  const urls = (relayText.value || "")
-    .split(/\r?\n/)
-    .map((r) => r.trim())
-    .filter(Boolean);
-  try {
-    const ndk = await useNdk({ requireSigner: false });
-    for (const url of urls) {
-      ndk.addExplicitRelay(url);
-    }
-    await messenger.connect(urls);
-    notifySuccess("Connected to relays");
-  } catch (err: any) {
-    notifyError(err?.message || "Failed to connect");
-  }
+	const urls = (relayText.value || "")
+		.split(/\r?\n/)
+		.map((r) => r.trim())
+		.filter(Boolean);
+	try {
+		const ndk = await useNdk({ requireSigner: false });
+		for (const url of urls) {
+			ndk.addExplicitRelay(url);
+		}
+		await messenger.connect(urls);
+		notifySuccess("Connected to relays");
+	} catch (err: any) {
+		notifyError(err?.message || "Failed to connect");
+	}
 };
 
 const disconnect = async () => {
-  try {
-    await Promise.resolve(messenger.disconnect());
-    notifySuccess("Disconnected from relays");
-  } catch (err: any) {
-    notifyError(err?.message || "Failed to disconnect");
-  }
+	try {
+		await Promise.resolve(messenger.disconnect());
+		notifySuccess("Disconnected from relays");
+	} catch (err: any) {
+		notifyError(err?.message || "Failed to disconnect");
+	}
 };
 
 const removeRelay = (url: string) => {
-  messenger.removeRelay(url);
+	messenger.removeRelay(url);
 };
 </script>

@@ -113,9 +113,9 @@ import { computed, ref, onMounted, onUnmounted } from "vue";
 import { formatDistanceToNow } from "date-fns";
 
 import {
-  mdiCheck,
-  mdiCheckAll,
-  mdiAlertCircleOutline,
+	mdiCheck,
+	mdiCheckAll,
+	mdiAlertCircleOutline,
 } from "@quasar/extras/mdi-v6";
 import type { MessengerMessage } from "src/stores/messenger";
 import TokenCarousel from "components/TokenCarousel.vue";
@@ -130,22 +130,22 @@ import { useMessengerStore } from "src/stores/messenger";
 import { nip19 } from "nostr-tools";
 
 const props = defineProps<{
-  message: MessengerMessage;
-  deliveryStatus?: "sent" | "delivered" | "failed";
-  prevMessage?: MessengerMessage;
+	message: MessengerMessage;
+	deliveryStatus?: "sent" | "delivered" | "failed";
+	prevMessage?: MessengerMessage;
 }>();
 
 const AVATAR_INTERVAL_SECONDS = 5 * 60;
 
 const showAvatar = computed(() => {
-  const prev = props.prevMessage;
-  if (!prev) return true;
-  const sameSide = prev.outgoing === props.message.outgoing;
-  const sameAuthor =
-    props.message.outgoing || prev.pubkey === props.message.pubkey;
-  const closeInTime =
-    props.message.created_at - prev.created_at < AVATAR_INTERVAL_SECONDS;
-  return !(sameSide && sameAuthor && closeInTime);
+	const prev = props.prevMessage;
+	if (!prev) return true;
+	const sameSide = prev.outgoing === props.message.outgoing;
+	const sameAuthor =
+		props.message.outgoing || prev.pubkey === props.message.pubkey;
+	const closeInTime =
+		props.message.created_at - prev.created_at < AVATAR_INTERVAL_SECONDS;
+	return !(sameSide && sameAuthor && closeInTime);
 });
 
 const p2pk = useP2PKStore();
@@ -153,156 +153,156 @@ const nostr = useNostrStore();
 const messenger = useMessengerStore();
 
 const avatarPubkey = computed(() =>
-  props.message.outgoing ? nostr.pubkey : props.message.pubkey,
+	props.message.outgoing ? nostr.pubkey : props.message.pubkey,
 );
 const profile = ref<any>(null);
 const initials = computed(() => {
-  const alias = messenger.aliases[avatarPubkey.value];
-  const p: any = profile.value;
-  const name = alias || p?.display_name || p?.name || "";
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
-  return name.slice(0, 2).toUpperCase();
+	const alias = messenger.aliases[avatarPubkey.value];
+	const p: any = profile.value;
+	const name = alias || p?.display_name || p?.name || "";
+	const parts = name.trim().split(/\s+/).filter(Boolean);
+	if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+	return name.slice(0, 2).toUpperCase();
 });
 
 onMounted(async () => {
-  profile.value = await nostr.getProfile(avatarPubkey.value);
+	profile.value = await nostr.getProfile(avatarPubkey.value);
 });
 
 const time = computed(() =>
-  new Date(props.message.created_at * 1000).toLocaleString(),
+	new Date(props.message.created_at * 1000).toLocaleString(),
 );
 const isoTime = computed(() =>
-  new Date(props.message.created_at * 1000).toISOString(),
+	new Date(props.message.created_at * 1000).toISOString(),
 );
 const deliveryIcon = computed(() => {
-  if (props.deliveryStatus === "failed") return mdiAlertCircleOutline;
-  return props.deliveryStatus === "delivered" ? mdiCheckAll : mdiCheck;
+	if (props.deliveryStatus === "failed") return mdiAlertCircleOutline;
+	return props.deliveryStatus === "delivered" ? mdiCheckAll : mdiCheck;
 });
 const deliveryColor = computed(() =>
-  props.deliveryStatus === "failed" ? "negative" : undefined,
+	props.deliveryStatus === "failed" ? "negative" : undefined,
 );
 
 const isDataUrl = computed(() => props.message.content.startsWith("data:"));
 const isSafeDataUrl = computed(() =>
-  /^data:(image|audio|video)\//i.test(props.message.content),
+	/^data:(image|audio|video)\//i.test(props.message.content),
 );
 const isImageDataUrl = computed(() =>
-  props.message.content.startsWith("data:image"),
+	props.message.content.startsWith("data:image"),
 );
 const isHttpUrl = computed(() => /^https?:\/\//.test(props.message.content));
 const isImageLink = computed(
-  () =>
-    isHttpUrl.value &&
-    /\.(png|jpe?g|gif|webp|svg)$/i.test(props.message.content),
+	() =>
+		isHttpUrl.value &&
+		/\.(png|jpe?g|gif|webp|svg)$/i.test(props.message.content),
 );
 const imageSrc = computed(() =>
-  isImageDataUrl.value || isImageLink.value ? props.message.content : "",
+	isImageDataUrl.value || isImageLink.value ? props.message.content : "",
 );
 const isFile = computed(() => isSafeDataUrl.value || isHttpUrl.value);
 const attachmentUrl = computed(() =>
-  isFile.value ? props.message.content : "#",
+	isFile.value ? props.message.content : "#",
 );
 const attachmentName = computed(
-  () =>
-    props.message.attachment?.name ||
-    props.message.content.split("/").pop()?.split("?")[0] ||
-    "file",
+	() =>
+		props.message.attachment?.name ||
+		props.message.content.split("/").pop()?.split("?")[0] ||
+		"file",
 );
 
 const receiveStore = useReceiveTokensStore();
 const redeemed = ref(false);
 const autoRedeem = ref(false);
 if (props.message.subscriptionPayment) {
-  cashuDb.lockedTokens
-    .where("tokenString")
-    .equals(props.message.subscriptionPayment.token)
-    .first()
-    .then((row) => {
-      autoRedeem.value = row?.autoRedeem ?? false;
-    });
+	cashuDb.lockedTokens
+		.where("tokenString")
+		.equals(props.message.subscriptionPayment.token)
+		.first()
+		.then((row) => {
+			autoRedeem.value = row?.autoRedeem ?? false;
+		});
 }
 
 const now = ref(Date.now());
 let timer: any;
 onMounted(() => {
-  timer = setInterval(() => {
-    now.value = Date.now();
-  }, 1000);
+	timer = setInterval(() => {
+		now.value = Date.now();
+	}, 1000);
 });
 onUnmounted(() => clearInterval(timer));
 
 const receiverPubkey = computed(() => {
-  if (!props.message.subscriptionPayment) return "";
-  return p2pk.getTokenPubkey(props.message.subscriptionPayment.token) || "";
+	if (!props.message.subscriptionPayment) return "";
+	return p2pk.getTokenPubkey(props.message.subscriptionPayment.token) || "";
 });
 
 const unlockTime = computed(() => {
-  if (!props.message.subscriptionPayment) return undefined;
-  return p2pk.getTokenLocktime(props.message.subscriptionPayment.token);
+	if (!props.message.subscriptionPayment) return undefined;
+	return p2pk.getTokenLocktime(props.message.subscriptionPayment.token);
 });
 
 const unlockIso = computed(() =>
-  unlockTime.value ? new Date(unlockTime.value * 1000).toISOString() : "",
+	unlockTime.value ? new Date(unlockTime.value * 1000).toISOString() : "",
 );
 
 const remaining = computed(() => {
-  if (!unlockTime.value) return 0;
-  return unlockTime.value - Math.floor(now.value / 1000);
+	if (!unlockTime.value) return 0;
+	return unlockTime.value - Math.floor(now.value / 1000);
 });
 
 const countdown = computed(() =>
-  unlockTime.value
-    ? formatDistanceToNow(unlockTime.value * 1000, { includeSeconds: true })
-    : "",
+	unlockTime.value
+		? formatDistanceToNow(unlockTime.value * 1000, { includeSeconds: true })
+		: "",
 );
 
 const receiverPubkeyNpub = computed(() => {
-  try {
-    return receiverPubkey.value ? nip19.npubEncode(receiverPubkey.value) : "";
-  } catch {
-    return receiverPubkey.value;
-  }
+	try {
+		return receiverPubkey.value ? nip19.npubEncode(receiverPubkey.value) : "";
+	} catch {
+		return receiverPubkey.value;
+	}
 });
 
 async function redeemPayment() {
-  if (!props.message.subscriptionPayment) return;
-  const payment = props.message.subscriptionPayment;
-  const wallet = useWalletStore();
-  const receiveStore = useReceiveTokensStore();
-  try {
-    if (unlockTime.value && remaining.value > 0) {
-      return;
-    }
-    await receiveStore.enqueue(() => wallet.redeem(payment.token));
-    if (payment.subscription_id) {
-      const sub = await cashuDb.subscriptions.get(payment.subscription_id);
-      const idx = sub?.intervals.findIndex(
-        (i) => i.monthIndex === payment.month_index,
-      );
-      if (sub && idx !== undefined && idx >= 0) {
-        sub.intervals[idx].status = "claimed";
-        sub.intervals[idx].redeemed = true;
-        await cashuDb.subscriptions.update(sub.id, {
-          intervals: sub.intervals,
-        });
-      }
-    }
-    redeemed.value = true;
-  } catch (e) {
-    console.error(e);
-    notifyError(e);
-  }
+	if (!props.message.subscriptionPayment) return;
+	const payment = props.message.subscriptionPayment;
+	const wallet = useWalletStore();
+	const receiveStore = useReceiveTokensStore();
+	try {
+		if (unlockTime.value && remaining.value > 0) {
+			return;
+		}
+		await receiveStore.enqueue(() => wallet.redeem(payment.token));
+		if (payment.subscription_id) {
+			const sub = await cashuDb.subscriptions.get(payment.subscription_id);
+			const idx = sub?.intervals.findIndex(
+				(i) => i.monthIndex === payment.month_index,
+			);
+			if (sub && idx !== undefined && idx >= 0) {
+				sub.intervals[idx].status = "claimed";
+				sub.intervals[idx].redeemed = true;
+				await cashuDb.subscriptions.update(sub.id, {
+					intervals: sub.intervals,
+				});
+			}
+		}
+		redeemed.value = true;
+	} catch (e) {
+		console.error(e);
+		notifyError(e);
+	}
 }
 
 async function updateAutoRedeem(val: boolean) {
-  if (!props.message.subscriptionPayment) return;
-  const row = await cashuDb.lockedTokens
-    .where("tokenString")
-    .equals(props.message.subscriptionPayment.token)
-    .first();
-  if (row) await cashuDb.lockedTokens.update(row.id, { autoRedeem: val });
-  autoRedeem.value = val;
+	if (!props.message.subscriptionPayment) return;
+	const row = await cashuDb.lockedTokens
+		.where("tokenString")
+		.equals(props.message.subscriptionPayment.token)
+		.first();
+	if (row) await cashuDb.lockedTokens.update(row.id, { autoRedeem: val });
+	autoRedeem.value = val;
 }
 </script>
 

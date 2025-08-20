@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 test("drives subscribers page layout", async ({ page }) => {
-  await page.setContent(`
+	await page.setContent(`
     <div id="topbar"><input id="search" /></div>
     <div id="tabs">
       <button data-tab="all">All</button>
@@ -42,12 +42,12 @@ test("drives subscribers page layout", async ({ page }) => {
     </script>
   `);
 
-  await expect(page.locator("#table tbody tr")).toHaveCount(6);
-  await page.click('#tabs button[data-tab="weekly"]');
-  await expect(page.locator("#table tbody tr")).toHaveCount(2);
-  await page.fill("#search", "Bob");
-  await expect(page.locator("#table tbody tr")).toHaveCount(1);
-  await page.click("#table tbody tr:first-child");
-  await expect(page.locator("#drawer")).toBeVisible();
-  await expect(page.locator("#drawer")).toHaveText("Bob");
+	await expect(page.locator("#table tbody tr")).toHaveCount(6);
+	await page.click('#tabs button[data-tab="weekly"]');
+	await expect(page.locator("#table tbody tr")).toHaveCount(2);
+	await page.fill("#search", "Bob");
+	await expect(page.locator("#table tbody tr")).toHaveCount(1);
+	await page.click("#table tbody tr:first-child");
+	await expect(page.locator("#drawer")).toBeVisible();
+	await expect(page.locator("#drawer")).toHaveText("Bob");
 });

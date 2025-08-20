@@ -453,30 +453,30 @@ const creatorSubscriptionsStore = useCreatorSubscriptionsStore();
 const { activeUnit } = storeToRefs(mintsStore);
 const { sendQueue } = storeToRefs(nutzap);
 const { subscriptions: creatorSubscriptions } = storeToRefs(
-  creatorSubscriptionsStore,
+	creatorSubscriptionsStore,
 );
 
 function pubkeyNpub(hex: string): string {
-  try {
-    return nip19.npubEncode(hex);
-  } catch {
-    return hex;
-  }
+	try {
+		return nip19.npubEncode(hex);
+	} catch {
+		return hex;
+	}
 }
 
 function formatCurrency(amount: number): string {
-  return uiStore.formatCurrency(amount, activeUnit.value);
+	return uiStore.formatCurrency(amount, activeUnit.value);
 }
 
 function formatTs(ts: number): string {
-  const d = new Date(ts * 1000);
-  return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${(
-    "0" + d.getDate()
-  ).slice(-2)}`;
+	const d = new Date(ts * 1000);
+	return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${(
+		"0" + d.getDate()
+	).slice(-2)}`;
 }
 
 function countdownTo(ts: number): string {
-  return formatDistanceToNow(ts * 1000);
+	return formatDistanceToNow(ts * 1000);
 }
 
 const subscriptionsStore = useSubscriptionsStore();
@@ -484,80 +484,80 @@ const subscriptionsStore = useSubscriptionsStore();
 const now = ref(Date.now());
 let nowTimer: any;
 onMounted(() => {
-  nowTimer = setInterval(() => {
-    now.value = Date.now();
-  }, 1000);
+	nowTimer = setInterval(() => {
+		now.value = Date.now();
+	}, 1000);
 });
 onUnmounted(() => clearInterval(nowTimer));
 
 const expandedRows = ref<Record<string, boolean>>({});
 
 const rows = computed(() => {
-  const nowSec = Math.floor(now.value / 1000);
-  return subscriptionsStore.subscriptions.map((sub) => {
-    const tokens: LockedToken[] = sub.intervals.map((i) => ({
-      id: i.lockedTokenId,
-      amount: sub.amountPerInterval,
-      token: i.tokenString,
-      pubkey: sub.creatorNpub,
-      locktime: i.unlockTs,
-      bucketId: sub.tierId,
-      date: "",
-      status: i.status,
-      redeemed: i.redeemed ?? false,
-      monthIndex: i.monthIndex,
-    }));
-    const total = tokens.reduce((sum, t) => sum + t.amount, 0);
-    const future = tokens.filter((t) => t.locktime && t.locktime > nowSec);
-    const nextUnlock =
-      future.sort((a, b) => a.locktime! - b.locktime!)[0]?.locktime || null;
-    const countdown = nextUnlock ? formatDistanceToNow(nextUnlock * 1000) : "";
-    const soon = !!nextUnlock && nextUnlock - nowSec <= 7 * 24 * 60 * 60;
-    const monthsLeft = future.length;
-    const monthly = sub.amountPerInterval;
-    const start = sub.startDate || null;
-    const progress = tokens.length ? 1 - monthsLeft / tokens.length : 0;
-    const totalPeriods = tokens.length;
-    const end =
-      start && totalPeriods
-        ? start + (totalPeriods - 1) * 30 * 24 * 60 * 60
-        : null;
-    const unlocked = tokens.filter(
-      (t) => !t.locktime || t.locktime <= nowSec,
-    ).length;
-    const status = monthsLeft > 0 ? "active" : "expired";
-    const bucket = bucketsStore.bucketList.find((b) => b.id === sub.tierId);
-    const bucketName = bucket?.name || "";
-    return {
-      creator: sub.creatorNpub,
-      bucketName,
-      total,
-      monthly,
-      start,
-      nextUnlock,
-      countdown,
-      monthsLeft,
-      progress,
-      totalPeriods,
-      end,
-      hasUnlocked: unlocked > 0,
-      status,
-      tokens,
-      tierName: (sub as any).tierName,
-      benefits: (sub as any).benefits || [],
-      frequency: sub.frequency,
-      tokensRemaining: monthsLeft,
-      soon,
-      expanded: expandedRows.value[sub.creatorNpub] || false,
-    };
-  });
+	const nowSec = Math.floor(now.value / 1000);
+	return subscriptionsStore.subscriptions.map((sub) => {
+		const tokens: LockedToken[] = sub.intervals.map((i) => ({
+			id: i.lockedTokenId,
+			amount: sub.amountPerInterval,
+			token: i.tokenString,
+			pubkey: sub.creatorNpub,
+			locktime: i.unlockTs,
+			bucketId: sub.tierId,
+			date: "",
+			status: i.status,
+			redeemed: i.redeemed ?? false,
+			monthIndex: i.monthIndex,
+		}));
+		const total = tokens.reduce((sum, t) => sum + t.amount, 0);
+		const future = tokens.filter((t) => t.locktime && t.locktime > nowSec);
+		const nextUnlock =
+			future.sort((a, b) => a.locktime! - b.locktime!)[0]?.locktime || null;
+		const countdown = nextUnlock ? formatDistanceToNow(nextUnlock * 1000) : "";
+		const soon = !!nextUnlock && nextUnlock - nowSec <= 7 * 24 * 60 * 60;
+		const monthsLeft = future.length;
+		const monthly = sub.amountPerInterval;
+		const start = sub.startDate || null;
+		const progress = tokens.length ? 1 - monthsLeft / tokens.length : 0;
+		const totalPeriods = tokens.length;
+		const end =
+			start && totalPeriods
+				? start + (totalPeriods - 1) * 30 * 24 * 60 * 60
+				: null;
+		const unlocked = tokens.filter(
+			(t) => !t.locktime || t.locktime <= nowSec,
+		).length;
+		const status = monthsLeft > 0 ? "active" : "expired";
+		const bucket = bucketsStore.bucketList.find((b) => b.id === sub.tierId);
+		const bucketName = bucket?.name || "";
+		return {
+			creator: sub.creatorNpub,
+			bucketName,
+			total,
+			monthly,
+			start,
+			nextUnlock,
+			countdown,
+			monthsLeft,
+			progress,
+			totalPeriods,
+			end,
+			hasUnlocked: unlocked > 0,
+			status,
+			tokens,
+			tierName: (sub as any).tierName,
+			benefits: (sub as any).benefits || [],
+			frequency: sub.frequency,
+			tokensRemaining: monthsLeft,
+			soon,
+			expanded: expandedRows.value[sub.creatorNpub] || false,
+		};
+	});
 });
 
 const soonRows = computed(() => rows.value.filter((r) => r.soon));
 
 const totalLocked = computed(() => rows.value.reduce((s, r) => s + r.total, 0));
 const monthlyTotal = computed(() =>
-  rows.value.reduce((s, r) => s + r.monthly, 0),
+	rows.value.reduce((s, r) => s + r.monthly, 0),
 );
 
 const profiles = ref<Record<string, any>>({});
@@ -582,317 +582,317 @@ const bucketFilter = ref<string | null>(null);
 const frequencyFilter = ref<string | null>(null);
 const sortBy = ref("end-date-asc");
 const sortOptions = [
-  { label: t("SubscriptionsOverview.sort.end"), value: "end-date-asc" },
-  { label: t("SubscriptionsOverview.sort.name"), value: "name-asc" },
-  { label: t("SubscriptionsOverview.sort.cost"), value: "cost-desc" },
-  {
-    label: t("SubscriptionsOverview.columns.start"),
-    value: "start-date-desc",
-  },
+	{ label: t("SubscriptionsOverview.sort.end"), value: "end-date-asc" },
+	{ label: t("SubscriptionsOverview.sort.name"), value: "name-asc" },
+	{ label: t("SubscriptionsOverview.sort.cost"), value: "cost-desc" },
+	{
+		label: t("SubscriptionsOverview.columns.start"),
+		value: "start-date-desc",
+	},
 ];
 const showFilterPanel = ref(false);
 const isLoading = ref(true);
 
 const filteredRows = computed(() => {
-  const term = filter.value.toLowerCase();
-  const list = rows.value.filter((r) => {
-    const matchesStatus =
-      !statusFilter.value || r.status === statusFilter.value;
-    const matchesBucket =
-      !bucketFilter.value || r.bucketName === bucketFilter.value;
-    const matchesFrequency =
-      !frequencyFilter.value || r.frequency === frequencyFilter.value;
-    const rowString = JSON.stringify(r).toLowerCase();
-    const matchesFilter = !term || rowString.includes(term);
-    return matchesStatus && matchesBucket && matchesFrequency && matchesFilter;
-  });
-  let field = "end";
-  let descending = false;
-  switch (sortBy.value) {
-    case "name-asc":
-      field = "creator";
-      break;
-    case "cost-desc":
-      field = "monthly";
-      descending = true;
-      break;
-    case "start-date-desc":
-      field = "start";
-      descending = true;
-      break;
-    case "end-date-asc":
-    default:
-      field = "end";
-      break;
-  }
-  return customSort([...list], field, descending);
+	const term = filter.value.toLowerCase();
+	const list = rows.value.filter((r) => {
+		const matchesStatus =
+			!statusFilter.value || r.status === statusFilter.value;
+		const matchesBucket =
+			!bucketFilter.value || r.bucketName === bucketFilter.value;
+		const matchesFrequency =
+			!frequencyFilter.value || r.frequency === frequencyFilter.value;
+		const rowString = JSON.stringify(r).toLowerCase();
+		const matchesFilter = !term || rowString.includes(term);
+		return matchesStatus && matchesBucket && matchesFrequency && matchesFilter;
+	});
+	let field = "end";
+	let descending = false;
+	switch (sortBy.value) {
+		case "name-asc":
+			field = "creator";
+			break;
+		case "cost-desc":
+			field = "monthly";
+			descending = true;
+			break;
+		case "start-date-desc":
+			field = "start";
+			descending = true;
+			break;
+		case "end-date-asc":
+		default:
+			field = "end";
+			break;
+	}
+	return customSort([...list], field, descending);
 });
 
 function customSort(rows: any[], sortBy: string, descending: boolean) {
-  return rows.sort((a, b) => {
-    let result = 0;
-    if (sortBy === "creator") {
-      const profileA = profiles.value[a.creator];
-      const profileB = profiles.value[b.creator];
-      const nameA =
-        profileA?.display_name || profileA?.name || (a.creator as string);
-      const nameB =
-        profileB?.display_name || profileB?.name || (b.creator as string);
-      result = nameA.localeCompare(nameB);
-    } else {
-      const x = a[sortBy];
-      const y = b[sortBy];
-      if (typeof x === "number" && typeof y === "number") {
-        result = x - y;
-      } else {
-        result = String(x).localeCompare(String(y));
-      }
-    }
-    return descending ? -result : result;
-  });
+	return rows.sort((a, b) => {
+		let result = 0;
+		if (sortBy === "creator") {
+			const profileA = profiles.value[a.creator];
+			const profileB = profiles.value[b.creator];
+			const nameA =
+				profileA?.display_name || profileA?.name || (a.creator as string);
+			const nameB =
+				profileB?.display_name || profileB?.name || (b.creator as string);
+			result = nameA.localeCompare(nameB);
+		} else {
+			const x = a[sortBy];
+			const y = b[sortBy];
+			if (typeof x === "number" && typeof y === "number") {
+				result = x - y;
+			} else {
+				result = String(x).localeCompare(String(y));
+			}
+		}
+		return descending ? -result : result;
+	});
 }
 
 function toggleDetails(pubkey: string) {
-  expandedRows.value[pubkey] = !expandedRows.value[pubkey];
+	expandedRows.value[pubkey] = !expandedRows.value[pubkey];
 }
 
 function sendMessage(pubkey: string) {
-  messageRecipient.value = pubkey;
-  messageText.value = "";
-  showMessageDialog.value = true;
+	messageRecipient.value = pubkey;
+	messageText.value = "";
+	showMessageDialog.value = true;
 }
 
 async function confirmMessage() {
-  const text = messageText.value.trim();
-  const recipient = messageRecipient.value;
-  showMessageDialog.value = false;
-  if (!text || !recipient) return;
-  const { success } = await messenger.sendDm(recipient, text);
-  if (success) {
-    notifySuccess(t("wallet.notifications.nostr_dm_sent"));
-    messenger.createConversation(recipient);
-    messenger.setCurrentConversation(recipient);
-    messenger.markRead(recipient);
-    router.push("/nostr-messenger");
-  } else {
-    notifyError(t("wallet.notifications.nostr_dm_failed"));
-  }
+	const text = messageText.value.trim();
+	const recipient = messageRecipient.value;
+	showMessageDialog.value = false;
+	if (!text || !recipient) return;
+	const { success } = await messenger.sendDm(recipient, text);
+	if (success) {
+		notifySuccess(t("wallet.notifications.nostr_dm_sent"));
+		messenger.createConversation(recipient);
+		messenger.setCurrentConversation(recipient);
+		messenger.markRead(recipient);
+		router.push("/nostr-messenger");
+	} else {
+		notifyError(t("wallet.notifications.nostr_dm_failed"));
+	}
 }
 
 async function retryQueuedSends() {
-  await nutzap.retryQueuedSends();
-  nutzap.clearSendQueue();
+	await nutzap.retryQueuedSends();
+	nutzap.clearSendQueue();
 }
 
 function cancelSubscription(pubkey: string) {
-  const row = rows.value.find((r) => r.creator === pubkey);
-  if (!row) return;
-  confirmPubkey.value = pubkey;
-  confirmTitle.value = t("SubscriptionsOverview.cancel_confirm_title");
-  confirmDialogMessage.value = t("SubscriptionsOverview.cancel_confirm_text");
-  showConfirmDialog.value = true;
+	const row = rows.value.find((r) => r.creator === pubkey);
+	if (!row) return;
+	confirmPubkey.value = pubkey;
+	confirmTitle.value = t("SubscriptionsOverview.cancel_confirm_title");
+	confirmDialogMessage.value = t("SubscriptionsOverview.cancel_confirm_text");
+	showConfirmDialog.value = true;
 }
 
 function extendSubscription(pubkey: string) {
-  const row = rows.value.find((r) => r.creator === pubkey);
-  const sub = subscriptionsStore.subscriptions.find(
-    (s) => s.creatorNpub === pubkey,
-  );
-  if (!row || !sub) return;
-  $q.dialog({
-    title: t("SubscriptionsOverview.extend_dialog_title"),
-    message: t("SubscriptionsOverview.extend_dialog_text"),
-    prompt: {
-      model: 1,
-      type: "number",
-      min: 1,
-    },
-    cancel: true,
-    persistent: true,
-  }).onOk(async (periods: number) => {
-    if (!periods || periods <= 0) return;
-    const future = row.tokens
-      .filter((t) => t.locktime)
-      .sort((a, b) => (a.locktime || 0) - (b.locktime || 0));
-    const lastLock = future.length
-      ? future[future.length - 1].locktime!
-      : Math.floor(Date.now() / 1000);
-    const startDate = lastLock + (sub.intervalDays ?? 30) * 24 * 60 * 60;
-    try {
-      let profile = null;
-      try {
-        profile = await fetchNutzapProfile(pubkey);
-      } catch (e: any) {
-        if (e instanceof RelayConnectionError) {
-          notifyError("Unable to connect to Nostr relays");
-          return;
-        }
-        throw e;
-      }
-      if (!profile) {
-        notifyError("Creator has not published a Nutzap profile (kind-10019)");
-        return;
-      }
-      const newTokens = await nutzap.send({
-        npub: pubkey,
-        periods,
-        amount: row.monthly,
-        startDate,
-        intervalDays: sub.intervalDays,
-        frequency: sub.frequency as any,
-      });
-      receiptList.value = newTokens as any[];
-      showReceiptDialog.value = true;
-      const newSubId = newTokens[0]?.subscriptionId;
-      if (newSubId) {
-        await subscriptionsStore.deleteSubscription(newSubId);
-      }
-      const totalPeriods = sub.intervals.length + newTokens.length;
-      const existingIntervals = sub.intervals.map((i, idx) => ({
-        ...i,
-        monthIndex: idx + 1,
-        totalPeriods,
-      }));
-      const addedIntervals = newTokens.map((t: any, idx: number) => ({
-        intervalKey: String(sub.intervals.length + idx + 1),
-        lockedTokenId: t.id,
-        unlockTs: t.unlockTs,
-        status: "pending",
-        tokenString: t.tokenString,
-        autoRedeem: false,
-        redeemed: false,
-        subscriptionId: sub.id,
-        tierId: sub.tierId,
-        monthIndex: sub.intervals.length + idx + 1,
-        totalPeriods,
-        htlcHash: t.htlcHash ?? null,
-        htlcSecret: t.htlcSecret ?? null,
-      }));
-      await cashuDb.lockedTokens.bulkPut(
-        newTokens.map((t: any, idx: number) => ({
-          ...t,
-          tierId: sub.tierId,
-          ...(sub.tierName ? { tierName: sub.tierName } : {}),
-          subscriptionId: sub.id,
-          monthIndex: sub.intervals.length + idx + 1,
-          totalPeriods,
-        })),
-      );
-      await subscriptionsStore.addSubscription({
-        ...sub,
-        id: sub.id,
-        commitmentLength: totalPeriods,
-        intervals: [...existingIntervals, ...addedIntervals],
-      } as any);
-      showToast(
-        t("SubscriptionsOverview.notifications.extend_success"),
-        "positive",
-      );
-    } catch (e: any) {
-      showToast(e.message, "negative");
-    }
-  });
+	const row = rows.value.find((r) => r.creator === pubkey);
+	const sub = subscriptionsStore.subscriptions.find(
+		(s) => s.creatorNpub === pubkey,
+	);
+	if (!row || !sub) return;
+	$q.dialog({
+		title: t("SubscriptionsOverview.extend_dialog_title"),
+		message: t("SubscriptionsOverview.extend_dialog_text"),
+		prompt: {
+			model: 1,
+			type: "number",
+			min: 1,
+		},
+		cancel: true,
+		persistent: true,
+	}).onOk(async (periods: number) => {
+		if (!periods || periods <= 0) return;
+		const future = row.tokens
+			.filter((t) => t.locktime)
+			.sort((a, b) => (a.locktime || 0) - (b.locktime || 0));
+		const lastLock = future.length
+			? future[future.length - 1].locktime!
+			: Math.floor(Date.now() / 1000);
+		const startDate = lastLock + (sub.intervalDays ?? 30) * 24 * 60 * 60;
+		try {
+			let profile = null;
+			try {
+				profile = await fetchNutzapProfile(pubkey);
+			} catch (e: any) {
+				if (e instanceof RelayConnectionError) {
+					notifyError("Unable to connect to Nostr relays");
+					return;
+				}
+				throw e;
+			}
+			if (!profile) {
+				notifyError("Creator has not published a Nutzap profile (kind-10019)");
+				return;
+			}
+			const newTokens = await nutzap.send({
+				npub: pubkey,
+				periods,
+				amount: row.monthly,
+				startDate,
+				intervalDays: sub.intervalDays,
+				frequency: sub.frequency as any,
+			});
+			receiptList.value = newTokens as any[];
+			showReceiptDialog.value = true;
+			const newSubId = newTokens[0]?.subscriptionId;
+			if (newSubId) {
+				await subscriptionsStore.deleteSubscription(newSubId);
+			}
+			const totalPeriods = sub.intervals.length + newTokens.length;
+			const existingIntervals = sub.intervals.map((i, idx) => ({
+				...i,
+				monthIndex: idx + 1,
+				totalPeriods,
+			}));
+			const addedIntervals = newTokens.map((t: any, idx: number) => ({
+				intervalKey: String(sub.intervals.length + idx + 1),
+				lockedTokenId: t.id,
+				unlockTs: t.unlockTs,
+				status: "pending",
+				tokenString: t.tokenString,
+				autoRedeem: false,
+				redeemed: false,
+				subscriptionId: sub.id,
+				tierId: sub.tierId,
+				monthIndex: sub.intervals.length + idx + 1,
+				totalPeriods,
+				htlcHash: t.htlcHash ?? null,
+				htlcSecret: t.htlcSecret ?? null,
+			}));
+			await cashuDb.lockedTokens.bulkPut(
+				newTokens.map((t: any, idx: number) => ({
+					...t,
+					tierId: sub.tierId,
+					...(sub.tierName ? { tierName: sub.tierName } : {}),
+					subscriptionId: sub.id,
+					monthIndex: sub.intervals.length + idx + 1,
+					totalPeriods,
+				})),
+			);
+			await subscriptionsStore.addSubscription({
+				...sub,
+				id: sub.id,
+				commitmentLength: totalPeriods,
+				intervals: [...existingIntervals, ...addedIntervals],
+			} as any);
+			showToast(
+				t("SubscriptionsOverview.notifications.extend_success"),
+				"positive",
+			);
+		} catch (e: any) {
+			showToast(e.message, "negative");
+		}
+	});
 }
 
 function shareTokens(pubkey: string) {
-  const row = rows.value.find((r) => r.creator === pubkey);
-  if (!row) return;
-  const proofs = row.tokens.flatMap((t) => {
-    const decoded = token.decode(t.token);
-    return decoded ? (token.getProofs(decoded) as Proof[]) : [];
-  });
-  if (!proofs.length) return;
-  const tokenStr = proofsStore.serializeProofs(proofs);
-  sendTokensStore.clearSendData();
-  sendTokensStore.sendData.tokensBase64 = tokenStr;
-  sendTokensStore.showSendTokens = true;
+	const row = rows.value.find((r) => r.creator === pubkey);
+	if (!row) return;
+	const proofs = row.tokens.flatMap((t) => {
+		const decoded = token.decode(t.token);
+		return decoded ? (token.getProofs(decoded) as Proof[]) : [];
+	});
+	if (!proofs.length) return;
+	const tokenStr = proofsStore.serializeProofs(proofs);
+	sendTokensStore.clearSendData();
+	sendTokensStore.sendData.tokensBase64 = tokenStr;
+	sendTokensStore.showSendTokens = true;
 }
 
 function exportTokens(pubkey: string) {
-  const row = rows.value.find((r) => r.creator === pubkey);
-  if (!row) return;
-  const lines = ["amount,unlock_time,token"];
-  row.tokens.forEach((t) => {
-    lines.push(`${t.amount},${t.locktime || ""},${t.token}`);
-  });
-  const csv = lines.join("\n");
-  const blob = new Blob([csv], { type: "text/csv" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `tokens_${pubkey}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast(
-    t("SubscriptionsOverview.notifications.export_success"),
-    "positive",
-  );
+	const row = rows.value.find((r) => r.creator === pubkey);
+	if (!row) return;
+	const lines = ["amount,unlock_time,token"];
+	row.tokens.forEach((t) => {
+		lines.push(`${t.amount},${t.locktime || ""},${t.token}`);
+	});
+	const csv = lines.join("\n");
+	const blob = new Blob([csv], { type: "text/csv" });
+	const url = URL.createObjectURL(blob);
+	const a = document.createElement("a");
+	a.href = url;
+	a.download = `tokens_${pubkey}.csv`;
+	a.click();
+	URL.revokeObjectURL(url);
+	showToast(
+		t("SubscriptionsOverview.notifications.export_success"),
+		"positive",
+	);
 }
 
 function confirmCancel() {
-  const pubkey = confirmPubkey.value;
-  if (!pubkey) return;
-  subscriptionsStore
-    .cancelSubscription(pubkey)
-    .then(() =>
-      showToast(
-        t("SubscriptionsOverview.notifications.cancel_success"),
-        "positive",
-      ),
-    )
-    .catch((e: any) => showToast(e.message, "negative"))
-    .finally(() => {
-      showConfirmDialog.value = false;
-    });
+	const pubkey = confirmPubkey.value;
+	if (!pubkey) return;
+	subscriptionsStore
+		.cancelSubscription(pubkey)
+		.then(() =>
+			showToast(
+				t("SubscriptionsOverview.notifications.cancel_success"),
+				"positive",
+			),
+		)
+		.catch((e: any) => showToast(e.message, "negative"))
+		.finally(() => {
+			showConfirmDialog.value = false;
+		});
 }
 
 async function updateProfiles() {
-  const missing: string[] = [];
-  for (const sub of subscriptionsStore.subscriptions) {
-    const pk = sub.creatorNpub;
-    const cached = profileCache.get(pk);
-    if (cached) {
-      profiles.value[pk] = cached;
-    } else if (profiles.value[pk] === undefined) {
-      missing.push(pk);
-    }
-  }
-  if (!missing.length) return;
-  try {
-    await nostr.initNdkReadOnly();
-    const ndk = await useNdk({ requireSigner: false });
-    const events = await ndk.fetchEvents({ kinds: [0], authors: missing });
-    const found = new Set<string>();
-    events.forEach((ev: any) => {
-      try {
-        const profile = JSON.parse(ev.content || "{}");
-        profileCache.set(ev.pubkey, profile);
-        profiles.value[ev.pubkey] = profile;
-        found.add(ev.pubkey);
-      } catch (e) {
-        profiles.value[ev.pubkey] = {};
-      }
-    });
-    for (const pk of missing) {
-      if (!found.has(pk)) {
-        profiles.value[pk] = {};
-      }
-    }
-  } catch (e) {
-    console.error("Failed to fetch profiles", e);
-    for (const pk of missing) {
-      profiles.value[pk] = {};
-    }
-  }
+	const missing: string[] = [];
+	for (const sub of subscriptionsStore.subscriptions) {
+		const pk = sub.creatorNpub;
+		const cached = profileCache.get(pk);
+		if (cached) {
+			profiles.value[pk] = cached;
+		} else if (profiles.value[pk] === undefined) {
+			missing.push(pk);
+		}
+	}
+	if (!missing.length) return;
+	try {
+		await nostr.initNdkReadOnly();
+		const ndk = await useNdk({ requireSigner: false });
+		const events = await ndk.fetchEvents({ kinds: [0], authors: missing });
+		const found = new Set<string>();
+		events.forEach((ev: any) => {
+			try {
+				const profile = JSON.parse(ev.content || "{}");
+				profileCache.set(ev.pubkey, profile);
+				profiles.value[ev.pubkey] = profile;
+				found.add(ev.pubkey);
+			} catch (e) {
+				profiles.value[ev.pubkey] = {};
+			}
+		});
+		for (const pk of missing) {
+			if (!found.has(pk)) {
+				profiles.value[pk] = {};
+			}
+		}
+	} catch (e) {
+		console.error("Failed to fetch profiles", e);
+		for (const pk of missing) {
+			profiles.value[pk] = {};
+		}
+	}
 }
 
 onMounted(async () => {
-  try {
-    await updateProfiles();
-    isLoading.value = false;
-  } catch (e: any) {
-    notifyError(e.message);
-  }
+	try {
+		await updateProfiles();
+		isLoading.value = false;
+	} catch (e: any) {
+		notifyError(e.message);
+	}
 });
 watch(() => subscriptionsStore.subscriptions, updateProfiles);
 </script>

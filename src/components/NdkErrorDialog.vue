@@ -52,24 +52,24 @@ const show = computed(() => !!errStore.error);
 const reason = computed(() => errStore.error?.reason ?? "unknown");
 const isLocked = computed(() => reason.value === "nip07-locked");
 const allowPaste = computed(
-  () => isLocked.value || reason.value === "no-signer",
+	() => isLocked.value || reason.value === "no-signer",
 );
 
 const nsec = ref("");
 
 function saveNsec() {
-  if (!nsec.value.startsWith("nsec")) return;
-  window.localStorage.setItem("nsec", nsec.value.trim());
-  errStore.clear();
-  location.reload();
+	if (!nsec.value.startsWith("nsec")) return;
+	window.localStorage.setItem("nsec", nsec.value.trim());
+	errStore.clear();
+	location.reload();
 }
 
 function retry() {
-  errStore.clear();
-  location.reload();
+	errStore.clear();
+	location.reload();
 }
 
 function closeDialog() {
-  errStore.clear();
+	errStore.clear();
 }
 </script>

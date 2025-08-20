@@ -72,29 +72,29 @@ import { defineComponent } from "vue";
 import { mapState, mapWritableState } from "pinia";
 import { useClipboard } from "src/composables/useClipboard";
 import { defineAsyncComponent } from "vue";
-const VueQrcode = defineAsyncComponent(() =>
-  import("@chenfengyuan/vue-qrcode"),
+const VueQrcode = defineAsyncComponent(
+	() => import("@chenfengyuan/vue-qrcode"),
 );
 
 import { useP2PKStore } from "src/stores/p2pk";
 
 export default defineComponent({
-  name: "P2PKDialog",
-  mixins: [windowMixin],
-  components: {
-    VueQrcode,
-  },
-  setup() {
-    const { copy } = useClipboard();
-    const p2pk = useP2PKStore();
-    return { copy, p2pk };
-  },
-  data: function () {
-    return {};
-  },
-  computed: {
-    ...mapState(useP2PKStore, ["p2pkKeys", "showP2PKData", "showLastKey"]),
-    ...mapWritableState(useP2PKStore, ["showP2PKDialog"]),
-  },
+	name: "P2PKDialog",
+	mixins: [windowMixin],
+	components: {
+		VueQrcode,
+	},
+	setup() {
+		const { copy } = useClipboard();
+		const p2pk = useP2PKStore();
+		return { copy, p2pk };
+	},
+	data: function () {
+		return {};
+	},
+	computed: {
+		...mapState(useP2PKStore, ["p2pkKeys", "showP2PKData", "showLastKey"]),
+		...mapWritableState(useP2PKStore, ["showP2PKDialog"]),
+	},
 });
 </script>

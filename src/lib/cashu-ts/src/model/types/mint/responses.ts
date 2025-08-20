@@ -1,4 +1,4 @@
-import { SerializedBlindedMessage } from '../wallet';
+import { SerializedBlindedMessage } from "../wallet";
 
 /**
  * Cashu api error
@@ -31,11 +31,12 @@ export type ProofState = {
  * Enum for the state of a proof
  */
 export const CheckStateEnum = {
-	UNSPENT: 'UNSPENT',
-	PENDING: 'PENDING',
-	SPENT: 'SPENT'
+	UNSPENT: "UNSPENT",
+	PENDING: "PENDING",
+	SPENT: "SPENT",
 } as const;
-export type CheckStateEnum = (typeof CheckStateEnum)[keyof typeof CheckStateEnum];
+export type CheckStateEnum =
+	(typeof CheckStateEnum)[keyof typeof CheckStateEnum];
 
 /**
  * Response when checking proofs if they are spendable. Should not rely on this for receiving, since it can be easily cheated.
@@ -59,60 +60,60 @@ export type GetInfoResponse = {
 	icon_url?: string;
 	contact: Array<MintContactInfo>;
 	nuts: {
-		'4': {
+		"4": {
 			// Minting
 			methods: Array<SwapMethod>;
 			disabled: boolean;
 		};
-		'5': {
+		"5": {
 			// Melting
 			methods: Array<SwapMethod>;
 			disabled: boolean;
 		};
-		'7'?: {
+		"7"?: {
 			// Token state check
 			supported: boolean;
 		};
-		'8'?: {
+		"8"?: {
 			// Overpaid melt fees
 			supported: boolean;
 		};
-		'9'?: {
+		"9"?: {
 			// Restore
 			supported: boolean;
 		};
-		'10'?: {
+		"10"?: {
 			// Spending conditions
 			supported: boolean;
 		};
-		'11'?: {
+		"11"?: {
 			// P2PK
 			supported: boolean;
 		};
-		'12'?: {
+		"12"?: {
 			// DLEQ
 			supported: boolean;
 		};
-		'14'?: {
+		"14"?: {
 			// HTLCs
 			supported: boolean;
 		};
-		'15'?: {
+		"15"?: {
 			// MPP
 			methods: Array<MPPMethod>;
 		};
-		'17'?: {
+		"17"?: {
 			// WebSockets
 			supported: Array<WebSocketSupport>;
 		};
-		'20'?: {
+		"20"?: {
 			// Locked Mint Quote
 			supported: boolean;
 		};
-		'22'?: {
+		"22"?: {
 			// Blind Authentication
 			bat_max_mint: number;
-			protected_endpoints: Array<{ method: 'GET' | 'POST'; path: string }>;
+			protected_endpoints: Array<{ method: "GET" | "POST"; path: string }>;
 		};
 	};
 	motd?: string;
@@ -156,14 +157,18 @@ export type PartialMeltQuoteResponse = {
 	unit?: string;
 } & ApiError;
 
-export type MeltQuoteResponse = PartialMeltQuoteResponse & { request: string; unit: string };
+export type MeltQuoteResponse = PartialMeltQuoteResponse & {
+	request: string;
+	unit: string;
+};
 
 export const MeltQuoteState = {
-	UNPAID: 'UNPAID',
-	PENDING: 'PENDING',
-	PAID: 'PAID'
+	UNPAID: "UNPAID",
+	PENDING: "PENDING",
+	PAID: "PAID",
 } as const;
-export type MeltQuoteState = (typeof MeltQuoteState)[keyof typeof MeltQuoteState];
+export type MeltQuoteState =
+	(typeof MeltQuoteState)[keyof typeof MeltQuoteState];
 
 export type MintContactInfo = {
 	method: string;
@@ -171,11 +176,12 @@ export type MintContactInfo = {
 };
 
 export const MintQuoteState = {
-	UNPAID: 'UNPAID',
-	PAID: 'PAID',
-	ISSUED: 'ISSUED'
+	UNPAID: "UNPAID",
+	PAID: "PAID",
+	ISSUED: "ISSUED",
 } as const;
-export type MintQuoteState = (typeof MintQuoteState)[keyof typeof MintQuoteState];
+export type MintQuoteState =
+	(typeof MintQuoteState)[keyof typeof MintQuoteState];
 
 /**
  * Response from the mint after requesting a mint
@@ -211,7 +217,10 @@ export type PartialMintQuoteResponse = {
 	amount?: number;
 } & ApiError;
 
-export type MintQuoteResponse = PartialMintQuoteResponse & { amount: number; unit: string };
+export type MintQuoteResponse = PartialMintQuoteResponse & {
+	amount: number;
+	unit: string;
+};
 
 export type LockedMintQuoteResponse = MintQuoteResponse & { pubkey: string };
 

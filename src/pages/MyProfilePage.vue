@@ -167,150 +167,150 @@ import P2PKDialog from "components/P2PKDialog.vue";
 import { isTrustedUrl } from "src/utils/sanitize-url";
 
 export default defineComponent({
-  name: "MyProfilePage",
-  components: { CreatorProfileForm, P2PKDialog },
-  setup() {
-    const $q = useQuasar();
-    const { t } = useI18n();
-    const { copy } = useClipboard();
-    const router = useRouter();
+	name: "MyProfilePage",
+	components: { CreatorProfileForm, P2PKDialog },
+	setup() {
+		const $q = useQuasar();
+		const { t } = useI18n();
+		const { copy } = useClipboard();
+		const router = useRouter();
 
-    const nostr = useNostrStore();
-    const {
-      npub,
-      seedSignerPrivateKeyNsecComputed,
-      privateKeySignerPrivateKey,
-    } = storeToRefs(nostr);
-    const hub = useCreatorHubStore();
-    const profileStore = useCreatorProfileStore();
-    const p2pkStore = useP2PKStore();
-    const { showP2PKDialog, p2pkKeys } = storeToRefs(p2pkStore);
-    const priceStore = usePriceStore();
-    const uiStore = useUiStore();
-    const mints = useMintsStore();
-    const buckets = useBucketsStore();
-    const { expandProfileDetails, expandTierList, expandP2PKKeys } =
-      storeToRefs(uiStore);
-    const {
-      display_name,
-      picture,
-      about,
-      pubkey: profilePub,
-      mints: profileMints,
-      relays: profileRelays,
-      isDirty,
-    } = storeToRefs(profileStore);
-    const bitcoinPrice = computed(() => priceStore.bitcoinPrice);
-    const profile = ref<any>({});
-    const tiers = ref(hub.getTierArray());
-    const profileData = computed(() => ({
-      display_name: display_name.value,
-      picture: picture.value,
-      about: about.value,
-    }));
-    const walletBalance = computed(() => mints.activeBalance);
-    const activeUnit = computed(() => mints.activeUnit);
-    const bucketCount = computed(() => buckets.bucketList.length);
-    const walletBalanceFormatted = computed(() =>
-      uiStore.formatCurrency(walletBalance.value, activeUnit.value),
-    );
+		const nostr = useNostrStore();
+		const {
+			npub,
+			seedSignerPrivateKeyNsecComputed,
+			privateKeySignerPrivateKey,
+		} = storeToRefs(nostr);
+		const hub = useCreatorHubStore();
+		const profileStore = useCreatorProfileStore();
+		const p2pkStore = useP2PKStore();
+		const { showP2PKDialog, p2pkKeys } = storeToRefs(p2pkStore);
+		const priceStore = usePriceStore();
+		const uiStore = useUiStore();
+		const mints = useMintsStore();
+		const buckets = useBucketsStore();
+		const { expandProfileDetails, expandTierList, expandP2PKKeys } =
+			storeToRefs(uiStore);
+		const {
+			display_name,
+			picture,
+			about,
+			pubkey: profilePub,
+			mints: profileMints,
+			relays: profileRelays,
+			isDirty,
+		} = storeToRefs(profileStore);
+		const bitcoinPrice = computed(() => priceStore.bitcoinPrice);
+		const profile = ref<any>({});
+		const tiers = ref(hub.getTierArray());
+		const profileData = computed(() => ({
+			display_name: display_name.value,
+			picture: picture.value,
+			about: about.value,
+		}));
+		const walletBalance = computed(() => mints.activeBalance);
+		const activeUnit = computed(() => mints.activeUnit);
+		const bucketCount = computed(() => buckets.bucketList.length);
+		const walletBalanceFormatted = computed(() =>
+			uiStore.formatCurrency(walletBalance.value, activeUnit.value),
+		);
 
-    async function initProfile() {
-      if (!npub.value) return;
-      const p = await nostr.getProfile(npub.value);
-      if (p) {
-        if (p.picture && !isTrustedUrl(p.picture)) {
-          delete (p as any).picture;
-        }
-        profile.value = { ...p };
-        profileStore.setProfile(p);
-        profileStore.markClean();
-      }
-      if (profileStore.mints.length) {
-        profileMints.value = [...profileStore.mints];
-      }
-      if (profileStore.relays.length) {
-        profileRelays.value = [...profileStore.relays];
-      }
-    }
+		async function initProfile() {
+			if (!npub.value) return;
+			const p = await nostr.getProfile(npub.value);
+			if (p) {
+				if (p.picture && !isTrustedUrl(p.picture)) {
+					delete (p as any).picture;
+				}
+				profile.value = { ...p };
+				profileStore.setProfile(p);
+				profileStore.markClean();
+			}
+			if (profileStore.mints.length) {
+				profileMints.value = [...profileStore.mints];
+			}
+			if (profileStore.relays.length) {
+				profileRelays.value = [...profileStore.relays];
+			}
+		}
 
-    onMounted(() => {
-      initProfile();
-    });
+		onMounted(() => {
+			initProfile();
+		});
 
-    function renderMarkdownSafeWrapper(text: string): string {
-      return renderMarkdownSafeFn(text || "");
-    }
+		function renderMarkdownSafeWrapper(text: string): string {
+			return renderMarkdownSafeFn(text || "");
+		}
 
-    function formatFiat(sats: number): string {
-      if (!priceStore.bitcoinPrice) return "";
-      const value = (priceStore.bitcoinPrice / 100000000) * sats;
-      return uiStore.formatCurrency(value, "USD", true);
-    }
+		function formatFiat(sats: number): string {
+			if (!priceStore.bitcoinPrice) return "";
+			const value = (priceStore.bitcoinPrice / 100000000) * sats;
+			return uiStore.formatCurrency(value, "USD", true);
+		}
 
-    function editProfile() {
-      router.push("/creator-hub");
-    }
+		function editProfile() {
+			router.push("/creator-hub");
+		}
 
-    async function saveProfile() {
-      try {
-        await publishDiscoveryProfile({
-          profile: profileData.value,
-          p2pkPub: profilePub.value,
-          mints: profileMints.value,
-          relays: profileRelays.value,
-        });
-        notifySuccess("Profile updated");
-        profileStore.markClean();
-      } catch (e: any) {
-        notifyError(e?.message || "Failed to publish profile");
-      }
-    }
+		async function saveProfile() {
+			try {
+				await publishDiscoveryProfile({
+					profile: profileData.value,
+					p2pkPub: profilePub.value,
+					mints: profileMints.value,
+					relays: profileRelays.value,
+				});
+				notifySuccess("Profile updated");
+				profileStore.markClean();
+			} catch (e: any) {
+				notifyError(e?.message || "Failed to publish profile");
+			}
+		}
 
-    function openP2PKDialog() {
-      if (!p2pkStore.p2pkKeys.length) {
-        p2pkStore.createAndSelectNewKey().then(() => p2pkStore.showLastKey());
-      } else {
-        p2pkStore.showLastKey();
-      }
-    }
+		function openP2PKDialog() {
+			if (!p2pkStore.p2pkKeys.length) {
+				p2pkStore.createAndSelectNewKey().then(() => p2pkStore.showLastKey());
+			} else {
+				p2pkStore.showLastKey();
+			}
+		}
 
-    function showP2PKKeyEntry(pubKey: string) {
-      p2pkStore.showKeyDetails(pubKey);
-    }
+		function showP2PKKeyEntry(pubKey: string) {
+			p2pkStore.showKeyDetails(pubKey);
+		}
 
-    return {
-      npub,
-      seedSignerPrivateKeyNsecComputed,
-      privateKeySignerPrivateKey,
-      profile,
-      tiers,
-      display_name,
-      picture,
-      about,
-      profilePub,
-      profileMints,
-      profileRelays,
-      isDirty,
-      bitcoinPrice,
-      walletBalance,
-      activeUnit,
-      bucketCount,
-      walletBalanceFormatted,
-      shortenString,
-      renderMarkdownSafe: renderMarkdownSafeWrapper,
-      formatFiat,
-      openP2PKDialog,
-      showP2PKKeyEntry,
-      saveProfile,
-      copy,
-      editProfile,
-      showP2PKDialog,
-      p2pkKeys,
-      expandProfileDetails,
-      expandTierList,
-      expandP2PKKeys,
-    };
-  },
+		return {
+			npub,
+			seedSignerPrivateKeyNsecComputed,
+			privateKeySignerPrivateKey,
+			profile,
+			tiers,
+			display_name,
+			picture,
+			about,
+			profilePub,
+			profileMints,
+			profileRelays,
+			isDirty,
+			bitcoinPrice,
+			walletBalance,
+			activeUnit,
+			bucketCount,
+			walletBalanceFormatted,
+			shortenString,
+			renderMarkdownSafe: renderMarkdownSafeWrapper,
+			formatFiat,
+			openP2PKDialog,
+			showP2PKKeyEntry,
+			saveProfile,
+			copy,
+			editProfile,
+			showP2PKDialog,
+			p2pkKeys,
+			expandProfileDetails,
+			expandTierList,
+			expandP2PKKeys,
+		};
+	},
 });
 </script>

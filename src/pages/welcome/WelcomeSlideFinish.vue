@@ -2,7 +2,9 @@
   <section role="region" :aria-labelledby="id" class="q-pa-md flex flex-center">
     <div class="text-center">
       <q-icon name="check_circle" size="4em" color="primary" />
-      <h1 :id="id" tabindex="-1" class="q-mt-md">{{ $t("Welcome.finish.title") }}</h1>
+      <h1 :id="id" tabindex="-1" class="q-mt-md">
+        {{ $t("Welcome.finish.title") }}
+      </h1>
 
       <div class="q-mt-lg column items-center q-gutter-sm">
         <q-btn
@@ -28,7 +30,11 @@
               @click="createBuckets"
               :label="$t('Welcome.finish.ctas.createBuckets')"
             />
-            <q-btn flat @click="restore" :label="$t('Welcome.finish.ctas.restore')" />
+            <q-btn
+              flat
+              @click="restore"
+              :label="$t('Welcome.finish.ctas.restore')"
+            />
           </div>
         </q-expansion-item>
       </div>
@@ -39,26 +45,26 @@
 <script setup lang="ts">
 const id = "welcome-finish-title";
 const props = defineProps<{
-  onAddMint?: () => void;
-  onCreateBuckets?: () => void;
-  onRestore?: () => void;
-  onOpenWallet?: () => void;
+	onAddMint?: () => void;
+	onCreateBuckets?: () => void;
+	onRestore?: () => void;
+	onOpenWallet?: () => void;
 }>();
 
 function addMint() {
-  props.onAddMint?.();
+	props.onAddMint?.();
 }
 
 function createBuckets() {
-  props.onCreateBuckets?.();
+	props.onCreateBuckets?.();
 }
 
 function restore() {
-  props.onRestore?.();
+	props.onRestore?.();
 }
 
 function openWallet() {
-  props.onOpenWallet?.();
+	props.onOpenWallet?.();
 }
 </script>
 

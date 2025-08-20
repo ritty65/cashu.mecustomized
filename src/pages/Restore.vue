@@ -14,9 +14,9 @@ import { defineComponent } from "vue";
 import RestoreView from "components/RestoreView.vue";
 
 export default defineComponent({
-  name: "ErrorNotFound",
-  components: {
-    RestoreView,
-  },
+	name: "ErrorNotFound",
+	components: {
+		RestoreView,
+	},
 });
 </script>

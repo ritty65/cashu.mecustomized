@@ -92,79 +92,79 @@ import { defineComponent } from "vue";
 import { useClipboard } from "src/composables/useClipboard";
 
 export default defineComponent({
-  name: "SubscriptionReceipt",
-  mixins: [windowMixin],
-  props: {
-    modelValue: Boolean,
-    receipts: {
-      type: Array,
-      required: true,
-    },
-  },
-  emits: ["update:modelValue"],
-  setup() {
-    const { copy } = useClipboard();
-    return { copy };
-  },
-  data() {
-    return {
-      expanded: {} as Record<string, boolean>,
-      activeSlide: 1,
-    };
-  },
-  computed: {
-    model: {
-      get(): boolean {
-        return this.modelValue;
-      },
-      set(v: boolean) {
-        this.$emit("update:modelValue", v);
-      },
-    },
-  },
-  watch: {
-    modelValue(val: boolean) {
-      if (val) this.activeSlide = 1;
-    },
-    receipts() {
-      this.activeSlide = 1;
-    },
-  },
-  methods: {
-    copyToken(token: string) {
-      this.copy(token);
-    },
-    saveToken(token: string) {
-      const blob = new Blob([token], { type: "text/plain" });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "subscription_token.txt";
-      link.style.display = "none";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    },
-    toggle(id: string) {
-      this.$set(this.expanded, id, !this.expanded[id]);
-    },
-    formatDate(r: any) {
-      if (r.locktime) {
-        const d = new Date(r.locktime * 1000);
-        return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${(
-          "0" + d.getDate()
-        ).slice(-2)} ${("0" + d.getHours()).slice(-2)}:${(
-          "0" + d.getMinutes()
-        ).slice(-2)}`;
-      }
-      try {
-        return new Date(r.date).toISOString();
-      } catch {
-        return r.date;
-      }
-    },
-  },
+	name: "SubscriptionReceipt",
+	mixins: [windowMixin],
+	props: {
+		modelValue: Boolean,
+		receipts: {
+			type: Array,
+			required: true,
+		},
+	},
+	emits: ["update:modelValue"],
+	setup() {
+		const { copy } = useClipboard();
+		return { copy };
+	},
+	data() {
+		return {
+			expanded: {} as Record<string, boolean>,
+			activeSlide: 1,
+		};
+	},
+	computed: {
+		model: {
+			get(): boolean {
+				return this.modelValue;
+			},
+			set(v: boolean) {
+				this.$emit("update:modelValue", v);
+			},
+		},
+	},
+	watch: {
+		modelValue(val: boolean) {
+			if (val) this.activeSlide = 1;
+		},
+		receipts() {
+			this.activeSlide = 1;
+		},
+	},
+	methods: {
+		copyToken(token: string) {
+			this.copy(token);
+		},
+		saveToken(token: string) {
+			const blob = new Blob([token], { type: "text/plain" });
+			const url = window.URL.createObjectURL(blob);
+			const link = document.createElement("a");
+			link.href = url;
+			link.download = "subscription_token.txt";
+			link.style.display = "none";
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+			window.URL.revokeObjectURL(url);
+		},
+		toggle(id: string) {
+			this.$set(this.expanded, id, !this.expanded[id]);
+		},
+		formatDate(r: any) {
+			if (r.locktime) {
+				const d = new Date(r.locktime * 1000);
+				return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${(
+					"0" + d.getDate()
+				).slice(-2)} ${("0" + d.getHours()).slice(-2)}:${(
+					"0" + d.getMinutes()
+				).slice(-2)}`;
+			}
+			try {
+				return new Date(r.date).toISOString();
+			} catch {
+				return r.date;
+			}
+		},
+	},
 });
 </script>
 

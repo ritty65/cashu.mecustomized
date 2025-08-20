@@ -7,7 +7,9 @@
       </h1>
       <p class="q-mt-sm">{{ $t("Welcome.backup.lead") }}</p>
       <ul class="q-mt-md text-left" style="display: inline-block">
-        <li v-for="(b, i) in $tm('Welcome.backup.bullets')" :key="i">{{ b }}</li>
+        <li v-for="(b, i) in $tm('Welcome.backup.bullets')" :key="i">
+          {{ b }}
+        </li>
       </ul>
       <div class="q-mt-md">
         <q-btn
@@ -36,16 +38,19 @@
 <script setup lang="ts">
 import { useWelcomeStore } from "src/stores/welcome";
 
-const props = defineProps<{ onRevealSeed?: () => void; onDownloadBackup?: () => void }>();
+const props = defineProps<{
+	onRevealSeed?: () => void;
+	onDownloadBackup?: () => void;
+}>();
 const welcomeStore = useWelcomeStore();
 const id = "welcome-backup-title";
 
 function revealSeed() {
-  props.onRevealSeed?.();
+	props.onRevealSeed?.();
 }
 
 function downloadBackup() {
-  props.onDownloadBackup?.();
+	props.onDownloadBackup?.();
 }
 </script>
 

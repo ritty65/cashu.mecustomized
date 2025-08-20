@@ -1,8 +1,8 @@
-import { CashuMint } from './CashuMint.js';
-import { CashuWallet, splitWithSecret } from './CashuWallet.js';
-import { OutputData } from './model/OutputData.js';
-import { PaymentRequest } from './model/PaymentRequest.js';
-import { setGlobalRequestOptions } from './request.js';
+import { CashuMint } from "./CashuMint.js";
+import { CashuWallet, splitWithSecret } from "./CashuWallet.js";
+import { OutputData } from "./model/OutputData.js";
+import { PaymentRequest } from "./model/PaymentRequest.js";
+import { setGlobalRequestOptions } from "./request.js";
 import {
 	getEncodedToken,
 	getEncodedTokenV4,
@@ -11,11 +11,16 @@ import {
 	decodePaymentRequest,
 	getDecodedTokenBinary,
 	getEncodedTokenBinary,
-	hasValidDleq
-} from './utils.js';
-import { CashuAuthMint, CashuAuthWallet, getBlindedAuthToken, getEncodedAuthToken } from './auth';
+	hasValidDleq,
+} from "./utils.js";
+import {
+	CashuAuthMint,
+	CashuAuthWallet,
+	getBlindedAuthToken,
+	getEncodedAuthToken,
+} from "./auth";
 
-export * from './model/types/index.js';
+export * from "./model/types/index.js";
 
 export {
 	CashuMint,
@@ -35,9 +40,13 @@ export {
 	setGlobalRequestOptions,
 	getDecodedTokenBinary,
 	getEncodedTokenBinary,
-	hasValidDleq
+	hasValidDleq,
 };
 
-export { injectWebSocketImpl } from './ws.js';
+export { injectWebSocketImpl } from "./ws.js";
 
-export { MintOperationError, NetworkError, HttpResponseError } from './model/Errors.js';
+export {
+	MintOperationError,
+	NetworkError,
+	HttpResponseError,
+} from "./model/Errors.js";

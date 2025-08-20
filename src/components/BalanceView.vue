@@ -187,97 +187,97 @@ import BucketDetailModal from "components/BucketDetailModal.vue";
 import axios from "axios";
 
 export default defineComponent({
-  name: "BalanceView",
-  mixins: [windowMixin],
-  components: {
-    ToggleUnit,
-    AnimatedNumber,
-    BucketDetailModal,
-  },
-  props: {
-    setTab: Function,
-  },
-  computed: {
-    ...mapState(useMintsStore, [
-      "activeMintUrl",
-      "activeProofs",
-      "activeBalance",
-      "mints",
-      "totalUnitBalance",
-      "activeUnit",
-      "activeMint",
-    ]),
-    ...mapState(useTokensStore, ["historyTokens"]),
-    ...mapState(useUiStore, ["globalMutexLock"]),
-    ...mapState(usePriceStore, ["bitcoinPrice"]),
-    ...mapState(useBucketsStore, ["bucketList", "bucketBalances"]),
-    ...mapWritableState(useMintsStore, ["activeUnit"]),
-    ...mapWritableState(useUiStore, ["hideBalance", "lastBalanceCached"]),
-    pendingBalance: function () {
-      return -this.historyTokens
-        .filter((t) => t.status == "pending")
-        .filter((t) => t.unit == this.activeUnit)
-        .reduce((sum, el) => (sum += el.amount), 0);
-    },
-    balancesOptions: function () {
-      const mint = this.activeMint();
-      return Object.entries(mint.allBalances).map(([key, value]) => ({
-        label: key,
-        value: key,
-      }));
-    },
-    allMintKeysets: function () {
-      return [].concat(...this.mints.map((m) => m.keysets));
-    },
-    getTotalBalance: function () {
-      return this.totalUnitBalance;
-    },
-    getActiveBalance: function () {
-      return this.activeBalance;
-    },
-    activeMintLabel: function () {
-      const mintClass = this.activeMint();
+	name: "BalanceView",
+	mixins: [windowMixin],
+	components: {
+		ToggleUnit,
+		AnimatedNumber,
+		BucketDetailModal,
+	},
+	props: {
+		setTab: Function,
+	},
+	computed: {
+		...mapState(useMintsStore, [
+			"activeMintUrl",
+			"activeProofs",
+			"activeBalance",
+			"mints",
+			"totalUnitBalance",
+			"activeUnit",
+			"activeMint",
+		]),
+		...mapState(useTokensStore, ["historyTokens"]),
+		...mapState(useUiStore, ["globalMutexLock"]),
+		...mapState(usePriceStore, ["bitcoinPrice"]),
+		...mapState(useBucketsStore, ["bucketList", "bucketBalances"]),
+		...mapWritableState(useMintsStore, ["activeUnit"]),
+		...mapWritableState(useUiStore, ["hideBalance", "lastBalanceCached"]),
+		pendingBalance: function () {
+			return -this.historyTokens
+				.filter((t) => t.status == "pending")
+				.filter((t) => t.unit == this.activeUnit)
+				.reduce((sum, el) => (sum += el.amount), 0);
+		},
+		balancesOptions: function () {
+			const mint = this.activeMint();
+			return Object.entries(mint.allBalances).map(([key, value]) => ({
+				label: key,
+				value: key,
+			}));
+		},
+		allMintKeysets: function () {
+			return [].concat(...this.mints.map((m) => m.keysets));
+		},
+		getTotalBalance: function () {
+			return this.totalUnitBalance;
+		},
+		getActiveBalance: function () {
+			return this.activeBalance;
+		},
+		activeMintLabel: function () {
+			const mintClass = this.activeMint();
 
-      return (
-        mintClass.mint.nickname ||
-        mintClass.mint.info?.name ||
-        getShortUrl(this.activeMintUrl)
-      );
-    },
-    getBalance: function () {
-      var balance = this.activeProofs
-        .flat()
-        .reduce((sum, el) => (sum += el.amount), 0);
-      return balance;
-    },
-  },
-  data() {
-    return {
-      priceLabel: null,
-      viewingBucket: null,
-      detailModalOpen: false,
-    };
-  },
-  mounted() {
-    this.fetchBitcoinPriceUSD();
-  },
-  methods: {
-    ...mapActions(useWalletStore, ["checkPendingTokens"]),
-    ...mapActions(usePriceStore, ["fetchBitcoinPriceUSD"]),
-    toggleUnit: function () {
-      const units = this.activeMint().units;
-      this.activeUnit =
-        units[(units.indexOf(this.activeUnit) + 1) % units.length];
-      return this.activeUnit;
-    },
-    toggleHideBalance() {
-      this.hideBalance = !this.hideBalance;
-    },
-    openBucketDetail(bucket) {
-      this.viewingBucket = bucket;
-      this.detailModalOpen = true;
-    },
-  },
+			return (
+				mintClass.mint.nickname ||
+				mintClass.mint.info?.name ||
+				getShortUrl(this.activeMintUrl)
+			);
+		},
+		getBalance: function () {
+			var balance = this.activeProofs
+				.flat()
+				.reduce((sum, el) => (sum += el.amount), 0);
+			return balance;
+		},
+	},
+	data() {
+		return {
+			priceLabel: null,
+			viewingBucket: null,
+			detailModalOpen: false,
+		};
+	},
+	mounted() {
+		this.fetchBitcoinPriceUSD();
+	},
+	methods: {
+		...mapActions(useWalletStore, ["checkPendingTokens"]),
+		...mapActions(usePriceStore, ["fetchBitcoinPriceUSD"]),
+		toggleUnit: function () {
+			const units = this.activeMint().units;
+			this.activeUnit =
+				units[(units.indexOf(this.activeUnit) + 1) % units.length];
+			return this.activeUnit;
+		},
+		toggleHideBalance() {
+			this.hideBalance = !this.hideBalance;
+		},
+		openBucketDetail(bucket) {
+			this.viewingBucket = bucket;
+			this.detailModalOpen = true;
+		},
+	},
 });
 </script>
 <style scoped>

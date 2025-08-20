@@ -69,14 +69,14 @@ import { useUiStore } from "stores/ui";
 import type { CreatorSubscription } from "stores/creatorSubscriptions";
 
 const props = defineProps<{
-  profile: any;
-  subscription: CreatorSubscription;
-  compact?: boolean;
+	profile: any;
+	subscription: CreatorSubscription;
+	compact?: boolean;
 }>();
 
 const emit = defineEmits<{
-  (e: "select"): void;
-  (e: "open"): void;
+	(e: "select"): void;
+	(e: "open"): void;
 }>();
 
 const uiStore = useUiStore();
@@ -84,81 +84,81 @@ const { activeUnit } = useMintsStore();
 const $q = useQuasar();
 
 function formatCurrency(amount: number): string {
-  return uiStore.formatCurrency(amount, activeUnit.value);
+	return uiStore.formatCurrency(amount, activeUnit.value);
 }
 
 const cardHeight = computed(() => (props.compact ? "96px" : "120px"));
 
 const initials = computed(() => {
-  const n =
-    props.profile?.display_name ||
-    props.profile?.name ||
-    props.subscription.subscriberNpub;
-  return n
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((p: string) => p[0])
-    .join("")
-    .toUpperCase();
+	const n =
+		props.profile?.display_name ||
+		props.profile?.name ||
+		props.subscription.subscriberNpub;
+	return n
+		.split(/\s+/)
+		.filter(Boolean)
+		.slice(0, 2)
+		.map((p: string) => p[0])
+		.join("")
+		.toUpperCase();
 });
 
 const displayName = computed(
-  () =>
-    props.profile?.display_name ||
-    props.profile?.name ||
-    props.subscription.subscriberNpub,
+	() =>
+		props.profile?.display_name ||
+		props.profile?.name ||
+		props.subscription.subscriberNpub,
 );
 
 const nip05Domain = computed(() => {
-  const nip05 = props.profile?.nip05;
-  if (!nip05) return "";
-  return nip05.split("@")[1] || nip05;
+	const nip05 = props.profile?.nip05;
+	if (!nip05) return "";
+	return nip05.split("@")[1] || nip05;
 });
 
 const amountPerInterval = computed(() => {
-  const periodAmount =
-    props.subscription.receivedPeriods > 0
-      ? props.subscription.totalAmount / props.subscription.receivedPeriods
-      : props.subscription.totalAmount;
-  return `${formatCurrency(periodAmount)} / ${props.subscription.frequency}`;
+	const periodAmount =
+		props.subscription.receivedPeriods > 0
+			? props.subscription.totalAmount / props.subscription.receivedPeriods
+			: props.subscription.totalAmount;
+	return `${formatCurrency(periodAmount)} / ${props.subscription.frequency}`;
 });
 
 const lifetimeTotal = computed(() =>
-  formatCurrency(props.subscription.totalAmount),
+	formatCurrency(props.subscription.totalAmount),
 );
 
 const statusColor = computed(() => {
-  if (props.subscription.status === "active") return "positive";
-  if (props.subscription.status === "pending") return "warning";
-  return "negative";
+	if (props.subscription.status === "active") return "positive";
+	if (props.subscription.status === "pending") return "warning";
+	return "negative";
 });
 
 const statusTextColor = computed(() =>
-  props.subscription.status === "pending" ? "black" : "white",
+	props.subscription.status === "pending" ? "black" : "white",
 );
 
 const statusIcon = computed(() =>
-  props.subscription.status === "active"
-    ? "check"
-    : props.subscription.status === "pending"
-    ? "schedule"
-    : "close",
+	props.subscription.status === "active"
+		? "check"
+		: props.subscription.status === "pending"
+			? "schedule"
+			: "close",
 );
 
 const renewsText = computed(() => {
-  if (!props.subscription.nextRenewal) return "renews in —";
-  return `renews in ${formatDistanceToNow(
-    props.subscription.nextRenewal * 1000,
-  )}`;
+	if (!props.subscription.nextRenewal) return "renews in —";
+	return `renews in ${formatDistanceToNow(
+		props.subscription.nextRenewal * 1000,
+	)}`;
 });
 
 const progress = computed(() => {
-  if (!props.subscription.nextRenewal) return 0;
-  const periodSeconds = props.subscription.intervalDays * 24 * 60 * 60;
-  const lastRenewal = props.subscription.nextRenewal - periodSeconds;
-  const now = Date.now() / 1000;
-  const elapsed = now - lastRenewal;
-  return Math.min(Math.max(elapsed / periodSeconds, 0), 1);
+	if (!props.subscription.nextRenewal) return 0;
+	const periodSeconds = props.subscription.intervalDays * 24 * 60 * 60;
+	const lastRenewal = props.subscription.nextRenewal - periodSeconds;
+	const now = Date.now() / 1000;
+	const elapsed = now - lastRenewal;
+	return Math.min(Math.max(elapsed / periodSeconds, 0), 1);
 });
 </script>

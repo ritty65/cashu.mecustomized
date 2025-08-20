@@ -99,127 +99,127 @@ import { useUiStore } from "src/stores/ui";
 import { NAV_DRAWER_WIDTH, NAV_DRAWER_GUTTER } from "src/constants/layout";
 
 export default defineComponent({
-  name: "MainLayout",
-  mixins: [windowMixin],
-  components: {
-    MainHeader,
-    AppNavDrawer,
-    ConversationList,
-    UserInfo,
-    NewChatDialog,
-  },
-  setup() {
-    const messenger = useMessengerStore();
-    const router = useRouter();
-    const conversationSearch = ref("");
-    const newChatDialogRef = ref(null);
-    const $q = useQuasar();
-    const ui = useUiStore();
+	name: "MainLayout",
+	mixins: [windowMixin],
+	components: {
+		MainHeader,
+		AppNavDrawer,
+		ConversationList,
+		UserInfo,
+		NewChatDialog,
+	},
+	setup() {
+		const messenger = useMessengerStore();
+		const router = useRouter();
+		const conversationSearch = ref("");
+		const newChatDialogRef = ref(null);
+		const $q = useQuasar();
+		const ui = useUiStore();
 
-    const navStyleVars = computed(() => ({
-      "--nav-drawer-width": `${NAV_DRAWER_WIDTH}px`,
-      "--nav-offset-x":
-        ui.mainNavOpen && $q.screen.width >= 1024
-          ? `calc(var(--nav-drawer-width) + ${NAV_DRAWER_GUTTER}px)`
-          : "0px",
-    }));
+		const navStyleVars = computed(() => ({
+			"--nav-drawer-width": `${NAV_DRAWER_WIDTH}px`,
+			"--nav-offset-x":
+				ui.mainNavOpen && $q.screen.width >= 1024
+					? `calc(var(--nav-drawer-width) + ${NAV_DRAWER_GUTTER}px)`
+					: "0px",
+		}));
 
-    // Persisted width just for this layout (keep store unchanged)
-    const DEFAULT_DESKTOP = 440;
-    const DEFAULT_TABLET = 320;
-    const MIN_W = 320;
-    const MAX_W = 640;
+		// Persisted width just for this layout (keep store unchanged)
+		const DEFAULT_DESKTOP = 440;
+		const DEFAULT_TABLET = 320;
+		const MIN_W = 320;
+		const MAX_W = 640;
 
-    const saved = LocalStorage.getItem("cashu.messenger.drawerWidth");
-    const drawerWidth = ref(
-      typeof saved === "number"
-        ? saved
-        : $q.screen.lt.md
-        ? DEFAULT_TABLET
-        : DEFAULT_DESKTOP,
-    );
+		const saved = LocalStorage.getItem("cashu.messenger.drawerWidth");
+		const drawerWidth = ref(
+			typeof saved === "number"
+				? saved
+				: $q.screen.lt.md
+					? DEFAULT_TABLET
+					: DEFAULT_DESKTOP,
+		);
 
-    const computedDrawerWidth = computed(() => {
-      if ($q.screen.lt.md)
-        return Math.max(MIN_W, Math.min(drawerWidth.value, 420));
-      return Math.max(MIN_W, Math.min(drawerWidth.value, MAX_W));
-    });
+		const computedDrawerWidth = computed(() => {
+			if ($q.screen.lt.md)
+				return Math.max(MIN_W, Math.min(drawerWidth.value, 420));
+			return Math.max(MIN_W, Math.min(drawerWidth.value, MAX_W));
+		});
 
-    watch(drawerWidth, (val) => {
-      LocalStorage.set("cashu.messenger.drawerWidth", val);
-    });
+		watch(drawerWidth, (val) => {
+			LocalStorage.set("cashu.messenger.drawerWidth", val);
+		});
 
-    watch(
-      () => $q.screen.lt.md,
-      (isLt) => {
-        if (isLt && drawerWidth.value > 420) drawerWidth.value = DEFAULT_TABLET;
-        if (!isLt && drawerWidth.value < MIN_W)
-          drawerWidth.value = DEFAULT_DESKTOP;
-      },
-    );
+		watch(
+			() => $q.screen.lt.md,
+			(isLt) => {
+				if (isLt && drawerWidth.value > 420) drawerWidth.value = DEFAULT_TABLET;
+				if (!isLt && drawerWidth.value < MIN_W)
+					drawerWidth.value = DEFAULT_DESKTOP;
+			},
+		);
 
-    // Drag-to-resize
-    let startX = 0;
-    let startW = 0;
-    const onMouseMove = (e) => {
-      const dx = e.clientX - startX;
-      drawerWidth.value = startW + dx;
-    };
-    const onMouseUp = () => {
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("mouseup", onMouseUp);
-    };
-    const onResizeStart = (e) => {
-      startX = e.clientX;
-      startW = drawerWidth.value;
-      window.addEventListener("mousemove", onMouseMove);
-      window.addEventListener("mouseup", onMouseUp);
-      e.preventDefault();
-    };
+		// Drag-to-resize
+		let startX = 0;
+		let startW = 0;
+		const onMouseMove = (e) => {
+			const dx = e.clientX - startX;
+			drawerWidth.value = startW + dx;
+		};
+		const onMouseUp = () => {
+			window.removeEventListener("mousemove", onMouseMove);
+			window.removeEventListener("mouseup", onMouseUp);
+		};
+		const onResizeStart = (e) => {
+			startX = e.clientX;
+			startW = drawerWidth.value;
+			window.addEventListener("mousemove", onMouseMove);
+			window.addEventListener("mouseup", onMouseUp);
+			e.preventDefault();
+		};
 
-    const openNewChatDialog = () => {
-      newChatDialogRef.value?.show();
-    };
+		const openNewChatDialog = () => {
+			newChatDialogRef.value?.show();
+		};
 
-    const selectConversation = (pubkey) => {
-      messenger.markRead(pubkey);
-      messenger.setCurrentConversation(pubkey);
-      if ($q.screen.lt.md) {
-        messenger.setDrawer(false);
-      }
-      if (router.currentRoute.value.path !== "/nostr-messenger") {
-        router.push("/nostr-messenger");
-      }
-    };
+		const selectConversation = (pubkey) => {
+			messenger.markRead(pubkey);
+			messenger.setCurrentConversation(pubkey);
+			if ($q.screen.lt.md) {
+				messenger.setDrawer(false);
+			}
+			if (router.currentRoute.value.path !== "/nostr-messenger") {
+				router.push("/nostr-messenger");
+			}
+		};
 
-    const startChat = (pubkey) => {
-      messenger.startChat(pubkey);
-      selectConversation(pubkey);
-    };
+		const startChat = (pubkey) => {
+			messenger.startChat(pubkey);
+			selectConversation(pubkey);
+		};
 
-    const isMessengerRoute = computed(() =>
-      router.currentRoute.value.path.startsWith("/nostr-messenger"),
-    );
+		const isMessengerRoute = computed(() =>
+			router.currentRoute.value.path.startsWith("/nostr-messenger"),
+		);
 
-    return {
-      messenger,
-      conversationSearch,
-      newChatDialogRef,
-      openNewChatDialog,
-      selectConversation,
-      startChat,
-      isMessengerRoute,
-      computedDrawerWidth,
-      onResizeStart,
-      navStyleVars,
-    };
-  },
-  async mounted() {
-    const nostr = useNostrStore();
-    await nostr.initSignerIfNotSet();
-    const myHex = nostr.pubkey;
-    useNutzapStore().initListener(myHex);
-  },
+		return {
+			messenger,
+			conversationSearch,
+			newChatDialogRef,
+			openNewChatDialog,
+			selectConversation,
+			startChat,
+			isMessengerRoute,
+			computedDrawerWidth,
+			onResizeStart,
+			navStyleVars,
+		};
+	},
+	async mounted() {
+		const nostr = useNostrStore();
+		await nostr.initSignerIfNotSet();
+		const myHex = nostr.pubkey;
+		useNutzapStore().initListener(myHex);
+	},
 });
 </script>
 

@@ -341,8 +341,8 @@
 import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { defineAsyncComponent } from "vue";
-const VueQrcode = defineAsyncComponent(() =>
-  import("@chenfengyuan/vue-qrcode"),
+const VueQrcode = defineAsyncComponent(
+	() => import("@chenfengyuan/vue-qrcode"),
 );
 import { useMintsStore, MintClass } from "src/stores/mints";
 import { useSettingsStore } from "src/stores/settings";
@@ -352,140 +352,140 @@ import MintMotdMessage from "src/components/MintMotdMessage.vue";
 import MintAuditInfo from "src/components/MintAuditInfo.vue";
 import { useClipboard } from "src/composables/useClipboard";
 import {
-  X as CloseIcon,
-  QrCode as QrCodeIcon,
-  Link as LinkIcon,
-  Nut as NutIcon,
-  DollarSign as CurrencyIcon,
-  Info as InfoIcon,
-  Mail as MailIcon,
-  Copy as CopyIcon,
-  Pencil as PencilIcon,
-  Trash as TrashIcon,
-  Building as BuildingIcon,
-  Banknote as BanknoteIcon,
+	X as CloseIcon,
+	QrCode as QrCodeIcon,
+	Link as LinkIcon,
+	Nut as NutIcon,
+	DollarSign as CurrencyIcon,
+	Info as InfoIcon,
+	Mail as MailIcon,
+	Copy as CopyIcon,
+	Pencil as PencilIcon,
+	Trash as TrashIcon,
+	Building as BuildingIcon,
+	Banknote as BanknoteIcon,
 } from "lucide-vue-next";
 
 export default defineComponent({
-  name: "MintInfoDialog",
-  components: {
-    VueQrcode,
-    CloseIcon,
-    QrCodeIcon,
-    LinkIcon,
-    NutIcon,
-    CurrencyIcon,
-    InfoIcon,
-    MailIcon,
-    CopyIcon,
-    PencilIcon,
-    TrashIcon,
-    BuildingIcon,
-    BanknoteIcon,
-    EditMintDialog,
-    RemoveMintDialog,
-    MintMotdMessage,
-    MintAuditInfo,
-  },
-  setup() {
-    const { copy } = useClipboard();
-    return { copy };
-  },
-  data: function () {
-    return {
-      mintToEdit: {},
-      mintToRemove: {},
-      editMintData: {},
-      contactIcons: {
-        email: "mail",
-      },
-      contactMethods: {
-        twitter: "X",
-        nostr: "Nostr",
-      },
-      showQrCode: false,
-      showAllNuts: false,
-      nutNames: {
-        7: "Token state check",
-        8: "Overpaid Lightning fees",
-        9: "Signature restore",
-        10: "Spending conditions",
-        11: "Pay-To-Pubkey (P2PK)",
-        12: "DLEQ proofs",
-        13: "Deterministic secrets",
-        14: "Hashed Timelock Contracts",
-        15: "Partial multi-path payments",
-        16: "Animated QR codes",
-        17: "WebSocket subscriptions",
-        18: "Payment requests",
-        19: "Cached Responses",
-        20: "Signature on Mint Quote",
-        21: "Clear authentication",
-        22: "Blind authentication",
-      },
-      motdDismissed: false,
-      settings: useSettingsStore(),
-    };
-  },
-  computed: {
-    ...mapState(useMintsStore, ["showMintInfoData"]),
-    ...mapWritableState(useMintsStore, [
-      "showMintInfoDialog",
-      "showEditMintDialog",
-      "showRemoveMintDialog",
-    ]),
-    filteredNutNames() {
-      // Only include nuts 7 and above
-      const filteredNuts = {};
-      Object.keys(this.nutNames).forEach((nutNumber) => {
-        if (parseInt(nutNumber) >= 7) {
-          filteredNuts[nutNumber] = this.nutNames[nutNumber];
-        }
-      });
-      return filteredNuts;
-    },
-    visibleNuts() {
-      // Return only the nuts that are both in our filtered list and supported by the mint
-      const result = {};
-      if (
-        this.showMintInfoData &&
-        this.showMintInfoData.info &&
-        this.showMintInfoData.info.nuts
-      ) {
-        Object.keys(this.filteredNutNames).forEach((nutNumber) => {
-          if (this.showMintInfoData.info.nuts[nutNumber]) {
-            result[nutNumber] = this.filteredNutNames[nutNumber];
-          }
-        });
-      }
-      return result;
-    },
-    mintUnits() {
-      if (this.showMintInfoData) {
-        const mintClassInstance = new MintClass(this.showMintInfoData);
-        return mintClassInstance.units;
-      }
-      return [];
-    },
-  },
-  methods: {
-    ...mapActions(useMintsStore, ["removeMint"]),
-    shortenText: function (text, maxLength) {
-      if (text.length > maxLength) {
-        return text.substring(0, maxLength) + "...";
-      }
-      return text;
-    },
-    openEditMintDialog() {
-      this.mintToEdit = Object.assign({}, this.showMintInfoData);
-      this.editMintData = Object.assign({}, this.showMintInfoData);
-      this.showEditMintDialog = true;
-    },
-    openRemoveMintDialog() {
-      this.mintToRemove = Object.assign({}, this.showMintInfoData);
-      this.showRemoveMintDialog = true;
-    },
-  },
+	name: "MintInfoDialog",
+	components: {
+		VueQrcode,
+		CloseIcon,
+		QrCodeIcon,
+		LinkIcon,
+		NutIcon,
+		CurrencyIcon,
+		InfoIcon,
+		MailIcon,
+		CopyIcon,
+		PencilIcon,
+		TrashIcon,
+		BuildingIcon,
+		BanknoteIcon,
+		EditMintDialog,
+		RemoveMintDialog,
+		MintMotdMessage,
+		MintAuditInfo,
+	},
+	setup() {
+		const { copy } = useClipboard();
+		return { copy };
+	},
+	data: function () {
+		return {
+			mintToEdit: {},
+			mintToRemove: {},
+			editMintData: {},
+			contactIcons: {
+				email: "mail",
+			},
+			contactMethods: {
+				twitter: "X",
+				nostr: "Nostr",
+			},
+			showQrCode: false,
+			showAllNuts: false,
+			nutNames: {
+				7: "Token state check",
+				8: "Overpaid Lightning fees",
+				9: "Signature restore",
+				10: "Spending conditions",
+				11: "Pay-To-Pubkey (P2PK)",
+				12: "DLEQ proofs",
+				13: "Deterministic secrets",
+				14: "Hashed Timelock Contracts",
+				15: "Partial multi-path payments",
+				16: "Animated QR codes",
+				17: "WebSocket subscriptions",
+				18: "Payment requests",
+				19: "Cached Responses",
+				20: "Signature on Mint Quote",
+				21: "Clear authentication",
+				22: "Blind authentication",
+			},
+			motdDismissed: false,
+			settings: useSettingsStore(),
+		};
+	},
+	computed: {
+		...mapState(useMintsStore, ["showMintInfoData"]),
+		...mapWritableState(useMintsStore, [
+			"showMintInfoDialog",
+			"showEditMintDialog",
+			"showRemoveMintDialog",
+		]),
+		filteredNutNames() {
+			// Only include nuts 7 and above
+			const filteredNuts = {};
+			Object.keys(this.nutNames).forEach((nutNumber) => {
+				if (parseInt(nutNumber) >= 7) {
+					filteredNuts[nutNumber] = this.nutNames[nutNumber];
+				}
+			});
+			return filteredNuts;
+		},
+		visibleNuts() {
+			// Return only the nuts that are both in our filtered list and supported by the mint
+			const result = {};
+			if (
+				this.showMintInfoData &&
+				this.showMintInfoData.info &&
+				this.showMintInfoData.info.nuts
+			) {
+				Object.keys(this.filteredNutNames).forEach((nutNumber) => {
+					if (this.showMintInfoData.info.nuts[nutNumber]) {
+						result[nutNumber] = this.filteredNutNames[nutNumber];
+					}
+				});
+			}
+			return result;
+		},
+		mintUnits() {
+			if (this.showMintInfoData) {
+				const mintClassInstance = new MintClass(this.showMintInfoData);
+				return mintClassInstance.units;
+			}
+			return [];
+		},
+	},
+	methods: {
+		...mapActions(useMintsStore, ["removeMint"]),
+		shortenText: function (text, maxLength) {
+			if (text.length > maxLength) {
+				return text.substring(0, maxLength) + "...";
+			}
+			return text;
+		},
+		openEditMintDialog() {
+			this.mintToEdit = Object.assign({}, this.showMintInfoData);
+			this.editMintData = Object.assign({}, this.showMintInfoData);
+			this.showEditMintDialog = true;
+		},
+		openRemoveMintDialog() {
+			this.mintToRemove = Object.assign({}, this.showMintInfoData);
+			this.showRemoveMintDialog = true;
+		},
+	},
 });
 </script>
 

@@ -89,55 +89,55 @@ import { useMintsStore } from "stores/mints";
 import { nip19 } from "nostr-tools";
 
 export default defineComponent({
-  name: "LockedTokensTable",
-  mixins: [windowMixin],
-  props: {
-    bucketId: { type: String, required: true },
-  },
-  setup() {
-    const { copy } = useClipboard();
-    return { copy };
-  },
-  data() {
-    return { currentPage: 1, pageSize: 5 };
-  },
-  computed: {
-    ...mapState(useLockedTokensStore, ["lockedTokens"]),
-    ...mapState(useMintsStore, ["activeUnit"]),
-    filteredTokens() {
-      return this.lockedTokens.filter((t) => t.bucketId === this.bucketId);
-    },
-    maxPages() {
-      return Math.ceil(this.filteredTokens.length / this.pageSize);
-    },
-    paginatedTokens() {
-      const start = (this.currentPage - 1) * this.pageSize;
-      const end = start + this.pageSize;
-      return this.filteredTokens.slice().reverse().slice(start, end);
-    },
-  },
-  methods: {
-    shortenString,
-    formattedDate(dateStr) {
-      const date = parseISO(dateStr);
-      return formatDistanceToNow(date, { addSuffix: false });
-    },
-    formatTs(ts) {
-      const d = new Date(ts * 1000);
-      return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${(
-        "0" + d.getDate()
-      ).slice(-2)} ${("0" + d.getHours()).slice(-2)}:${(
-        "0" + d.getMinutes()
-      ).slice(-2)}`;
-    },
-    pubkeyNpub(hex) {
-      try {
-        if (!hex) return "";
-        return nip19.npubEncode(hex);
-      } catch (e) {
-        return hex;
-      }
-    },
-  },
+	name: "LockedTokensTable",
+	mixins: [windowMixin],
+	props: {
+		bucketId: { type: String, required: true },
+	},
+	setup() {
+		const { copy } = useClipboard();
+		return { copy };
+	},
+	data() {
+		return { currentPage: 1, pageSize: 5 };
+	},
+	computed: {
+		...mapState(useLockedTokensStore, ["lockedTokens"]),
+		...mapState(useMintsStore, ["activeUnit"]),
+		filteredTokens() {
+			return this.lockedTokens.filter((t) => t.bucketId === this.bucketId);
+		},
+		maxPages() {
+			return Math.ceil(this.filteredTokens.length / this.pageSize);
+		},
+		paginatedTokens() {
+			const start = (this.currentPage - 1) * this.pageSize;
+			const end = start + this.pageSize;
+			return this.filteredTokens.slice().reverse().slice(start, end);
+		},
+	},
+	methods: {
+		shortenString,
+		formattedDate(dateStr) {
+			const date = parseISO(dateStr);
+			return formatDistanceToNow(date, { addSuffix: false });
+		},
+		formatTs(ts) {
+			const d = new Date(ts * 1000);
+			return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${(
+				"0" + d.getDate()
+			).slice(-2)} ${("0" + d.getHours()).slice(-2)}:${(
+				"0" + d.getMinutes()
+			).slice(-2)}`;
+		},
+		pubkeyNpub(hex) {
+			try {
+				if (!hex) return "";
+				return nip19.npubEncode(hex);
+			} catch (e) {
+				return hex;
+			}
+		},
+	},
 });
 </script>

@@ -16,7 +16,7 @@ const ui = useUiStore();
 const { activeUnit } = storeToRefs(useMintsStore());
 
 function formatCurrency(val: number) {
-  return ui.formatCurrency(val, activeUnit.value);
+	return ui.formatCurrency(val, activeUnit.value);
 }
 </script>
 

@@ -41,8 +41,8 @@
 import { ref, computed, watch } from "vue";
 import { useCreatorSubscribersStore } from "src/stores/creatorSubscribers";
 import {
-  useSubscribersStore,
-  type SortOption,
+	useSubscribersStore,
+	type SortOption,
 } from "src/stores/subscribersStore";
 import type { SubStatus } from "src/types/subscriber";
 import { useI18n } from "vue-i18n";
@@ -57,62 +57,62 @@ const localSort = ref<SortOption>(store.sort);
 const { t } = useI18n();
 
 const statusOptions = computed(() => [
-  { label: t("CreatorSubscribers.status.active"), value: "active" },
-  { label: t("CreatorSubscribers.status.pending"), value: "pending" },
-  { label: t("CreatorSubscribers.status.ended"), value: "ended" },
+	{ label: t("CreatorSubscribers.status.active"), value: "active" },
+	{ label: t("CreatorSubscribers.status.pending"), value: "pending" },
+	{ label: t("CreatorSubscribers.status.ended"), value: "ended" },
 ]);
 
 const tierOptions = computed(() => {
-  const map = new Map(dataStore.subscribers.map((s) => [s.tierId, s.tierName]));
-  return Array.from(map, ([id, name]) => ({ label: name, value: id }));
+	const map = new Map(dataStore.subscribers.map((s) => [s.tierId, s.tierName]));
+	return Array.from(map, ([id, name]) => ({ label: name, value: id }));
 });
 
 const sortOptions = computed(() => [
-  {
-    label: t("CreatorSubscribers.filters.sortOptions.next"),
-    value: "next",
-  },
-  {
-    label: t("CreatorSubscribers.filters.sortOptions.first"),
-    value: "first",
-  },
-  {
-    label: t("CreatorSubscribers.filters.sortOptions.amount"),
-    value: "amount",
-  },
+	{
+		label: t("CreatorSubscribers.filters.sortOptions.next"),
+		value: "next",
+	},
+	{
+		label: t("CreatorSubscribers.filters.sortOptions.first"),
+		value: "first",
+	},
+	{
+		label: t("CreatorSubscribers.filters.sortOptions.amount"),
+		value: "amount",
+	},
 ]);
 
 watch(
-  () => Array.from(store.status),
-  (v) => {
-    localStatuses.value = v as SubStatus[];
-  },
+	() => Array.from(store.status),
+	(v) => {
+		localStatuses.value = v as SubStatus[];
+	},
 );
 watch(
-  () => Array.from(store.tier),
-  (v) => {
-    localTiers.value = v as string[];
-  },
+	() => Array.from(store.tier),
+	(v) => {
+		localTiers.value = v as string[];
+	},
 );
 watch(
-  () => store.sort,
-  (v) => {
-    localSort.value = v;
-  },
+	() => store.sort,
+	(v) => {
+		localSort.value = v;
+	},
 );
 
 function apply() {
-  store.applyFilters({
-    status: new Set(localStatuses.value),
-    tier: new Set(localTiers.value),
-    sort: localSort.value,
-  });
+	store.applyFilters({
+		status: new Set(localStatuses.value),
+		tier: new Set(localTiers.value),
+		sort: localSort.value,
+	});
 }
 
 function clear() {
-  localStatuses.value = [];
-  localTiers.value = [];
-  localSort.value = "next";
-  store.clearFilters();
+	localStatuses.value = [];
+	localTiers.value = [];
+	localSort.value = "next";
+	store.clearFilters();
 }
 </script>

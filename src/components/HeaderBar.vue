@@ -55,11 +55,11 @@ const { tab } = storeToRefs(ui);
 const totalBalance = computed(() => totalUnitBalance.value);
 
 function formatCurrency(val: number, unit: string) {
-  return ui.formatCurrency(val, unit);
+	return ui.formatCurrency(val, unit);
 }
 
 function toggleDark() {
-  $q.dark.toggle();
+	$q.dark.toggle();
 }
 </script>
 

@@ -26,7 +26,7 @@ const props = defineProps<{ onCreateBuckets?: () => void }>();
 const id = "welcome-buckets-title";
 
 function createBuckets() {
-  props.onCreateBuckets?.();
+	props.onCreateBuckets?.();
 }
 </script>
 

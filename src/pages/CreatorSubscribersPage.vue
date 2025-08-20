@@ -262,8 +262,8 @@
 import { ref, computed, watch, onMounted } from "vue";
 import { useCreatorSubscribersStore } from "src/stores/creatorSubscribers";
 import {
-  useSubscribersStore,
-  type SortOption,
+	useSubscribersStore,
+	type SortOption,
 } from "src/stores/subscribersStore";
 import { storeToRefs } from "pinia";
 import { useDebounceFn } from "@vueuse/core";
@@ -286,24 +286,24 @@ const $q = useQuasar();
 const subStore = useCreatorSubscribersStore();
 const viewStore = useSubscribersStore();
 const { filtered, counts, activeTab, loading, profilesLoading, error } =
-  storeToRefs(subStore);
+	storeToRefs(subStore);
 // `filtered` is maintained by the Pinia store based on the active tab,
 // search query and filter drawer. Treat it as the single source of truth
 // for the subscriber list and KPI counts throughout this page.
 
 const activeCount = computed(
-  () => filtered.value.filter((s) => s.status === "active").length,
+	() => filtered.value.filter((s) => s.status === "active").length,
 );
 const pendingCount = computed(
-  () => filtered.value.filter((s) => s.status === "pending").length,
+	() => filtered.value.filter((s) => s.status === "pending").length,
 );
 // Lifetime sats are included in the KPI row. Safeguard against undefined
 // values in case the field is missing from older data snapshots.
 const lifetimeRevenue = computed(() =>
-  filtered.value.reduce(
-    (sum, s) => sum + (typeof s.lifetimeSat === "number" ? s.lifetimeSat : 0),
-    0,
-  ),
+	filtered.value.reduce(
+		(sum, s) => sum + (typeof s.lifetimeSat === "number" ? s.lifetimeSat : 0),
+		0,
+	),
 );
 
 // Controls the "Next week/month" KPI card. Clicking the card swaps
@@ -313,43 +313,43 @@ const periodWindowDays = computed(() => (periodMode.value === "week" ? 7 : 30));
 // Aggregate expected sats from subscriptions that renew inside the
 // selected window. This feeds the final KPI card.
 const kpiThisPeriodSat = computed(() => {
-  const now = Date.now() / 1000;
-  const end = now + periodWindowDays.value * 86400;
-  return filtered.value
-    .filter(
-      (s) =>
-        s.status === "active" &&
-        typeof s.nextRenewal === "number" &&
-        s.nextRenewal <= end,
-    )
-    .reduce(
-      (sum, s) => sum + (typeof s.amountSat === "number" ? s.amountSat : 0),
-      0,
-    );
+	const now = Date.now() / 1000;
+	const end = now + periodWindowDays.value * 86400;
+	return filtered.value
+		.filter(
+			(s) =>
+				s.status === "active" &&
+				typeof s.nextRenewal === "number" &&
+				s.nextRenewal <= end,
+		)
+		.reduce(
+			(sum, s) => sum + (typeof s.amountSat === "number" ? s.amountSat : 0),
+			0,
+		);
 });
 const formattedKpiThisPeriodSat = computed(() =>
-  kpiThisPeriodSat.value.toLocaleString(),
+	kpiThisPeriodSat.value.toLocaleString(),
 );
 
 function togglePeriod() {
-  // Toggle between week and month views when the KPI card is clicked.
-  periodMode.value = periodMode.value === "week" ? "month" : "week";
+	// Toggle between week and month views when the KPI card is clicked.
+	periodMode.value = periodMode.value === "week" ? "month" : "week";
 }
 
 const search = ref(viewStore.query);
 // Forward the user-entered search term to the Pinia store (debounced),
 // which recomputes `filtered` for us.
 const applySearch = useDebounceFn((v: string) => {
-  viewStore.applyFilters({ query: v });
+	viewStore.applyFilters({ query: v });
 }, 300);
 watch(search, (v) => applySearch(v));
 
 const sort = ref<SortOption>(viewStore.sort);
 watch(
-  () => viewStore.sort,
-  (v) => {
-    sort.value = v;
-  },
+	() => viewStore.sort,
+	(v) => {
+		sort.value = v;
+	},
 );
 watch(sort, (v) => viewStore.applyFilters({ sort: v }));
 
@@ -358,248 +358,248 @@ const savedViewOptions = [{ label: "Default", value: "default" }];
 
 const chartRange = ref<{ from: string; to: string } | null>(null);
 const chartRows = computed(() => {
-  if (!chartRange.value) return filtered.value;
-  const from = new Date(chartRange.value.from).getTime() / 1000;
-  const to = new Date(chartRange.value.to).getTime() / 1000 + 24 * 60 * 60;
-  return filtered.value.filter(
-    (r) => r.startDate && r.startDate >= from && r.startDate <= to,
-  );
+	if (!chartRange.value) return filtered.value;
+	const from = new Date(chartRange.value.from).getTime() / 1000;
+	const to = new Date(chartRange.value.to).getTime() / 1000 + 24 * 60 * 60;
+	return filtered.value.filter(
+		(r) => r.startDate && r.startDate >= from && r.startDate <= to,
+	);
 });
 
 const tabOptions = computed(() => [
-  {
-    label: `${t("CreatorSubscribers.tabs.all")} (${counts.value.all})`,
-    value: "all",
-  },
-  {
-    label: `${t("CreatorSubscribers.frequency.weekly")} (${
-      counts.value.weekly
-    })`,
-    value: "weekly",
-  },
-  {
-    label: `${t("CreatorSubscribers.frequency.biweekly")} (${
-      counts.value.biweekly
-    })`,
-    value: "biweekly",
-  },
-  {
-    label: `${t("CreatorSubscribers.frequency.monthly")} (${
-      counts.value.monthly
-    })`,
-    value: "monthly",
-  },
-  {
-    label: `${t("CreatorSubscribers.status.pending")} (${
-      counts.value.pending
-    })`,
-    value: "pending",
-  },
-  {
-    label: `${t("CreatorSubscribers.status.ended")} (${counts.value.ended})`,
-    value: "ended",
-  },
+	{
+		label: `${t("CreatorSubscribers.tabs.all")} (${counts.value.all})`,
+		value: "all",
+	},
+	{
+		label: `${t("CreatorSubscribers.frequency.weekly")} (${
+			counts.value.weekly
+		})`,
+		value: "weekly",
+	},
+	{
+		label: `${t("CreatorSubscribers.frequency.biweekly")} (${
+			counts.value.biweekly
+		})`,
+		value: "biweekly",
+	},
+	{
+		label: `${t("CreatorSubscribers.frequency.monthly")} (${
+			counts.value.monthly
+		})`,
+		value: "monthly",
+	},
+	{
+		label: `${t("CreatorSubscribers.status.pending")} (${
+			counts.value.pending
+		})`,
+		value: "pending",
+	},
+	{
+		label: `${t("CreatorSubscribers.status.ended")} (${counts.value.ended})`,
+		value: "ended",
+	},
 ]);
 
 const tierMap = computed(() => {
-  return new Map(subStore.subscribers.map((s) => [s.tierId, s.tierName]));
+	return new Map(subStore.subscribers.map((s) => [s.tierId, s.tierName]));
 });
 
 const filterChips = computed(() => {
-  const chips: Array<{
-    key: string;
-    label: string;
-    type: string;
-    value?: string;
-  }> = [];
-  for (const s of viewStore.status) {
-    chips.push({
-      key: `status-${s}`,
-      type: "status",
-      value: s,
-      label: `${t("CreatorSubscribers.filters.status")}: ${t(
-        `CreatorSubscribers.status.${s}`,
-      )}`,
-    });
-  }
-  for (const tierId of viewStore.tier) {
-    chips.push({
-      key: `tier-${tierId}`,
-      type: "tier",
-      value: tierId,
-      label: `${t("CreatorSubscribers.filters.tier")}: ${
-        tierMap.value.get(tierId) ?? tierId
-      }`,
-    });
-  }
-  if (viewStore.sort !== "next") {
-    chips.push({
-      key: "sort",
-      type: "sort",
-      value: viewStore.sort,
-      label: `${t("CreatorSubscribers.filters.sort")}: ${t(
-        `CreatorSubscribers.filters.sortOptions.${viewStore.sort}`,
-      )}`,
-    });
-  }
-  return chips;
+	const chips: Array<{
+		key: string;
+		label: string;
+		type: string;
+		value?: string;
+	}> = [];
+	for (const s of viewStore.status) {
+		chips.push({
+			key: `status-${s}`,
+			type: "status",
+			value: s,
+			label: `${t("CreatorSubscribers.filters.status")}: ${t(
+				`CreatorSubscribers.status.${s}`,
+			)}`,
+		});
+	}
+	for (const tierId of viewStore.tier) {
+		chips.push({
+			key: `tier-${tierId}`,
+			type: "tier",
+			value: tierId,
+			label: `${t("CreatorSubscribers.filters.tier")}: ${
+				tierMap.value.get(tierId) ?? tierId
+			}`,
+		});
+	}
+	if (viewStore.sort !== "next") {
+		chips.push({
+			key: "sort",
+			type: "sort",
+			value: viewStore.sort,
+			label: `${t("CreatorSubscribers.filters.sort")}: ${t(
+				`CreatorSubscribers.filters.sortOptions.${viewStore.sort}`,
+			)}`,
+		});
+	}
+	return chips;
 });
 
 function removeFilter(chip: { type: string; value?: string }) {
-  const statuses = new Set(viewStore.status);
-  const tiers = new Set(viewStore.tier);
-  let sort: SortOption = viewStore.sort;
-  if (chip.type === "status" && chip.value) {
-    statuses.delete(chip.value as SubStatus);
-  } else if (chip.type === "tier" && chip.value) {
-    tiers.delete(chip.value);
-  } else if (chip.type === "sort") {
-    sort = "next";
-  }
-  if (statuses.size || tiers.size || sort !== "next") {
-    viewStore.applyFilters({ status: statuses, tier: tiers, sort });
-  } else {
-    viewStore.clearFilters();
-  }
+	const statuses = new Set(viewStore.status);
+	const tiers = new Set(viewStore.tier);
+	let sort: SortOption = viewStore.sort;
+	if (chip.type === "status" && chip.value) {
+		statuses.delete(chip.value as SubStatus);
+	} else if (chip.type === "tier" && chip.value) {
+		tiers.delete(chip.value);
+	} else if (chip.type === "sort") {
+		sort = "next";
+	}
+	if (statuses.size || tiers.size || sort !== "next") {
+		viewStore.applyFilters({ status: statuses, tier: tiers, sort });
+	} else {
+		viewStore.clearFilters();
+	}
 }
 
 function retry() {
-  void subStore.loadFromDb();
-  void subStore.fetchProfiles();
+	void subStore.loadFromDb();
+	void subStore.fetchProfiles();
 }
 
 const selected = ref<Subscriber[]>([]);
 
 function exportSelected() {
-  downloadCsv(selected.value);
+	downloadCsv(selected.value);
 }
 
 function clearSelected() {
-  selected.value = [];
+	selected.value = [];
 }
 
 const { viewMode: view, density, visibleColumns } = storeToRefs(viewStore);
 
 const viewOptions = computed(() => [
-  {
-    value: "table",
-    icon: "table_rows",
-    label: $q.screen.gt.xs ? t("CreatorSubscribers.toolbar.tableView") : "",
-    "aria-label": t("CreatorSubscribers.toolbar.tableView"),
-  },
-  {
-    value: "card",
-    icon: "grid_view",
-    label: $q.screen.gt.xs ? t("CreatorSubscribers.toolbar.cardView") : "",
-    "aria-label": t("CreatorSubscribers.toolbar.cardView"),
-  },
+	{
+		value: "table",
+		icon: "table_rows",
+		label: $q.screen.gt.xs ? t("CreatorSubscribers.toolbar.tableView") : "",
+		"aria-label": t("CreatorSubscribers.toolbar.tableView"),
+	},
+	{
+		value: "card",
+		icon: "grid_view",
+		label: $q.screen.gt.xs ? t("CreatorSubscribers.toolbar.cardView") : "",
+		"aria-label": t("CreatorSubscribers.toolbar.cardView"),
+	},
 ]);
 const densityOptions = computed(() => [
-  {
-    value: "comfortable",
-    icon: "view_comfy",
-    label: $q.screen.gt.xs ? t("CreatorSubscribers.toolbar.comfortable") : "",
-    "aria-label": t("CreatorSubscribers.toolbar.comfortable"),
-  },
-  {
-    value: "compact",
-    icon: "view_compact",
-    label: $q.screen.gt.xs ? t("CreatorSubscribers.toolbar.compact") : "",
-    "aria-label": t("CreatorSubscribers.toolbar.compact"),
-  },
+	{
+		value: "comfortable",
+		icon: "view_comfy",
+		label: $q.screen.gt.xs ? t("CreatorSubscribers.toolbar.comfortable") : "",
+		"aria-label": t("CreatorSubscribers.toolbar.comfortable"),
+	},
+	{
+		value: "compact",
+		icon: "view_compact",
+		label: $q.screen.gt.xs ? t("CreatorSubscribers.toolbar.compact") : "",
+		"aria-label": t("CreatorSubscribers.toolbar.compact"),
+	},
 ]);
 
 onMounted(() => {
-  void subStore.loadFromDb();
-  void subStore.fetchProfiles();
+	void subStore.loadFromDb();
+	void subStore.fetchProfiles();
 });
 
 // When the list of subscribers changes, fetch profiles for any new npubs.
 watch(
-  () => subStore.subscribers.map((s) => s.npub),
-  (npubs, prev) => {
-    const prevSet = new Set(prev);
-    if (npubs.some((n) => !prevSet.has(n))) {
-      void subStore.fetchProfiles();
-    }
-  },
+	() => subStore.subscribers.map((s) => s.npub),
+	(npubs, prev) => {
+		const prevSet = new Set(prev);
+		if (npubs.some((n) => !prevSet.has(n))) {
+			void subStore.fetchProfiles();
+		}
+	},
 );
 
 const columns = [
-  {
-    name: "subscriber",
-    label: t("CreatorSubscribers.columns.subscriber"),
-  },
-  {
-    name: "tier",
-    label: t("CreatorSubscribers.columns.tier"),
-  },
-  {
-    name: "frequency",
-    label: t("CreatorSubscribers.columns.frequency"),
-  },
-  {
-    name: "status",
-    label: t("CreatorSubscribers.columns.status"),
-  },
-  {
-    name: "amount",
-    label: t("CreatorSubscribers.columns.amount"),
-  },
-  {
-    name: "nextRenewal",
-    label: t("CreatorSubscribers.columns.nextRenewal"),
-  },
-  {
-    name: "lifetime",
-    label: t("CreatorSubscribers.columns.lifetime"),
-  },
+	{
+		name: "subscriber",
+		label: t("CreatorSubscribers.columns.subscriber"),
+	},
+	{
+		name: "tier",
+		label: t("CreatorSubscribers.columns.tier"),
+	},
+	{
+		name: "frequency",
+		label: t("CreatorSubscribers.columns.frequency"),
+	},
+	{
+		name: "status",
+		label: t("CreatorSubscribers.columns.status"),
+	},
+	{
+		name: "amount",
+		label: t("CreatorSubscribers.columns.amount"),
+	},
+	{
+		name: "nextRenewal",
+		label: t("CreatorSubscribers.columns.nextRenewal"),
+	},
+	{
+		name: "lifetime",
+		label: t("CreatorSubscribers.columns.lifetime"),
+	},
 ];
 
 if (visibleColumns.value.length === 0) {
-  visibleColumns.value = columns.map((c) => c.name);
+	visibleColumns.value = columns.map((c) => c.name);
 }
 
 function initials(name: string) {
-  return name
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((p) => p[0])
-    .join("")
-    .toUpperCase();
+	return name
+		.split(/\s+/)
+		.filter(Boolean)
+		.map((p) => p[0])
+		.join("")
+		.toUpperCase();
 }
 function freqShort(f: Frequency) {
-  return f === "weekly" ? "W" : f === "biweekly" ? "2W" : "M";
+	return f === "weekly" ? "W" : f === "biweekly" ? "2W" : "M";
 }
 function statusColor(s: SubStatus) {
-  return s === "active" ? "positive" : s === "pending" ? "warning" : "negative";
+	return s === "active" ? "positive" : s === "pending" ? "warning" : "negative";
 }
 function statusTextColor(s: SubStatus) {
-  return s === "pending" ? "black" : "white";
+	return s === "pending" ? "black" : "white";
 }
 function statusIcon(s: SubStatus) {
-  return s === "active" ? "check" : s === "pending" ? "schedule" : "close";
+	return s === "active" ? "check" : s === "pending" ? "schedule" : "close";
 }
 function progressPercent(r: Subscriber) {
-  return Math.round((r.progress ?? 0) * 100);
+	return Math.round((r.progress ?? 0) * 100);
 }
 function dueSoon(r: Subscriber) {
-  return r.dueSoon;
+	return r.dueSoon;
 }
 function rowClass(row: Subscriber) {
-  return dueSoon(row) ? "due-soon" : "";
+	return dueSoon(row) ? "due-soon" : "";
 }
 const drawer = ref(false);
 const current = ref<Subscriber | null>(null);
 function openDrawer(r: Subscriber) {
-  current.value = r;
-  drawer.value = true;
+	current.value = r;
+	drawer.value = true;
 }
 const avatarMenuRef = ref<QMenu | null>(null);
 const menuNpub = ref("");
 function showAvatarMenu(e: Event, row: Subscriber) {
-  menuNpub.value = row.npub;
-  avatarMenuRef.value?.show(e);
+	menuNpub.value = row.npub;
+	avatarMenuRef.value?.show(e);
 }
 </script>
 

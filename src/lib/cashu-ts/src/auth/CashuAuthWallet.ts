@@ -1,7 +1,12 @@
-import { OutputData } from '../model/OutputData';
-import { BlindAuthMintPayload, MintKeys, MintKeyset, Proof } from '../model/types';
-import { hasValidDleq } from '../utils';
-import { CashuAuthMint } from './CashuAuthMint';
+import { OutputData } from "../model/OutputData";
+import {
+	BlindAuthMintPayload,
+	MintKeys,
+	MintKeyset,
+	Proof,
+} from "../model/types";
+import { hasValidDleq } from "../utils";
+import { CashuAuthMint } from "./CashuAuthMint";
 
 /**
  * Class that represents a Cashu NUT-22 wallet.
@@ -10,7 +15,7 @@ class CashuAuthWallet {
 	private _keys: Map<string, MintKeys> = new Map();
 	private _keysetId: string | undefined;
 	private _keysets: Array<MintKeyset> = [];
-	private _unit = 'auth';
+	private _unit = "auth";
 
 	mint: CashuAuthMint;
 
@@ -24,7 +29,7 @@ class CashuAuthWallet {
 		options?: {
 			keys?: Array<MintKeys> | MintKeys;
 			keysets?: Array<MintKeyset>;
-		}
+		},
 	) {
 		this.mint = mint;
 		let keys: Array<MintKeys> = [];
@@ -42,7 +47,7 @@ class CashuAuthWallet {
 	}
 	get keysetId(): string {
 		if (!this._keysetId) {
-			throw new Error('No keysetId set');
+			throw new Error("No keysetId set");
 		}
 		return this._keysetId;
 	}
@@ -73,13 +78,16 @@ class CashuAuthWallet {
 		let activeKeysets = keysets.filter((k: MintKeyset) => k.active);
 
 		// we only consider keyset IDs that start with "00"
-		activeKeysets = activeKeysets.filter((k: MintKeyset) => k.id.startsWith('00'));
+		activeKeysets = activeKeysets.filter((k: MintKeyset) =>
+			k.id.startsWith("00"),
+		);
 
 		const activeKeyset = activeKeysets.sort(
-			(a: MintKeyset, b: MintKeyset) => (a.input_fee_ppk ?? 0) - (b.input_fee_ppk ?? 0)
+			(a: MintKeyset, b: MintKeyset) =>
+				(a.input_fee_ppk ?? 0) - (b.input_fee_ppk ?? 0),
 		)[0];
 		if (!activeKeyset) {
-			throw new Error('No active keyset found');
+			throw new Error("No active keyset found");
 		}
 		return activeKeyset;
 	}
@@ -90,7 +98,9 @@ class CashuAuthWallet {
 	 */
 	async getKeySets(): Promise<Array<MintKeyset>> {
 		const allKeysets = await this.mint.getKeySets();
-		const unitKeysets = allKeysets.keysets.filter((k: MintKeyset) => k.unit === this._unit);
+		const unitKeysets = allKeysets.keysets.filter(
+			(k: MintKeyset) => k.unit === this._unit,
+		);
 		this._keysets = unitKeysets;
 		return this._keysets;
 	}
@@ -129,7 +139,9 @@ class CashuAuthWallet {
 		if (!this._keysets.find((k: MintKeyset) => k.id === keysetId)) {
 			await this.getKeySets();
 			if (!this._keysets.find((k: MintKeyset) => k.id === keysetId)) {
-				throw new Error(`could not initialize keys. No keyset with id '${keysetId}' found`);
+				throw new Error(
+					`could not initialize keys. No keyset with id '${keysetId}' found`,
+				);
 			}
 		}
 
@@ -156,18 +168,20 @@ class CashuAuthWallet {
 		clearAuthToken: string,
 		options?: {
 			keysetId?: string;
-		}
+		},
 	): Promise<Array<Proof>> {
 		const keyset = await this.getKeys(options?.keysetId);
 		const outputData = OutputData.createRandomData(amount, keyset);
 
 		const mintPayload: BlindAuthMintPayload = {
-			outputs: outputData.map((d) => d.blindedMessage)
+			outputs: outputData.map((d) => d.blindedMessage),
 		};
 		const { signatures } = await this.mint.mint(mintPayload, clearAuthToken);
-		const authProofs = outputData.map((d, i) => d.toProof(signatures[i], keyset));
+		const authProofs = outputData.map((d, i) =>
+			d.toProof(signatures[i], keyset),
+		);
 		if (authProofs.some((p) => !hasValidDleq(p, keyset))) {
-			throw new Error('Mint returned auth proofs with invalid DLEQ');
+			throw new Error("Mint returned auth proofs with invalid DLEQ");
 		}
 		return authProofs;
 	}

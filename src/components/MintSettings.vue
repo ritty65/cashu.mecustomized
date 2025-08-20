@@ -477,236 +477,236 @@ import { EventBus } from "../js/eventBus";
 import AddMintDialog from "src/components/AddMintDialog.vue";
 
 export default defineComponent({
-  name: "MintSettings",
-  mixins: [windowMixin],
-  components: {
-    MintDetailsDialog,
-    AddMintDialog,
-  },
-  props: {},
-  setup() {
-    const addMintDiv = ref(null);
-    const { copy } = useClipboard();
+	name: "MintSettings",
+	mixins: [windowMixin],
+	components: {
+		MintDetailsDialog,
+		AddMintDialog,
+	},
+	props: {},
+	setup() {
+		const addMintDiv = ref(null);
+		const { copy } = useClipboard();
 
-    const scrollToAddMintDiv = () => {
-      if (addMintDiv.value) {
-        // addMintDiv.value.scrollIntoView({ behavior: "smooth" });
-        // const top = addMintDiv.value.offsetTop;
-        const rect = addMintDiv.value.getBoundingClientRect();
-        window.scrollTo({
-          top: window.scrollY + rect.top,
-          behavior: "smooth",
-        });
-      }
-    };
+		const scrollToAddMintDiv = () => {
+			if (addMintDiv.value) {
+				// addMintDiv.value.scrollIntoView({ behavior: "smooth" });
+				// const top = addMintDiv.value.offsetTop;
+				const rect = addMintDiv.value.getBoundingClientRect();
+				window.scrollTo({
+					top: window.scrollY + rect.top,
+					behavior: "smooth",
+				});
+			}
+		};
 
-    onMounted(() => {
-      EventBus.on("scrollToAddMintDiv", scrollToAddMintDiv);
-    });
+		onMounted(() => {
+			EventBus.on("scrollToAddMintDiv", scrollToAddMintDiv);
+		});
 
-    onBeforeUnmount(() => {
-      EventBus.off("scrollToAddMintDiv", scrollToAddMintDiv);
-    });
-    return {
-      addMintDiv,
-      copy,
-    };
-  },
-  data: function () {
-    return {
-      discoveringMints: false,
-      addingMint: false,
-      swapData: {
-        fromUrl: {
-          url: "",
-          optionLabel: "",
-        },
-        toUrl: {
-          url: "",
-          optionLabel: "",
-        },
-        amount: undefined,
-      },
-      activatingMintUrl: "",
-    };
-  },
-  computed: {
-    ...mapWritableState(useSettingsStore, ["getBitcoinPrice"]),
-    ...mapState(useP2PKStore, ["p2pkKeys"]),
-    ...mapState(useMintsStore, [
-      "activeMintUrl",
-      "activeUnit",
-      "mints",
-      "activeProofs",
-      "addMintBlocking",
-    ]),
-    ...mapState(useNostrStore, ["pubkey", "mintRecommendations"]),
-    ...mapState(useWorkersStore, ["invoiceWorkerRunning"]),
-    ...mapWritableState(useMintsStore, [
-      "addMintData",
-      "showAddMintDialog",
-      "showMintInfoDialog",
-      "showMintInfoData",
-    ]),
-    ...mapState(useUiStore, ["tickerShort"]),
-    ...mapState(useSwapStore, ["swapAmountData"]),
-    ...mapWritableState(useSwapStore, ["swapBlocking"]),
-  },
-  watch: {
-    // if swapBlocking is true and invoiceWorkerRunning changes to false, then swapBlocking should be set to false
-    invoiceWorkerRunning: function (val) {
-      if (this.swapBlocking && !val) {
-        this.swapBlocking = false;
-      }
-    },
-  },
-  methods: {
-    ...mapActions(useNostrStore, [
-      "init",
-      "initNdkReadOnly",
-      "getUserPubkey",
-      "fetchEventsFromUser",
-      "fetchMints",
-    ]),
-    ...mapActions(useP2PKStore, ["createAndSelectNewKey", "showKeyDetails"]),
-    ...mapActions(useMintsStore, [
-      "addMint",
-      "removeMint",
-      "activateMintUrl",
-      "updateMint",
-      "triggerMintInfoMotdChanged",
-      "fetchMintInfo",
-    ]),
-    ...mapActions(useWalletStore, ["decodeRequest", "mintOnPaid"]),
-    ...mapActions(useWorkersStore, ["clearAllWorkers"]),
-    ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
-    ...mapActions(useSwapStore, ["mintAmountSwap"]),
-    activateMintUrlInternal: async function (mintUrl) {
-      this.activatingMintUrl = mintUrl;
-      debug(`Activating mint ${this.activatingMintUrl}`);
-      try {
-        await this.activateMintUrl(mintUrl, false, true);
-      } catch (e) {
-        debug("#### Error activating mint:", e);
-      } finally {
-        this.activatingMintUrl = "";
-      }
-    },
-    validateMintUrl: function (url) {
-      try {
-        new URL(url);
-        return true;
-      } catch (e) {
-        return false;
-      }
-    },
-    sanitizeMintUrlAndShowAddDialog: function () {
-      // if no protocol is given, add https
-      if (!this.addMintData.url.match(/^[a-zA-Z]+:\/\//)) {
-        this.addMintData.url = "https://" + this.addMintData.url;
-      }
-      if (!this.validateMintUrl(this.addMintData.url)) {
-        notifyError(
-          this.$i18n.t("MintSettings.add.actions.add_mint.error_invalid_url"),
-        );
-        return;
-      }
-      let urlObj = new URL(this.addMintData.url);
-      urlObj.hostname = urlObj.hostname.toLowerCase();
-      this.addMintData.url = urlObj.toString();
-      this.addMintData.url = this.addMintData.url.replace(/\/$/, "");
-      this.showAddMintDialog = true;
-    },
-    addMintInternal: function (mintToAdd, verbose) {
-      this.addingMint = true;
-      try {
-        this.addMint(mintToAdd, verbose);
-        this.addMintData = { url: "", nickname: "" };
-      } finally {
-        this.addingMint = false;
-      }
-    },
-    mintClass(mint) {
-      return new MintClass(mint);
-    },
-    swapAmountDataOptions: function () {
-      let options = [];
-      for (const [i, m] of Object.entries(this.mints)) {
-        const unitStr = "sat";
-        const unitBalance = this.mintClass(m).unitBalance(unitStr);
-        const balanceStr = useUiStore().formatCurrency(unitBalance, unitStr);
-        options.push({
-          url: m.url,
-          optionLabel:
-            (m.nickname || getShortUrl(m.url)) + " (" + balanceStr + ")",
-        });
-      }
-      return options;
-    },
-    clearSwapData: function () {
-      this.swapData.fromUrl = "";
-      this.swapData.toUrl = "";
-      this.swapData.amount = undefined;
-    },
-    extractAndMintAmountSwap: async function (swapAmountData) {
-      swapAmountData.fromUrl = this.swapData.fromUrl.url;
-      swapAmountData.toUrl = this.swapData.toUrl.url;
-      swapAmountData.amount = this.swapData.amount;
-      await this.mintAmountSwap(swapAmountData);
-      this.clearSwapData();
-    },
-    fetchMintsFromNdk: async function () {
-      this.discoveringMints = true;
-      await this.initNdkReadOnly();
-      debug("### fetch mints");
-      let maxTries = 5;
-      let tries = 0;
-      let mintUrls = [];
-      while (mintUrls.length == 0 && tries < maxTries) {
-        try {
-          mintUrls = await this.fetchMints();
-        } catch (e) {
-          debug("Error fetching mints", e);
-        }
-        tries++;
-      }
-      if (mintUrls.length == 0) {
-        this.notifyError(
-          this.$i18n.t("MintSettings.discover.actions.discover.error_no_mints"),
-        );
-      } else {
-        this.notifySuccess(
-          this.$i18n.t("MintSettings.discover.actions.discover.success", {
-            length: mintUrls.length,
-          }),
-        );
-      }
-      debug(mintUrls);
-      this.discoveringMints = false;
-    },
-    showMintInfo: async function (mint) {
-      this.showMintInfoData = mint;
-      this.showMintInfoDialog = true;
+		onBeforeUnmount(() => {
+			EventBus.off("scrollToAddMintDiv", scrollToAddMintDiv);
+		});
+		return {
+			addMintDiv,
+			copy,
+		};
+	},
+	data: function () {
+		return {
+			discoveringMints: false,
+			addingMint: false,
+			swapData: {
+				fromUrl: {
+					url: "",
+					optionLabel: "",
+				},
+				toUrl: {
+					url: "",
+					optionLabel: "",
+				},
+				amount: undefined,
+			},
+			activatingMintUrl: "",
+		};
+	},
+	computed: {
+		...mapWritableState(useSettingsStore, ["getBitcoinPrice"]),
+		...mapState(useP2PKStore, ["p2pkKeys"]),
+		...mapState(useMintsStore, [
+			"activeMintUrl",
+			"activeUnit",
+			"mints",
+			"activeProofs",
+			"addMintBlocking",
+		]),
+		...mapState(useNostrStore, ["pubkey", "mintRecommendations"]),
+		...mapState(useWorkersStore, ["invoiceWorkerRunning"]),
+		...mapWritableState(useMintsStore, [
+			"addMintData",
+			"showAddMintDialog",
+			"showMintInfoDialog",
+			"showMintInfoData",
+		]),
+		...mapState(useUiStore, ["tickerShort"]),
+		...mapState(useSwapStore, ["swapAmountData"]),
+		...mapWritableState(useSwapStore, ["swapBlocking"]),
+	},
+	watch: {
+		// if swapBlocking is true and invoiceWorkerRunning changes to false, then swapBlocking should be set to false
+		invoiceWorkerRunning: function (val) {
+			if (this.swapBlocking && !val) {
+				this.swapBlocking = false;
+			}
+		},
+	},
+	methods: {
+		...mapActions(useNostrStore, [
+			"init",
+			"initNdkReadOnly",
+			"getUserPubkey",
+			"fetchEventsFromUser",
+			"fetchMints",
+		]),
+		...mapActions(useP2PKStore, ["createAndSelectNewKey", "showKeyDetails"]),
+		...mapActions(useMintsStore, [
+			"addMint",
+			"removeMint",
+			"activateMintUrl",
+			"updateMint",
+			"triggerMintInfoMotdChanged",
+			"fetchMintInfo",
+		]),
+		...mapActions(useWalletStore, ["decodeRequest", "mintOnPaid"]),
+		...mapActions(useWorkersStore, ["clearAllWorkers"]),
+		...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
+		...mapActions(useSwapStore, ["mintAmountSwap"]),
+		activateMintUrlInternal: async function (mintUrl) {
+			this.activatingMintUrl = mintUrl;
+			debug(`Activating mint ${this.activatingMintUrl}`);
+			try {
+				await this.activateMintUrl(mintUrl, false, true);
+			} catch (e) {
+				debug("#### Error activating mint:", e);
+			} finally {
+				this.activatingMintUrl = "";
+			}
+		},
+		validateMintUrl: function (url) {
+			try {
+				new URL(url);
+				return true;
+			} catch (e) {
+				return false;
+			}
+		},
+		sanitizeMintUrlAndShowAddDialog: function () {
+			// if no protocol is given, add https
+			if (!this.addMintData.url.match(/^[a-zA-Z]+:\/\//)) {
+				this.addMintData.url = "https://" + this.addMintData.url;
+			}
+			if (!this.validateMintUrl(this.addMintData.url)) {
+				notifyError(
+					this.$i18n.t("MintSettings.add.actions.add_mint.error_invalid_url"),
+				);
+				return;
+			}
+			let urlObj = new URL(this.addMintData.url);
+			urlObj.hostname = urlObj.hostname.toLowerCase();
+			this.addMintData.url = urlObj.toString();
+			this.addMintData.url = this.addMintData.url.replace(/\/$/, "");
+			this.showAddMintDialog = true;
+		},
+		addMintInternal: function (mintToAdd, verbose) {
+			this.addingMint = true;
+			try {
+				this.addMint(mintToAdd, verbose);
+				this.addMintData = { url: "", nickname: "" };
+			} finally {
+				this.addingMint = false;
+			}
+		},
+		mintClass(mint) {
+			return new MintClass(mint);
+		},
+		swapAmountDataOptions: function () {
+			let options = [];
+			for (const [i, m] of Object.entries(this.mints)) {
+				const unitStr = "sat";
+				const unitBalance = this.mintClass(m).unitBalance(unitStr);
+				const balanceStr = useUiStore().formatCurrency(unitBalance, unitStr);
+				options.push({
+					url: m.url,
+					optionLabel:
+						(m.nickname || getShortUrl(m.url)) + " (" + balanceStr + ")",
+				});
+			}
+			return options;
+		},
+		clearSwapData: function () {
+			this.swapData.fromUrl = "";
+			this.swapData.toUrl = "";
+			this.swapData.amount = undefined;
+		},
+		extractAndMintAmountSwap: async function (swapAmountData) {
+			swapAmountData.fromUrl = this.swapData.fromUrl.url;
+			swapAmountData.toUrl = this.swapData.toUrl.url;
+			swapAmountData.amount = this.swapData.amount;
+			await this.mintAmountSwap(swapAmountData);
+			this.clearSwapData();
+		},
+		fetchMintsFromNdk: async function () {
+			this.discoveringMints = true;
+			await this.initNdkReadOnly();
+			debug("### fetch mints");
+			let maxTries = 5;
+			let tries = 0;
+			let mintUrls = [];
+			while (mintUrls.length == 0 && tries < maxTries) {
+				try {
+					mintUrls = await this.fetchMints();
+				} catch (e) {
+					debug("Error fetching mints", e);
+				}
+				tries++;
+			}
+			if (mintUrls.length == 0) {
+				this.notifyError(
+					this.$i18n.t("MintSettings.discover.actions.discover.error_no_mints"),
+				);
+			} else {
+				this.notifySuccess(
+					this.$i18n.t("MintSettings.discover.actions.discover.success", {
+						length: mintUrls.length,
+					}),
+				);
+			}
+			debug(mintUrls);
+			this.discoveringMints = false;
+		},
+		showMintInfo: async function (mint) {
+			this.showMintInfoData = mint;
+			this.showMintInfoDialog = true;
 
-      this.fetchMintInfo(mint).then((newMintInfo) => {
-        this.triggerMintInfoMotdChanged(newMintInfo, mint);
-        this.mints.filter((m) => m.url === mint.url)[0].info = newMintInfo;
-        this.showMintInfoData = mint;
-      });
-    },
-    getMintIconUrl: function (mint) {
-      if (mint.info) {
-        if (mint.info.icon_url) {
-          return mint.info.icon_url;
-        } else {
-          return undefined;
-        }
-      } else {
-        return undefined;
-      }
-    },
-  },
-  created: function () {},
+			this.fetchMintInfo(mint).then((newMintInfo) => {
+				this.triggerMintInfoMotdChanged(newMintInfo, mint);
+				this.mints.filter((m) => m.url === mint.url)[0].info = newMintInfo;
+				this.showMintInfoData = mint;
+			});
+		},
+		getMintIconUrl: function (mint) {
+			if (mint.info) {
+				if (mint.info.icon_url) {
+					return mint.info.icon_url;
+				} else {
+					return undefined;
+				}
+			} else {
+				return undefined;
+			}
+		},
+	},
+	created: function () {},
 });
 </script>
 

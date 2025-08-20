@@ -182,170 +182,170 @@ const tokensStore = useTokensStore();
 
 const bucketId = route.params.id as string;
 const bucket = computed(() =>
-  bucketsStore.bucketList.find((b) => b.id === bucketId),
+	bucketsStore.bucketList.find((b) => b.id === bucketId),
 );
 const bucketProofs = computed(() =>
-  proofsStore.proofs.filter((p) => p.bucketId === bucketId && !p.reserved),
+	proofsStore.proofs.filter((p) => p.bucketId === bucketId && !p.reserved),
 );
 const bucketBalance = computed(() =>
-  bucketProofs.value.reduce((s, p) => s + p.amount, 0),
+	bucketProofs.value.reduce((s, p) => s + p.amount, 0),
 );
 const { activeUnit } = storeToRefs(mintsStore);
 const showSendTokens = storeToRefs(sendTokensStore).showSendTokens;
 const sendDmDialogRef = ref<InstanceType<typeof SendBucketDmDialog> | null>(
-  null,
+	null,
 );
 
 const selectedSecrets = ref<string[]>([]);
 const targetBucketId = ref<string | null>(null);
 const editDialog = ref({
-  show: false,
-  label: "",
-  color: DEFAULT_COLOR,
-  description: "",
-  originalLabel: "",
+	show: false,
+	label: "",
+	color: DEFAULT_COLOR,
+	description: "",
+	originalLabel: "",
 });
 
 type ProofGroup = {
-  key: string;
-  label: string;
-  color: string;
-  secrets: string[];
-  total: number;
-  tokens: HistoryToken[];
+	key: string;
+	label: string;
+	color: string;
+	secrets: string[];
+	total: number;
+	tokens: HistoryToken[];
 };
 
 const groupedProofs = computed<ProofGroup[]>(() => {
-  const groups: Record<string, ProofGroup> = {};
-  const historyByLabel: Record<string, HistoryToken[]> = {};
-  tokensStore.historyTokens
-    .filter((t) => t.bucketId === bucketId)
-    .forEach((t) => {
-      const lbl = t.label ?? "";
-      if (!historyByLabel[lbl]) historyByLabel[lbl] = [];
-      historyByLabel[lbl].push(t);
-    });
-  bucketProofs.value.forEach((p) => {
-    const lbl = p.label ?? "";
-    if (!groups[lbl]) {
-      const color = historyByLabel[lbl]?.[0]?.color ?? DEFAULT_COLOR;
-      groups[lbl] = {
-        key: lbl || "nolabel",
-        label: lbl,
-        color,
-        secrets: [],
-        total: 0,
-        tokens: historyByLabel[lbl] || [],
-      };
-    }
-    groups[lbl].secrets.push(p.secret);
-    groups[lbl].total += p.amount;
-  });
-  return Object.values(groups);
+	const groups: Record<string, ProofGroup> = {};
+	const historyByLabel: Record<string, HistoryToken[]> = {};
+	tokensStore.historyTokens
+		.filter((t) => t.bucketId === bucketId)
+		.forEach((t) => {
+			const lbl = t.label ?? "";
+			if (!historyByLabel[lbl]) historyByLabel[lbl] = [];
+			historyByLabel[lbl].push(t);
+		});
+	bucketProofs.value.forEach((p) => {
+		const lbl = p.label ?? "";
+		if (!groups[lbl]) {
+			const color = historyByLabel[lbl]?.[0]?.color ?? DEFAULT_COLOR;
+			groups[lbl] = {
+				key: lbl || "nolabel",
+				label: lbl,
+				color,
+				secrets: [],
+				total: 0,
+				tokens: historyByLabel[lbl] || [],
+			};
+		}
+		groups[lbl].secrets.push(p.secret);
+		groups[lbl].total += p.amount;
+	});
+	return Object.values(groups);
 });
 
 const bucketOptions = computed(() =>
-  bucketsStore.bucketList
-    .filter((b) => b.id !== bucketId)
-    .map((b) => ({ label: b.name, value: b.id })),
+	bucketsStore.bucketList
+		.filter((b) => b.id !== bucketId)
+		.map((b) => ({ label: b.name, value: b.id })),
 );
 
 function formatCurrency(amount: number, unit: string) {
-  return uiStore.formatCurrency(amount, unit);
+	return uiStore.formatCurrency(amount, unit);
 }
 
 function formatTs(ts: number) {
-  const d = new Date(ts * 1000);
-  return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${(
-    "0" + d.getDate()
-  ).slice(-2)} ${("0" + d.getHours()).slice(-2)}:${("0" + d.getMinutes()).slice(
-    -2,
-  )}`;
+	const d = new Date(ts * 1000);
+	return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${(
+		"0" + d.getDate()
+	).slice(-2)} ${("0" + d.getHours()).slice(-2)}:${("0" + d.getMinutes()).slice(
+		-2,
+	)}`;
 }
 
 function toggleGroup(group: ProofGroup, val: boolean) {
-  if (val) {
-    const add = group.secrets.filter((s) => !selectedSecrets.value.includes(s));
-    selectedSecrets.value.push(...add);
-  } else {
-    selectedSecrets.value = selectedSecrets.value.filter(
-      (s) => !group.secrets.includes(s),
-    );
-  }
+	if (val) {
+		const add = group.secrets.filter((s) => !selectedSecrets.value.includes(s));
+		selectedSecrets.value.push(...add);
+	} else {
+		selectedSecrets.value = selectedSecrets.value.filter(
+			(s) => !group.secrets.includes(s),
+		);
+	}
 }
 
 function onDragStart(ev: DragEvent, group: ProofGroup) {
-  const secrets = selectedSecrets.value.length
-    ? selectedSecrets.value
-    : group.secrets;
-  if (ev.dataTransfer) {
-    ev.dataTransfer.setData("text/plain", JSON.stringify(secrets));
-    ev.dataTransfer.effectAllowed = "move";
-  }
+	const secrets = selectedSecrets.value.length
+		? selectedSecrets.value
+		: group.secrets;
+	if (ev.dataTransfer) {
+		ev.dataTransfer.setData("text/plain", JSON.stringify(secrets));
+		ev.dataTransfer.effectAllowed = "move";
+	}
 }
 
 function openEditGroup(group: ProofGroup) {
-  editDialog.value.show = true;
-  editDialog.value.label = group.label;
-  editDialog.value.color = group.color;
-  editDialog.value.description = group.tokens[0]?.description || "";
-  editDialog.value.originalLabel = group.label;
+	editDialog.value.show = true;
+	editDialog.value.label = group.label;
+	editDialog.value.color = group.color;
+	editDialog.value.description = group.tokens[0]?.description || "";
+	editDialog.value.originalLabel = group.label;
 }
 
 function saveEdit() {
-  const tokens = tokensStore.historyTokens.filter(
-    (t) =>
-      t.bucketId === bucketId &&
-      (t.label ?? "") === editDialog.value.originalLabel,
-  );
-  tokens.forEach((t) => {
-    tokensStore.editHistoryToken(t.token, {
-      newLabel: editDialog.value.label,
-      newColor: editDialog.value.color,
-      newDescription: editDialog.value.description,
-    });
-  });
-  editDialog.value.show = false;
+	const tokens = tokensStore.historyTokens.filter(
+		(t) =>
+			t.bucketId === bucketId &&
+			(t.label ?? "") === editDialog.value.originalLabel,
+	);
+	tokens.forEach((t) => {
+		tokensStore.editHistoryToken(t.token, {
+			newLabel: editDialog.value.label,
+			newColor: editDialog.value.color,
+			newDescription: editDialog.value.description,
+		});
+	});
+	editDialog.value.show = false;
 }
 
 async function moveSelected() {
-  if (!targetBucketId.value) {
-    notifyError(t("MoveTokens.errors.select_bucket"));
-    return;
-  }
-  const bucketExists = bucketsStore.bucketList.find(
-    (b) => b.id === targetBucketId.value,
-  );
-  if (!bucketExists) {
-    notifyError(`Bucket not found: ${targetBucketId.value}`);
-    return;
-  }
-  await proofsStore.moveProofs(
-    selectedSecrets.value,
-    targetBucketId.value as string,
-  );
-  selectedSecrets.value = [];
+	if (!targetBucketId.value) {
+		notifyError(t("MoveTokens.errors.select_bucket"));
+		return;
+	}
+	const bucketExists = bucketsStore.bucketList.find(
+		(b) => b.id === targetBucketId.value,
+	);
+	if (!bucketExists) {
+		notifyError(`Bucket not found: ${targetBucketId.value}`);
+		return;
+	}
+	await proofsStore.moveProofs(
+		selectedSecrets.value,
+		targetBucketId.value as string,
+	);
+	selectedSecrets.value = [];
 }
 
 function sendSelected() {
-  const proofs = bucketProofs.value.filter((p) =>
-    selectedSecrets.value.includes(p.secret),
-  );
-  const token = proofsStore.serializeProofs(proofs);
-  sendTokensStore.clearSendData();
-  sendTokensStore.sendData.tokensBase64 = token;
-  showSendTokens.value = true;
+	const proofs = bucketProofs.value.filter((p) =>
+		selectedSecrets.value.includes(p.secret),
+	);
+	const token = proofsStore.serializeProofs(proofs);
+	sendTokensStore.clearSendData();
+	sendTokensStore.sendData.tokensBase64 = token;
+	showSendTokens.value = true;
 }
 
 function exportBucket() {
-  const token = proofsStore.serializeProofs(bucketProofs.value);
-  sendTokensStore.clearSendData();
-  sendTokensStore.sendData.tokensBase64 = token;
-  showSendTokens.value = true;
+	const token = proofsStore.serializeProofs(bucketProofs.value);
+	sendTokensStore.clearSendData();
+	sendTokensStore.sendData.tokensBase64 = token;
+	showSendTokens.value = true;
 }
 
 function openSendDmDialog() {
-  const npub = bucket.value?.creatorPubkey;
-  (sendDmDialogRef.value as any)?.show(npub);
+	const npub = bucket.value?.creatorPubkey;
+	(sendDmDialogRef.value as any)?.show(npub);
 }
 </script>

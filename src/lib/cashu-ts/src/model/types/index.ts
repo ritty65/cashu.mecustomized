@@ -1,8 +1,8 @@
-import { OutputDataFactory, OutputDataLike } from '../OutputData';
-import { Proof } from './wallet/index';
+import { OutputDataFactory, OutputDataLike } from "../OutputData";
+import { Proof } from "./wallet/index";
 
-export * from './mint/index';
-export * from './wallet/index';
+export * from "./mint/index";
+export * from "./wallet/index";
 
 export type OutputAmounts = {
 	sendAmounts: Array<number>;
@@ -137,7 +137,7 @@ export type InvoiceData = {
 	expiry?: number;
 };
 
-type RpcSubKinds = 'bolt11_mint_quote' | 'bolt11_melt_quote' | 'proof_state';
+type RpcSubKinds = "bolt11_mint_quote" | "bolt11_melt_quote" | "proof_state";
 
 export type RpcSubId = string | number | null;
 
@@ -150,7 +150,7 @@ export type JsonRpcReqParams = {
 };
 
 type JsonRpcSuccess<T = any> = {
-	jsonrpc: '2.0';
+	jsonrpc: "2.0";
 	result: T;
 	id: RpcSubId;
 };
@@ -162,22 +162,26 @@ export type JsonRpcErrorObject = {
 };
 
 type JsonRpcError = {
-	jsonrpc: '2.0';
+	jsonrpc: "2.0";
 	error: JsonRpcErrorObject;
 	id: RpcSubId;
 };
 
 type JsonRpcRequest = {
-	jsonrpc: '2.0';
-	method: 'sub';
+	jsonrpc: "2.0";
+	method: "sub";
 	params: JsonRpcReqParams;
 	id: Exclude<RpcSubId, null>;
 };
 
 export type JsonRpcNotification = {
-	jsonrpc: '2.0';
+	jsonrpc: "2.0";
 	method: string;
 	params?: JsonRpcParams;
 };
 
-export type JsonRpcMessage = JsonRpcRequest | JsonRpcNotification | JsonRpcSuccess | JsonRpcError;
+export type JsonRpcMessage =
+	| JsonRpcRequest
+	| JsonRpcNotification
+	| JsonRpcSuccess
+	| JsonRpcError;

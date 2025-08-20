@@ -36,21 +36,21 @@ import { computed } from "vue";
 import type { CreatorSubscription } from "stores/creatorSubscriptions";
 
 const props = defineProps<{
-  subscription: CreatorSubscription;
-  compact?: boolean;
-  status: "active" | "pending" | "ended";
-  nextIn: string;
-  progress: number;
-  amount: string;
+	subscription: CreatorSubscription;
+	compact?: boolean;
+	status: "active" | "pending" | "ended";
+	nextIn: string;
+	progress: number;
+	amount: string;
 }>();
 
 const statusColor = computed(() => {
-  if (props.status === "active") return "positive";
-  if (props.status === "pending") return "warning";
-  return "negative";
+	if (props.status === "active") return "positive";
+	if (props.status === "pending") return "warning";
+	return "negative";
 });
 
 const statusTextColor = computed(() =>
-  props.status === "pending" ? "black" : "white",
+	props.status === "pending" ? "black" : "white",
 );
 </script>

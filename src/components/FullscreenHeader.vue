@@ -22,12 +22,12 @@
 import { defineComponent, ref } from "vue";
 
 export default defineComponent({
-  name: "FullscreenHeader",
-  mixins: [windowMixin],
-  props: {},
-  components: {},
-  setup() {
-    return {};
-  },
+	name: "FullscreenHeader",
+	mixins: [windowMixin],
+	props: {},
+	components: {},
+	setup() {
+		return {};
+	},
 });
 </script>

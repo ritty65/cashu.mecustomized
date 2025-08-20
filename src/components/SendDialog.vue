@@ -90,106 +90,106 @@ import { useSendTokensStore } from "src/stores/sendTokensStore";
 import { useSettingsStore } from "../stores/settings";
 import { useMintsStore } from "src/stores/mints";
 import {
-  X as XIcon,
-  Banknote as BanknoteIcon,
-  Zap as ZapIcon,
-  Scan as ScanIcon,
-  Coins as CoinsIcon,
+	X as XIcon,
+	Banknote as BanknoteIcon,
+	Zap as ZapIcon,
+	Scan as ScanIcon,
+	Coins as CoinsIcon,
 } from "lucide-vue-next";
 import { notifyWarning } from "src/js/notify";
 import { DEFAULT_BUCKET_ID } from "@/constants/buckets";
 
 export default defineComponent({
-  name: "SendDialog",
-  components: {
-    XIcon,
-    CoinsIcon,
-    ZapIcon,
-    ScanIcon,
-  },
-  mixins: [windowMixin],
-  props: {},
-  data: function () {
-    return {
-      currentPage: 1,
-      pageSize: 5,
-    };
-  },
-  computed: {
-    ...mapState(useMintsStore, ["mints"]),
-    ...mapWritableState(useUiStore, [
-      "showInvoiceDetails",
-      "tab",
-      "showSendDialog",
-      "showReceiveDialog",
-    ]),
-    ...mapWritableState(useInvoiceHistoryStore, ["invoiceHistory"]),
-    ...mapWritableState(useWalletStore, ["invoiceData", "payInvoiceData"]),
-    ...mapWritableState(useCameraStore, ["camera"]),
-    ...mapWritableState(useSendTokensStore, [
-      "showSendTokens",
-      "sendData",
-      "showLockInput",
-    ]),
-    canMakePayments: function () {
-      if (!this.mints.length) {
-        return false;
-      } else {
-        return true;
-      }
-    },
-    cardClass: function () {
-      return this.$q.dark.isActive
-        ? "bg-gray-100 text-white"
-        : "bg-white text-dark";
-    },
-    iconBgColor: function () {
-      return this.$q.dark.isActive
-        ? "var(--q-color-grey-10)"
-        : "var(--q-color-grey-2)";
-    },
-  },
-  methods: {
-    ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
-    showParseDialog: function () {
-      if (!this.canMakePayments) {
-        notifyWarning(
-          this.$i18n.t("SendDialog.actions.lightning.error_no_mints"),
-        );
-        this.showSendDialog = false;
-        return;
-      }
-      this.payInvoiceData.show = true;
-      this.payInvoiceData.invoice = null;
-      this.payInvoiceData.lnurlpay = null;
-      this.payInvoiceData.domain = "";
-      this.payInvoiceData.lnurlauth = null;
-      this.payInvoiceData.input.request = "";
-      this.payInvoiceData.input.comment = "";
-      this.payInvoiceData.input.paymentChecker = null;
-      this.camera.show = false;
-      this.showSendDialog = false;
-    },
-    showSendTokensDialog: function () {
-      debug("##### showSendTokensDialog");
-      if (!this.canMakePayments) {
-        notifyWarning(this.$i18n.t("SendDialog.actions.ecash.error_no_mints"));
-        this.showSendDialog = false;
-        return;
-      }
-      this.sendData.tokens = "";
-      this.sendData.tokensBase64 = "";
-      this.sendData.amount = null;
-      this.sendData.memo = "";
-      this.sendData.p2pkPubkey = "";
-      this.sendData.paymentRequest = undefined;
-      this.sendData.bucketId = DEFAULT_BUCKET_ID;
-      this.showSendDialog = false;
-      this.showSendTokens = true;
-      this.showLockInput = false;
-    },
-  },
-  created: function () {},
+	name: "SendDialog",
+	components: {
+		XIcon,
+		CoinsIcon,
+		ZapIcon,
+		ScanIcon,
+	},
+	mixins: [windowMixin],
+	props: {},
+	data: function () {
+		return {
+			currentPage: 1,
+			pageSize: 5,
+		};
+	},
+	computed: {
+		...mapState(useMintsStore, ["mints"]),
+		...mapWritableState(useUiStore, [
+			"showInvoiceDetails",
+			"tab",
+			"showSendDialog",
+			"showReceiveDialog",
+		]),
+		...mapWritableState(useInvoiceHistoryStore, ["invoiceHistory"]),
+		...mapWritableState(useWalletStore, ["invoiceData", "payInvoiceData"]),
+		...mapWritableState(useCameraStore, ["camera"]),
+		...mapWritableState(useSendTokensStore, [
+			"showSendTokens",
+			"sendData",
+			"showLockInput",
+		]),
+		canMakePayments: function () {
+			if (!this.mints.length) {
+				return false;
+			} else {
+				return true;
+			}
+		},
+		cardClass: function () {
+			return this.$q.dark.isActive
+				? "bg-gray-100 text-white"
+				: "bg-white text-dark";
+		},
+		iconBgColor: function () {
+			return this.$q.dark.isActive
+				? "var(--q-color-grey-10)"
+				: "var(--q-color-grey-2)";
+		},
+	},
+	methods: {
+		...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
+		showParseDialog: function () {
+			if (!this.canMakePayments) {
+				notifyWarning(
+					this.$i18n.t("SendDialog.actions.lightning.error_no_mints"),
+				);
+				this.showSendDialog = false;
+				return;
+			}
+			this.payInvoiceData.show = true;
+			this.payInvoiceData.invoice = null;
+			this.payInvoiceData.lnurlpay = null;
+			this.payInvoiceData.domain = "";
+			this.payInvoiceData.lnurlauth = null;
+			this.payInvoiceData.input.request = "";
+			this.payInvoiceData.input.comment = "";
+			this.payInvoiceData.input.paymentChecker = null;
+			this.camera.show = false;
+			this.showSendDialog = false;
+		},
+		showSendTokensDialog: function () {
+			debug("##### showSendTokensDialog");
+			if (!this.canMakePayments) {
+				notifyWarning(this.$i18n.t("SendDialog.actions.ecash.error_no_mints"));
+				this.showSendDialog = false;
+				return;
+			}
+			this.sendData.tokens = "";
+			this.sendData.tokensBase64 = "";
+			this.sendData.amount = null;
+			this.sendData.memo = "";
+			this.sendData.p2pkPubkey = "";
+			this.sendData.paymentRequest = undefined;
+			this.sendData.bucketId = DEFAULT_BUCKET_ID;
+			this.showSendDialog = false;
+			this.showSendTokens = true;
+			this.showLockInput = false;
+		},
+	},
+	created: function () {},
 });
 </script>
 

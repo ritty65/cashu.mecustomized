@@ -51,6 +51,6 @@ const { filtered, counts, activeTab } = storeToRefs(store);
 const search = ref(viewStore.query);
 
 const onSearch = useDebounceFn((val: string) => {
-  viewStore.applyFilters({ query: val });
+	viewStore.applyFilters({ query: val });
 }, 220);
 </script>
