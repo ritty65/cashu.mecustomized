@@ -7,13 +7,24 @@
       </h1>
       <p class="q-mt-sm">{{ t('Welcome.mints.lead') }}</p>
       <p class="text-caption q-mt-sm">{{ t('Welcome.mints.primer') }}</p>
+      <p class="text-caption q-mt-sm">
+        These mints were recommended by other Nostr users.
+        Read reviews at
+        <a
+          href="https://bitcoinmints.com"
+          target="_blank"
+          rel="noopener"
+          >bitcoinmints.com</a
+        >.
+        Be careful and do your own research before using a mint.
+      </p>
       <div class="q-mt-sm">
         <q-btn
           flat
           dense
           icon="factory"
           @click="showCatalog = true"
-          :label="t('Welcome.mints.browse')"
+          label="Click to browse mints"
           :disable="!recommendedMints.length"
         />
       </div>

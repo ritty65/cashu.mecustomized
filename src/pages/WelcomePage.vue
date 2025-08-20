@@ -108,14 +108,6 @@ const tasks = computed<WelcomeTask[]>(() => [
     done: () => welcome.nostrSetupCompleted,
     ctas: [{ label: t('welcome.tasks.createKey.generate'), action: 'emit', eventName: 'goto', params: { slide: 1 } }],
   },
-  {
-    id: 'chooseMint',
-    icon: 'factory',
-    title: t('welcome.tasks.chooseMint.title'),
-    desc: t('welcome.tasks.chooseMint.desc'),
-    done: () => welcome.mintConnected,
-    ctas: [{ label: t('welcome.tasks.chooseMint.choose'), action: 'emit', eventName: 'goto', params: { slide: 4 } }],
-  },
 ])
 
 const progress = computed(() => t('welcome.taskList.progress', { done: tasks.value.filter((t) => t.done()).length, total: tasks.value.length }))
@@ -123,7 +115,6 @@ const canFinish = computed(() => tasks.value.every((t) => t.done()))
 
 function runTask(task: WelcomeTask) {
   if (task.id === 'nostr') jump(1)
-  if (task.id === 'chooseMint') jump(4)
   showChecklist.value = false
 }
 
