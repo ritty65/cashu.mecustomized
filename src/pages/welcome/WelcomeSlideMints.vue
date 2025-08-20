@@ -34,16 +34,9 @@
           <q-card-section>
             <div class="text-h6">{{ t('Welcome.mints.browse') }}</div>
           </q-card-section>
-          <q-list>
-            <q-item
-              v-for="mint in recommendedMints"
-              :key="mint.url"
-              clickable
-              @click="selectMint(mint.url)"
-            >
-              <q-item-section>{{ mint.label || mint.url }}</q-item-section>
-            </q-item>
-          </q-list>
+          <q-card-section>
+            <MintGallery @selected="gallerySelected" />
+          </q-card-section>
           <q-card-actions align="right">
             <q-btn flat :label="t('global.actions.close.label')" v-close-popup />
           </q-card-actions>
@@ -57,6 +50,7 @@
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
+import MintGallery from 'src/components/welcome/MintGallery.vue'
 import { useWelcomeStore } from 'src/stores/welcome'
 import { useMintsStore } from 'src/stores/mints'
 
@@ -74,7 +68,8 @@ const recommendedMints = ref<{ label?: string; url: string }[]>([])
 
 async function loadRecommendedMints() {
   try {
-    const resp = await fetch('/mints.json')
+    const base = new URL(import.meta.env.BASE_URL, window.location.origin)
+    const resp = await fetch(new URL('mints.json', base).toString())
     if (!resp.ok) throw new Error('network')
     const data = await resp.json()
     recommendedMints.value = Array.isArray(data) ? data : []
@@ -86,7 +81,8 @@ async function loadRecommendedMints() {
     if (!recommendedMints.value.length && process.env.RECOMMENDED_MINT_URL) {
       recommendedMints.value.push({ url: process.env.RECOMMENDED_MINT_URL as string })
     }
-  } catch {
+  } catch (err) {
+    console.error('Failed to load recommended mints', err)
     if (process.env.RECOMMENDED_MINTS) {
       recommendedMints.value = (process.env.RECOMMENDED_MINTS as string)
         .split(',')
@@ -122,21 +118,14 @@ async function connect() {
     return
   }
   loading.value = true
-  const checkUrl = input.replace(/\/$/, '') + '/keys'
-  try {
-    await fetch(checkUrl, { method: 'GET', mode: 'no-cors' })
-  } catch {
-    error.value = t('Welcome.mints.errorUnreachable')
-    loading.value = false
-    return
-  }
   try {
     const mint = await mints.addMint({ url: input }, true)
     connected.value.push(mint)
     welcome.mintConnected = true
     url.value = ''
-  } catch {
-    error.value = t('Welcome.mints.errorResponse')
+  } catch (e) {
+    console.error('Failed to connect to mint', e)
+    error.value = t('Welcome.mints.errorUnreachable')
   } finally {
     loading.value = false
   }
@@ -147,10 +136,12 @@ function addAnother() {
   error.value = ''
 }
 
-function selectMint(mintUrl: string) {
+function gallerySelected() {
   showCatalog.value = false
-  url.value = mintUrl
-  connect()
+  connected.value = [...mints.mints]
+  if (connected.value.length) {
+    welcome.mintConnected = true
+  }
 }
 </script>
 
