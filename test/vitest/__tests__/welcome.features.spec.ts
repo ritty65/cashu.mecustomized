@@ -17,15 +17,29 @@ vi.mock('vue-i18n', async () => {
   }
 })
 
+vi.mock('quasar', () => ({
+  useQuasar: () => ({ notify: vi.fn(), platform: { has: {} } }),
+  QIcon: { template: '<i></i>' },
+  QBtn: { template: '<button @click="$emit(\'click\')"><slot/></button>' },
+  QForm: { template: '<form @submit.prevent="(e)=>$emit(\'submit\',e)"><slot/></form>' },
+  QInput: { props: ['modelValue', 'label', 'placeholder'], template: '<input />' },
+  QCheckbox: { props: ['modelValue', 'label'], template: '<input type="checkbox" />' },
+  QDialog: { template: '<div><slot/></div>' },
+  QCard: { template: '<div><slot/></div>' },
+  QCardSection: { template: '<div><slot/></div>' },
+  QSeparator: { template: '<hr />' },
+  QCardActions: { template: '<div><slot/></div>' },
+  QLinearProgress: { template: '<div></div>' },
+}))
+
 describe("WelcomeSlideFeatures", () => {
   it("renders feature links", () => {
     const wrapper = mount(WelcomeSlideFeatures, {
       global: {
         mocks: { $t: (msg: string) => msg },
         stubs: {
-          RouterLink: { props: ["to"], template: '<a :href="to"><slot/></a>' },
-          "q-icon": { template: "<i></i>" },
-        },
+          RouterLink: { props: ['to'], template: '<a :href="to"><slot/></a>' }
+        }
       },
     });
 
@@ -44,17 +58,13 @@ describe('WelcomeSlideNostr', () => {
       global: {
         mocks: { t: (msg: string) => msg },
         stubs: {
-          'q-icon': { template: '<i></i>' },
-          'q-btn': { template: '<button @click="$emit(\'click\')"><slot/></button>' },
-          'q-form': { template: '<form @submit.prevent="(e)=>$emit(\'submit\',e)"><slot/></form>' },
-          'q-input': { props:['modelValue','label'], template: '<input />' },
-          'NostrBackupDialog': { template: '<div></div>', props:['modelValue','nsec'] }
+          NostrBackupDialog: { template: '<div></div>', props: ['modelValue', 'nsec'] }
         }
       }
     })
     const welcome = useWelcomeStore()
     const btns = wrapper.findAll('button')
-    await btns[0].trigger('click')
+    await btns[1].trigger('click')
     expect(welcome.nostrSetupCompleted).toBe(true)
   })
 
@@ -67,11 +77,7 @@ describe('WelcomeSlideNostr', () => {
       global: {
         mocks: { t: (msg: string) => msg },
         stubs: {
-          'q-icon': { template: '<i></i>' },
-          'q-btn': { template: '<button @click="$emit(\'click\')"><slot/></button>' },
-          'q-form': { template: '<form @submit.prevent="(e)=>$emit(\'submit\',e)"><slot/></form>' },
-          'q-input': { props:['modelValue','label'], template: '<input />' },
-          'NostrBackupDialog': { template: '<div></div>', props:['modelValue','nsec'] }
+          NostrBackupDialog: { template: '<div></div>', props: ['modelValue', 'nsec'] }
         }
       }
     })
@@ -92,11 +98,7 @@ describe('WelcomeSlideNostr', () => {
       global: {
         mocks: { t: (msg: string) => msg },
         stubs: {
-          'q-icon': { template: '<i></i>' },
-          'q-btn': { template: '<button @click="$emit(\'click\')"><slot/></button>' },
-          'q-form': { template: '<form @submit.prevent="(e)=>$emit(\'submit\',e)"><slot/></form>' },
-          'q-input': { props:['modelValue','label'], template: '<input />' },
-          'NostrBackupDialog': { template: '<div></div>', props:['modelValue','nsec'] }
+          NostrBackupDialog: { template: '<div></div>', props: ['modelValue', 'nsec'] }
         }
       }
     })
@@ -119,11 +121,7 @@ describe('WelcomeSlideMints', () => {
       global: {
         mocks: { t: (msg: string) => msg },
         stubs: {
-          'q-icon': { template: '<i></i>' },
-          'q-input': { props:['modelValue','placeholder'], template: '<input />' },
-          'q-form': { template: '<form @submit.prevent="(e)=>$emit(\'submit\',e)"><slot/></form>' },
-          'q-btn': { template: '<button @click="$emit(\'click\')"><slot/></button>' },
-          'MintInfoDrawer': { template: '<div></div>' }
+          MintInfoDrawer: { template: '<div></div>' }
         }
       }
     })
@@ -143,11 +141,7 @@ describe('WelcomeSlideMints', () => {
       global: {
         mocks: { t: (msg: string) => msg },
         stubs: {
-          'q-icon': { template: '<i></i>' },
-          'q-input': { props:['modelValue','placeholder'], template: '<input />' },
-          'q-form': { template: '<form @submit.prevent="(e)=>$emit(\'submit\',e)"><slot/></form>' },
-          'q-btn': { template: '<button @click="$emit(\'click\')"><slot/></button>' },
-          'MintInfoDrawer': { template: '<div></div>' }
+          MintInfoDrawer: { template: '<div></div>' }
         }
       }
     })
@@ -155,6 +149,6 @@ describe('WelcomeSlideMints', () => {
     await wrapper.find('form').trigger('submit')
     const welcome = useWelcomeStore()
     expect(welcome.mintConnected).toBe(false)
-    expect(wrapper.text()).toContain('Welcome.mints.error')
+    expect(wrapper.text()).toContain('Welcome.mints.errorInvalid')
   })
 })

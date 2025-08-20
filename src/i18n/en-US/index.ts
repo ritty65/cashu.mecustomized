@@ -1883,10 +1883,13 @@ export const messages = {
       finish: "Finish",
       step: "Step {n} of {total}",
       language: "Language",
+      help: "Need help?",
     },
     features: {
       title: "Get to Know the App",
       lead: "Explore these key sections to start using the wallet:",
+      subtitle: "Click a feature below to see what it's for.",
+      intro: "Click on each step to learn what it's for.",
       bullets: {
         creatorHub: {
           label: "CreatorHub",
@@ -1913,7 +1916,9 @@ export const messages = {
       importPlaceholder: "nsec or hex key",
       skip: "Skip for now",
       errorInvalid: "Invalid key",
-      errorConnect: "Could not connect to extension",
+      errorConnect: "Extension connection failed. Make sure a NIP-07 extension is installed and try again.",
+      installHint: "Install a NIP-07 browser extension",
+      installUrl: "https://github.com/albyorg/alby-extension",
       backupTitle: "Backup your Nostr secret",
       backupWarning: "Anyone with this can act as you. Store it privately. We cannot recover it.",
       backupOk: "Got it",
@@ -1931,10 +1936,14 @@ export const messages = {
     mints: {
       title: "Connect to a Cashu mint",
       lead: "You must connect a mint to issue and verify ecash; you can add more later.",
+      primer: "A mint issues your ecash. Choose one to start or learn more.",
       placeholder: "https://your-mint.example",
       connect: "Connect mint",
+      browse: "Browse mints",
       addAnother: "Add another",
-      error: "Could not connect to mint",
+      errorInvalid: "Please enter a valid mint URL",
+      errorUnreachable: "Mint is unreachable",
+      errorResponse: "Mint responded with an error",
     },
     proofs: {
       title: "Proofs",

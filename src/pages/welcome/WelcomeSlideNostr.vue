@@ -6,11 +6,18 @@
       <p class="q-mt-sm">{{ t('Welcome.nostr.lead') }}</p>
       <div class="q-gutter-y-md q-mt-md">
         <q-btn
-          v-if="hasNip07"
           color="primary"
           :label="t('Welcome.nostr.connect')"
           @click="connectNip07"
+          :disable="!hasNip07"
         />
+        <div v-if="!hasNip07" class="text-caption">
+          <a
+            :href="t('Welcome.nostr.installUrl')"
+            target="_blank"
+            class="text-primary"
+          >{{ t('Welcome.nostr.installHint') }}</a>
+        </div>
         <q-btn color="primary" :label="t('Welcome.nostr.generate')" @click="generate" />
         <q-form @submit.prevent="importKey">
           <q-input v-model="nsec" :label="t('Welcome.nostr.importPlaceholder')" autocomplete="off" />
@@ -28,6 +35,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useQuasar } from 'quasar'
 import { useNostrStore } from 'src/stores/nostr'
 import { useWelcomeStore } from 'src/stores/welcome'
 import NostrBackupDialog from 'src/components/welcome/NostrBackupDialog.vue'
@@ -35,6 +43,7 @@ import { nip19 } from 'nostr-tools'
 import { hexToBytes } from '@noble/hashes/utils'
 
 const { t } = useI18n()
+const $q = useQuasar()
 const nostr = useNostrStore()
 const welcome = useWelcomeStore()
 const id = 'welcome-nostr-title'
@@ -56,7 +65,9 @@ async function connectNip07() {
     welcome.nostrSetupCompleted = true
     npub.value = nostr.npub
   } catch (e) {
-    error.value = t('Welcome.nostr.errorConnect')
+    const msg = t('Welcome.nostr.errorConnect')
+    error.value = msg
+    $q.notify({ type: 'negative', message: msg })
   }
 }
 

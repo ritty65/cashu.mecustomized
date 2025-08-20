@@ -6,7 +6,10 @@
         {{ t('Welcome.mints.title') }}
       </h1>
       <p class="q-mt-sm">{{ t('Welcome.mints.lead') }}</p>
-      <q-btn flat dense icon="info" class="q-mt-sm" @click="info = true" />
+      <p class="text-caption q-mt-sm">{{ t('Welcome.mints.primer') }}</p>
+      <div class="q-mt-sm">
+        <q-btn flat dense icon="info" @click="info = true" :label="t('Welcome.mints.browse')" />
+      </div>
       <q-form class="q-mt-md" @submit.prevent="connect">
         <q-input v-model="url" :placeholder="t('Welcome.mints.placeholder')" autocomplete="off" />
         <div v-if="error" class="text-negative text-caption q-mt-xs">{{ error }}</div>
@@ -35,7 +38,7 @@ const { t } = useI18n()
 const welcome = useWelcomeStore()
 const mints = useMintsStore()
 const id = 'welcome-mints-title'
-const url = ref('')
+const url = ref((process.env.RECOMMENDED_MINT_URL as string) || '')
 const error = ref('')
 const loading = ref(false)
 const connected = ref<any[]>([])
@@ -52,14 +55,14 @@ async function connect() {
   error.value = ''
   let input = url.value.trim()
   if (!input) {
-    error.value = t('Welcome.mints.error')
+    error.value = t('Welcome.mints.errorInvalid')
     return
   }
   if (!/^https?:\/\//i.test(input)) {
     input = 'https://' + input
   }
   if (/\s/.test(input) || !input.includes('.')) {
-    error.value = t('Welcome.mints.error')
+    error.value = t('Welcome.mints.errorInvalid')
     return
   }
   loading.value = true
@@ -67,7 +70,7 @@ async function connect() {
   try {
     await fetch(checkUrl, { method: 'GET', mode: 'no-cors' })
   } catch {
-    error.value = t('Welcome.mints.error')
+    error.value = t('Welcome.mints.errorUnreachable')
     loading.value = false
     return
   }
@@ -77,7 +80,7 @@ async function connect() {
     welcome.mintConnected = true
     url.value = ''
   } catch {
-    error.value = t('Welcome.mints.error')
+    error.value = t('Welcome.mints.errorResponse')
   } finally {
     loading.value = false
   }
