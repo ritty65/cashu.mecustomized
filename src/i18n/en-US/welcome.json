@@ -50,5 +50,11 @@
       "desc": "Earmark funds for goals.",
       "cta": "Create a bucket"
     }
+  },
+  "terms": {
+    "title": "Terms",
+    "link": "View terms",
+    "accept": "I accept the terms",
+    "summary": "Please review the terms below."
   }
 }

@@ -14,6 +14,10 @@ export const useWelcomeStore = defineStore('welcome', {
     firstRun: true as boolean,
     role: useLocalStorage<UserRole>('cashu.welcome.role', null).value,
     welcomeCompleted: useLocalStorage<boolean>('cashu.welcome.completed', false).value,
+    termsAccepted: useLocalStorage<boolean>(
+      'cashu.welcome.termsAccepted',
+      false,
+    ).value,
   }),
   getters: {
     hasKey: () => {
@@ -40,6 +44,10 @@ export const useWelcomeStore = defineStore('welcome', {
     },
     markWelcomeCompleted() {
       this.welcomeCompleted = true
+    },
+    setTermsAccepted(val: boolean) {
+      this.termsAccepted = val
+      localStorage.setItem('cashu.welcome.termsAccepted', String(val))
     },
   },
 })

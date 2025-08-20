@@ -447,6 +447,7 @@ export const messages = {
       theme: {
         title: "Appearance",
         description: "Change how your wallet looks.",
+        toggle_dark_mode: "Toggle dark mode",
         tooltips: {
           mono: "mono",
           cyber: "cyber",
@@ -651,6 +652,15 @@ export const messages = {
         success: "Restore finished successfully",
         error: "Error restoring mints - { error }",
       },
+    },
+    notifications: {
+      relay_already_added: "Relay already added",
+      invalid_relay_url: "Invalid relay URL",
+      all_reserved_proofs_unset: "All reserved proofs unset",
+      removed_spent_proofs: "Removed {count} spent proofs",
+      no_spent_proofs_found: "No spent proofs found",
+      no_p2pk_key: "No P2PK key",
+      failed_to_publish: "Failed to publish",
     },
   },
   MintSettings: {

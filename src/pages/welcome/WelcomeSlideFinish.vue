@@ -42,6 +42,7 @@ const props = defineProps<{
   onAddMint?: () => void;
   onCreateBuckets?: () => void;
   onRestore?: () => void;
+  onOpenWallet?: () => void;
 }>();
 
 function addMint() {
@@ -57,7 +58,7 @@ function restore() {
 }
 
 function openWallet() {
-  /* handled by main welcome page */
+  props.onOpenWallet?.();
 }
 </script>
 

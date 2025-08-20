@@ -113,7 +113,13 @@
           <q-item-section class="q-mx-none q-pl-none">
             <!-- toggle to turn Lightning address on and off in new row -->
             <div class="row q-pt-md">
-              <q-toggle v-model="npcEnabled" color="primary" />
+              <q-toggle
+                v-model="npcEnabled"
+                color="primary"
+                :aria-label="
+                  $t('Settings.lightning_address.enable.toggle')
+                "
+              />
               <q-item-section>
                 <q-item-label title>{{
                   $t("Settings.lightning_address.enable.toggle")
@@ -153,7 +159,13 @@
                 </q-input>
               </div>
               <div class="row q-pt-md">
-                <q-toggle v-model="automaticClaim" color="primary" />
+                <q-toggle
+                  v-model="automaticClaim"
+                  color="primary"
+                  :aria-label="
+                    $t('Settings.lightning_address.automatic_claim.toggle')
+                  "
+                />
                 <q-item-section>
                   <q-item-label title>{{
                     $t("Settings.lightning_address.automatic_claim.toggle")
@@ -404,6 +416,8 @@
                     icon="add"
                     color="primary"
                     @click="addNostrRelay"
+                    :aria-label="$t('Settings.nostr_relays.add.title')"
+                    :title="$t('Settings.nostr_relays.add.title')"
                   ></q-btn>
                 </template>
               </q-input>
@@ -434,6 +448,8 @@
                 size="xs"
                 color="grey"
                 class="q-mr-sm cursor-pointer"
+                :aria-label="$t('Settings.nostr_relays.list.copy_tooltip')"
+                :title="$t('Settings.nostr_relays.list.copy_tooltip')"
                 ><q-tooltip>{{
                   $t("Settings.nostr_relays.list.copy_tooltip")
                 }}</q-tooltip></q-icon
@@ -449,6 +465,8 @@
                 size="1.3em"
                 color="grey"
                 class="q-mr-sm cursor-pointer"
+                :aria-label="$t('Settings.nostr_relays.list.remove_tooltip')"
+                :title="$t('Settings.nostr_relays.list.remove_tooltip')"
                 ><q-tooltip>{{
                   $t("Settings.nostr_relays.list.remove_tooltip")
                 }}</q-tooltip></q-icon
@@ -502,6 +520,9 @@
         <q-toggle
           v-model="receivePaymentRequestsAutomatically"
           color="primary"
+          :aria-label="
+            $t('Settings.payment_requests.claim_automatically.toggle')
+          "
         />
         <q-item-section>
           <q-item-label title>{{
@@ -629,7 +650,13 @@
                 outlined
                 rounded
                 dense
-                v-model="connection.allowanceLeft"
+                v-model.number="connection.allowanceLeft"
+                @update:model-value="
+                  updateConnectionAllowance(
+                    connection.connectionPublicKey,
+                    $event,
+                  )
+                "
                 :label="
                   $t('Settings.nostr_wallet_connect.connection.allowance_label')
                 "
@@ -673,6 +700,8 @@
                       icon="add"
                       color="primary"
                       @click="addRelay"
+                      :aria-label="$t('Settings.nostr_wallet_connect.relays.add.title')"
+                      :title="$t('Settings.nostr_wallet_connect.relays.add.title')"
                     ></q-btn>
                   </template>
                 </q-input>
@@ -701,6 +730,12 @@
                   size="xs"
                   color="grey"
                   class="q-mr-sm cursor-pointer"
+                  :aria-label="
+                    $t('Settings.nostr_wallet_connect.relays.list.copy_tooltip')
+                  "
+                  :title="
+                    $t('Settings.nostr_wallet_connect.relays.list.copy_tooltip')
+                  "
                   ><q-tooltip>{{
                     $t("Settings.nostr_wallet_connect.relays.list.copy_tooltip")
                   }}</q-tooltip></q-icon
@@ -716,6 +751,16 @@
                   size="1.3em"
                   color="grey"
                   class="q-mr-sm cursor-pointer"
+                  :aria-label="
+                    $t(
+                      'Settings.nostr_wallet_connect.relays.list.remove_tooltip',
+                    )
+                  "
+                  :title="
+                    $t(
+                      'Settings.nostr_wallet_connect.relays.list.remove_tooltip',
+                    )
+                  "
                   ><q-tooltip>{{
                     $t(
                       "Settings.nostr_wallet_connect.relays.list.remove_tooltip",
@@ -908,7 +953,7 @@
             </q-item>
             <q-item>
               <q-toggle
-                v-model="showP2PkButtonInDrawer"
+                v-model="showP2PKButtonInDrawer"
                 :label="$t('Settings.p2pk_features.quick_access.toggle')"
                 color="primary"
               /> </q-item
@@ -1264,7 +1309,7 @@
                 </q-item-label>
                 <div class="row q-py-md">
                   <q-btn dense flat rounded @click="toggleDarkMode" size="md">
-                    Toggle dark mode
+                    {{ $t('Settings.appearance.theme.toggle_dark_mode') }}
                     <q-icon
                       class="q-ml-sm"
                       :name="$q.dark.isActive ? 'brightness_3' : 'wb_sunny'"
@@ -1787,13 +1832,14 @@ import P2PKDialog from "./P2PKDialog.vue";
 import NWCDialog from "./NWCDialog.vue";
 
 import { getShortUrl } from "src/js/wallet-helpers";
+import { sanitizeRelayUrl } from "src/js/relay";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore, MintClass } from "src/stores/mints";
 import { useWalletStore } from "src/stores/wallet";
 import { useMnemonicStore } from "src/stores/mnemonic";
 import { useSettingsStore } from "src/stores/settings";
 import { useNostrStore, publishDiscoveryProfile } from "src/stores/nostr";
-import { notifySuccess, notifyError } from "src/js/notify";
+import { notifySuccess, notifyError, notifyWarning } from "src/js/notify";
 import { useNPCStore } from "src/stores/npubcash";
 import { useP2PKStore } from "src/stores/p2pk";
 import { useCreatorProfileStore } from "src/stores/creatorProfile";
@@ -1883,10 +1929,16 @@ export default defineComponent({
     ...mapState(useP2PKStore, ["p2pkKeys", "firstKey"]),
     ...mapWritableState(useP2PKStore, [
       "showP2PKDialog",
-      "showP2PkButtonInDrawer",
+      "showP2PKButtonInDrawer",
     ]),
     ...mapWritableState(useNWCStore, ["showNWCDialog", "showNWCData"]),
-    ...mapState(useMintsStore, ["activeMintUrl", "mints", "activeProofs"]),
+    ...mapState(useMintsStore, [
+      "activeMintUrl",
+      "mints",
+      "activeProofs",
+      "activeUnit",
+      "activeMint",
+    ]),
     ...mapState(useNPCStore, ["npcLoading"]),
     ...mapState(useNostrStore, [
       "pubkey",
@@ -1975,6 +2027,7 @@ export default defineComponent({
       "listenToNWCCommands",
       "unsubscribeNWC",
       "getConnectionString",
+      "updateConnectionAllowance",
     ]),
     ...mapActions(useP2PKStore, [
       "importNsec",
@@ -2020,14 +2073,13 @@ export default defineComponent({
       // mark all this.proofs as reserved=false
       const proofsStore = useProofsStore();
       await proofsStore.setReserved(await proofsStore.getProofs(), false);
-      this.notifySuccess("All reserved proofs unset");
+      notifySuccess(this.$t("Settings.notifications.all_reserved_proofs_unset"));
     },
     checkActiveProofsSpendable: async function () {
       // iterate over this.activeProofs in batches of 50 and check if they are spendable
-      let wallet = useWalletStore().mintWallet(
-        this.activeMintUrl,
-        this.activeUnit,
-      );
+      const unit = this.activeUnit || this.activeMint?.unit || "sat";
+      if (!this.activeMintUrl) return;
+      const wallet = useWalletStore().mintWallet(this.activeMintUrl, unit);
       let proofs = this.activeProofs.flat();
       debug("Checking proofs", proofs);
       let allSpentProofs = [];
@@ -2041,9 +2093,15 @@ export default defineComponent({
       let spentProofs = allSpentProofs.flat();
       if (spentProofs.length > 0) {
         debug("Spent proofs", spentProofs);
-        this.notifySuccess("Removed " + spentProofs.length + " spent proofs");
+        notifySuccess(
+          this.$t("Settings.notifications.removed_spent_proofs", {
+            count: spentProofs.length,
+          }),
+        );
       } else {
-        this.notifySuccess("No spent proofs found");
+        notifySuccess(
+          this.$t("Settings.notifications.no_spent_proofs_found"),
+        );
       }
     },
     showP2PKKeyEntry: async function (pubKey) {
@@ -2071,7 +2129,7 @@ export default defineComponent({
       }
       try {
         if (!this.firstKey) {
-          notifyError("No P2PK key");
+          notifyError(this.$t("Settings.notifications.no_p2pk_key"));
           return;
         }
         const profileStore = useCreatorProfileStore();
@@ -2087,7 +2145,9 @@ export default defineComponent({
         });
         notifySuccess("Profile published");
       } catch (e: any) {
-        notifyError(e?.message || "Failed to publish");
+        notifyError(
+          e?.message || this.$t("Settings.notifications.failed_to_publish"),
+        );
       }
     },
     handleSeedClick: async function () {
@@ -2129,18 +2189,21 @@ export default defineComponent({
     },
     addRelay: function () {
       if (this.newRelay) {
-        this.newRelay = this.newRelay.trim();
-        // if relay is already in relays, don't add it, send notification
-        if (this.relays.includes(this.newRelay)) {
-          this.notifyWarning("Relay already added");
-        } else {
-          this.relays.push(this.newRelay);
-          const profileStore = useCreatorProfileStore();
-          if (!profileStore.relays.includes(this.newRelay)) {
-            profileStore.relays.push(this.newRelay);
-          }
-          this.newRelay = "";
+        const { url, error } = sanitizeRelayUrl(this.newRelay, this.relays);
+        if (error === "duplicate") {
+          notifyWarning(this.$t("Settings.notifications.relay_already_added"));
+          return;
         }
+        if (error === "invalid" || !url) {
+          notifyError(this.$t("Settings.notifications.invalid_relay_url"));
+          return;
+        }
+        this.relays.push(url);
+        const profileStore = useCreatorProfileStore();
+        if (!profileStore.relays.some((r) => r.toLowerCase() === url.toLowerCase())) {
+          profileStore.relays.push(url);
+        }
+        this.newRelay = "";
       }
     },
     removeRelay: function (relay) {
@@ -2150,17 +2213,24 @@ export default defineComponent({
     },
     addNostrRelay: function () {
       if (this.newNostrRelay) {
-        this.newNostrRelay = this.newNostrRelay.trim();
-        if (this.defaultNostrRelays.includes(this.newNostrRelay)) {
-          this.notifyWarning("Relay already added");
-        } else {
-          this.defaultNostrRelays.push(this.newNostrRelay);
-          const profileStore = useCreatorProfileStore();
-          if (!profileStore.relays.includes(this.newNostrRelay)) {
-            profileStore.relays.push(this.newNostrRelay);
-          }
-          this.newNostrRelay = "";
+        const { url, error } = sanitizeRelayUrl(
+          this.newNostrRelay,
+          this.defaultNostrRelays,
+        );
+        if (error === "duplicate") {
+          notifyWarning(this.$t("Settings.notifications.relay_already_added"));
+          return;
         }
+        if (error === "invalid" || !url) {
+          notifyError(this.$t("Settings.notifications.invalid_relay_url"));
+          return;
+        }
+        this.defaultNostrRelays.push(url);
+        const profileStore = useCreatorProfileStore();
+        if (!profileStore.relays.some((r) => r.toLowerCase() === url.toLowerCase())) {
+          profileStore.relays.push(url);
+        }
+        this.newNostrRelay = "";
       }
     },
     removeNostrRelay: function (relay) {
@@ -2171,10 +2241,19 @@ export default defineComponent({
       profileStore.relays = profileStore.relays.filter((r) => r !== relay);
     },
     updateNostrRelay: function (index: number, value: string) {
-      const val = value.trim();
-      this.defaultNostrRelays.splice(index, 1, val);
+      const list = this.defaultNostrRelays.filter((_, i) => i !== index);
+      const { url, error } = sanitizeRelayUrl(value, list);
+      if (error === "duplicate") {
+        notifyWarning(this.$t("Settings.notifications.relay_already_added"));
+        return;
+      }
+      if (error === "invalid" || !url) {
+        notifyError(this.$t("Settings.notifications.invalid_relay_url"));
+        return;
+      }
+      this.defaultNostrRelays.splice(index, 1, url);
       const profileStore = useCreatorProfileStore();
-      profileStore.relays.splice(index, 1, val);
+      profileStore.relays.splice(index, 1, url);
     },
     changeLanguage(locale) {
       if (locale === "en") {

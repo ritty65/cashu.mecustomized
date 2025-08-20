@@ -53,4 +53,12 @@ describe('welcome store', () => {
     store.markWelcomeCompleted()
     expect(store.welcomeCompleted).toBe(true)
   })
+
+  it('termsAccepted persists', () => {
+    const store = useWelcomeStore()
+    expect(store.termsAccepted).toBe(false)
+    store.setTermsAccepted(true)
+    const stored = localStorage.getItem('cashu.welcome.termsAccepted')
+    expect(stored).toBe('true')
+  })
 })

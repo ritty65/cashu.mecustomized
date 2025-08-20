@@ -11,7 +11,12 @@
         />
       </div>
       <div class="col-12 col-md-8">
-        <WelcomeSlides />
+        <WelcomeSlides
+          :on-open-wallet="onOpenWallet"
+          :on-add-mint="onAddMint"
+          :on-create-buckets="onCreateBuckets"
+          :on-restore="onRestore"
+        />
       </div>
     </div>
 
@@ -173,6 +178,25 @@ function runTask(task: WelcomeTask) {
 function finish() {
   welcome.markWelcomeCompleted()
   router.push('/wallet')
+}
+
+function onOpenWallet() {
+  finish()
+}
+
+function onAddMint() {
+  finish()
+  router.push('/wallet?tab=mints')
+}
+
+function onCreateBuckets() {
+  finish()
+  router.push('/wallet?tab=buckets')
+}
+
+function onRestore() {
+  welcome.markWelcomeCompleted()
+  router.push('/restore')
 }
 
 const showCreateKey = ref(false)

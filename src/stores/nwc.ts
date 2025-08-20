@@ -480,6 +480,16 @@ export const useNWCStore = defineStore("nwc", {
         debug("### error", e);
       }
     },
+    updateConnectionAllowance(pubkeyOrId: string, allowance: number) {
+      const conn = this.connections.find(
+        (c) =>
+          c.connectionPublicKey === pubkeyOrId ||
+          c.walletPublicKey === pubkeyOrId,
+      );
+      if (conn) {
+        conn.allowanceLeft = allowance;
+      }
+    },
     listenToNWCCommands: async function () {
       // if (!this.connections.length) {
       //   await this.generateNWCConnection()

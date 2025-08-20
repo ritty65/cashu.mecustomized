@@ -28,7 +28,7 @@
             <q-scroll-area style="height: 60vh">
               <div class="q-pa-md">
                 <p class="q-mb-md">
-                  {{ $t('Welcome.terms.summary') || 'Please review the terms below.' }}
+                  {{ $t('Welcome.terms.summary') }}
                 </p>
                 <TermsContent />
               </div>
@@ -50,12 +50,19 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import TermsContent from "src/components/TermsContent.vue";
+import { useWelcomeStore } from "src/stores/welcome";
 
 const id = "welcome-terms-title";
 const showTerms = ref(false);
-const accepted = ref(false);
+const welcomeStore = useWelcomeStore();
+const accepted = computed({
+  get: () => welcomeStore.termsAccepted,
+  set: (val: boolean) => (welcomeStore.termsAccepted = val),
+});
+
+defineExpose({ accepted });
 
 function acceptAndClose() {
   accepted.value = true;

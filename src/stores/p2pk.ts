@@ -36,6 +36,15 @@ type P2PKKey = {
   usedCount: number;
 };
 
+const OLD_SHOW_KEY = "cashu.p2pk.showP2PkButtonInDrawer";
+const NEW_SHOW_KEY =
+  LOCAL_STORAGE_KEYS.CASHU_P2PK_SHOWP2PKBUTTONINDRAWER;
+const oldValue = localStorage.getItem(OLD_SHOW_KEY);
+if (oldValue !== null && localStorage.getItem(NEW_SHOW_KEY) === null) {
+  localStorage.setItem(NEW_SHOW_KEY, oldValue);
+  localStorage.removeItem(OLD_SHOW_KEY);
+}
+
 //--------------------------------------------------------------------------
 // NEW  helper: buildTimedOutputs()
 //--------------------------------------------------------------------------
@@ -79,7 +88,7 @@ export async function buildTimedOutputs(
 export const useP2PKStore = defineStore("p2pk", {
   state: () => ({
     p2pkKeys: useLocalStorage<P2PKKey[]>(LOCAL_STORAGE_KEYS.CASHU_P2PKKEYS, []),
-    showP2PkButtonInDrawer: useLocalStorage<boolean>(
+    showP2PKButtonInDrawer: useLocalStorage<boolean>(
       LOCAL_STORAGE_KEYS.CASHU_P2PK_SHOWP2PKBUTTONINDRAWER,
       false,
     ),

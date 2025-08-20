@@ -14,7 +14,7 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "checkformat": "prettier --check .",
-    "test": "node --experimental-vm-modules node_modules/vitest/vitest.mjs run test/markdown.sanitize.spec.ts test/safeHtml.spec.ts test/sanitize-url.spec.ts test/tooltip.sanitize.spec.ts",
+    "test": "node --experimental-vm-modules node_modules/vitest/vitest.mjs run test/markdown.sanitize.spec.ts test/safeHtml.spec.ts test/sanitize-url.spec.ts test/tooltip.sanitize.spec.ts test/vitest/__tests__/welcome.store.spec.ts test/vitest/__tests__/nwc.allowance.spec.ts test/vitest/__tests__/relay.util.spec.ts test/vitest/__tests__/router.guard.spec.ts",
     "test:ci": "vitest run test/markdown.sanitize.spec.ts test/safeHtml.spec.ts test/sanitize-url.spec.ts test/tooltip.sanitize.spec.ts",
     "test:e2e": "playwright test test/e2e/profile.sanitize.spec.ts",
     "types": "tsc -p tsconfig.local.json --noEmit",

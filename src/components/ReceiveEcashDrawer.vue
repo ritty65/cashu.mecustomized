@@ -87,7 +87,7 @@
           </q-btn>
 
           <q-btn
-            v-if="showP2PkButtonInDrawer && p2pkKeys.length"
+            v-if="showP2PKButtonInDrawer && p2pkKeys.length"
             class="full-width custom-btn"
             @click="handleLockBtn"
           >
@@ -207,7 +207,7 @@ export default defineComponent({
     ...mapWritableState(useMintsStore, ["addMintData", "showAddMintDialog"]),
     ...mapWritableState(usePRStore, ["showPRDialog"]),
     ...mapState(useCameraStore, ["hasCamera"]),
-    ...mapState(useP2PKStore, ["p2pkKeys", "showP2PkButtonInDrawer"]),
+    ...mapState(useP2PKStore, ["p2pkKeys", "showP2PKButtonInDrawer"]),
     ...mapState(usePRStore, ["enablePaymentRequest"]),
     ...mapWritableState(useUiStore, ["showReceiveDialog"]),
     ...mapState(useCameraStore, ["lastScannedResult"]),

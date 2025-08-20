@@ -1,9 +1,9 @@
 <template>
-  <q-carousel v-model="slide" animated swipeable>
-    <q-carousel-slide v-for="s in slides" :name="s.name" :key="s.name">
-      <component :is="s.component" />
-    </q-carousel-slide>
-  </q-carousel>
+<q-carousel v-model="slide" animated swipeable>
+  <q-carousel-slide v-for="s in slides" :name="s.name" :key="s.name">
+    <component :is="s.component" v-bind="props" />
+  </q-carousel-slide>
+</q-carousel>
 </template>
 
 <script setup lang="ts">
@@ -16,6 +16,13 @@ import WelcomeSlideBuckets from 'src/pages/welcome/WelcomeSlideBuckets.vue'
 import WelcomeSlidePwa from 'src/pages/welcome/WelcomeSlidePwa.vue'
 import WelcomeSlideTerms from 'src/pages/welcome/WelcomeSlideTerms.vue'
 import WelcomeSlideFinish from 'src/pages/welcome/WelcomeSlideFinish.vue'
+
+const props = defineProps<{
+  onOpenWallet?: () => void
+  onAddMint?: () => void
+  onCreateBuckets?: () => void
+  onRestore?: () => void
+}>()
 
 const slide = ref(0)
 const slides = [
