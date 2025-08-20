@@ -21,7 +21,10 @@
         <q-linear-progress class="q-mt-sm" :value="(welcome.currentSlide + 1) / slides.length" />
         <div class="text-caption q-mt-xs">{{ $t('Welcome.footer.step',{n: welcome.currentSlide + 1, total: slides.length}) }}</div>
       </div>
-      <component :is="slides[welcome.currentSlide]" />
+      <component
+        :is="slides[welcome.currentSlide].component"
+        v-bind="slides[welcome.currentSlide].props"
+      />
       <div class="row justify-between q-mt-lg">
         <q-btn flat :disable="welcome.currentSlide === 0" @click="prev" :label="$t('Welcome.footer.previous')" />
         <q-btn
@@ -50,6 +53,8 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
+import { useQuasar } from 'quasar'
 import WelcomeSlideFeatures from './welcome/WelcomeSlideFeatures.vue'
 import WelcomeSlideNostr from './welcome/WelcomeSlideNostr.vue'
 import WelcomeSlidePwa from './welcome/WelcomeSlidePwa.vue'
@@ -59,19 +64,38 @@ import WelcomeSlideTerms from './welcome/WelcomeSlideTerms.vue'
 import TaskChecklist from 'src/components/welcome/TaskChecklist.vue'
 import type { WelcomeTask } from 'src/types/welcome'
 import { useWelcomeStore, LAST_WELCOME_SLIDE } from 'src/stores/welcome'
-import { useRouter } from 'vue-router'
+import { useMnemonicStore } from 'src/stores/mnemonic'
+import { useStorageStore } from 'src/stores/storage'
 
 const { t } = useI18n()
 const welcome = useWelcomeStore()
 const router = useRouter()
+const $q = useQuasar()
+const mnemonicStore = useMnemonicStore()
+const storageStore = useStorageStore()
+
+function revealSeed() {
+  const mnemonic = mnemonicStore.mnemonic
+  $q.dialog({
+    title: t('Welcome.backup.revealSeed'),
+    message: mnemonic,
+  })
+}
+
+function downloadBackup() {
+  storageStore.exportWalletState()
+}
 
 const slides = [
-  WelcomeSlideFeatures,
-  WelcomeSlideNostr,
-  WelcomeSlidePwa,
-  WelcomeSlideBackup,
-  WelcomeSlideMints,
-  WelcomeSlideTerms,
+  { component: WelcomeSlideFeatures },
+  { component: WelcomeSlideNostr },
+  { component: WelcomeSlidePwa },
+  {
+    component: WelcomeSlideBackup,
+    props: { onRevealSeed: revealSeed, onDownloadBackup: downloadBackup },
+  },
+  { component: WelcomeSlideMints },
+  { component: WelcomeSlideTerms },
 ]
 
 const showChecklist = ref(false)
