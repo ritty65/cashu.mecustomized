@@ -12,9 +12,9 @@
           flat
           dense
           icon="factory"
-          @click="showCatalog = true"
           :label="t('Welcome.mints.browse')"
           :disable="!recommendedMints.length"
+          @click="showCatalog = true"
         />
       </div>
       <q-form class="q-mt-md" @submit.prevent="connect">
@@ -27,7 +27,7 @@
           <q-icon name="check" color="positive" class="q-mr-sm" />
           <span>{{ m.nickname || m.url }}</span>
         </div>
-        <q-btn flat color="primary" class="q-mt-sm" @click="addAnother" :label="t('Welcome.mints.addAnother')" />
+          <q-btn flat color="primary" class="q-mt-sm" :label="t('Welcome.mints.addAnother')" @click="addAnother" />
       </div>
       <q-dialog v-model="showCatalog">
         <q-card style="min-width:300px">
@@ -44,9 +44,9 @@
               <q-item-section>{{ mint.label || mint.url }}</q-item-section>
             </q-item>
           </q-list>
-          <q-card-actions align="right">
-            <q-btn flat :label="t('global.actions.close.label')" v-close-popup />
-          </q-card-actions>
+            <q-card-actions align="right">
+              <q-btn v-close-popup flat :label="t('global.actions.close.label')" />
+            </q-card-actions>
         </q-card>
       </q-dialog>
     </div>
@@ -73,29 +73,44 @@ const showCatalog = ref(false)
 const recommendedMints = ref<{ label?: string; url: string }[]>([])
 
 async function loadRecommendedMints() {
+  const catalogUrl =
+    (process.env.MINT_CATALOG_URL as string) ||
+    'https://mints.cashu.space/mints.json'
   try {
-    const resp = await fetch('/mints.json')
-    if (!resp.ok) throw new Error('network')
-    const data = await resp.json()
-    recommendedMints.value = Array.isArray(data) ? data : []
-    if (!recommendedMints.value.length && process.env.RECOMMENDED_MINTS) {
-      recommendedMints.value = (process.env.RECOMMENDED_MINTS as string)
-        .split(',')
-        .map((u) => ({ url: u.trim() }))
+    let data: any[] = []
+    try {
+      const resp = await fetch(catalogUrl)
+      if (!resp.ok) throw new Error('network')
+      data = await resp.json()
+    } catch {
+      const resp = await fetch('/mints.json')
+      if (!resp.ok) throw new Error('network')
+      data = await resp.json()
     }
-    if (!recommendedMints.value.length && process.env.RECOMMENDED_MINT_URL) {
-      recommendedMints.value.push({ url: process.env.RECOMMENDED_MINT_URL as string })
+    const verified: { label?: string; url: string }[] = []
+    for (const m of Array.isArray(data) ? data : []) {
+      const mintUrl = m.url || m
+      if (!mintUrl) continue
+      try {
+        const infoResp = await fetch(
+          mintUrl.replace(/\/$/, '') + '/v1/info',
+        )
+        if (!infoResp.ok) continue
+        const info = await infoResp.json()
+        verified.push({
+          url: mintUrl,
+          label: info.name || m.label || mintUrl,
+        })
+      } catch {
+        /* ignore unreachable mint */
+      }
     }
-  } catch {
-    if (process.env.RECOMMENDED_MINTS) {
-      recommendedMints.value = (process.env.RECOMMENDED_MINTS as string)
-        .split(',')
-        .map((u) => ({ url: u.trim() }))
-    } else if (process.env.RECOMMENDED_MINT_URL) {
-      recommendedMints.value.push({ url: process.env.RECOMMENDED_MINT_URL as string })
-    } else {
+    recommendedMints.value = verified
+    if (!recommendedMints.value.length) {
       $q.notify({ type: 'negative', message: t('Welcome.mints.errorLoad') })
     }
+  } catch {
+    $q.notify({ type: 'negative', message: t('Welcome.mints.errorLoad') })
   }
 }
 
@@ -122,16 +137,19 @@ async function connect() {
     return
   }
   loading.value = true
-  const checkUrl = input.replace(/\/$/, '') + '/keys'
+  const infoUrl = input.replace(/\/$/, '') + '/v1/info'
+  let info: any
   try {
-    await fetch(checkUrl, { method: 'GET', mode: 'no-cors' })
+    const resp = await fetch(infoUrl)
+    if (!resp.ok) throw new Error('network')
+    info = await resp.json()
   } catch {
     error.value = t('Welcome.mints.errorUnreachable')
     loading.value = false
     return
   }
   try {
-    const mint = await mints.addMint({ url: input }, true)
+    const mint = await mints.addMint({ url: input, nickname: info.name }, true)
     connected.value.push(mint)
     welcome.mintConnected = true
     url.value = ''
