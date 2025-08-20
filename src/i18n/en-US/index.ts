@@ -1944,6 +1944,9 @@ export const messages = {
       errorInvalid: "Please enter a valid mint URL",
       errorUnreachable: "Mint is unreachable",
       errorResponse: "Mint responded with an error",
+      errorNoName: "Mint metadata missing name",
+      errorNoVersion: "Mint metadata missing version",
+      errorMetadata: "Mint info could not be retrieved",
     },
     proofs: {
       title: "Proofs",
