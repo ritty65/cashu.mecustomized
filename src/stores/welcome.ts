@@ -1,43 +1,30 @@
 import { defineStore } from 'pinia'
 import { useLocalStorage } from '@vueuse/core'
-import { useSignerStore } from './signer'
+import { useNostrStore } from './nostr'
 import { useMintsStore } from './mints'
 import { useProofsStore } from './proofs'
-import { useCreatorProfileStore } from './creatorProfile'
 
-export type UserRole = 'supporter' | 'creator' | 'wallet-only' | null
-
-const backupKey = 'cashu.backup.completed'
+const DEFAULT_MINT_URL = 'https://mint.example.com'
 
 export const useWelcomeStore = defineStore('welcome', {
   state: () => ({
-    firstRun: true as boolean,
-    role: useLocalStorage<UserRole>('cashu.welcome.role', null).value,
     welcomeCompleted: useLocalStorage<boolean>('cashu.welcome.completed', false).value,
+    recommendedMintUrl: process.env.RECOMMENDED_MINT_URL || DEFAULT_MINT_URL,
   }),
   getters: {
-    hasKey: () => {
-      const signer = useSignerStore()
-      return signer.method !== null
+    hasIdentity: () => !!useNostrStore().pubkey,
+    identitySource: () => {
+      const s = (useNostrStore() as any).signerType
+      return s ? String(s).toLowerCase() : null
     },
-    hasBackup: () => localStorage.getItem(backupKey) === 'true',
-    hasMint: () => {
-      const mints = useMintsStore()
-      return mints.mints.length > 0
-    },
-    hasBalance: () => {
-      const proofs = useProofsStore()
-      return proofs.proofs.reduce((s, p) => s + p.amount, 0) > 0
-    },
-    hasProfile: () => {
-      const profile = useCreatorProfileStore()
-      return !!profile.display_name
+    hasMint: () => !!useMintsStore().activeMintUrl,
+    balanceSats: () =>
+      useProofsStore().proofs.reduce((sum, p) => sum + p.amount, 0),
+    canFinish(): boolean {
+      return this.hasIdentity && this.hasMint
     },
   },
   actions: {
-    setRole(role: UserRole) {
-      this.role = role
-    },
     markWelcomeCompleted() {
       this.welcomeCompleted = true
     },

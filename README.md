@@ -79,6 +79,12 @@ The app includes a built-in Nostr messenger for private chat.
 
 Fundstr is currently in Alpha/Beta.
 
+## Welcome onboarding
+
+- The `/welcome` page now includes an actionable checklist for setting up a Nostr identity and selecting a mint, with state stored in `useWelcomeStore`.
+- Informational learn cards explain the main app sections without leaving the page.
+- To change the default mint suggested during onboarding, set the `RECOMMENDED_MINT_URL` environment variable.
+
 **What's Working**
 
 - Core Cashu wallet functionality (send, receive, mint management)
