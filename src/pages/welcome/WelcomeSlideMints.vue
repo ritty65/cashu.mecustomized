@@ -14,6 +14,7 @@
           icon="factory"
           @click="showCatalog = true"
           :label="t('Welcome.mints.browse')"
+          :disable="!recommendedMints.length"
         />
       </div>
       <q-form class="q-mt-md" @submit.prevent="connect">
@@ -55,10 +56,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { useQuasar } from 'quasar'
 import { useWelcomeStore } from 'src/stores/welcome'
 import { useMintsStore } from 'src/stores/mints'
 
 const { t } = useI18n()
+const $q = useQuasar()
 const welcome = useWelcomeStore()
 const mints = useMintsStore()
 const id = 'welcome-mints-title'
@@ -69,15 +72,31 @@ const connected = ref<any[]>([])
 const showCatalog = ref(false)
 const recommendedMints = ref<{ label?: string; url: string }[]>([])
 
-if (process.env.RECOMMENDED_MINTS) {
-  recommendedMints.value = (process.env.RECOMMENDED_MINTS as string)
-    .split(',')
-    .map((u) => ({ url: u.trim() }))
-}
-if (!recommendedMints.value.length && process.env.RECOMMENDED_MINT_URL) {
-  recommendedMints.value.push({
-    url: process.env.RECOMMENDED_MINT_URL as string,
-  })
+async function loadRecommendedMints() {
+  try {
+    const resp = await fetch('/mints.json')
+    if (!resp.ok) throw new Error('network')
+    const data = await resp.json()
+    recommendedMints.value = Array.isArray(data) ? data : []
+    if (!recommendedMints.value.length && process.env.RECOMMENDED_MINTS) {
+      recommendedMints.value = (process.env.RECOMMENDED_MINTS as string)
+        .split(',')
+        .map((u) => ({ url: u.trim() }))
+    }
+    if (!recommendedMints.value.length && process.env.RECOMMENDED_MINT_URL) {
+      recommendedMints.value.push({ url: process.env.RECOMMENDED_MINT_URL as string })
+    }
+  } catch {
+    if (process.env.RECOMMENDED_MINTS) {
+      recommendedMints.value = (process.env.RECOMMENDED_MINTS as string)
+        .split(',')
+        .map((u) => ({ url: u.trim() }))
+    } else if (process.env.RECOMMENDED_MINT_URL) {
+      recommendedMints.value.push({ url: process.env.RECOMMENDED_MINT_URL as string })
+    } else {
+      $q.notify({ type: 'negative', message: t('Welcome.mints.errorLoad') })
+    }
+  }
 }
 
 onMounted(() => {
@@ -85,6 +104,7 @@ onMounted(() => {
     welcome.mintConnected = true
     connected.value = [...mints.mints]
   }
+  loadRecommendedMints()
 })
 
 async function connect() {

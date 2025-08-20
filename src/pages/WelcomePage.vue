@@ -47,6 +47,7 @@
         @finish="showChecklist=false"
       />
     </q-dialog>
+    <RevealSeedDialog v-model="showSeedDialog" :seed="mnemonicStore.mnemonic" />
   </q-page>
 </template>
 
@@ -62,6 +63,7 @@ import WelcomeSlideBackup from './welcome/WelcomeSlideBackup.vue'
 import WelcomeSlideMints from './welcome/WelcomeSlideMints.vue'
 import WelcomeSlideTerms from './welcome/WelcomeSlideTerms.vue'
 import TaskChecklist from 'src/components/welcome/TaskChecklist.vue'
+import RevealSeedDialog from 'src/components/welcome/RevealSeedDialog.vue'
 import type { WelcomeTask } from 'src/types/welcome'
 import { useWelcomeStore, LAST_WELCOME_SLIDE } from 'src/stores/welcome'
 import { useMnemonicStore } from 'src/stores/mnemonic'
@@ -73,13 +75,10 @@ const router = useRouter()
 const $q = useQuasar()
 const mnemonicStore = useMnemonicStore()
 const storageStore = useStorageStore()
+const showSeedDialog = ref(false)
 
 function revealSeed() {
-  const mnemonic = mnemonicStore.mnemonic
-  $q.dialog({
-    title: t('Welcome.backup.revealSeed'),
-    message: mnemonic,
-  })
+  showSeedDialog.value = true
 }
 
 function downloadBackup() {

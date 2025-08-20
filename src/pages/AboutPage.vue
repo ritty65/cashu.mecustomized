@@ -266,55 +266,7 @@
         <p class="text-lg md:text-xl mb-12">
           Every page explained from both the Creator and Fan perspectives.
         </p>
-        <div id="map-container" class="mt-8 text-left" ref="mapContainer">
-          <q-tabs
-            v-model="mode"
-            align="center"
-            dense
-            class="mb-6"
-            aria-label="Toggle between fan and creator modes"
-            :active-color="mode === 'fan' ? 'accent' : 'primary'"
-            :indicator-color="mode === 'fan' ? 'accent' : 'primary'"
-          >
-            <q-tab name="fan" label="Fan" :aria-selected="mode === 'fan'" />
-            <q-tab
-              name="creator"
-              label="Creator"
-              :aria-selected="mode === 'creator'"
-            />
-          </q-tabs>
-
-          <q-list class="accordion">
-            <q-expansion-item
-              v-for="(item, idx) in navigationItems"
-              :key="item.menuItem"
-              :label="item.menuItem"
-              :icon="item.icon"
-              group="navigation"
-              class="border-b accordion-item"
-              :class="{ open: openIndex === idx }"
-              @show="openIndex = idx"
-              @hide="openIndex = null"
-              expand-icon="keyboard_arrow_down"
-              expanded-icon="keyboard_arrow_down"
-            >
-              <div class="px-4 pb-4 text-sm">
-                <div class="fan-content">
-                  <h4 class="font-semibold mb-2">
-                    {{ $t("AboutPage.navigation.fanPerspective") }}
-                  </h4>
-                  <p>{{ item.fanText }}</p>
-                </div>
-                <div class="creator-content">
-                  <h4 class="font-semibold mb-2">
-                    {{ $t("AboutPage.navigation.creatorPerspective") }}
-                  </h4>
-                  <p>{{ item.creatorText }}</p>
-                </div>
-              </div>
-            </q-expansion-item>
-          </q-list>
-        </div>
+        <NavigationMap :items="navigationItems" />
       </div>
     </section>
 
@@ -812,15 +764,10 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch, computed } from "vue";
+import { onMounted, ref } from "vue";
 import { useI18n } from "vue-i18n";
-
-interface NavigationItem {
-  menuItem: string;
-  icon: string;
-  fanText: string;
-  creatorText: string;
-}
+import NavigationMap from "src/components/NavigationMap.vue";
+import { useNavigationItems } from "src/composables/navigationItems";
 
 const dialogStep1 = ref(false);
 const dialogStep2 = ref(false);
@@ -921,115 +868,9 @@ const siteOverviewCards: SiteOverviewCard[] = [
 ];
 
 // navigation items for the navigation map
-const navigationItems = computed<NavigationItem[]>(() => [
-  {
-    menuItem: t("MainHeader.menu.wallet.title"),
-    icon: "account_balance_wallet",
-    fanText: t("AboutPage.navigation.items.wallet.fan"),
-    creatorText: t("AboutPage.navigation.items.wallet.creator"),
-  },
-  {
-    menuItem: t("MainHeader.menu.settings.title"),
-    icon: "settings",
-    fanText: t("AboutPage.navigation.items.settings.fan"),
-    creatorText: t("AboutPage.navigation.items.settings.creator"),
-  },
-  {
-    menuItem: t("MainHeader.menu.findCreators.title"),
-    icon: "img:icons/find-creators.svg",
-    fanText: t("AboutPage.navigation.items.findCreators.fan"),
-    creatorText: t("AboutPage.navigation.items.findCreators.creator"),
-  },
-  {
-    menuItem: t("MainHeader.menu.creatorHub.title"),
-    icon: "img:icons/creator-hub.svg",
-    fanText: t("AboutPage.navigation.items.creatorHub.fan"),
-    creatorText: t("AboutPage.navigation.items.creatorHub.creator"),
-  },
-  {
-    menuItem: t("MainHeader.menu.myProfile.title"),
-    icon: "person",
-    fanText: t("AboutPage.navigation.items.myProfile.fan"),
-    creatorText: t("AboutPage.navigation.items.myProfile.creator"),
-  },
-  {
-    menuItem: t("MainHeader.menu.buckets.title"),
-    icon: "inventory_2",
-    fanText: t("AboutPage.navigation.items.buckets.fan"),
-    creatorText: t("AboutPage.navigation.items.buckets.creator"),
-  },
-  {
-    menuItem: t("MainHeader.menu.subscriptions.title"),
-    icon: "auto_awesome_motion",
-    fanText: t("AboutPage.navigation.items.subscriptions.fan"),
-    creatorText: t("AboutPage.navigation.items.subscriptions.creator"),
-  },
-  {
-    menuItem: t("MainHeader.menu.nostrMessenger.title"),
-    icon: "chat",
-    fanText: t("AboutPage.navigation.items.chats.fan"),
-    creatorText: t("AboutPage.navigation.items.chats.creator"),
-  },
-  {
-    menuItem: t("MainHeader.menu.restore.title"),
-    icon: "settings_backup_restore",
-    fanText: t("AboutPage.navigation.items.restore.fan"),
-    creatorText: t("AboutPage.navigation.items.restore.creator"),
-  },
-  {
-    menuItem: t("MainHeader.menu.alreadyRunning.title"),
-    icon: "warning",
-    fanText: t("AboutPage.navigation.items.alreadyRunning.fan"),
-    creatorText: t("AboutPage.navigation.items.alreadyRunning.creator"),
-  },
-  {
-    menuItem: t("MainHeader.menu.welcome.title"),
-    icon: "info",
-    fanText: t("AboutPage.navigation.items.welcome.fan"),
-    creatorText: t("AboutPage.navigation.items.welcome.creator"),
-  },
-  {
-    menuItem: t("MainHeader.menu.terms.title"),
-    icon: "gavel",
-    fanText: t("AboutPage.navigation.items.terms.fan"),
-    creatorText: t("AboutPage.navigation.items.terms.creator"),
-  },
-  {
-    menuItem: t("MainHeader.menu.about.title"),
-    icon: "info",
-    fanText: t("AboutPage.navigation.items.about.fan"),
-    creatorText: t("AboutPage.navigation.items.about.creator"),
-  },
-  {
-    menuItem: t("MainHeader.menu.links.title"),
-    icon: "link",
-    fanText: t("AboutPage.navigation.items.externalLinks.fan"),
-    creatorText: t("AboutPage.navigation.items.externalLinks.creator"),
-  },
-  {
-    menuItem: t("MainHeader.menu.nostrLogin.title"),
-    icon: "vpn_key",
-    fanText: t("AboutPage.navigation.items.nostrLogin.fan"),
-    creatorText: t("AboutPage.navigation.items.nostrLogin.creator"),
-  },
-]);
-
-const mode = ref<"fan" | "creator">("fan");
-const mapContainer = ref<HTMLElement | null>(null);
-const openIndex = ref<number | null>(null);
-
-watch(mode, (val) => {
-  if (mapContainer.value) {
-    mapContainer.value.classList.toggle("fan-mode", val === "fan");
-    mapContainer.value.classList.toggle("creator-mode", val === "creator");
-  }
-});
+const navigationItems = useNavigationItems();
 
 onMounted(() => {
-  if (mapContainer.value) {
-    mapContainer.value.classList.add("fan-mode");
-  }
-
   if ("IntersectionObserver" in window) {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
@@ -1174,8 +1015,4 @@ blockquote {
   }
 }
 
-.fan-mode .creator-content,
-.creator-mode .fan-content {
-  display: none;
-}
 </style>
