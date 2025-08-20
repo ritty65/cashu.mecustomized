@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import { useLocalStorage } from '@vueuse/core'
-import { useMintsStore } from './mints'
 
 export const LAST_WELCOME_SLIDE = 5
 
@@ -20,10 +19,6 @@ export const useWelcomeStore = defineStore('welcome', {
     }),
   }),
   actions: {
-    walletHasAtLeastOneMint(): boolean {
-      const mints = useMintsStore()
-      return mints.mints.length > 0
-    },
     canProceed(slide: number): boolean {
       switch (slide) {
         case 0:
@@ -33,7 +28,7 @@ export const useWelcomeStore = defineStore('welcome', {
         case 3:
           return this.seedPhraseValidated || this.walletRestored
         case 4:
-          return this.mintConnected || this.walletHasAtLeastOneMint()
+          return true
         case 5:
           return this.termsAccepted
         default:
