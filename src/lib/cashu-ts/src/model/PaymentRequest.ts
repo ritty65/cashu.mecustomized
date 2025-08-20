@@ -1,13 +1,13 @@
-import { encodeBase64toUint8 } from "../base64";
-import { decodeCBOR, encodeCBOR } from "../cbor";
+import { encodeBase64toUint8 } from '../base64';
+import { decodeCBOR, encodeCBOR } from '../cbor';
 import {
 	RawPaymentRequest,
 	RawTransport,
 	NUT10Option,
 	PaymentRequestTransport,
-	PaymentRequestTransportType,
-} from "./types";
-import "buffer";
+	PaymentRequestTransportType
+} from './types';
+import 'buffer';
 declare const Buffer: any;
 
 export class PaymentRequest {
@@ -19,7 +19,7 @@ export class PaymentRequest {
 		public mints?: Array<string>,
 		public description?: string,
 		public singleUse: boolean = false,
-		public nut10?: NUT10Option,
+		public nut10?: NUT10Option
 	) {}
 
 	toRawRequest() {
@@ -28,7 +28,7 @@ export class PaymentRequest {
 			rawRequest.t = this.transport.map((t: PaymentRequestTransport) => ({
 				t: t.type,
 				a: t.target,
-				g: t.tags,
+				g: t.tags
 			}));
 		}
 		if (this.id) {
@@ -53,7 +53,7 @@ export class PaymentRequest {
 			rawRequest.nut10 = {
 				k: this.nut10.kind,
 				d: this.nut10.data,
-				t: this.nut10.tags,
+				t: this.nut10.tags
 			};
 		}
 		return rawRequest;
@@ -62,14 +62,12 @@ export class PaymentRequest {
 	toEncodedRequest() {
 		const rawRequest: RawPaymentRequest = this.toRawRequest();
 		const data = encodeCBOR(rawRequest);
-		const encodedData = Buffer.from(data).toString("base64");
-		return "creq" + "A" + encodedData;
+		const encodedData = Buffer.from(data).toString('base64');
+		return 'creq' + 'A' + encodedData;
 	}
 
 	getTransport(type: PaymentRequestTransportType) {
-		return this.transport?.find(
-			(t: PaymentRequestTransport) => t.type === type,
-		);
+		return this.transport?.find((t: PaymentRequestTransport) => t.type === type);
 	}
 
 	static fromRawRequest(rawPaymentRequest: RawPaymentRequest): PaymentRequest {
@@ -77,15 +75,15 @@ export class PaymentRequest {
 			? rawPaymentRequest.t.map((t: RawTransport) => ({
 					type: t.t,
 					target: t.a,
-					tags: t.g,
-				}))
+					tags: t.g
+			  }))
 			: undefined;
 		const nut10 = rawPaymentRequest.nut10
 			? {
 					kind: rawPaymentRequest.nut10.k,
 					data: rawPaymentRequest.nut10.d,
-					tags: rawPaymentRequest.nut10.t,
-				}
+					tags: rawPaymentRequest.nut10.t
+			  }
 			: undefined;
 		return new PaymentRequest(
 			transports,
@@ -95,17 +93,17 @@ export class PaymentRequest {
 			rawPaymentRequest.m,
 			rawPaymentRequest.d,
 			rawPaymentRequest.s,
-			nut10,
+			nut10
 		);
 	}
 
 	static fromEncodedRequest(encodedRequest: string): PaymentRequest {
-		if (!encodedRequest.startsWith("creq")) {
-			throw new Error("unsupported pr: invalid prefix");
+		if (!encodedRequest.startsWith('creq')) {
+			throw new Error('unsupported pr: invalid prefix');
 		}
 		const version = encodedRequest[4];
-		if (version !== "A") {
-			throw new Error("unsupported pr version");
+		if (version !== 'A') {
+			throw new Error('unsupported pr version');
 		}
 		const encodedData = encodedRequest.slice(5);
 		const data = encodeBase64toUint8(encodedData);

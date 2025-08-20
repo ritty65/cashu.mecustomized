@@ -49,46 +49,46 @@ import { formatDistanceToNow } from "date-fns";
 import TokenInformation from "./TokenInformation.vue";
 import { saveReceipt } from "src/utils/receipt-utils";
 const props = defineProps<{
-	payments: any | any[];
-	creator?: boolean;
-	message: any;
+  payments: any | any[];
+  creator?: boolean;
+  message: any;
 }>();
 const emit = defineEmits(["redeem"]);
 const slide = ref(0);
 const payments = computed(() =>
-	Array.isArray(props.payments) ? props.payments : [props.payments],
+  Array.isArray(props.payments) ? props.payments : [props.payments],
 );
 const now = ref(Date.now());
 let timer: any;
 onMounted(() => {
-	timer = setInterval(() => {
-		now.value = Date.now();
-	}, 1000);
+  timer = setInterval(() => {
+    now.value = Date.now();
+  }, 1000);
 });
 onUnmounted(() => clearInterval(timer));
 function badgeColor(s: string) {
-	if (s === "claimed") return "info";
-	if (s === "redeemable") return "positive";
-	return "warning";
+  if (s === "claimed") return "info";
+  if (s === "redeemable") return "positive";
+  return "warning";
 }
 function badgeIcon(s: string) {
-	if (s === "claimed") return "check";
-	if (s === "redeemable") return "lock_open";
-	return "schedule";
+  if (s === "claimed") return "check";
+  if (s === "redeemable") return "lock_open";
+  return "schedule";
 }
 function remaining(p: any): number {
-	if (!p.unlock_time) return 0;
-	return p.unlock_time - Math.floor(now.value / 1000);
+  if (!p.unlock_time) return 0;
+  return p.unlock_time - Math.floor(now.value / 1000);
 }
 function countdown(p: any): string {
-	return formatDistanceToNow(p.unlock_time * 1000, {
-		includeSeconds: true,
-	});
+  return formatDistanceToNow(p.unlock_time * 1000, {
+    includeSeconds: true,
+  });
 }
 function canRedeem(p: any) {
-	return props.creator && (!p.unlock_time || remaining(p) <= 0);
+  return props.creator && (!p.unlock_time || remaining(p) <= 0);
 }
 function download(p: any) {
-	saveReceipt({ ...props.message, subscriptionPayment: p });
+  saveReceipt({ ...props.message, subscriptionPayment: p });
 }
 </script>

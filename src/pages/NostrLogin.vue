@@ -32,35 +32,35 @@ import { generateSecretKey, nip19 } from "nostr-tools";
 import { hexToBytes } from "@noble/hashes/utils";
 
 export default defineComponent({
-	name: "NostrLogin",
-	setup() {
-		const nostr = useNostrStore();
-		const key = ref(nostr.activePrivateKeyNsec || nostr.privKeyHex || "");
-		const hasExistingKey = computed(() => !!key.value);
-		const router = useRouter();
+  name: "NostrLogin",
+  setup() {
+    const nostr = useNostrStore();
+    const key = ref(nostr.activePrivateKeyNsec || nostr.privKeyHex || "");
+    const hasExistingKey = computed(() => !!key.value);
+    const router = useRouter();
 
-		const normalizeKey = (input: string): string => {
-			const trimmed = input.trim();
-			if (/^[0-9a-fA-F]{64}$/.test(trimmed)) {
-				return nip19.nsecEncode(hexToBytes(trimmed));
-			}
-			return trimmed;
-		};
+    const normalizeKey = (input: string): string => {
+      const trimmed = input.trim();
+      if (/^[0-9a-fA-F]{64}$/.test(trimmed)) {
+        return nip19.nsecEncode(hexToBytes(trimmed));
+      }
+      return trimmed;
+    };
 
-		const submitKey = async () => {
-			if (!key.value.trim()) return;
-			await nostr.initPrivateKeySigner(normalizeKey(key.value));
-			if (nostr.pubkey) router.push("/wallet");
-		};
+    const submitKey = async () => {
+      if (!key.value.trim()) return;
+      await nostr.initPrivateKeySigner(normalizeKey(key.value));
+      if (nostr.pubkey) router.push("/wallet");
+    };
 
-		const createIdentity = async () => {
-			const sk = generateSecretKey();
-			const nsec = nip19.nsecEncode(sk);
-			await nostr.initPrivateKeySigner(nsec);
-			if (nostr.pubkey) router.push("/wallet");
-		};
+    const createIdentity = async () => {
+      const sk = generateSecretKey();
+      const nsec = nip19.nsecEncode(sk);
+      await nostr.initPrivateKeySigner(nsec);
+      if (nostr.pubkey) router.push("/wallet");
+    };
 
-		return { key, hasExistingKey, submitKey, createIdentity };
-	},
+    return { key, hasExistingKey, submitKey, createIdentity };
+  },
 });
 </script>

@@ -51,47 +51,47 @@ import { useSettingsStore } from "../stores/settings";
 import { notify } from "src/js/notify";
 
 export default defineComponent({
-	name: "NumericKeyboard",
-	props: {
-		modelValue: {
-			type: String,
-			default: "0",
-		},
-	},
-	emits: ["update:modelValue", "done"],
-	computed: {
-		...mapWritableState(useUiStore, ["showNumericKeyboard"]),
-		...mapWritableState(useSettingsStore, ["useNumericKeyboard"]),
-	},
-	methods: {
-		addDigit(digit) {
-			const current = this.modelValue || "0";
-			const newVal = current === "0" ? digit : current + digit;
-			this.$emit("update:modelValue", newVal);
-		},
-		backspace() {
-			const current = this.modelValue || "0";
-			const newVal = current.length > 1 ? current.slice(0, -1) : "0";
-			this.$emit("update:modelValue", newVal);
-		},
-		addComma() {
-			const current = this.modelValue || "0";
-			if (!current.includes(".")) {
-				this.$emit("update:modelValue", current + ".");
-			}
-		},
-		closeKeyboard() {
-			this.useNumericKeyboard = false;
-			this.showNumericKeyboard = false;
-			notify(
-				this.$i18n.t("NumericKeyboard.actions.close.closed_info_text"),
-				"bottom",
-			);
-		},
-		emitDone() {
-			this.$emit("done");
-		},
-	},
+  name: "NumericKeyboard",
+  props: {
+    modelValue: {
+      type: String,
+      default: "0",
+    },
+  },
+  emits: ["update:modelValue", "done"],
+  computed: {
+    ...mapWritableState(useUiStore, ["showNumericKeyboard"]),
+    ...mapWritableState(useSettingsStore, ["useNumericKeyboard"]),
+  },
+  methods: {
+    addDigit(digit) {
+      const current = this.modelValue || "0";
+      const newVal = current === "0" ? digit : current + digit;
+      this.$emit("update:modelValue", newVal);
+    },
+    backspace() {
+      const current = this.modelValue || "0";
+      const newVal = current.length > 1 ? current.slice(0, -1) : "0";
+      this.$emit("update:modelValue", newVal);
+    },
+    addComma() {
+      const current = this.modelValue || "0";
+      if (!current.includes(".")) {
+        this.$emit("update:modelValue", current + ".");
+      }
+    },
+    closeKeyboard() {
+      this.useNumericKeyboard = false;
+      this.showNumericKeyboard = false;
+      notify(
+        this.$i18n.t("NumericKeyboard.actions.close.closed_info_text"),
+        "bottom",
+      );
+    },
+    emitDone() {
+      this.$emit("done");
+    },
+  },
 });
 </script>
 

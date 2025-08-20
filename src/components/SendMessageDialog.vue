@@ -28,29 +28,29 @@
 import { defineComponent, ref, computed } from "vue";
 
 export default defineComponent({
-	name: "SendMessageDialog",
-	props: {
-		modelValue: Boolean,
-	},
-	emits: ["update:modelValue", "send"],
-	setup(props, { emit }) {
-		const message = ref("");
-		const model = computed({
-			get: () => props.modelValue,
-			set: (v: boolean) => emit("update:modelValue", v),
-		});
+  name: "SendMessageDialog",
+  props: {
+    modelValue: Boolean,
+  },
+  emits: ["update:modelValue", "send"],
+  setup(props, { emit }) {
+    const message = ref("");
+    const model = computed({
+      get: () => props.modelValue,
+      set: (v: boolean) => emit("update:modelValue", v),
+    });
 
-		const cancel = () => {
-			emit("update:modelValue", false);
-		};
+    const cancel = () => {
+      emit("update:modelValue", false);
+    };
 
-		const confirm = () => {
-			emit("send", message.value);
-			emit("update:modelValue", false);
-			message.value = "";
-		};
+    const confirm = () => {
+      emit("send", message.value);
+      emit("update:modelValue", false);
+      message.value = "";
+    };
 
-		return { model, message, cancel, confirm };
-	},
+    return { model, message, cancel, confirm };
+  },
 });
 </script>

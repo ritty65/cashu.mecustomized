@@ -99,75 +99,75 @@ import { i18n } from "../boot/i18n";
 import { title } from "process";
 
 export default defineComponent({
-	name: "ChooseMint",
-	mixins: [windowMixin],
-	props: {
-		rounded: {
-			type: Boolean,
-			default: false,
-		},
-		title: {
-			type: String,
-			default: i18n.global.t("ChooseMint.title"),
-		},
-		style: {
-			type: String,
-			default: "",
-		},
-	},
-	data: function () {
-		return {
-			chosenMint: null,
-		};
-	},
-	mounted() {
-		const m = this.mints.find((m) => m.url === this.activeMintUrl);
-		const mint = new MintClass(m);
-		this.chosenMint = {
-			url: this.activeMintUrl,
-			nickname: mint.mint.nickname || mint.mint.info?.name,
-			shorturl: getShortUrl(this.activeMintUrl),
-			errored: mint.mint.errored,
-		};
-	},
-	watch: {
-		chosenMint: async function () {
-			this.activeMintUrl = this.chosenMint.url;
-		},
-	},
-	computed: {
-		...mapState(useMintsStore, [
-			"activeMintUrl",
-			"activeProofs",
-			"mints",
-			"activeUnit",
-		]),
-		...mapWritableState(useMintsStore, ["activeMintUrl"]),
-		getBalance: function () {
-			return this.activeProofs
-				.flat()
-				.reduce((sum, el) => (sum += el.amount), 0);
-		},
-	},
-	methods: {
-		...mapActions(useMintsStore, ["activateMintUrl"]),
-		chooseMintOptions: function () {
-			let options = [];
-			for (const [i, m] of Object.entries(this.mints)) {
-				const all_units = m.keysets.map((r) => r.unit);
-				const units = [...new Set(all_units)];
-				const mint = new MintClass(m);
-				options.push({
-					nickname: mint.mint.nickname || mint.mint.info?.name,
-					url: mint.mint.url,
-					shorturl: getShortUrl(m.url),
-					balances: mint.allBalances,
-					errored: mint.mint.errored,
-					units: units,
-				});
-			}
-			return options;
-		},
-	},
+  name: "ChooseMint",
+  mixins: [windowMixin],
+  props: {
+    rounded: {
+      type: Boolean,
+      default: false,
+    },
+    title: {
+      type: String,
+      default: i18n.global.t("ChooseMint.title"),
+    },
+    style: {
+      type: String,
+      default: "",
+    },
+  },
+  data: function () {
+    return {
+      chosenMint: null,
+    };
+  },
+  mounted() {
+    const m = this.mints.find((m) => m.url === this.activeMintUrl);
+    const mint = new MintClass(m);
+    this.chosenMint = {
+      url: this.activeMintUrl,
+      nickname: mint.mint.nickname || mint.mint.info?.name,
+      shorturl: getShortUrl(this.activeMintUrl),
+      errored: mint.mint.errored,
+    };
+  },
+  watch: {
+    chosenMint: async function () {
+      this.activeMintUrl = this.chosenMint.url;
+    },
+  },
+  computed: {
+    ...mapState(useMintsStore, [
+      "activeMintUrl",
+      "activeProofs",
+      "mints",
+      "activeUnit",
+    ]),
+    ...mapWritableState(useMintsStore, ["activeMintUrl"]),
+    getBalance: function () {
+      return this.activeProofs
+        .flat()
+        .reduce((sum, el) => (sum += el.amount), 0);
+    },
+  },
+  methods: {
+    ...mapActions(useMintsStore, ["activateMintUrl"]),
+    chooseMintOptions: function () {
+      let options = [];
+      for (const [i, m] of Object.entries(this.mints)) {
+        const all_units = m.keysets.map((r) => r.unit);
+        const units = [...new Set(all_units)];
+        const mint = new MintClass(m);
+        options.push({
+          nickname: mint.mint.nickname || mint.mint.info?.name,
+          url: mint.mint.url,
+          shorturl: getShortUrl(m.url),
+          balances: mint.allBalances,
+          errored: mint.mint.errored,
+          units: units,
+        });
+      }
+      return options;
+    },
+  },
 });
 </script>

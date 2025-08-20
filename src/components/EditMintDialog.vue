@@ -62,50 +62,50 @@ import { defineComponent, ref, watch, computed } from "vue";
 import { useMintsStore } from "src/stores/mints";
 
 export default defineComponent({
-	name: "EditMintDialog",
-	props: {
-		mint: {
-			type: Object,
-			required: true,
-		},
-		showEditMintDialog: {
-			type: Boolean,
-			required: true,
-		},
-	},
-	setup(props, { emit }) {
-		const editMintData = ref({
-			url: "",
-			nickname: "",
-		});
-		const mintToEdit = ref({});
-		const showEditMintDialogLocal = computed({
-			get: () => props.showEditMintDialog,
-			set: (value) => emit("update:showEditMintDialog", value),
-		});
+  name: "EditMintDialog",
+  props: {
+    mint: {
+      type: Object,
+      required: true,
+    },
+    showEditMintDialog: {
+      type: Boolean,
+      required: true,
+    },
+  },
+  setup(props, { emit }) {
+    const editMintData = ref({
+      url: "",
+      nickname: "",
+    });
+    const mintToEdit = ref({});
+    const showEditMintDialogLocal = computed({
+      get: () => props.showEditMintDialog,
+      set: (value) => emit("update:showEditMintDialog", value),
+    });
 
-		watch(
-			() => props.mint,
-			(newMint) => {
-				mintToEdit.value = { ...newMint };
-				editMintData.value = { ...newMint };
-			},
-			{ immediate: true },
-		);
+    watch(
+      () => props.mint,
+      (newMint) => {
+        mintToEdit.value = { ...newMint };
+        editMintData.value = { ...newMint };
+      },
+      { immediate: true },
+    );
 
-		const updateMintLocal = () => {
-			const mintStore = useMintsStore();
-			mintStore.updateMint(mintToEdit.value, editMintData.value);
-			mintStore.showMintInfoData = { ...editMintData.value };
-			showEditMintDialogLocal.value = false;
-		};
+    const updateMintLocal = () => {
+      const mintStore = useMintsStore();
+      mintStore.updateMint(mintToEdit.value, editMintData.value);
+      mintStore.showMintInfoData = { ...editMintData.value };
+      showEditMintDialogLocal.value = false;
+    };
 
-		return {
-			editMintData,
-			mintToEdit,
-			updateMintLocal,
-			showEditMintDialogLocal,
-		};
-	},
+    return {
+      editMintData,
+      mintToEdit,
+      updateMintLocal,
+      showEditMintDialogLocal,
+    };
+  },
 });
 </script>

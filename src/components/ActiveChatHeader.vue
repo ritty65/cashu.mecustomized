@@ -76,66 +76,66 @@ const messenger = useMessengerStore();
 const profile = ref<any>(null);
 
 const loadProfile = async () => {
-	if (props.pubkey) {
-		profile.value = await nostr.getProfile(props.pubkey);
-	} else {
-		profile.value = null;
-	}
+  if (props.pubkey) {
+    profile.value = await nostr.getProfile(props.pubkey);
+  } else {
+    profile.value = null;
+  }
 };
 
 watch(
-	() => props.pubkey,
-	() => {
-		loadProfile();
-	},
-	{ immediate: true },
+  () => props.pubkey,
+  () => {
+    loadProfile();
+  },
+  { immediate: true },
 );
 
 const displayName = computed(() => {
-	if (!props.pubkey) return "";
-	const alias = messenger.aliases[props.pubkey];
-	if (alias) return alias;
-	const p: any = profile.value;
-	if (p?.display_name) return p.display_name;
-	if (p?.name) return p.name;
-	try {
-		return nip19.npubEncode(nostr.resolvePubkey(props.pubkey));
-	} catch (e) {
-		return props.pubkey.slice(0, 8) + "..." + props.pubkey.slice(-4);
-	}
+  if (!props.pubkey) return "";
+  const alias = messenger.aliases[props.pubkey];
+  if (alias) return alias;
+  const p: any = profile.value;
+  if (p?.display_name) return p.display_name;
+  if (p?.name) return p.name;
+  try {
+    return nip19.npubEncode(nostr.resolvePubkey(props.pubkey));
+  } catch (e) {
+    return props.pubkey.slice(0, 8) + "..." + props.pubkey.slice(-4);
+  }
 });
 
 const initials = computed(() => {
-	const name = displayName.value.trim();
-	if (!name) return "";
-	const parts = name.split(" ");
-	if (parts.length >= 2) {
-		return (parts[0][0] + parts[1][0]).toUpperCase();
-	}
-	return name.slice(0, 2).toUpperCase();
+  const name = displayName.value.trim();
+  if (!name) return "";
+  const parts = name.split(" ");
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  return name.slice(0, 2).toUpperCase();
 });
 
 const chatSendTokenDialogRef = ref<InstanceType<
-	typeof ChatSendTokenDialog
+  typeof ChatSendTokenDialog
 > | null>(null);
 const relayManagerDialogRef = ref<InstanceType<
-	typeof RelayManagerDialog
+  typeof RelayManagerDialog
 > | null>(null);
 const showProfileDialog = ref(false);
 
 function openSendTokenDialog() {
-	if (!props.pubkey) return;
-	(chatSendTokenDialogRef.value as any)?.show();
+  if (!props.pubkey) return;
+  (chatSendTokenDialogRef.value as any)?.show();
 }
 
 function openRelayDialog() {
-	(relayManagerDialogRef.value as any)?.show();
+  (relayManagerDialogRef.value as any)?.show();
 }
 
 function clearChat() {
-	if (!props.pubkey) return;
-	messenger.conversations[props.pubkey] = [];
-	messenger.unreadCounts[props.pubkey] = 0;
+  if (!props.pubkey) return;
+  messenger.conversations[props.pubkey] = [];
+  messenger.unreadCounts[props.pubkey] = 0;
 }
 </script>
 

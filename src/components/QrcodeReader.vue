@@ -8,87 +8,87 @@ let QrScanner: any;
 let URDecoder: any;
 
 export default {
-	emits: ["decode"],
-	data(): {
-		qrScanner: QrScanner | null;
-		urDecoder: URDecoder | null;
-		urDecoderProgress: number;
-	} {
-		return {
-			qrScanner: null,
-			urDecoder: null,
-			urDecoderProgress: 0,
-		};
-	},
-	setup() {
-		const instance = getCurrentInstance();
-		const scannerPromise = (async () => {
-			QrScanner = (await import("qr-scanner")).default;
-			URDecoder = (await import("@gandlaf21/bc-ur")).URDecoder;
-		})();
+  emits: ["decode"],
+  data(): {
+    qrScanner: QrScanner | null;
+    urDecoder: URDecoder | null;
+    urDecoderProgress: number;
+  } {
+    return {
+      qrScanner: null,
+      urDecoder: null,
+      urDecoderProgress: 0,
+    };
+  },
+  setup() {
+    const instance = getCurrentInstance();
+    const scannerPromise = (async () => {
+      QrScanner = (await import("qr-scanner")).default;
+      URDecoder = (await import("@gandlaf21/bc-ur")).URDecoder;
+    })();
 
-		onMounted(() => {
-			scannerPromise.then(() => {
-				if (!instance) return;
-				const vm: any = instance.proxy;
-				vm.qrScanner = new QrScanner(
-					vm.$refs.cameraEl as HTMLVideoElement,
-					(result: any) => {
-						vm.handleResult(result);
-					},
-					{
-						returnDetailedScanResult: true,
-						highlightScanRegion: true,
-						highlightCodeOutline: true,
-						onDecodeError: () => {},
-					},
-				);
-				vm.qrScanner.start();
-				vm.urDecoder = new URDecoder();
-			});
-		});
-		return {};
-	},
-	computed: {
-		...mapState(useCameraStore, ["camera", "hasCamera"]),
-		canPasteFromClipboard: function () {
-			return (
-				window.isSecureContext &&
-				navigator.clipboard &&
-				navigator.clipboard.readText
-			);
-		},
-	},
-	methods: {
-		...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
-		handleResult(result: QrScanner.ScanResult) {
-			// if this is a multipart-qr code, do not yet emit
-			if (result.data.toLowerCase().startsWith("ur:")) {
-				this.urDecoder?.receivePart(result.data);
-				this.urDecoderProgress =
-					this.urDecoder?.estimatedPercentComplete() || 0;
-				if (this.urDecoder?.isComplete() && this.urDecoder?.isSuccess()) {
-					const ur = this.urDecoder?.resultUR();
-					const decoded = ur.decodeCBOR();
-					this.$emit("decode", decoded.toString());
-					this.qrScanner?.stop();
-					this.urDecoderProgress = 0;
-				}
-			} else {
-				this.$emit("decode", result.data);
-				this.qrScanner?.stop();
-			}
-		},
-		pasteToParseDialog: async function () {
-			const text = await useUiStore().pasteFromClipboard();
-			if (text) {
-				this.$emit("decode", text);
-			}
-		},
-	},
-	unmounted() {
-		this.qrScanner?.destroy();
-	},
+    onMounted(() => {
+      scannerPromise.then(() => {
+        if (!instance) return;
+        const vm: any = instance.proxy;
+        vm.qrScanner = new QrScanner(
+          vm.$refs.cameraEl as HTMLVideoElement,
+          (result: any) => {
+            vm.handleResult(result);
+          },
+          {
+            returnDetailedScanResult: true,
+            highlightScanRegion: true,
+            highlightCodeOutline: true,
+            onDecodeError: () => {},
+          },
+        );
+        vm.qrScanner.start();
+        vm.urDecoder = new URDecoder();
+      });
+    });
+    return {};
+  },
+  computed: {
+    ...mapState(useCameraStore, ["camera", "hasCamera"]),
+    canPasteFromClipboard: function () {
+      return (
+        window.isSecureContext &&
+        navigator.clipboard &&
+        navigator.clipboard.readText
+      );
+    },
+  },
+  methods: {
+    ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
+    handleResult(result: QrScanner.ScanResult) {
+      // if this is a multipart-qr code, do not yet emit
+      if (result.data.toLowerCase().startsWith("ur:")) {
+        this.urDecoder?.receivePart(result.data);
+        this.urDecoderProgress =
+          this.urDecoder?.estimatedPercentComplete() || 0;
+        if (this.urDecoder?.isComplete() && this.urDecoder?.isSuccess()) {
+          const ur = this.urDecoder?.resultUR();
+          const decoded = ur.decodeCBOR();
+          this.$emit("decode", decoded.toString());
+          this.qrScanner?.stop();
+          this.urDecoderProgress = 0;
+        }
+      } else {
+        this.$emit("decode", result.data);
+        this.qrScanner?.stop();
+      }
+    },
+    pasteToParseDialog: async function () {
+      const text = await useUiStore().pasteFromClipboard();
+      if (text) {
+        this.$emit("decode", text);
+      }
+    },
+  },
+  unmounted() {
+    this.qrScanner?.destroy();
+  },
 };
 </script>
 <template>

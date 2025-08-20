@@ -22,9 +22,9 @@ import { computed } from "vue";
 import { useNostrStore } from "src/stores/nostr";
 
 interface LogEvent {
-	id: string;
-	created_at: number;
-	outgoing?: boolean;
+  id: string;
+  created_at: number;
+  outgoing?: boolean;
 }
 
 const props = defineProps<{ events?: LogEvent[] }>();

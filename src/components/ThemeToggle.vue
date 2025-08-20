@@ -17,7 +17,7 @@ import { useQuasar } from "quasar";
 const $q = useQuasar();
 
 function toggle() {
-	$q.dark.toggle();
-	$q.localStorage.set("cashu.darkMode", $q.dark.isActive);
+  $q.dark.toggle();
+  $q.localStorage.set("cashu.darkMode", $q.dark.isActive);
 }
 </script>

@@ -83,102 +83,102 @@ import { shortenString } from "src/js/string-utils";
 import token from "src/js/token";
 
 export default defineComponent({
-	name: "TokenInformation",
-	mixins: [windowMixin],
-	props: {
-		encodedToken: String,
-		showAmount: Boolean,
-		showMintCheck: Boolean,
-		showP2PKCheck: Boolean,
-	},
-	data: function () {
-		return {};
-	},
-	watch: {},
-	computed: {
-		...mapState(useMintsStore, [
-			"activeMintUrl",
-			"activeProofs",
-			"mints",
-			"activeUnit",
-			"addMintBlocking",
-		]),
-		proofsToShow: function () {
-			return token.getProofs(token.decode(this.encodedToken));
-		},
-		sumProofs: function () {
-			let proofs = token.getProofs(token.decode(this.encodedToken));
-			return proofs.flat().reduce((sum, el) => (sum += el.amount), 0);
-		},
-		displayUnit: function () {
-			let display = this.formatCurrency(this.sumProofs, this.tokenUnit);
-			return display;
-		},
-		tokenUnit: function () {
-			return token.getUnit(token.decode(this.encodedToken));
-		},
-		tokenMintUrl: function () {
-			let mint = token.getMint(token.decode(this.encodedToken));
-			return getShortUrl(mint);
-		},
-		displayMemo: function () {
-			return token.getMemo(token.decode(this.encodedToken));
-		},
-		tokenPubkey: function () {
-			return this.getTokenPubkey(this.encodedToken);
-		},
-		tokenLocktime: function () {
-			return this.getTokenLocktime(this.encodedToken);
-		},
-		tokenLocktimeISO: function () {
-			return this.tokenLocktime
-				? new Date(this.tokenLocktime * 1000).toISOString()
-				: "";
-		},
-	},
-	methods: {
-		...mapActions(useP2PKStore, [
-			"isPureP2PK",
-			"isLockedToUs",
-			"getTokenPubkey",
-			"getTokenLocktime",
-			"isHTLC",
-		]),
-		formatPubkey(hex) {
-			try {
-				if (!hex) return "";
-				return ensureCompressed(hex);
-			} catch (e) {
-				return hex;
-			}
-		},
-		shortenString,
-		getProofsMint: function (proofs) {
-			// unique keyset IDs of proofs
-			let uniqueIds = [...new Set(proofs.map((p) => p.id))];
-			// mints that have any of the keyset IDs
-			let mints_keysets = this.mints.filter((m) =>
-				m.keysets.some((r) => uniqueIds.indexOf(r) >= 0),
-			);
-			// what we put into the JSON
-			let mints = mints_keysets.map((m) => [{ url: m.url, ids: m.keysets }][0]);
-			if (mints.length == 0) {
-				return "";
-			} else {
-				return getShortUrl(mints[0].url);
-			}
-		},
-		mintKnownToUs: function (proofs) {
-			// unique keyset IDs of proofs
-			let uniqueIds = [...new Set(proofs.map((p) => p.id))];
-			// mints that have any of the keyset IDs
-			return (
-				this.mints.filter((m) =>
-					m.keysets.some((r) => uniqueIds.indexOf(r.id) >= 0),
-				).length > 0
-			);
-		},
-	},
+  name: "TokenInformation",
+  mixins: [windowMixin],
+  props: {
+    encodedToken: String,
+    showAmount: Boolean,
+    showMintCheck: Boolean,
+    showP2PKCheck: Boolean,
+  },
+  data: function () {
+    return {};
+  },
+  watch: {},
+  computed: {
+    ...mapState(useMintsStore, [
+      "activeMintUrl",
+      "activeProofs",
+      "mints",
+      "activeUnit",
+      "addMintBlocking",
+    ]),
+    proofsToShow: function () {
+      return token.getProofs(token.decode(this.encodedToken));
+    },
+    sumProofs: function () {
+      let proofs = token.getProofs(token.decode(this.encodedToken));
+      return proofs.flat().reduce((sum, el) => (sum += el.amount), 0);
+    },
+    displayUnit: function () {
+      let display = this.formatCurrency(this.sumProofs, this.tokenUnit);
+      return display;
+    },
+    tokenUnit: function () {
+      return token.getUnit(token.decode(this.encodedToken));
+    },
+    tokenMintUrl: function () {
+      let mint = token.getMint(token.decode(this.encodedToken));
+      return getShortUrl(mint);
+    },
+    displayMemo: function () {
+      return token.getMemo(token.decode(this.encodedToken));
+    },
+    tokenPubkey: function () {
+      return this.getTokenPubkey(this.encodedToken);
+    },
+    tokenLocktime: function () {
+      return this.getTokenLocktime(this.encodedToken);
+    },
+    tokenLocktimeISO: function () {
+      return this.tokenLocktime
+        ? new Date(this.tokenLocktime * 1000).toISOString()
+        : "";
+    },
+  },
+  methods: {
+    ...mapActions(useP2PKStore, [
+      "isPureP2PK",
+      "isLockedToUs",
+      "getTokenPubkey",
+      "getTokenLocktime",
+      "isHTLC",
+    ]),
+    formatPubkey(hex) {
+      try {
+        if (!hex) return "";
+        return ensureCompressed(hex);
+      } catch (e) {
+        return hex;
+      }
+    },
+    shortenString,
+    getProofsMint: function (proofs) {
+      // unique keyset IDs of proofs
+      let uniqueIds = [...new Set(proofs.map((p) => p.id))];
+      // mints that have any of the keyset IDs
+      let mints_keysets = this.mints.filter((m) =>
+        m.keysets.some((r) => uniqueIds.indexOf(r) >= 0),
+      );
+      // what we put into the JSON
+      let mints = mints_keysets.map((m) => [{ url: m.url, ids: m.keysets }][0]);
+      if (mints.length == 0) {
+        return "";
+      } else {
+        return getShortUrl(mints[0].url);
+      }
+    },
+    mintKnownToUs: function (proofs) {
+      // unique keyset IDs of proofs
+      let uniqueIds = [...new Set(proofs.map((p) => p.id))];
+      // mints that have any of the keyset IDs
+      return (
+        this.mints.filter((m) =>
+          m.keysets.some((r) => uniqueIds.indexOf(r.id) >= 0),
+        ).length > 0
+      );
+    },
+  },
 });
 </script>
 

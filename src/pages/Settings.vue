@@ -14,9 +14,9 @@ import { defineComponent } from "vue";
 import SettingsView from "components/SettingsView.vue";
 
 export default defineComponent({
-	name: "ErrorNotFound",
-	components: {
-		SettingsView,
-	},
+  name: "ErrorNotFound",
+  components: {
+    SettingsView,
+  },
 });
 </script>

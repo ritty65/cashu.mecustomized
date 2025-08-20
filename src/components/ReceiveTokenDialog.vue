@@ -321,300 +321,300 @@ import { DEFAULT_BUCKET_ID } from "@/constants/buckets";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 import {
-	ChevronLeft as ChevronLeftIcon,
-	Clipboard as ClipboardIcon,
-	FileText as FileTextIcon,
-	Lock as LockIcon,
-	Scan as ScanIcon,
-	Nfc as NfcIcon,
+  ChevronLeft as ChevronLeftIcon,
+  Clipboard as ClipboardIcon,
+  FileText as FileTextIcon,
+  Lock as LockIcon,
+  Scan as ScanIcon,
+  Nfc as NfcIcon,
 } from "lucide-vue-next";
 
 import {
-	notifyError,
-	notifySuccess,
-	notifyWarning,
-	notify,
+  notifyError,
+  notifySuccess,
+  notifyWarning,
+  notify,
 } from "../js/notify";
 import MintSettings from "./MintSettings.vue";
 
 export default defineComponent({
-	name: "ReceiveTokenDialog",
-	mixins: [windowMixin],
-	components: {
-		TokenInformation,
-		NfcIcon,
-		ScanIcon,
-		ChooseMint,
-	},
-	data: function () {
-		return {
-			showP2PKDialog: false,
-			swapSelected: false,
-		};
-	},
-	watch: {
-		watchClipboardPaste(val) {
-			if (val) {
-				this.$nextTick(() => {
-					this.pasteToParseDialog();
-					this.watchClipboardPaste = false;
-				});
-			}
-		},
-		bucketList: {
-			handler(newList) {
-				if (!newList.find((b) => b.id === this.receiveData.bucketId)) {
-					this.receiveData.bucketId = DEFAULT_BUCKET_ID;
-				}
-			},
-			deep: true,
-		},
-		"receiveData.tokensBase64"() {
-			this.applyBucketRules();
-		},
-		"receiveData.label"() {
-			this.applyBucketRules();
-		},
-	},
-	computed: {
-		...mapWritableState(useReceiveTokensStore, [
-			"showReceiveTokens",
-			"watchClipboardPaste",
-			"receiveData",
-			"scanningCard",
-		]),
-		...mapState(useUiStore, ["tickerShort", "ndefSupported"]),
-		...mapState(usePriceStore, ["bitcoinPrice"]),
-		...mapState(useMintsStore, [
-			"activeMintUrl",
-			"activeProofs",
-			"activeUnit",
-			"addMintBlocking",
-			"mints",
-		]),
-		...mapState(useSettingsStore, ["enableReceiveSwaps"]),
-		...mapWritableState(useMintsStore, ["addMintData", "showAddMintDialog"]),
-		...mapWritableState(usePRStore, ["showPRDialog"]),
-		...mapState(useCameraStore, ["hasCamera"]),
-		...mapState(useP2PKStore, ["p2pkKeys"]),
-		...mapState(usePRStore, ["enablePaymentRequest"]),
-		...mapState(useSwapStore, ["swapBlocking"]),
-		...mapWritableState(useUiStore, ["showReceiveDialog"]),
-		...mapState(useCameraStore, ["lastScannedResult"]),
-		...mapState(useBucketsStore, ["bucketList"]),
-		bucketOptions() {
-			return this.bucketList.map((b) => ({ label: b.name, value: b.id }));
-		},
-		canPasteFromClipboard: function () {
-			return (
-				window.isSecureContext &&
-				navigator.clipboard &&
-				navigator.clipboard.readText
-			);
-		},
-		tokenDecodesCorrectly: function () {
-			// Try decoding token directly
-			if (this.decodeToken(this.receiveData.tokensBase64) !== undefined) {
-				return true;
-			}
+  name: "ReceiveTokenDialog",
+  mixins: [windowMixin],
+  components: {
+    TokenInformation,
+    NfcIcon,
+    ScanIcon,
+    ChooseMint,
+  },
+  data: function () {
+    return {
+      showP2PKDialog: false,
+      swapSelected: false,
+    };
+  },
+  watch: {
+    watchClipboardPaste(val) {
+      if (val) {
+        this.$nextTick(() => {
+          this.pasteToParseDialog();
+          this.watchClipboardPaste = false;
+        });
+      }
+    },
+    bucketList: {
+      handler(newList) {
+        if (!newList.find((b) => b.id === this.receiveData.bucketId)) {
+          this.receiveData.bucketId = DEFAULT_BUCKET_ID;
+        }
+      },
+      deep: true,
+    },
+    "receiveData.tokensBase64"() {
+      this.applyBucketRules();
+    },
+    "receiveData.label"() {
+      this.applyBucketRules();
+    },
+  },
+  computed: {
+    ...mapWritableState(useReceiveTokensStore, [
+      "showReceiveTokens",
+      "watchClipboardPaste",
+      "receiveData",
+      "scanningCard",
+    ]),
+    ...mapState(useUiStore, ["tickerShort", "ndefSupported"]),
+    ...mapState(usePriceStore, ["bitcoinPrice"]),
+    ...mapState(useMintsStore, [
+      "activeMintUrl",
+      "activeProofs",
+      "activeUnit",
+      "addMintBlocking",
+      "mints",
+    ]),
+    ...mapState(useSettingsStore, ["enableReceiveSwaps"]),
+    ...mapWritableState(useMintsStore, ["addMintData", "showAddMintDialog"]),
+    ...mapWritableState(usePRStore, ["showPRDialog"]),
+    ...mapState(useCameraStore, ["hasCamera"]),
+    ...mapState(useP2PKStore, ["p2pkKeys"]),
+    ...mapState(usePRStore, ["enablePaymentRequest"]),
+    ...mapState(useSwapStore, ["swapBlocking"]),
+    ...mapWritableState(useUiStore, ["showReceiveDialog"]),
+    ...mapState(useCameraStore, ["lastScannedResult"]),
+    ...mapState(useBucketsStore, ["bucketList"]),
+    bucketOptions() {
+      return this.bucketList.map((b) => ({ label: b.name, value: b.id }));
+    },
+    canPasteFromClipboard: function () {
+      return (
+        window.isSecureContext &&
+        navigator.clipboard &&
+        navigator.clipboard.readText
+      );
+    },
+    tokenDecodesCorrectly: function () {
+      // Try decoding token directly
+      if (this.decodeToken(this.receiveData.tokensBase64) !== undefined) {
+        return true;
+      }
 
-			// Fall back to peanut check
-			return this.decodePeanut(this.receiveData.tokensBase64) !== undefined;
-		},
-		knowThisMint: function () {
-			const tokenJson = this.decodeToken(this.receiveData.tokensBase64);
-			if (tokenJson == undefined) {
-				return false;
-			}
-			return this.knowThisMintOfTokenJson(tokenJson);
-		},
-		tokenAmount: function () {
-			if (!this.tokenDecodesCorrectly) {
-				return 0;
-			}
-			const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
-			return this.getProofs(decodedToken).reduce(
-				(sum, el) => (sum += el.amount),
-				0,
-			);
-		},
-		tokenUnit: function () {
-			if (!this.tokenDecodesCorrectly) {
-				return "";
-			}
-			const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
-			return token.getUnit(decodedToken);
-		},
-		tokenMint: function () {
-			if (!this.tokenDecodesCorrectly) {
-				return "";
-			}
-			const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
-			return this.getMint(decodedToken);
-		},
-		receiverPubkey: function () {
-			if (!this.tokenDecodesCorrectly) {
-				return "";
-			}
-			return this.getTokenPubkey(this.receiveData.tokensBase64) || "";
-		},
-		unlockDate: function () {
-			const ts = this.getTokenLocktime(this.receiveData.tokensBase64);
-			if (!ts) return "";
-			return date.formatDate(new Date(ts * 1000), "YYYY-MM-DD HH:mm");
-		},
-		swapToMintAmount: function () {
-			const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
-			return this.tokenAmount - useSwapStore().meltToMintFees(decodedToken);
-		},
-	},
-	methods: {
-		...mapActions(useWalletStore, ["redeem"]),
-		...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
-		...mapActions(useTokensStore, ["addPendingToken"]),
-		...mapActions(useP2PKStore, [
-			"getPrivateKeyForP2PKEncodedToken",
-			"createAndSelectNewKey",
-			"showLastKey",
-			"getTokenLocktime",
-			"getTokenPubkey",
-		]),
-		...mapActions(useMintsStore, ["addMint"]),
-		...mapActions(useReceiveTokensStore, [
-			"receiveIfDecodes",
-			"decodeToken",
-			"knowThisMintOfTokenJson",
-			"toggleScanner",
-			"pasteToParseDialog",
-		]),
-		shortenString,
-		// TOKEN METHODS
-		decodePeanut: function (peanut) {
-			try {
-				let decoded = [];
-				const chars = Array.from(peanut);
-				if (!chars.length) return undefined;
-				const fromVariationSelector = function (char) {
-					const codePoint = char.codePointAt(0);
+      // Fall back to peanut check
+      return this.decodePeanut(this.receiveData.tokensBase64) !== undefined;
+    },
+    knowThisMint: function () {
+      const tokenJson = this.decodeToken(this.receiveData.tokensBase64);
+      if (tokenJson == undefined) {
+        return false;
+      }
+      return this.knowThisMintOfTokenJson(tokenJson);
+    },
+    tokenAmount: function () {
+      if (!this.tokenDecodesCorrectly) {
+        return 0;
+      }
+      const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
+      return this.getProofs(decodedToken).reduce(
+        (sum, el) => (sum += el.amount),
+        0,
+      );
+    },
+    tokenUnit: function () {
+      if (!this.tokenDecodesCorrectly) {
+        return "";
+      }
+      const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
+      return token.getUnit(decodedToken);
+    },
+    tokenMint: function () {
+      if (!this.tokenDecodesCorrectly) {
+        return "";
+      }
+      const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
+      return this.getMint(decodedToken);
+    },
+    receiverPubkey: function () {
+      if (!this.tokenDecodesCorrectly) {
+        return "";
+      }
+      return this.getTokenPubkey(this.receiveData.tokensBase64) || "";
+    },
+    unlockDate: function () {
+      const ts = this.getTokenLocktime(this.receiveData.tokensBase64);
+      if (!ts) return "";
+      return date.formatDate(new Date(ts * 1000), "YYYY-MM-DD HH:mm");
+    },
+    swapToMintAmount: function () {
+      const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
+      return this.tokenAmount - useSwapStore().meltToMintFees(decodedToken);
+    },
+  },
+  methods: {
+    ...mapActions(useWalletStore, ["redeem"]),
+    ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
+    ...mapActions(useTokensStore, ["addPendingToken"]),
+    ...mapActions(useP2PKStore, [
+      "getPrivateKeyForP2PKEncodedToken",
+      "createAndSelectNewKey",
+      "showLastKey",
+      "getTokenLocktime",
+      "getTokenPubkey",
+    ]),
+    ...mapActions(useMintsStore, ["addMint"]),
+    ...mapActions(useReceiveTokensStore, [
+      "receiveIfDecodes",
+      "decodeToken",
+      "knowThisMintOfTokenJson",
+      "toggleScanner",
+      "pasteToParseDialog",
+    ]),
+    shortenString,
+    // TOKEN METHODS
+    decodePeanut: function (peanut) {
+      try {
+        let decoded = [];
+        const chars = Array.from(peanut);
+        if (!chars.length) return undefined;
+        const fromVariationSelector = function (char) {
+          const codePoint = char.codePointAt(0);
 
-					// Handle Variation Selectors (VS1-VS16): U+FE00 to U+FE0F
-					if (codePoint >= 0xfe00 && codePoint <= 0xfe0f) {
-						// Maps FE00->0, FE01->1, ..., FE0F->15
-						const byteValue = codePoint - 0xfe00;
-						return String.fromCharCode(byteValue);
-					}
+          // Handle Variation Selectors (VS1-VS16): U+FE00 to U+FE0F
+          if (codePoint >= 0xfe00 && codePoint <= 0xfe0f) {
+            // Maps FE00->0, FE01->1, ..., FE0F->15
+            const byteValue = codePoint - 0xfe00;
+            return String.fromCharCode(byteValue);
+          }
 
-					// Handle Variation Selectors Supplement (VS17-VS256): U+E0100 to U+E01EF
-					if (codePoint >= 0xe0100 && codePoint <= 0xe01ef) {
-						// Maps E0100->16, E0101->17, ..., E01EF->255
-						const byteValue = codePoint - 0xe0100 + 16;
-						return String.fromCharCode(byteValue);
-					}
+          // Handle Variation Selectors Supplement (VS17-VS256): U+E0100 to U+E01EF
+          if (codePoint >= 0xe0100 && codePoint <= 0xe01ef) {
+            // Maps E0100->16, E0101->17, ..., E01EF->255
+            const byteValue = codePoint - 0xe0100 + 16;
+            return String.fromCharCode(byteValue);
+          }
 
-					// No Variation Selector
-					return null;
-				};
-				// Check all input chars for peanut data
-				for (const char of chars) {
-					let byte = fromVariationSelector(char);
-					if (byte === null && decoded.length > 0) {
-						break;
-					} else if (byte === null) {
-						continue;
-					}
-					decoded.push(byte); // got some
-				}
-				// Switch out token if we found peanut data
-				decoded = decoded.join("");
-				if (decoded) {
-					this.receiveData.tokensBase64 = decoded;
-				}
-				return this.decodeToken(decoded);
-			} catch (error) {
-				return undefined;
-			}
-		},
-		getProofs: function (decoded_token) {
-			return token.getProofs(decoded_token);
-		},
-		getMint: function (decoded_token) {
-			return token.getMint(decoded_token);
-		},
-		tokenAlreadyInHistory: function (tokenStr) {
-			const tokensStore = useTokensStore();
-			return (
-				tokensStore.historyTokens.find((t) => t.token === tokenStr) !==
-				undefined
-			);
-		},
-		applyBucketRules() {
-			if (!this.receiveData.tokensBase64) return;
-			if (this.receiveData.bucketId !== DEFAULT_BUCKET_ID) return;
-			const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
-			if (!decodedToken) return;
-			const mint = this.getMint(decodedToken);
-			const bucket = useBucketsStore().autoBucketFor(
-				mint,
-				this.receiveData.label,
-			);
-			if (bucket) {
-				this.receiveData.bucketId = bucket;
-			}
-		},
-		addPendingTokenToHistory: function (tokenStr) {
-			if (this.tokenAlreadyInHistory(tokenStr)) {
-				this.notifySuccess(
-					this.$i18n.t(
-						"ReceiveTokenDialog.actions.later.already_in_history_success_text",
-					),
-				);
-				this.showReceiveTokens = false;
-				return;
-			}
-			const tokensStore = useTokensStore();
-			const decodedToken = this.decodeToken(tokenStr);
-			const mintInToken = this.getMint(decodedToken);
-			const unitInToken = token.getUnit(decodedToken);
-			// get amount from decodedToken.token.proofs[..].amount
-			const amount = this.getProofs(decodedToken).reduce(
-				(sum, el) => (sum += el.amount),
-				0,
-			);
+          // No Variation Selector
+          return null;
+        };
+        // Check all input chars for peanut data
+        for (const char of chars) {
+          let byte = fromVariationSelector(char);
+          if (byte === null && decoded.length > 0) {
+            break;
+          } else if (byte === null) {
+            continue;
+          }
+          decoded.push(byte); // got some
+        }
+        // Switch out token if we found peanut data
+        decoded = decoded.join("");
+        if (decoded) {
+          this.receiveData.tokensBase64 = decoded;
+        }
+        return this.decodeToken(decoded);
+      } catch (error) {
+        return undefined;
+      }
+    },
+    getProofs: function (decoded_token) {
+      return token.getProofs(decoded_token);
+    },
+    getMint: function (decoded_token) {
+      return token.getMint(decoded_token);
+    },
+    tokenAlreadyInHistory: function (tokenStr) {
+      const tokensStore = useTokensStore();
+      return (
+        tokensStore.historyTokens.find((t) => t.token === tokenStr) !==
+        undefined
+      );
+    },
+    applyBucketRules() {
+      if (!this.receiveData.tokensBase64) return;
+      if (this.receiveData.bucketId !== DEFAULT_BUCKET_ID) return;
+      const decodedToken = this.decodeToken(this.receiveData.tokensBase64);
+      if (!decodedToken) return;
+      const mint = this.getMint(decodedToken);
+      const bucket = useBucketsStore().autoBucketFor(
+        mint,
+        this.receiveData.label,
+      );
+      if (bucket) {
+        this.receiveData.bucketId = bucket;
+      }
+    },
+    addPendingTokenToHistory: function (tokenStr) {
+      if (this.tokenAlreadyInHistory(tokenStr)) {
+        this.notifySuccess(
+          this.$i18n.t(
+            "ReceiveTokenDialog.actions.later.already_in_history_success_text",
+          ),
+        );
+        this.showReceiveTokens = false;
+        return;
+      }
+      const tokensStore = useTokensStore();
+      const decodedToken = this.decodeToken(tokenStr);
+      const mintInToken = this.getMint(decodedToken);
+      const unitInToken = token.getUnit(decodedToken);
+      // get amount from decodedToken.token.proofs[..].amount
+      const amount = this.getProofs(decodedToken).reduce(
+        (sum, el) => (sum += el.amount),
+        0,
+      );
 
-			tokensStore.addPendingToken({
-				amount: amount,
-				tokenStr: tokenStr,
-				mint: mintInToken,
-				unit: unitInToken,
-				label: this.receiveData.label,
-				description: this.receiveData.description,
-				bucketId: this.receiveData.bucketId,
-			});
-			this.showReceiveTokens = false;
-			// show success notification
-			this.notifySuccess(
-				this.$i18n.t(
-					"ReceiveTokenDialog.actions.later.added_to_history_success_text",
-				),
-			);
-		},
-		handleSwapToTrustedMint: async function () {
-			const mint = useMintsStore().activeMint().mint;
-			await useReceiveTokensStore().meltTokenToMint(
-				this.receiveData.tokensBase64,
-				mint,
-			);
-			this.swapSelected = false;
-		},
-		pubkeyNpub(hex) {
-			try {
-				if (!hex) return "";
-				return nip19.npubEncode(hex);
-			} catch (e) {
-				return hex;
-			}
-		},
-	},
+      tokensStore.addPendingToken({
+        amount: amount,
+        tokenStr: tokenStr,
+        mint: mintInToken,
+        unit: unitInToken,
+        label: this.receiveData.label,
+        description: this.receiveData.description,
+        bucketId: this.receiveData.bucketId,
+      });
+      this.showReceiveTokens = false;
+      // show success notification
+      this.notifySuccess(
+        this.$i18n.t(
+          "ReceiveTokenDialog.actions.later.added_to_history_success_text",
+        ),
+      );
+    },
+    handleSwapToTrustedMint: async function () {
+      const mint = useMintsStore().activeMint().mint;
+      await useReceiveTokensStore().meltTokenToMint(
+        this.receiveData.tokensBase64,
+        mint,
+      );
+      this.swapSelected = false;
+    },
+    pubkeyNpub(hex) {
+      try {
+        if (!hex) return "";
+        return nip19.npubEncode(hex);
+      } catch (e) {
+        return hex;
+      }
+    },
+  },
 });
 </script>
 

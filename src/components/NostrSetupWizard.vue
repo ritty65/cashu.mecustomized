@@ -70,8 +70,8 @@ const nostr = useNostrStore();
 const messenger = useMessengerStore();
 
 const model = computed({
-	get: () => props.modelValue,
-	set: (v: boolean) => emit("update:modelValue", v),
+  get: () => props.modelValue,
+  set: (v: boolean) => emit("update:modelValue", v),
 });
 
 const step = ref(1);
@@ -83,43 +83,43 @@ const connected = ref(false);
 const error = ref("");
 
 function addRelay() {
-	const val = relayInput.value.trim();
-	if (val) {
-		relays.value.push(val);
-		relayInput.value = "";
-	}
+  const val = relayInput.value.trim();
+  if (val) {
+    relays.value.push(val);
+    relayInput.value = "";
+  }
 }
 function removeRelay(idx: number) {
-	relays.value.splice(idx, 1);
+  relays.value.splice(idx, 1);
 }
 
 async function nextFromKey() {
-	if (!privKey.value.trim()) return;
-	await nostr.initPrivateKeySigner(privKey.value.trim());
-	step.value = 2;
+  if (!privKey.value.trim()) return;
+  await nostr.initPrivateKeySigner(privKey.value.trim());
+  step.value = 2;
 }
 
 function nextFromRelays() {
-	if (relays.value.length === 0) return;
-	step.value = 3;
+  if (relays.value.length === 0) return;
+  step.value = 3;
 }
 
 async function connect() {
-	connecting.value = true;
-	error.value = "";
-	try {
-		await messenger.connect(relays.value);
-		connected.value = messenger.connected;
-	} catch (e: any) {
-		error.value = e?.message || "Failed to connect";
-		connected.value = false;
-	} finally {
-		connecting.value = false;
-	}
+  connecting.value = true;
+  error.value = "";
+  try {
+    await messenger.connect(relays.value);
+    connected.value = messenger.connected;
+  } catch (e: any) {
+    error.value = e?.message || "Failed to connect";
+    connected.value = false;
+  } finally {
+    connecting.value = false;
+  }
 }
 
 function finish() {
-	emit("complete");
-	emit("update:modelValue", false);
+  emit("complete");
+  emit("update:modelValue", false);
 }
 </script>

@@ -29,35 +29,35 @@ import { useUiStore } from "src/stores/ui";
 import { NAV_DRAWER_WIDTH, NAV_DRAWER_GUTTER } from "src/constants/layout";
 
 export default defineComponent({
-	name: "FullscreenLayout",
-	mixins: [windowMixin],
-	components: {
-		MainHeader,
-		AppNavDrawer,
-		PublishBar,
-	},
-	setup() {
-		const { loggedIn, publishFullProfile, publishing } = useCreatorHub();
-		const route = useRoute();
-		const showPublishBar = computed(() => route.path === "/creator-hub");
+  name: "FullscreenLayout",
+  mixins: [windowMixin],
+  components: {
+    MainHeader,
+    AppNavDrawer,
+    PublishBar,
+  },
+  setup() {
+    const { loggedIn, publishFullProfile, publishing } = useCreatorHub();
+    const route = useRoute();
+    const showPublishBar = computed(() => route.path === "/creator-hub");
 
-		const $q = useQuasar();
-		const ui = useUiStore();
-		const navStyleVars = computed(() => ({
-			"--nav-drawer-width": `${NAV_DRAWER_WIDTH}px`,
-			"--nav-offset-x":
-				ui.mainNavOpen && $q.screen.width >= 1024
-					? `calc(var(--nav-drawer-width) + ${NAV_DRAWER_GUTTER}px)`
-					: "0px",
-		}));
+    const $q = useQuasar();
+    const ui = useUiStore();
+    const navStyleVars = computed(() => ({
+      "--nav-drawer-width": `${NAV_DRAWER_WIDTH}px`,
+      "--nav-offset-x":
+        ui.mainNavOpen && $q.screen.width >= 1024
+          ? `calc(var(--nav-drawer-width) + ${NAV_DRAWER_GUTTER}px)`
+          : "0px",
+    }));
 
-		return {
-			loggedIn,
-			publishFullProfile,
-			publishing,
-			showPublishBar,
-			navStyleVars,
-		};
-	},
+    return {
+      loggedIn,
+      publishFullProfile,
+      publishing,
+      showPublishBar,
+      navStyleVars,
+    };
+  },
 });
 </script>

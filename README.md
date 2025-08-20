@@ -279,11 +279,6 @@ The wallet interface now uses three new Vue components:
 
 To try the redesign, swap the old wallet route to `WalletBucketsPage` and include `HeaderBar` and `Sidebar` where appropriate. These components rely on the existing stores and keep all previous functionality.
 
-## Developer Notes
-
-- **Onboarding persistence keys**: `cashu.welcome.termsAccepted`, `cashu.welcome.completed`
-- **NWC allowance persistence**: stored per connection in `cashu.nwc.connections`
-
 ## License
 
 This project is licensed under the [MIT License](LICENSE.md).

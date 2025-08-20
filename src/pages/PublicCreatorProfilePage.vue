@@ -121,105 +121,105 @@ import MediaPreview from "components/MediaPreview.vue";
 import { isTrustedUrl } from "src/utils/sanitize-url";
 
 export default defineComponent({
-	name: "PublicCreatorProfilePage",
-	components: { PaywalledContent, SubscriptionReceipt, MediaPreview },
-	setup() {
-		const route = useRoute();
-		const creatorNpub = route.params.npub as string;
-		let creatorHex = creatorNpub;
-		try {
-			const decoded = nip19.decode(creatorNpub);
-			if (typeof decoded.data === "string") {
-				creatorHex = decoded.data;
-			}
-		} catch (e) {
-			// ignore decode error and keep original value
-		}
-		const creators = useCreatorsStore();
-		const nostr = useNostrStore();
-		const priceStore = usePriceStore();
-		const uiStore = useUiStore();
-		const { t } = useI18n();
-		const bitcoinPrice = computed(() => priceStore.bitcoinPrice);
-		const profile = ref<any>({});
-		const tiers = computed(() => creators.tiersMap[creatorHex] || []);
-		const showSubscribeDialog = ref(false);
-		const showReceiptDialog = ref(false);
-		const receiptList = ref<any[]>([]);
-		const selectedTier = ref<any>(null);
-		const followers = ref<number | null>(null);
-		const following = ref<number | null>(null);
+  name: "PublicCreatorProfilePage",
+  components: { PaywalledContent, SubscriptionReceipt, MediaPreview },
+  setup() {
+    const route = useRoute();
+    const creatorNpub = route.params.npub as string;
+    let creatorHex = creatorNpub;
+    try {
+      const decoded = nip19.decode(creatorNpub);
+      if (typeof decoded.data === "string") {
+        creatorHex = decoded.data;
+      }
+    } catch (e) {
+      // ignore decode error and keep original value
+    }
+    const creators = useCreatorsStore();
+    const nostr = useNostrStore();
+    const priceStore = usePriceStore();
+    const uiStore = useUiStore();
+    const { t } = useI18n();
+    const bitcoinPrice = computed(() => priceStore.bitcoinPrice);
+    const profile = ref<any>({});
+    const tiers = computed(() => creators.tiersMap[creatorHex] || []);
+    const showSubscribeDialog = ref(false);
+    const showReceiptDialog = ref(false);
+    const receiptList = ref<any[]>([]);
+    const selectedTier = ref<any>(null);
+    const followers = ref<number | null>(null);
+    const following = ref<number | null>(null);
 
-		const loadProfile = async () => {
-			await creators.fetchTierDefinitions(creatorHex);
-			const p = await nostr.getProfile(creatorHex);
-			if (p) {
-				if (p.picture && !isTrustedUrl(p.picture)) {
-					delete (p as any).picture;
-				}
-				profile.value = { ...p };
-			}
-			followers.value = await nostr.fetchFollowerCount(creatorHex);
-			following.value = await nostr.fetchFollowingCount(creatorHex);
-		};
-		loadProfile();
-		useNdk();
+    const loadProfile = async () => {
+      await creators.fetchTierDefinitions(creatorHex);
+      const p = await nostr.getProfile(creatorHex);
+      if (p) {
+        if (p.picture && !isTrustedUrl(p.picture)) {
+          delete (p as any).picture;
+        }
+        profile.value = { ...p };
+      }
+      followers.value = await nostr.fetchFollowerCount(creatorHex);
+      following.value = await nostr.fetchFollowingCount(creatorHex);
+    };
+    loadProfile();
+    useNdk();
 
-		const openSubscribe = (tier: any) => {
-			selectedTier.value = tier;
-			showSubscribeDialog.value = true;
-		};
+    const openSubscribe = (tier: any) => {
+      selectedTier.value = tier;
+      showSubscribeDialog.value = true;
+    };
 
-		const formatTs = (ts: number) => {
-			const d = new Date(ts * 1000);
-			return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${(
-				"0" + d.getDate()
-			).slice(-2)} ${("0" + d.getHours()).slice(-2)}:${(
-				"0" + d.getMinutes()
-			).slice(-2)}`;
-		};
+    const formatTs = (ts: number) => {
+      const d = new Date(ts * 1000);
+      return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${(
+        "0" + d.getDate()
+      ).slice(-2)} ${("0" + d.getHours()).slice(-2)}:${(
+        "0" + d.getMinutes()
+      ).slice(-2)}`;
+    };
 
-		const confirmSubscribe = ({
-			bucketId,
-			periods,
-			amount,
-			startDate,
-			total,
-		}: any) => {
-			// Transaction already processed in SubscribeDialog.
-			showSubscribeDialog.value = false;
-		};
+    const confirmSubscribe = ({
+      bucketId,
+      periods,
+      amount,
+      startDate,
+      total,
+    }: any) => {
+      // Transaction already processed in SubscribeDialog.
+      showSubscribeDialog.value = false;
+    };
 
-		function formatFiat(sats: number): string {
-			if (!priceStore.bitcoinPrice) return "";
-			const value = (priceStore.bitcoinPrice / 100000000) * sats;
-			return uiStore.formatCurrency(value, "USD", true);
-		}
+    function formatFiat(sats: number): string {
+      if (!priceStore.bitcoinPrice) return "";
+      const value = (priceStore.bitcoinPrice / 100000000) * sats;
+      return uiStore.formatCurrency(value, "USD", true);
+    }
 
-		function getPrice(t: any): number {
-			return t.price_sats ?? t.price ?? 0;
-		}
+    function getPrice(t: any): number {
+      return t.price_sats ?? t.price ?? 0;
+    }
 
-		return {
-			creatorNpub,
-			creatorHex,
-			profile,
-			tiers,
-			showSubscribeDialog,
-			showReceiptDialog,
-			receiptList,
-			selectedTier,
-			followers,
-			following,
-			bitcoinPrice,
-			priceStore,
-			// no markdown rendering needed
-			formatFiat,
-			getPrice,
-			openSubscribe,
-			confirmSubscribe,
-		};
-	},
+    return {
+      creatorNpub,
+      creatorHex,
+      profile,
+      tiers,
+      showSubscribeDialog,
+      showReceiptDialog,
+      receiptList,
+      selectedTier,
+      followers,
+      following,
+      bitcoinPrice,
+      priceStore,
+      // no markdown rendering needed
+      formatFiat,
+      getPrice,
+      openSubscribe,
+      confirmSubscribe,
+    };
+  },
 });
 </script>
 

@@ -94,38 +94,38 @@ import DisplayMenu from "../common/DisplayMenu.vue";
 import { useSubscribersStore } from "src/stores/subscribersStore";
 
 const props = withDefaults(
-	defineProps<{
-		total: number;
-		dateRange: string;
-		search: string;
-		filters: { key: string; label: string }[];
-		columns?: { name: string; label: string }[];
-	}>(),
-	{
-		columns: () => [],
-	},
+  defineProps<{
+    total: number;
+    dateRange: string;
+    search: string;
+    filters: { key: string; label: string }[];
+    columns?: { name: string; label: string }[];
+  }>(),
+  {
+    columns: () => [],
+  },
 );
 
 const emit = defineEmits<{
-	"update:dateRange": [string];
-	"update:search": [string];
-	"open-filters": [];
-	export: [];
+  "update:dateRange": [string];
+  "update:search": [string];
+  "open-filters": [];
+  export: [];
 }>();
 
 const dateOptions = [
-	{ label: "Last 7 days", value: "7d" },
-	{ label: "Last 30 days", value: "30d" },
+  { label: "Last 7 days", value: "7d" },
+  { label: "Last 30 days", value: "30d" },
 ];
 
 const modelDateRange = computed({
-	get: () => props.dateRange,
-	set: (val: string) => emit("update:dateRange", val),
+  get: () => props.dateRange,
+  set: (val: string) => emit("update:dateRange", val),
 });
 
 const modelSearch = computed({
-	get: () => props.search,
-	set: (val: string) => emit("update:search", val),
+  get: () => props.search,
+  set: (val: string) => emit("update:search", val),
 });
 
 const searchRef = ref<{ focus: () => void } | null>(null);
@@ -134,44 +134,44 @@ const store = useSubscribersStore();
 const views = computed(() => store.savedViews);
 
 function saveCurrent() {
-	const name = window.prompt("View name?");
-	if (name) {
-		store.saveCurrentView(name);
-	}
+  const name = window.prompt("View name?");
+  if (name) {
+    store.saveCurrentView(name);
+  }
 }
 
 function apply(id: string) {
-	store.applyView(id);
+  store.applyView(id);
 }
 
 function remove(id: string) {
-	store.deleteView(id);
+  store.deleteView(id);
 }
 
 function setDefault() {
-	store.savePrefs();
+  store.savePrefs();
 }
 
 function resetLast() {
-	if (store.activeViewId) {
-		store.applyView(store.activeViewId);
-	}
+  if (store.activeViewId) {
+    store.applyView(store.activeViewId);
+  }
 }
 
 function handleKey(event: KeyboardEvent) {
-	const tag = (event.target as HTMLElement).tagName;
-	if (tag === "INPUT" || tag === "TEXTAREA") return;
+  const tag = (event.target as HTMLElement).tagName;
+  if (tag === "INPUT" || tag === "TEXTAREA") return;
 
-	if (event.key === "/") {
-		event.preventDefault();
-		searchRef.value?.focus();
-	} else if (event.key === "f") {
-		event.preventDefault();
-		emit("open-filters");
-	} else if (event.key === "e") {
-		event.preventDefault();
-		emit("export");
-	}
+  if (event.key === "/") {
+    event.preventDefault();
+    searchRef.value?.focus();
+  } else if (event.key === "f") {
+    event.preventDefault();
+    emit("open-filters");
+  } else if (event.key === "e") {
+    event.preventDefault();
+    emit("export");
+  }
 }
 
 onMounted(() => document.addEventListener("keydown", handleKey));

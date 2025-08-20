@@ -142,8 +142,8 @@ const emit = defineEmits(["update:modelValue"]);
 const { t } = useI18n();
 
 const showLocal = computed({
-	get: () => props.modelValue,
-	set: (val) => emit("update:modelValue", val),
+  get: () => props.modelValue,
+  set: (val) => emit("update:modelValue", val),
 });
 
 const activeTab = ref<"overview" | "history">("overview");
@@ -155,47 +155,47 @@ const tokensStore = useTokensStore();
 const uiStore = useUiStore();
 const { activeUnit } = storeToRefs(mintsStore);
 const sendDmDialogRef = ref<InstanceType<typeof SendBucketDmDialog> | null>(
-	null,
+  null,
 );
 const editDialog = ref({
-	show: false,
-	label: "",
-	description: "",
-	secret: "",
+  show: false,
+  label: "",
+  description: "",
+  secret: "",
 });
 
 const bucket = computed(
-	() => bucketsStore.bucketList.find((b) => b.id === props.bucketId) || null,
+  () => bucketsStore.bucketList.find((b) => b.id === props.bucketId) || null,
 );
 const bucketProofs = computed(() =>
-	proofsStore.proofs.filter(
-		(p) => p.bucketId === props.bucketId && !p.reserved,
-	),
+  proofsStore.proofs.filter(
+    (p) => p.bucketId === props.bucketId && !p.reserved,
+  ),
 );
 const bucketBalance = computed(() =>
-	bucketProofs.value.reduce((s, p) => s + p.amount, 0),
+  bucketProofs.value.reduce((s, p) => s + p.amount, 0),
 );
 
 const formatCurrency = (a: number, unit: string) =>
-	uiStore.formatCurrency(a, unit);
+  uiStore.formatCurrency(a, unit);
 
 function openEdit(token: any) {
-	editDialog.value.show = true;
-	editDialog.value.label = token.label || "";
-	editDialog.value.description = token.description || "";
-	editDialog.value.secret = token.secret;
+  editDialog.value.show = true;
+  editDialog.value.label = token.label || "";
+  editDialog.value.description = token.description || "";
+  editDialog.value.secret = token.secret;
 }
 
 function saveEdit() {
-	tokensStore.editHistoryTokenBySecret(editDialog.value.secret, {
-		newLabel: editDialog.value.label,
-		newDescription: editDialog.value.description,
-	});
-	editDialog.value.show = false;
+  tokensStore.editHistoryTokenBySecret(editDialog.value.secret, {
+    newLabel: editDialog.value.label,
+    newDescription: editDialog.value.description,
+  });
+  editDialog.value.show = false;
 }
 
 function openSendDmDialog() {
-	const npub = bucket.value?.creatorPubkey;
-	(sendDmDialogRef.value as any)?.show(npub);
+  const npub = bucket.value?.creatorPubkey;
+  (sendDmDialogRef.value as any)?.show(npub);
 }
 </script>

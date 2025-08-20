@@ -32,38 +32,38 @@ import { X as XIcon, Info as InfoIcon } from "lucide-vue-next";
 import { useMintsStore } from "src/stores/mints";
 
 export default defineComponent({
-	name: "MintMotdMessage",
-	components: {
-		XIcon,
-		InfoIcon,
-	},
-	props: {
-		message: {
-			type: String,
-			default: "",
-		},
-		mintUrl: {
-			type: String,
-			required: true,
-		},
-		dismissed: {
-			type: Boolean,
-			default: false,
-		},
-	},
-	emits: ["dismiss"],
-	setup(props, { emit }) {
-		const mintsStore = useMintsStore();
+  name: "MintMotdMessage",
+  components: {
+    XIcon,
+    InfoIcon,
+  },
+  props: {
+    message: {
+      type: String,
+      default: "",
+    },
+    mintUrl: {
+      type: String,
+      required: true,
+    },
+    dismissed: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  emits: ["dismiss"],
+  setup(props, { emit }) {
+    const mintsStore = useMintsStore();
 
-		const dismissMessage = () => {
-			mintsStore.setMintMotdViewed(props.mintUrl);
-			emit("dismiss");
-		};
+    const dismissMessage = () => {
+      mintsStore.setMintMotdViewed(props.mintUrl);
+      emit("dismiss");
+    };
 
-		return {
-			dismissMessage,
-		};
-	},
+    return {
+      dismissMessage,
+    };
+  },
 });
 </script>
 

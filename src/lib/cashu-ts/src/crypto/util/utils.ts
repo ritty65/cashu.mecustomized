@@ -1,5 +1,5 @@
-import { bytesToHex } from "@noble/curves/abstract/utils";
-import "buffer";
+import { bytesToHex } from '@noble/curves/abstract/utils';
+import 'buffer';
 declare const Buffer: any;
 
 export function bytesToNumber(bytes: Uint8Array): bigint {
@@ -11,5 +11,5 @@ export function hexToNumber(hex: string): bigint {
 }
 
 export function encodeBase64toUint8(base64String: string): Uint8Array {
-	return Buffer.from(base64String, "base64");
+	return Buffer.from(base64String, 'base64');
 }

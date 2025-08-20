@@ -10,12 +10,12 @@
 import { defineComponent } from "vue";
 
 export default defineComponent({
-	name: "InfoTooltip",
-	props: {
-		text: {
-			type: String,
-			default: "",
-		},
-	},
+  name: "InfoTooltip",
+  props: {
+    text: {
+      type: String,
+      default: "",
+    },
+  },
 });
 </script>

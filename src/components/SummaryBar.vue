@@ -11,15 +11,15 @@
 import { useUiStore } from "stores/ui";
 
 const props = defineProps<{
-	total: number;
-	activeCount: number;
-	unit: string;
+  total: number;
+  activeCount: number;
+  unit: string;
 }>();
 
 const uiStore = useUiStore();
 
 function formatCurrency(value: number, unit: string) {
-	return uiStore.formatCurrency(value, unit);
+  return uiStore.formatCurrency(value, unit);
 }
 </script>
 

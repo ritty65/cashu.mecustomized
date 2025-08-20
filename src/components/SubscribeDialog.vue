@@ -61,10 +61,10 @@ import { DEFAULT_BUCKET_ID } from "@/constants/buckets";
 import { useMintsStore } from "stores/mints";
 import { useUiStore } from "stores/ui";
 import {
-	fetchNutzapProfile,
-	npubToHex,
-	RelayConnectionError,
-	useNostrStore,
+  fetchNutzapProfile,
+  npubToHex,
+  RelayConnectionError,
+  useNostrStore,
 } from "stores/nostr";
 import { notifySuccess, notifyError } from "src/js/notify";
 import { storeToRefs } from "pinia";
@@ -74,223 +74,223 @@ import { NdkBootError } from "boot/ndk";
 import { useBootErrorStore } from "stores/bootError";
 import type { CreatorIdentity } from "src/types/creator";
 import {
-	frequencyToDays,
-	type SubscriptionFrequency,
+  frequencyToDays,
+  type SubscriptionFrequency,
 } from "src/constants/subscriptionFrequency";
 
 export default defineComponent({
-	name: "SubscribeDialog",
-	props: {
-		modelValue: Boolean,
-		tier: { type: Object, required: false },
-		supporterPubkey: { type: String, default: "" },
-		creatorPubkey: { type: String, default: "" },
-	},
-	emits: ["update:modelValue", "confirm"],
-	setup(props, { emit }) {
-		const donationStore = useDonationPresetsStore();
-		const bucketsStore = useBucketsStore();
-		const mintsStore = useMintsStore();
-		const uiStore = useUiStore();
-		const nutzap = useNutzapStore();
-		const nostr = useNostrStore();
-		const { t } = useI18n();
-		const { bucketList, bucketBalances } = storeToRefs(bucketsStore);
-		const { activeUnit } = storeToRefs(mintsStore);
+  name: "SubscribeDialog",
+  props: {
+    modelValue: Boolean,
+    tier: { type: Object, required: false },
+    supporterPubkey: { type: String, default: "" },
+    creatorPubkey: { type: String, default: "" },
+  },
+  emits: ["update:modelValue", "confirm"],
+  setup(props, { emit }) {
+    const donationStore = useDonationPresetsStore();
+    const bucketsStore = useBucketsStore();
+    const mintsStore = useMintsStore();
+    const uiStore = useUiStore();
+    const nutzap = useNutzapStore();
+    const nostr = useNostrStore();
+    const { t } = useI18n();
+    const { bucketList, bucketBalances } = storeToRefs(bucketsStore);
+    const { activeUnit } = storeToRefs(mintsStore);
 
-		const periods = ref(donationStore.presets[0]?.periods || 0);
-		const tierPrice = computed(
-			() => props.tier?.price_sats ?? (props.tier as any)?.price ?? 0,
-		);
-		const frequency = computed<SubscriptionFrequency>(
-			() => (props.tier?.frequency as SubscriptionFrequency) || "monthly",
-		);
-		const intervalDays = computed(() =>
-			props.tier?.intervalDays !== undefined
-				? props.tier.intervalDays
-				: frequencyToDays(frequency.value),
-		);
-		const frequencyLabel = computed(() => {
-			switch (frequency.value) {
-				case "weekly":
-					return "Every week";
-				case "biweekly":
-					return "Twice a month";
-				default:
-					return "Every month";
-			}
-		});
-		const bucketId = ref<string>(DEFAULT_BUCKET_ID);
-		const today = new Date().toISOString().slice(0, 10);
-		const startDate = ref(today);
-		const total = computed(() => tierPrice.value * periods.value);
-		const startDateError = computed(() =>
-			new Date(startDate.value).getTime() < new Date(today).getTime()
-				? "Start date is in the past"
-				: "",
-		);
+    const periods = ref(donationStore.presets[0]?.periods || 0);
+    const tierPrice = computed(
+      () => props.tier?.price_sats ?? (props.tier as any)?.price ?? 0,
+    );
+    const frequency = computed<SubscriptionFrequency>(
+      () => (props.tier?.frequency as SubscriptionFrequency) || "monthly",
+    );
+    const intervalDays = computed(() =>
+      props.tier?.intervalDays !== undefined
+        ? props.tier.intervalDays
+        : frequencyToDays(frequency.value),
+    );
+    const frequencyLabel = computed(() => {
+      switch (frequency.value) {
+        case "weekly":
+          return "Every week";
+        case "biweekly":
+          return "Twice a month";
+        default:
+          return "Every month";
+      }
+    });
+    const bucketId = ref<string>(DEFAULT_BUCKET_ID);
+    const today = new Date().toISOString().slice(0, 10);
+    const startDate = ref(today);
+    const total = computed(() => tierPrice.value * periods.value);
+    const startDateError = computed(() =>
+      new Date(startDate.value).getTime() < new Date(today).getTime()
+        ? "Start date is in the past"
+        : "",
+    );
 
-		const hasSigner = computed(() => !!nostr.signer);
+    const hasSigner = computed(() => !!nostr.signer);
 
-		const model = computed({
-			get: () => props.modelValue,
-			set: (v: boolean) => emit("update:modelValue", v),
-		});
+    const model = computed({
+      get: () => props.modelValue,
+      set: (v: boolean) => emit("update:modelValue", v),
+    });
 
-		const bucketOptions = computed(() =>
-			bucketList.value.map((b) => ({
-				label: `${b.name} (${uiStore.formatCurrency(
-					bucketBalances.value[b.id] ?? 0,
-					activeUnit.value,
-				)})`,
-				value: b.id,
-			})),
-		);
+    const bucketOptions = computed(() =>
+      bucketList.value.map((b) => ({
+        label: `${b.name} (${uiStore.formatCurrency(
+          bucketBalances.value[b.id] ?? 0,
+          activeUnit.value,
+        )})`,
+        value: b.id,
+      })),
+    );
 
-		const presetOptions = computed(() =>
-			donationStore.presets.map((p) => ({
-				label: `${p.periods}p`,
-				value: p.periods,
-			})),
-		);
+    const presetOptions = computed(() =>
+      donationStore.presets.map((p) => ({
+        label: `${p.periods}p`,
+        value: p.periods,
+      })),
+    );
 
-		const showBucketSelect = computed(() => !props.creatorPubkey);
+    const showBucketSelect = computed(() => !props.creatorPubkey);
 
-		const selectCreatorBucket = () => {
-			if (!props.creatorPubkey) return;
-			const existing = bucketList.value.find(
-				(b) => b.creatorPubkey === props.creatorPubkey,
-			);
-			if (existing) {
-				bucketId.value = existing.id;
-			} else {
-				const created = bucketsStore.addBucket({
-					name: props.creatorPubkey.slice(0, 8),
-					creatorPubkey: props.creatorPubkey,
-				});
-				if (created) bucketId.value = created.id;
-			}
-		};
+    const selectCreatorBucket = () => {
+      if (!props.creatorPubkey) return;
+      const existing = bucketList.value.find(
+        (b) => b.creatorPubkey === props.creatorPubkey,
+      );
+      if (existing) {
+        bucketId.value = existing.id;
+      } else {
+        const created = bucketsStore.addBucket({
+          name: props.creatorPubkey.slice(0, 8),
+          creatorPubkey: props.creatorPubkey,
+        });
+        if (created) bucketId.value = created.id;
+      }
+    };
 
-		watch(
-			() => props.modelValue,
-			async (val) => {
-				if (val) {
-					await nostr.initSignerIfNotSet();
-					if (!nostr.signer) {
-						useBootErrorStore().set(new NdkBootError("no-signer"));
-					}
-					selectCreatorBucket();
-				}
-			},
-		);
+    watch(
+      () => props.modelValue,
+      async (val) => {
+        if (val) {
+          await nostr.initSignerIfNotSet();
+          if (!nostr.signer) {
+            useBootErrorStore().set(new NdkBootError("no-signer"));
+          }
+          selectCreatorBucket();
+        }
+      },
+    );
 
-		watch(
-			() => props.creatorPubkey,
-			() => {
-				if (props.modelValue) selectCreatorBucket();
-			},
-		);
+    watch(
+      () => props.creatorPubkey,
+      () => {
+        if (props.modelValue) selectCreatorBucket();
+      },
+    );
 
-		const cancel = () => {
-			emit("update:modelValue", false);
-		};
+    const cancel = () => {
+      emit("update:modelValue", false);
+    };
 
-		const confirm = async () => {
-			if (!startDate.value) {
-				return;
-			}
-			await nostr.initSignerIfNotSet();
-			if (!nostr.signer) {
-				useBootErrorStore().set(new NdkBootError("no-signer"));
-				return;
-			}
-			try {
-				const creatorHex = props.creatorPubkey.startsWith("npub")
-					? npubToHex(props.creatorPubkey)
-					: props.creatorPubkey;
-				if (!creatorHex) {
-					notifyError("Error: Could not decode creator's public key.");
-					return;
-				}
-				let profile = null;
-				try {
-					profile = await fetchNutzapProfile(creatorHex);
-				} catch (e: any) {
-					if (e instanceof RelayConnectionError) {
-						console.error("Relay connection error", e);
-						notifyError("Unable to connect to Nostr relays");
-						return;
-					}
-					console.error("Failed to fetch Nutzap profile", e);
-					throw e;
-				}
-				if (!profile) {
-					notifyError(
-						"Creator has not published a Nutzap profile (kind-10019)",
-					);
-					return;
-				}
-				const creator: CreatorIdentity = {
-					nostrPubkey: creatorHex,
-					cashuP2pk: profile.p2pkPubkey,
-				};
-				const success = await nutzap.subscribeToTier({
-					creator,
-					tierId: props.tier?.id ?? props.tier?.name ?? "tier",
-					price: tierPrice.value,
-					periods: periods.value,
-					startDate: Math.floor(new Date(startDate.value).getTime() / 1000),
-					relayList: profile.relays ?? [],
-					frequency: frequency.value,
-					intervalDays: intervalDays.value,
-					tierName: props.tier?.name,
-					benefits: props.tier?.benefits,
-					creatorName: profile?.name,
-					creatorAvatar: profile?.picture,
-				});
-				if (success) {
-					notifySuccess(t("FindCreators.notifications.subscription_success"));
-					emit("confirm", {
-						bucketId: bucketId.value,
-						periods: periods.value,
-						startDate: Math.floor(new Date(startDate.value).getTime() / 1000),
-						total: total.value,
-					});
-					emit("update:modelValue", false);
-				} else {
-					notifyError(t("FindCreators.notifications.subscription_failed"));
-				}
-			} catch (e: any) {
-				console.error("Subscription failed", e);
-				if (e instanceof NdkBootError && e.reason === "no-signer") {
-					useBootErrorStore().set(e);
-				} else {
-					notifyError(
-						e.message || t("FindCreators.notifications.subscription_failed"),
-					);
-				}
-			}
-		};
+    const confirm = async () => {
+      if (!startDate.value) {
+        return;
+      }
+      await nostr.initSignerIfNotSet();
+      if (!nostr.signer) {
+        useBootErrorStore().set(new NdkBootError("no-signer"));
+        return;
+      }
+      try {
+        const creatorHex = props.creatorPubkey.startsWith("npub")
+          ? npubToHex(props.creatorPubkey)
+          : props.creatorPubkey;
+        if (!creatorHex) {
+          notifyError("Error: Could not decode creator's public key.");
+          return;
+        }
+        let profile = null;
+        try {
+          profile = await fetchNutzapProfile(creatorHex);
+        } catch (e: any) {
+          if (e instanceof RelayConnectionError) {
+            console.error("Relay connection error", e);
+            notifyError("Unable to connect to Nostr relays");
+            return;
+          }
+          console.error("Failed to fetch Nutzap profile", e);
+          throw e;
+        }
+        if (!profile) {
+          notifyError(
+            "Creator has not published a Nutzap profile (kind-10019)",
+          );
+          return;
+        }
+        const creator: CreatorIdentity = {
+          nostrPubkey: creatorHex,
+          cashuP2pk: profile.p2pkPubkey,
+        };
+        const success = await nutzap.subscribeToTier({
+          creator,
+          tierId: props.tier?.id ?? props.tier?.name ?? "tier",
+          price: tierPrice.value,
+          periods: periods.value,
+          startDate: Math.floor(new Date(startDate.value).getTime() / 1000),
+          relayList: profile.relays ?? [],
+          frequency: frequency.value,
+          intervalDays: intervalDays.value,
+          tierName: props.tier?.name,
+          benefits: props.tier?.benefits,
+          creatorName: profile?.name,
+          creatorAvatar: profile?.picture,
+        });
+        if (success) {
+          notifySuccess(t("FindCreators.notifications.subscription_success"));
+          emit("confirm", {
+            bucketId: bucketId.value,
+            periods: periods.value,
+            startDate: Math.floor(new Date(startDate.value).getTime() / 1000),
+            total: total.value,
+          });
+          emit("update:modelValue", false);
+        } else {
+          notifyError(t("FindCreators.notifications.subscription_failed"));
+        }
+      } catch (e: any) {
+        console.error("Subscription failed", e);
+        if (e instanceof NdkBootError && e.reason === "no-signer") {
+          useBootErrorStore().set(e);
+        } else {
+          notifyError(
+            e.message || t("FindCreators.notifications.subscription_failed"),
+          );
+        }
+      }
+    };
 
-		return {
-			model,
-			bucketId,
-			bucketOptions,
-			showBucketSelect,
-			periods,
-			presetOptions,
-			intervalDays,
-			frequency,
-			frequencyLabel,
-			startDate,
-			today,
-			total,
-			startDateError,
-			hasSigner,
-			cancel,
-			confirm,
-		};
-	},
+    return {
+      model,
+      bucketId,
+      bucketOptions,
+      showBucketSelect,
+      periods,
+      presetOptions,
+      intervalDays,
+      frequency,
+      frequencyLabel,
+      startDate,
+      today,
+      total,
+      startDateError,
+      hasSigner,
+      cancel,
+      confirm,
+    };
+  },
 });
 </script>

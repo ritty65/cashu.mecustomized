@@ -639,9 +639,9 @@ import { nip19, ProfilePointer } from "nostr-tools";
 import { ensureCompressed } from "src/utils/ecash";
 import TokenInformation from "components/TokenInformation.vue";
 import {
-	getDecodedToken,
-	getEncodedTokenV4,
-	getEncodedToken,
+  getDecodedToken,
+  getEncodedTokenV4,
+  getEncodedToken,
 } from "@cashu/cashu-ts";
 import { useBucketsStore } from "src/stores/buckets";
 import { DEFAULT_BUCKET_ID } from "@/constants/buckets";
@@ -652,452 +652,452 @@ import { UR, UREncoder } from "@gandlaf21/bc-ur";
 import SendPaymentRequest from "./SendPaymentRequest.vue";
 import NumericKeyboard from "components/NumericKeyboard.vue";
 import {
-	ChevronLeft as ChevronLeftIcon,
-	Clipboard as ClipboardIcon,
-	FileText as FileTextIcon,
-	Lock as LockIcon,
-	Scan as ScanIcon,
-	Nfc as NfcIcon,
+  ChevronLeft as ChevronLeftIcon,
+  Clipboard as ClipboardIcon,
+  FileText as FileTextIcon,
+  Lock as LockIcon,
+  Scan as ScanIcon,
+  Nfc as NfcIcon,
 } from "lucide-vue-next";
 import {
-	notifyError,
-	notifySuccess,
-	notify,
-	notifyWarning,
+  notifyError,
+  notifySuccess,
+  notify,
+  notifyWarning,
 } from "src/js/notify.ts";
 import { Dialog } from "quasar";
 import { useDmChatsStore } from "src/stores/dmChats";
 
 const VueQrcode = defineAsyncComponent(
-	() => import("@chenfengyuan/vue-qrcode"),
+  () => import("@chenfengyuan/vue-qrcode"),
 );
 export default defineComponent({
-	name: "SendTokenDialog",
-	mixins: [windowMixin],
-	components: {
-		ChooseMint,
-		TokenInformation,
-		SendPaymentRequest,
-		NumericKeyboard,
-		ScanIcon,
-		NfcIcon,
-		VueQrcode,
-	},
-	setup() {
-		const { copy } = useClipboard();
-		return { copy };
-	},
-	props: {},
-	data: function () {
-		return {
-			baseURL: location.protocol + "//" + location.host + location.pathname,
-			showAnimatedQR: false,
-			qrCodeFragment: "",
-			qrInterval: null,
-			encoder: null,
-			showDeleteDialog: false,
-			p2pkInput: "",
-			locktimeInput: "",
+  name: "SendTokenDialog",
+  mixins: [windowMixin],
+  components: {
+    ChooseMint,
+    TokenInformation,
+    SendPaymentRequest,
+    NumericKeyboard,
+    ScanIcon,
+    NfcIcon,
+    VueQrcode,
+  },
+  setup() {
+    const { copy } = useClipboard();
+    return { copy };
+  },
+  props: {},
+  data: function () {
+    return {
+      baseURL: location.protocol + "//" + location.host + location.pathname,
+      showAnimatedQR: false,
+      qrCodeFragment: "",
+      qrInterval: null,
+      encoder: null,
+      showDeleteDialog: false,
+      p2pkInput: "",
+      locktimeInput: "",
 
-			// parameters for animated QR
-			currentFragmentLength: 150,
-			fragmentLengthMedium: 100,
-			fragmentLengthShort: 50,
-			fragmentLengthLong: 150,
-			fragmentLengthLabel: "L",
+      // parameters for animated QR
+      currentFragmentLength: 150,
+      fragmentLengthMedium: 100,
+      fragmentLengthShort: 50,
+      fragmentLengthLong: 150,
+      fragmentLengthLabel: "L",
 
-			currentFragmentInterval: 150,
-			fragmentIntervalMedium: 250,
-			fragmentIntervalFast: 150,
-			framentInervalSlow: 500,
-			fragmentSpeedLabel: "F",
-			isV4Token: false,
-			scanningCard: false,
-			showExpandedButtons: false,
-		};
-	},
-	computed: {
-		...mapWritableState(useSendTokensStore, [
-			"showSendTokens",
-			"showLockInput",
-			"sendData",
-			"recipientPubkey",
-			"sendViaNostr",
-		]),
-		...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
-		...mapState(useUiStore, [
-			"tickerShort",
-			"canPasteFromClipboard",
-			"globalMutexLock",
-			"ndefSupported",
-		]),
-		...mapWritableState(useUiStore, ["showNumericKeyboard"]),
-		...mapState(useMintsStore, [
-			"mints",
-			"activeProofs",
-			"activeUnit",
-			"activeUnitLabel",
-			"activeUnitCurrencyMultiplyer",
-			"activeMintUrl",
-			"activeBalance",
-		]),
-		...mapState(useSettingsStore, [
-			"checkSentTokens",
-			"includeFeesInSendAmount",
-			"nfcEncoding",
-			"useNumericKeyboard",
-		]),
-		...mapState(usePriceStore, ["bitcoinPrice"]),
-		...mapState(useWorkersStore, ["tokenWorkerRunning"]),
-		...mapState(useBucketsStore, ["bucketList"]),
-		bucketOptions() {
-			return this.bucketList.map((b) => ({ label: b.name, value: b.id }));
-		},
-		isCreatorP2PK() {
-			const bucket = this.bucketList.find(
-				(b) => b.id === this.sendData.bucketId,
-			);
-			return (
-				!!bucket?.creatorPubkey &&
-				bucket.creatorPubkey === this.sendData.p2pkPubkey
-			);
-		},
-		// TOKEN METHODS
-		sumProofs: function () {
-			let proofs = token.getProofs(token.decode(this.sendData.tokensBase64));
-			return proofs.flat().reduce((sum, el) => (sum += el.amount), 0);
-		},
-		displayUnit: function () {
-			let display = this.formatCurrency(this.sumProofs, this.tokenUnit);
-			return display;
-		},
-		tokenUnit: function () {
-			let unit = token.getUnit(token.decode(this.sendData.tokensBase64));
-			return unit;
-		},
-		tokenMintUrl: function () {
-			let mint = token.getMint(token.decode(this.sendData.tokensBase64));
-			return mint;
-		},
-		paidFees: function () {
-			return this.sumProofs - Math.abs(this.sendData.historyAmount);
-		},
-		displayMemo: function () {
-			return token.getMemo(token.decode(this.sendData.tokensBase64));
-		},
-		shortUrl: function () {
-			return getShortUrl(this.tokenMintUrl);
-		},
-		decodedToken: function () {
-			return token.decode(this.sendData.tokensBase64);
-		},
-		runnerActive: function () {
-			return this.tokenWorkerRunning;
-		},
-		canSpendOffline: function () {
-			if (!this.sendData.amount) {
-				return false;
-			}
-			// check if entered amount is the same as the result of coinSelect(spendableProofs(activeProofs), amount)
-			let spendableProofs = this.spendableProofs(this.activeProofs);
-			const mintWallet = useWalletStore().wallet;
-			let selectedProofs = this.coinSelect(
-				spendableProofs,
-				mintWallet,
-				this.sendData.amount * this.activeUnitCurrencyMultiplyer,
-				this.includeFeesInSendAmount,
-				this.sendData.bucketId,
-			);
-			const feesToAdd = this.includeFeesInSendAmount
-				? this.getFeesForProofs(selectedProofs)
-				: 0;
-			const sumSelectedProofs = selectedProofs
-				.flat()
-				.reduce((sum, el) => (sum += el.amount), 0);
-			return (
-				sumSelectedProofs ==
-				this.sendData.amount * this.activeUnitCurrencyMultiplyer + feesToAdd
-			);
-		},
-	},
-	watch: {
-		"sendData.tokensBase64": function (val) {
-			this.showAnimatedQR = false;
-			if (!val.length) {
-				// it's emptied
-				return;
-			}
-			// check if token has more than one proof
-			const tokenObj = token.decode(val);
-			const proofs = tokenObj.proofs;
-			if (!proofs.length) {
-				// no proofs
-				return;
-			} else if (proofs.length <= 2) {
-				// we can display a single QR code
-				this.qrCodeFragment = val;
-			} else {
-				// we need to split the token into multiple QR codes
-				this.showAnimatedQR = true;
-				this.qrCodeFragment = "";
-				this.startQrCodeLoop();
-			}
-			// set isV4Token to true if token starts with 'cashuB'
-			this.isV4Token = val.startsWith("cashuB");
-		},
-		showSendTokens: function (val) {
-			if (val) {
-				this.$nextTick(() => {
-					// if we're entering the amount etc, show the keyboard
-					if (!this.sendData.tokensBase64.length) {
-						this.showNumericKeyboard = true;
-					} else {
-						this.showNumericKeyboard = false;
-					}
-				});
+      currentFragmentInterval: 150,
+      fragmentIntervalMedium: 250,
+      fragmentIntervalFast: 150,
+      framentInervalSlow: 500,
+      fragmentSpeedLabel: "F",
+      isV4Token: false,
+      scanningCard: false,
+      showExpandedButtons: false,
+    };
+  },
+  computed: {
+    ...mapWritableState(useSendTokensStore, [
+      "showSendTokens",
+      "showLockInput",
+      "sendData",
+      "recipientPubkey",
+      "sendViaNostr",
+    ]),
+    ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
+    ...mapState(useUiStore, [
+      "tickerShort",
+      "canPasteFromClipboard",
+      "globalMutexLock",
+      "ndefSupported",
+    ]),
+    ...mapWritableState(useUiStore, ["showNumericKeyboard"]),
+    ...mapState(useMintsStore, [
+      "mints",
+      "activeProofs",
+      "activeUnit",
+      "activeUnitLabel",
+      "activeUnitCurrencyMultiplyer",
+      "activeMintUrl",
+      "activeBalance",
+    ]),
+    ...mapState(useSettingsStore, [
+      "checkSentTokens",
+      "includeFeesInSendAmount",
+      "nfcEncoding",
+      "useNumericKeyboard",
+    ]),
+    ...mapState(usePriceStore, ["bitcoinPrice"]),
+    ...mapState(useWorkersStore, ["tokenWorkerRunning"]),
+    ...mapState(useBucketsStore, ["bucketList"]),
+    bucketOptions() {
+      return this.bucketList.map((b) => ({ label: b.name, value: b.id }));
+    },
+    isCreatorP2PK() {
+      const bucket = this.bucketList.find(
+        (b) => b.id === this.sendData.bucketId,
+      );
+      return (
+        !!bucket?.creatorPubkey &&
+        bucket.creatorPubkey === this.sendData.p2pkPubkey
+      );
+    },
+    // TOKEN METHODS
+    sumProofs: function () {
+      let proofs = token.getProofs(token.decode(this.sendData.tokensBase64));
+      return proofs.flat().reduce((sum, el) => (sum += el.amount), 0);
+    },
+    displayUnit: function () {
+      let display = this.formatCurrency(this.sumProofs, this.tokenUnit);
+      return display;
+    },
+    tokenUnit: function () {
+      let unit = token.getUnit(token.decode(this.sendData.tokensBase64));
+      return unit;
+    },
+    tokenMintUrl: function () {
+      let mint = token.getMint(token.decode(this.sendData.tokensBase64));
+      return mint;
+    },
+    paidFees: function () {
+      return this.sumProofs - Math.abs(this.sendData.historyAmount);
+    },
+    displayMemo: function () {
+      return token.getMemo(token.decode(this.sendData.tokensBase64));
+    },
+    shortUrl: function () {
+      return getShortUrl(this.tokenMintUrl);
+    },
+    decodedToken: function () {
+      return token.decode(this.sendData.tokensBase64);
+    },
+    runnerActive: function () {
+      return this.tokenWorkerRunning;
+    },
+    canSpendOffline: function () {
+      if (!this.sendData.amount) {
+        return false;
+      }
+      // check if entered amount is the same as the result of coinSelect(spendableProofs(activeProofs), amount)
+      let spendableProofs = this.spendableProofs(this.activeProofs);
+      const mintWallet = useWalletStore().wallet;
+      let selectedProofs = this.coinSelect(
+        spendableProofs,
+        mintWallet,
+        this.sendData.amount * this.activeUnitCurrencyMultiplyer,
+        this.includeFeesInSendAmount,
+        this.sendData.bucketId,
+      );
+      const feesToAdd = this.includeFeesInSendAmount
+        ? this.getFeesForProofs(selectedProofs)
+        : 0;
+      const sumSelectedProofs = selectedProofs
+        .flat()
+        .reduce((sum, el) => (sum += el.amount), 0);
+      return (
+        sumSelectedProofs ==
+        this.sendData.amount * this.activeUnitCurrencyMultiplyer + feesToAdd
+      );
+    },
+  },
+  watch: {
+    "sendData.tokensBase64": function (val) {
+      this.showAnimatedQR = false;
+      if (!val.length) {
+        // it's emptied
+        return;
+      }
+      // check if token has more than one proof
+      const tokenObj = token.decode(val);
+      const proofs = tokenObj.proofs;
+      if (!proofs.length) {
+        // no proofs
+        return;
+      } else if (proofs.length <= 2) {
+        // we can display a single QR code
+        this.qrCodeFragment = val;
+      } else {
+        // we need to split the token into multiple QR codes
+        this.showAnimatedQR = true;
+        this.qrCodeFragment = "";
+        this.startQrCodeLoop();
+      }
+      // set isV4Token to true if token starts with 'cashuB'
+      this.isV4Token = val.startsWith("cashuB");
+    },
+    showSendTokens: function (val) {
+      if (val) {
+        this.$nextTick(() => {
+          // if we're entering the amount etc, show the keyboard
+          if (!this.sendData.tokensBase64.length) {
+            this.showNumericKeyboard = true;
+          } else {
+            this.showNumericKeyboard = false;
+          }
+        });
 
-				// if we open the dialog from the history, let's check the
-				if (
-					this.sendData.historyToken &&
-					this.sendData.historyToken.amount < 0 &&
-					this.sendData.historyToken.status === "pending"
-				) {
-					if (!this.checkSentTokens) {
-						debug(
-							"settingsStore.checkSentTokens is disabled, skipping token check",
-						);
-						return;
-					}
-					const unspent = this.checkTokenSpendable(
-						this.sendData.historyToken,
-						false,
-					);
-					if (!unspent) {
-						this.sendData.historyToken.status = "paid";
-					}
-				}
-			} else {
-				clearInterval(this.qrInterval);
-				this.sendData.data = "";
-				this.sendData.tokensBase64 = "";
-				this.sendData.historyToken = null;
-				this.sendData.paymentRequest = null;
-				this.recipientPubkey = "";
-				this.sendViaNostr = false;
-			}
-		},
-		locktimeInput(val) {
-			if (val) {
-				this.sendData.locktime = Math.floor(new Date(val).getTime() / 1000);
-			} else {
-				this.sendData.locktime = null;
-			}
-		},
-		"sendData.bucketId": function (val) {
-			const bucket = this.bucketList.find((b) => b.id === val);
-			if (bucket && bucket.creatorPubkey) {
-				this.sendData.p2pkPubkey = bucket.creatorPubkey;
-			} else {
-				this.showLockInput = false;
-			}
-		},
-	},
-	methods: {
-		...mapActions(useWorkersStore, ["clearAllWorkers"]),
-		...mapActions(useWalletStore, [
-			"send",
-			"coinSelect",
-			"spendableProofs",
-			"getFeesForProofs",
-			"onTokenPaid",
-			"mintWallet",
-			"checkTokenSpendable",
-		]),
-		...mapActions(useProofsStore, ["serializeProofs"]),
-		...mapActions(useTokensStore, [
-			"addPendingToken",
-			"setTokenPaid",
-			"deleteToken",
-		]),
-		...mapActions(useP2PKStore, ["isValidPubkey", "sendToLock"]),
-		...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
-		...mapActions(useMintsStore, ["toggleUnit"]),
-		onDialogShown() {
-			this.$nextTick(() => {
-				if (this.$refs.amountInput) {
-					this.$refs.amountInput.focus();
-				}
-				if (this.useNumericKeyboard && !this.sendData.tokensBase64.length) {
-					this.showNumericKeyboard = true;
-				}
-			});
-		},
-		// decodeP2PKQR: function (res) {
-		//   debug("### SendToken qr", res);
-		//   this.camera.data = res;
-		//   this.camera.show = false;
-		//   // this.decodeRequest(res);
-		//   this.p2pkInput = res;
-		//   return;
-		//   if (isValidPubkey(res)) {
-		//     this.sendData.p2pkPubkey = res;
-		//   } else {
-		//     this.notifyError("No valid key");
-		//   }
-		// },
-		encodeToPeanut: function (token) {
-			return (
-				"🥜" +
-				Array.from(token)
-					.map((char) => {
-						const byteValue = char.charCodeAt(0);
-						// For byte values 0-15, use Variation Selectors (VS1-VS16): U+FE00 to U+FE0F
-						if (byteValue >= 0 && byteValue <= 15) {
-							return String.fromCodePoint(0xfe00 + byteValue);
-						}
+        // if we open the dialog from the history, let's check the
+        if (
+          this.sendData.historyToken &&
+          this.sendData.historyToken.amount < 0 &&
+          this.sendData.historyToken.status === "pending"
+        ) {
+          if (!this.checkSentTokens) {
+            debug(
+              "settingsStore.checkSentTokens is disabled, skipping token check",
+            );
+            return;
+          }
+          const unspent = this.checkTokenSpendable(
+            this.sendData.historyToken,
+            false,
+          );
+          if (!unspent) {
+            this.sendData.historyToken.status = "paid";
+          }
+        }
+      } else {
+        clearInterval(this.qrInterval);
+        this.sendData.data = "";
+        this.sendData.tokensBase64 = "";
+        this.sendData.historyToken = null;
+        this.sendData.paymentRequest = null;
+        this.recipientPubkey = "";
+        this.sendViaNostr = false;
+      }
+    },
+    locktimeInput(val) {
+      if (val) {
+        this.sendData.locktime = Math.floor(new Date(val).getTime() / 1000);
+      } else {
+        this.sendData.locktime = null;
+      }
+    },
+    "sendData.bucketId": function (val) {
+      const bucket = this.bucketList.find((b) => b.id === val);
+      if (bucket && bucket.creatorPubkey) {
+        this.sendData.p2pkPubkey = bucket.creatorPubkey;
+      } else {
+        this.showLockInput = false;
+      }
+    },
+  },
+  methods: {
+    ...mapActions(useWorkersStore, ["clearAllWorkers"]),
+    ...mapActions(useWalletStore, [
+      "send",
+      "coinSelect",
+      "spendableProofs",
+      "getFeesForProofs",
+      "onTokenPaid",
+      "mintWallet",
+      "checkTokenSpendable",
+    ]),
+    ...mapActions(useProofsStore, ["serializeProofs"]),
+    ...mapActions(useTokensStore, [
+      "addPendingToken",
+      "setTokenPaid",
+      "deleteToken",
+    ]),
+    ...mapActions(useP2PKStore, ["isValidPubkey", "sendToLock"]),
+    ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
+    ...mapActions(useMintsStore, ["toggleUnit"]),
+    onDialogShown() {
+      this.$nextTick(() => {
+        if (this.$refs.amountInput) {
+          this.$refs.amountInput.focus();
+        }
+        if (this.useNumericKeyboard && !this.sendData.tokensBase64.length) {
+          this.showNumericKeyboard = true;
+        }
+      });
+    },
+    // decodeP2PKQR: function (res) {
+    //   debug("### SendToken qr", res);
+    //   this.camera.data = res;
+    //   this.camera.show = false;
+    //   // this.decodeRequest(res);
+    //   this.p2pkInput = res;
+    //   return;
+    //   if (isValidPubkey(res)) {
+    //     this.sendData.p2pkPubkey = res;
+    //   } else {
+    //     this.notifyError("No valid key");
+    //   }
+    // },
+    encodeToPeanut: function (token) {
+      return (
+        "🥜" +
+        Array.from(token)
+          .map((char) => {
+            const byteValue = char.charCodeAt(0);
+            // For byte values 0-15, use Variation Selectors (VS1-VS16): U+FE00 to U+FE0F
+            if (byteValue >= 0 && byteValue <= 15) {
+              return String.fromCodePoint(0xfe00 + byteValue);
+            }
 
-						// For byte values 16-255, use Variation Selectors Supplement (VS17-VS256): U+E0100 to U+E01EF
-						if (byteValue >= 16 && byteValue <= 255) {
-							return String.fromCodePoint(0xe0100 + (byteValue - 16));
-						}
-					})
-					.join("")
-			);
-		},
-		decodeToken: function (encoded_token) {
-			return token.decode(encoded_token);
-		},
-		getProofs: function (decoded_token) {
-			return token.getProofs(decoded_token);
-		},
-		getAmount: function (decoded_token) {
-			return token.getAmount(decoded_token);
-		},
-		getUnit: function (decoded_token) {
-			return token.getUnit(decoded_token);
-		},
-		getMint: function (decoded_token) {
-			return token.getMint(decoded_token);
-		},
-		toggleExpandButtons() {
-			this.showExpandedButtons = !this.showExpandedButtons;
-		},
-		startQrCodeLoop: async function () {
-			if (this.sendData.tokensBase64.length == 0) {
-				return;
-			}
-			const messageBuffer = Buffer.from(this.sendData.tokensBase64);
-			const ur = UR.fromBuffer(messageBuffer);
-			const firstSeqNum = 0;
-			this.encoder = new UREncoder(ur, this.currentFragmentLength, firstSeqNum);
-			clearInterval(this.qrInterval);
-			this.qrInterval = setInterval(() => {
-				this.qrCodeFragment = this.encoder.nextPart();
-			}, this.currentFragmentInterval);
-		},
-		updateQrCode: function () {
-			this.qrCodeFragment = this.encoder.nextPart();
-		},
-		changeSpeed: function () {
-			// cycle currentFragmentInterval between slow, medium and fast
-			if (this.currentFragmentInterval == this.fragmentIntervalMedium) {
-				this.currentFragmentInterval = this.framentInervalSlow;
-				this.fragmentSpeedLabel = "S";
-			} else if (this.currentFragmentInterval == this.framentInervalSlow) {
-				this.currentFragmentInterval = this.fragmentIntervalFast;
-				this.fragmentSpeedLabel = "F";
-			} else {
-				this.currentFragmentInterval = this.fragmentIntervalMedium;
-				this.fragmentSpeedLabel = "M";
-			}
-			debug("### this.currentFragmentInterval", this.currentFragmentInterval);
-			this.startQrCodeLoop();
-		},
-		changeSize: function () {
-			// cycle currentFragmentLength between short, medium and long
-			if (this.currentFragmentLength == this.fragmentLengthMedium) {
-				this.currentFragmentLength = this.fragmentLengthShort;
-				this.fragmentLengthLabel = "S";
-			} else if (this.currentFragmentLength == this.fragmentLengthShort) {
-				this.currentFragmentLength = this.fragmentLengthLong;
-				this.fragmentLengthLabel = "L";
-			} else {
-				this.currentFragmentLength = this.fragmentLengthMedium;
-				this.fragmentLengthLabel = "M";
-			}
-			debug("### this.currentFragmentLength", this.currentFragmentLength);
-			this.startQrCodeLoop();
-		},
-		toggleTokenEncoding: function () {
-			const decodedToken = getDecodedToken(this.sendData.tokensBase64);
-			// if the token starts with 'cashuA', it is a v3 token
-			// if it starts with 'cashuB', it is a v4 token
-			if (this.sendData.tokensBase64.startsWith("cashuA")) {
-				try {
-					this.sendData.tokensBase64 = getEncodedTokenV4(decodedToken);
-				} catch {
-					debug("### Could not encode token to V4");
-					this.sendData.tokensBase64 = getEncodedToken(decodedToken, {
-						version: 3,
-					});
-				}
-			} else {
-				this.sendData.tokensBase64 = getEncodedToken(decodedToken, {
-					version: 3,
-				});
-			}
-		},
-		deleteThisToken: function () {
-			this.deleteToken(this.sendData.tokensBase64);
-			this.showSendTokens = false;
-			this.showDeleteDialog = false;
-			this.clearAllWorkers();
-		},
-		writeTokensToCard: function () {
-			if (!this.scanningCard) {
-				try {
-					this.ndef = new NDEFReader();
-					this.controller = new AbortController();
-					const signal = this.controller.signal;
-					this.ndef
-						.scan({ signal })
-						.then(() => {
-							debug("> Scan started");
+            // For byte values 16-255, use Variation Selectors Supplement (VS17-VS256): U+E0100 to U+E01EF
+            if (byteValue >= 16 && byteValue <= 255) {
+              return String.fromCodePoint(0xe0100 + (byteValue - 16));
+            }
+          })
+          .join("")
+      );
+    },
+    decodeToken: function (encoded_token) {
+      return token.decode(encoded_token);
+    },
+    getProofs: function (decoded_token) {
+      return token.getProofs(decoded_token);
+    },
+    getAmount: function (decoded_token) {
+      return token.getAmount(decoded_token);
+    },
+    getUnit: function (decoded_token) {
+      return token.getUnit(decoded_token);
+    },
+    getMint: function (decoded_token) {
+      return token.getMint(decoded_token);
+    },
+    toggleExpandButtons() {
+      this.showExpandedButtons = !this.showExpandedButtons;
+    },
+    startQrCodeLoop: async function () {
+      if (this.sendData.tokensBase64.length == 0) {
+        return;
+      }
+      const messageBuffer = Buffer.from(this.sendData.tokensBase64);
+      const ur = UR.fromBuffer(messageBuffer);
+      const firstSeqNum = 0;
+      this.encoder = new UREncoder(ur, this.currentFragmentLength, firstSeqNum);
+      clearInterval(this.qrInterval);
+      this.qrInterval = setInterval(() => {
+        this.qrCodeFragment = this.encoder.nextPart();
+      }, this.currentFragmentInterval);
+    },
+    updateQrCode: function () {
+      this.qrCodeFragment = this.encoder.nextPart();
+    },
+    changeSpeed: function () {
+      // cycle currentFragmentInterval between slow, medium and fast
+      if (this.currentFragmentInterval == this.fragmentIntervalMedium) {
+        this.currentFragmentInterval = this.framentInervalSlow;
+        this.fragmentSpeedLabel = "S";
+      } else if (this.currentFragmentInterval == this.framentInervalSlow) {
+        this.currentFragmentInterval = this.fragmentIntervalFast;
+        this.fragmentSpeedLabel = "F";
+      } else {
+        this.currentFragmentInterval = this.fragmentIntervalMedium;
+        this.fragmentSpeedLabel = "M";
+      }
+      debug("### this.currentFragmentInterval", this.currentFragmentInterval);
+      this.startQrCodeLoop();
+    },
+    changeSize: function () {
+      // cycle currentFragmentLength between short, medium and long
+      if (this.currentFragmentLength == this.fragmentLengthMedium) {
+        this.currentFragmentLength = this.fragmentLengthShort;
+        this.fragmentLengthLabel = "S";
+      } else if (this.currentFragmentLength == this.fragmentLengthShort) {
+        this.currentFragmentLength = this.fragmentLengthLong;
+        this.fragmentLengthLabel = "L";
+      } else {
+        this.currentFragmentLength = this.fragmentLengthMedium;
+        this.fragmentLengthLabel = "M";
+      }
+      debug("### this.currentFragmentLength", this.currentFragmentLength);
+      this.startQrCodeLoop();
+    },
+    toggleTokenEncoding: function () {
+      const decodedToken = getDecodedToken(this.sendData.tokensBase64);
+      // if the token starts with 'cashuA', it is a v3 token
+      // if it starts with 'cashuB', it is a v4 token
+      if (this.sendData.tokensBase64.startsWith("cashuA")) {
+        try {
+          this.sendData.tokensBase64 = getEncodedTokenV4(decodedToken);
+        } catch {
+          debug("### Could not encode token to V4");
+          this.sendData.tokensBase64 = getEncodedToken(decodedToken, {
+            version: 3,
+          });
+        }
+      } else {
+        this.sendData.tokensBase64 = getEncodedToken(decodedToken, {
+          version: 3,
+        });
+      }
+    },
+    deleteThisToken: function () {
+      this.deleteToken(this.sendData.tokensBase64);
+      this.showSendTokens = false;
+      this.showDeleteDialog = false;
+      this.clearAllWorkers();
+    },
+    writeTokensToCard: function () {
+      if (!this.scanningCard) {
+        try {
+          this.ndef = new NDEFReader();
+          this.controller = new AbortController();
+          const signal = this.controller.signal;
+          this.ndef
+            .scan({ signal })
+            .then(() => {
+              debug("> Scan started");
 
-							this.ndef.onreadingerror = (error) => {
-								console.error(`Cannot read NDEF data! ${error}`);
-								notifyError("Cannot read data from the NFC tag");
-								this.controller.abort();
-								this.scanningCard = false;
-							};
+              this.ndef.onreadingerror = (error) => {
+                console.error(`Cannot read NDEF data! ${error}`);
+                notifyError("Cannot read data from the NFC tag");
+                this.controller.abort();
+                this.scanningCard = false;
+              };
 
-							this.ndef.onreading = ({ message, serialNumber }) => {
-								debug(`Read card ${serialNumber}`);
-								this.controller.abort();
-								this.scanningCard = false;
-								try {
-									let records = [];
-									switch (this.nfcEncoding) {
-										case "text":
-											records = [
-												{
-													recordType: "text",
-													data: `${this.sendData.tokensBase64}`,
-													lang: "en",
-												},
-											];
-											break;
-										case "weburl":
-											records = [
-												{
-													recordType: "url",
-													data: `${window.location}#token=${this.sendData.tokensBase64}`,
-												},
-											];
-											break;
-										case "binary":
-											throw new Error("Binary encoding not supported yet");
-										/*
+              this.ndef.onreading = ({ message, serialNumber }) => {
+                debug(`Read card ${serialNumber}`);
+                this.controller.abort();
+                this.scanningCard = false;
+                try {
+                  let records = [];
+                  switch (this.nfcEncoding) {
+                    case "text":
+                      records = [
+                        {
+                          recordType: "text",
+                          data: `${this.sendData.tokensBase64}`,
+                          lang: "en",
+                        },
+                      ];
+                      break;
+                    case "weburl":
+                      records = [
+                        {
+                          recordType: "url",
+                          data: `${window.location}#token=${this.sendData.tokensBase64}`,
+                        },
+                      ];
+                      break;
+                    case "binary":
+                      throw new Error("Binary encoding not supported yet");
+                    /*
                       const data = null;
                       records = [
                         {
@@ -1108,329 +1108,329 @@ export default defineComponent({
                       ];
                       break;
                       */
-										default:
-											throw new Error(
-												`Unknown NFC encoding: ${this.nfcEncoding}`,
-											);
-									}
-									notifySuccess("Writing to NFC card...");
-									this.ndef
-										.write({ records: records }, { overwrite: true })
-										.then(() => {
-											debug("Successfully flashed token to card!");
-											notifySuccess("Successfully flashed token to card!");
-										})
-										.catch((err) => {
-											console.error(
-												`NFC write failed: The card may not have enough capacity (needed ${records[0].data.length} bytes).`,
-											);
-											notifyError(
-												`The card may not have enough capacity (needed ${records[0].data.length} bytes).`,
-												"NFC write failed",
-											);
-										});
-								} catch (err) {
-									console.error(`NFC error: ${err.message}`);
-									notifyError(`${err.message}`, "NFC error");
-								}
-							};
-							this.scanningCard = true;
-						})
-						.catch((error) => {
-							console.error(`NFC error: ${error.message}`);
-							notifyError(`${err.message}`, "NFC error");
-							this.scanningCard = false;
-						});
-				} catch (error) {
-					console.error(`NFC error: ${error.message}`);
-					notifyError(`${err.message}`, "NFC error");
-					this.scanningCard = false;
-				}
-			}
-		},
-		closeCardScanner: function () {
-			this.controller.abort();
-			this.scanningCard = false;
-		},
-		lockTokens: async function () {
-			let sendAmount = Math.floor(
-				this.sendData.amount * this.activeUnitCurrencyMultiplyer,
-			);
-			try {
-				// keep firstProofs, send scndProofs and delete them (invalidate=true)
-				const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
-				const bucketId = this.sendData.bucketId;
-				const proofsForBucket = this.activeProofs.filter(
-					(p) => p.bucketId === bucketId,
-				);
-				const p2pkInput = this.sendData.p2pkPubkey;
-				if (
-					p2pkInput &&
-					(p2pkInput.startsWith("npub1") || p2pkInput.startsWith("nprofile1"))
-				) {
-					try {
-						const decoded = nip19.decode(p2pkInput);
-						if (decoded.type === "npub") {
-							this.recipientPubkey = decoded.data as string;
-						} else if (decoded.type === "nprofile") {
-							this.recipientPubkey = (decoded.data as ProfilePointer).pubkey;
-						}
-						this.sendViaNostr = true;
-					} catch (e) {
-						console.error(e);
-					}
-				}
-				this.sendData.p2pkPubkey = ensureCompressed(this.sendData.p2pkPubkey);
-				let { _, sendProofs } = await this.sendToLock(
-					sendAmount,
-					this.sendData.p2pkPubkey,
-					this.sendData.locktime || 0,
-				);
-				// update UI
-				this.sendData.tokens = sendProofs;
+                    default:
+                      throw new Error(
+                        `Unknown NFC encoding: ${this.nfcEncoding}`,
+                      );
+                  }
+                  notifySuccess("Writing to NFC card...");
+                  this.ndef
+                    .write({ records: records }, { overwrite: true })
+                    .then(() => {
+                      debug("Successfully flashed token to card!");
+                      notifySuccess("Successfully flashed token to card!");
+                    })
+                    .catch((err) => {
+                      console.error(
+                        `NFC write failed: The card may not have enough capacity (needed ${records[0].data.length} bytes).`,
+                      );
+                      notifyError(
+                        `The card may not have enough capacity (needed ${records[0].data.length} bytes).`,
+                        "NFC write failed",
+                      );
+                    });
+                } catch (err) {
+                  console.error(`NFC error: ${err.message}`);
+                  notifyError(`${err.message}`, "NFC error");
+                }
+              };
+              this.scanningCard = true;
+            })
+            .catch((error) => {
+              console.error(`NFC error: ${error.message}`);
+              notifyError(`${err.message}`, "NFC error");
+              this.scanningCard = false;
+            });
+        } catch (error) {
+          console.error(`NFC error: ${error.message}`);
+          notifyError(`${err.message}`, "NFC error");
+          this.scanningCard = false;
+        }
+      }
+    },
+    closeCardScanner: function () {
+      this.controller.abort();
+      this.scanningCard = false;
+    },
+    lockTokens: async function () {
+      let sendAmount = Math.floor(
+        this.sendData.amount * this.activeUnitCurrencyMultiplyer,
+      );
+      try {
+        // keep firstProofs, send scndProofs and delete them (invalidate=true)
+        const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
+        const bucketId = this.sendData.bucketId;
+        const proofsForBucket = this.activeProofs.filter(
+          (p) => p.bucketId === bucketId,
+        );
+        const p2pkInput = this.sendData.p2pkPubkey;
+        if (
+          p2pkInput &&
+          (p2pkInput.startsWith("npub1") || p2pkInput.startsWith("nprofile1"))
+        ) {
+          try {
+            const decoded = nip19.decode(p2pkInput);
+            if (decoded.type === "npub") {
+              this.recipientPubkey = decoded.data as string;
+            } else if (decoded.type === "nprofile") {
+              this.recipientPubkey = (decoded.data as ProfilePointer).pubkey;
+            }
+            this.sendViaNostr = true;
+          } catch (e) {
+            console.error(e);
+          }
+        }
+        this.sendData.p2pkPubkey = ensureCompressed(this.sendData.p2pkPubkey);
+        let { _, sendProofs } = await this.sendToLock(
+          sendAmount,
+          this.sendData.p2pkPubkey,
+          this.sendData.locktime || 0,
+        );
+        // update UI
+        this.sendData.tokens = sendProofs;
 
-				this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
-				if (this.sendViaNostr && this.recipientPubkey) {
-					try {
-						let recipient = this.recipientPubkey;
-						if (
-							recipient.startsWith("npub") ||
-							recipient.startsWith("nprofile")
-						) {
-							try {
-								const decoded = nip19.decode(recipient);
-								recipient =
-									decoded.type === "npub"
-										? (decoded.data as string)
-										: (decoded.data as ProfilePointer).pubkey;
-							} catch (e) {
-								console.error(e);
-							}
-						}
-						const payload = {
-							token: this.sendData.tokensBase64,
-							amount: this.sendData.amount * this.activeUnitCurrencyMultiplyer,
-							unlockTime: this.sendData.locktime || null,
-							bucketId: this.sendData.bucketId,
-							referenceId: this.sendData.historyToken?.id || "",
-						};
-						const dmContent = JSON.stringify(payload);
-						const { success, event } =
-							await useNostrStore().sendNip04DirectMessage(
-								recipient,
-								dmContent,
-							);
-						if (success && event) {
-							useDmChatsStore().addOutgoing(event);
-							Dialog.create({
-								message: this.$t(
-									"wallet.notifications.nostr_dm_sent",
-								) as string,
-							});
-						} else {
-							Dialog.create({
-								message: this.$t(
-									"wallet.notifications.nostr_dm_failed",
-								) as string,
-							});
-						}
-					} catch (e) {
-						console.error(e);
-						Dialog.create({
-							message: this.$t(
-								"wallet.notifications.nostr_dm_failed",
-							) as string,
-						});
-					} finally {
-						this.recipientPubkey = "";
-						this.sendViaNostr = false;
-						this.sendData.memo = "";
-					}
-				}
-				useLockedTokensStore().addLockedToken({
-					amount: sendAmount,
-					token: this.sendData.tokensBase64,
-					pubkey: this.sendData.p2pkPubkey,
-					creatorP2PK: this.sendData.p2pkPubkey,
-					locktime: this.sendData.locktime || undefined,
-					bucketId,
-				});
-				const historyToken = {
-					amount: -this.sendData.amount,
-					token: this.sendData.tokensBase64,
-					unit: this.activeUnit,
-					mint: this.activeMintUrl,
-					label: "",
-					description: this.sendData.memo || "",
-					bucketId,
-				};
-				this.addPendingToken({ ...historyToken, tokenStr: historyToken.token });
-				this.sendData.historyToken = historyToken;
-				Dialog.create({
-					message: this.$t(
-						"FindCreators.notifications.donation_sent",
-					) as string,
-					ok: {
-						label: this.$t(
-							"FindCreators.actions.back_to_search.label",
-						) as string,
-					},
-				}).onOk(() => {
-					this.showSendTokens = false;
-					this.$router.push("/find-creators");
-				});
+        this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
+        if (this.sendViaNostr && this.recipientPubkey) {
+          try {
+            let recipient = this.recipientPubkey;
+            if (
+              recipient.startsWith("npub") ||
+              recipient.startsWith("nprofile")
+            ) {
+              try {
+                const decoded = nip19.decode(recipient);
+                recipient =
+                  decoded.type === "npub"
+                    ? (decoded.data as string)
+                    : (decoded.data as ProfilePointer).pubkey;
+              } catch (e) {
+                console.error(e);
+              }
+            }
+            const payload = {
+              token: this.sendData.tokensBase64,
+              amount: this.sendData.amount * this.activeUnitCurrencyMultiplyer,
+              unlockTime: this.sendData.locktime || null,
+              bucketId: this.sendData.bucketId,
+              referenceId: this.sendData.historyToken?.id || "",
+            };
+            const dmContent = JSON.stringify(payload);
+            const { success, event } =
+              await useNostrStore().sendNip04DirectMessage(
+                recipient,
+                dmContent,
+              );
+            if (success && event) {
+              useDmChatsStore().addOutgoing(event);
+              Dialog.create({
+                message: this.$t(
+                  "wallet.notifications.nostr_dm_sent",
+                ) as string,
+              });
+            } else {
+              Dialog.create({
+                message: this.$t(
+                  "wallet.notifications.nostr_dm_failed",
+                ) as string,
+              });
+            }
+          } catch (e) {
+            console.error(e);
+            Dialog.create({
+              message: this.$t(
+                "wallet.notifications.nostr_dm_failed",
+              ) as string,
+            });
+          } finally {
+            this.recipientPubkey = "";
+            this.sendViaNostr = false;
+            this.sendData.memo = "";
+          }
+        }
+        useLockedTokensStore().addLockedToken({
+          amount: sendAmount,
+          token: this.sendData.tokensBase64,
+          pubkey: this.sendData.p2pkPubkey,
+          creatorP2PK: this.sendData.p2pkPubkey,
+          locktime: this.sendData.locktime || undefined,
+          bucketId,
+        });
+        const historyToken = {
+          amount: -this.sendData.amount,
+          token: this.sendData.tokensBase64,
+          unit: this.activeUnit,
+          mint: this.activeMintUrl,
+          label: "",
+          description: this.sendData.memo || "",
+          bucketId,
+        };
+        this.addPendingToken({ ...historyToken, tokenStr: historyToken.token });
+        this.sendData.historyToken = historyToken;
+        Dialog.create({
+          message: this.$t(
+            "FindCreators.notifications.donation_sent",
+          ) as string,
+          ok: {
+            label: this.$t(
+              "FindCreators.actions.back_to_search.label",
+            ) as string,
+          },
+        }).onOk(() => {
+          this.showSendTokens = false;
+          this.$router.push("/find-creators");
+        });
 
-				if (!this.g.offline) {
-					this.onTokenPaid(historyToken);
-				}
-			} catch (error) {
-				console.error(error);
-				notifyError("Failed to send tokens");
-			}
-		},
-		sendTokens: async function () {
-			/*
+        if (!this.g.offline) {
+          this.onTokenPaid(historyToken);
+        }
+      } catch (error) {
+        console.error(error);
+        notifyError("Failed to send tokens");
+      }
+    },
+    sendTokens: async function () {
+      /*
       calls send, displays token and kicks off the spendableWorker
       */
-			this.showNumericKeyboard = false;
-			const p2pkInput = this.sendData.p2pkPubkey;
-			let nostrDm = false;
-			if (
-				p2pkInput &&
-				(p2pkInput.startsWith("npub1") || p2pkInput.startsWith("nprofile1"))
-			) {
-				try {
-					const decoded = nip19.decode(p2pkInput);
-					if (decoded.type === "npub") {
-						this.recipientPubkey = decoded.data as string;
-					} else if (decoded.type === "nprofile") {
-						this.recipientPubkey = (decoded.data as ProfilePointer).pubkey;
-					}
-					this.sendViaNostr = true;
-					nostrDm = true;
-				} catch (e) {
-					console.error(e);
-				}
-			}
+      this.showNumericKeyboard = false;
+      const p2pkInput = this.sendData.p2pkPubkey;
+      let nostrDm = false;
+      if (
+        p2pkInput &&
+        (p2pkInput.startsWith("npub1") || p2pkInput.startsWith("nprofile1"))
+      ) {
+        try {
+          const decoded = nip19.decode(p2pkInput);
+          if (decoded.type === "npub") {
+            this.recipientPubkey = decoded.data as string;
+          } else if (decoded.type === "nprofile") {
+            this.recipientPubkey = (decoded.data as ProfilePointer).pubkey;
+          }
+          this.sendViaNostr = true;
+          nostrDm = true;
+        } catch (e) {
+          console.error(e);
+        }
+      }
 
-			if (this.showLockInput || (p2pkInput && p2pkInput.trim() !== "")) {
-				if (!p2pkInput || p2pkInput.trim() === "") {
-					notifyWarning("A public key is required for a locked token.");
-					return;
-				}
-				if (!this.isValidPubkey(p2pkInput)) {
-					notifyError("The entered public key or npub is not valid.");
-					return;
-				}
-				await this.lockTokens();
-				return;
-			}
+      if (this.showLockInput || (p2pkInput && p2pkInput.trim() !== "")) {
+        if (!p2pkInput || p2pkInput.trim() === "") {
+          notifyWarning("A public key is required for a locked token.");
+          return;
+        }
+        if (!this.isValidPubkey(p2pkInput)) {
+          notifyError("The entered public key or npub is not valid.");
+          return;
+        }
+        await this.lockTokens();
+        return;
+      }
 
-			try {
-				let sendAmount = Math.floor(
-					this.sendData.amount * this.activeUnitCurrencyMultiplyer,
-				);
-				const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
-				const bucketId = this.sendData.bucketId;
-				let { _, sendProofs } = await this.send(
-					this.activeProofs,
-					mintWallet,
-					sendAmount,
-					true,
-					this.includeFeesInSendAmount,
-					bucketId,
-				);
+      try {
+        let sendAmount = Math.floor(
+          this.sendData.amount * this.activeUnitCurrencyMultiplyer,
+        );
+        const mintWallet = this.mintWallet(this.activeMintUrl, this.activeUnit);
+        const bucketId = this.sendData.bucketId;
+        let { _, sendProofs } = await this.send(
+          this.activeProofs,
+          mintWallet,
+          sendAmount,
+          true,
+          this.includeFeesInSendAmount,
+          bucketId,
+        );
 
-				// update UI
-				this.sendData.tokens = sendProofs;
-				this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
-				if (this.sendViaNostr && this.recipientPubkey) {
-					try {
-						let recipient = this.recipientPubkey;
-						if (
-							recipient.startsWith("npub") ||
-							recipient.startsWith("nprofile")
-						) {
-							try {
-								const decoded = nip19.decode(recipient);
-								recipient =
-									decoded.type === "npub"
-										? (decoded.data as string)
-										: (decoded.data as ProfilePointer).pubkey;
-							} catch (e) {
-								console.error(e);
-							}
-						}
-						const payload2 = {
-							token: this.sendData.tokensBase64,
-							amount: this.sendData.amount * this.activeUnitCurrencyMultiplyer,
-							unlockTime: this.sendData.locktime || null,
-							bucketId: this.sendData.bucketId,
-							referenceId: this.sendData.historyToken?.id || "",
-						};
-						const dmContent2 = JSON.stringify(payload2);
-						const { success, event } =
-							await useNostrStore().sendNip04DirectMessage(
-								recipient,
-								dmContent2,
-							);
-						if (success && event) {
-							useDmChatsStore().addOutgoing(event);
-							Dialog.create({
-								message: this.$t(
-									"wallet.notifications.nostr_dm_sent",
-								) as string,
-							});
-						} else {
-							Dialog.create({
-								message: this.$t(
-									"wallet.notifications.nostr_dm_failed",
-								) as string,
-							});
-						}
-					} catch (e) {
-						console.error(e);
-						Dialog.create({
-							message: this.$t(
-								"wallet.notifications.nostr_dm_failed",
-							) as string,
-						});
-					} finally {
-						this.recipientPubkey = "";
-						this.sendViaNostr = false;
-						this.sendData.memo = "";
-					}
-				}
-				this.sendData.historyAmount =
-					-this.sendData.amount * this.activeUnitCurrencyMultiplyer;
+        // update UI
+        this.sendData.tokens = sendProofs;
+        this.sendData.tokensBase64 = this.serializeProofs(sendProofs);
+        if (this.sendViaNostr && this.recipientPubkey) {
+          try {
+            let recipient = this.recipientPubkey;
+            if (
+              recipient.startsWith("npub") ||
+              recipient.startsWith("nprofile")
+            ) {
+              try {
+                const decoded = nip19.decode(recipient);
+                recipient =
+                  decoded.type === "npub"
+                    ? (decoded.data as string)
+                    : (decoded.data as ProfilePointer).pubkey;
+              } catch (e) {
+                console.error(e);
+              }
+            }
+            const payload2 = {
+              token: this.sendData.tokensBase64,
+              amount: this.sendData.amount * this.activeUnitCurrencyMultiplyer,
+              unlockTime: this.sendData.locktime || null,
+              bucketId: this.sendData.bucketId,
+              referenceId: this.sendData.historyToken?.id || "",
+            };
+            const dmContent2 = JSON.stringify(payload2);
+            const { success, event } =
+              await useNostrStore().sendNip04DirectMessage(
+                recipient,
+                dmContent2,
+              );
+            if (success && event) {
+              useDmChatsStore().addOutgoing(event);
+              Dialog.create({
+                message: this.$t(
+                  "wallet.notifications.nostr_dm_sent",
+                ) as string,
+              });
+            } else {
+              Dialog.create({
+                message: this.$t(
+                  "wallet.notifications.nostr_dm_failed",
+                ) as string,
+              });
+            }
+          } catch (e) {
+            console.error(e);
+            Dialog.create({
+              message: this.$t(
+                "wallet.notifications.nostr_dm_failed",
+              ) as string,
+            });
+          } finally {
+            this.recipientPubkey = "";
+            this.sendViaNostr = false;
+            this.sendData.memo = "";
+          }
+        }
+        this.sendData.historyAmount =
+          -this.sendData.amount * this.activeUnitCurrencyMultiplyer;
 
-				const historyToken = {
-					amount: -sendAmount,
-					token: this.sendData.tokensBase64,
-					unit: this.activeUnit,
-					mint: this.activeMintUrl,
-					paymentRequest: this.sendData.paymentRequest,
-					status: "pending",
-					label: "",
-					description: this.sendData.memo || "",
-					bucketId,
-				};
-				this.addPendingToken({ ...historyToken, tokenStr: historyToken.token });
-				this.sendData.historyToken = historyToken;
+        const historyToken = {
+          amount: -sendAmount,
+          token: this.sendData.tokensBase64,
+          unit: this.activeUnit,
+          mint: this.activeMintUrl,
+          paymentRequest: this.sendData.paymentRequest,
+          status: "pending",
+          label: "",
+          description: this.sendData.memo || "",
+          bucketId,
+        };
+        this.addPendingToken({ ...historyToken, tokenStr: historyToken.token });
+        this.sendData.historyToken = historyToken;
 
-				if (!this.g.offline) {
-					this.onTokenPaid(historyToken);
-				}
-			} catch (error) {
-				console.error(error);
-				notifyError("Failed to send tokens");
-			}
-		},
-		pasteToP2PKField: async function () {
-			debug("pasteToParseDialog");
-			const text = await useUiStore().pasteFromClipboard();
-			this.sendData.p2pkPubkey = text.trim();
-		},
-	},
+        if (!this.g.offline) {
+          this.onTokenPaid(historyToken);
+        }
+      } catch (error) {
+        console.error(error);
+        notifyError("Failed to send tokens");
+      }
+    },
+    pasteToP2PKField: async function () {
+      debug("pasteToParseDialog");
+      const text = await useUiStore().pasteFromClipboard();
+      this.sendData.p2pkPubkey = text.trim();
+    },
+  },
 });
 </script>

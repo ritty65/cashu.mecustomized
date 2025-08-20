@@ -28,42 +28,42 @@ import { useReceiveTokensStore } from "src/stores/receiveTokensStore";
 import { set } from "@vueuse/core";
 
 export default defineComponent({
-	name: "ActivityOrb",
-	mixins: [windowMixin],
-	components: {},
-	props: {},
-	data: function () {
-		return {
-			enableSpinner: false,
-		};
-	},
-	mounted() {},
-	computed: {
-		...mapWritableState(useUiStore, ["activityOrb"]),
-		...mapState(useWalletStore, ["activeWebsocketConnections"]),
-		...mapState(useReceiveTokensStore, ["scanningCard"]),
-	},
-	watch: {
-		activityOrb: function () {
-			if (this.activityOrb) {
-				this.enableSpinner = true;
-				setTimeout(() => {
-					this.activityOrb = false;
-					this.enableSpinner = false;
-				}, 2000);
-			} else {
-				this.enableSpinner = false;
-			}
-		},
-		scanningCard: function () {
-			if (this.scanningCard) {
-				this.enableSpinner = true;
-			} else {
-				this.enableSpinner = false;
-			}
-		},
-	},
-	methods: {},
+  name: "ActivityOrb",
+  mixins: [windowMixin],
+  components: {},
+  props: {},
+  data: function () {
+    return {
+      enableSpinner: false,
+    };
+  },
+  mounted() {},
+  computed: {
+    ...mapWritableState(useUiStore, ["activityOrb"]),
+    ...mapState(useWalletStore, ["activeWebsocketConnections"]),
+    ...mapState(useReceiveTokensStore, ["scanningCard"]),
+  },
+  watch: {
+    activityOrb: function () {
+      if (this.activityOrb) {
+        this.enableSpinner = true;
+        setTimeout(() => {
+          this.activityOrb = false;
+          this.enableSpinner = false;
+        }, 2000);
+      } else {
+        this.enableSpinner = false;
+      }
+    },
+    scanningCard: function () {
+      if (this.scanningCard) {
+        this.enableSpinner = true;
+      } else {
+        this.enableSpinner = false;
+      }
+    },
+  },
+  methods: {},
 });
 </script>
 <style scoped>

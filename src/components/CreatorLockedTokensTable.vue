@@ -67,92 +67,92 @@ import { useNostrStore } from "stores/nostr";
 import { useUiStore } from "stores/ui";
 
 export default defineComponent({
-	name: "CreatorLockedTokensTable",
-	props: { bucketId: { type: String, required: true } },
-	data() {
-		return { currentPage: 1, pageSize: 5 };
-	},
-	computed: {
-		...mapState(useDexieLockedTokensStore, ["lockedTokens"]),
-		...mapState(useMintsStore, ["activeUnit"]),
-		filteredTokens() {
-			const nostrPubkey = useNostrStore().pubkey;
-			return this.lockedTokens.filter(
-				(t) =>
-					t.owner === "creator" &&
-					t.creatorNpub === nostrPubkey &&
-					t.tierId === this.bucketId,
-			);
-		},
-		maxPages() {
-			return Math.ceil(this.filteredTokens.length / this.pageSize);
-		},
-		paginatedTokens() {
-			const start = (this.currentPage - 1) * this.pageSize;
-			const end = start + this.pageSize;
-			return this.filteredTokens.slice().reverse().slice(start, end);
-		},
-		pendingTokens() {
-			return this.filteredTokens.filter(
-				(t) => !t.redeemed && this.canRedeem(t),
-			);
-		},
-	},
-	methods: {
-		formattedDate(dateStr) {
-			const date = parseISO(dateStr);
-			return formatDistanceToNow(date, { addSuffix: false });
-		},
-		formatTs(ts) {
-			const d = new Date(ts * 1000);
-			return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${(
-				"0" + d.getDate()
-			).slice(-2)} ${("0" + d.getHours()).slice(-2)}:${(
-				"0" + d.getMinutes()
-			).slice(-2)}`;
-		},
-		formatCurrency(amount, unit) {
-			return useUiStore().formatCurrency(amount, unit);
-		},
-		canRedeem(token) {
-			const now = Math.floor(Date.now() / 1000);
-			return !token.unlockTs || token.unlockTs <= now;
-		},
-		async redeem(token) {
-			const receiveStore = useReceiveTokensStore();
-			const wallet = useWalletStore();
-			const p2pkStore = useP2PKStore();
-			receiveStore.receiveData.tokensBase64 = token.tokenString;
-			receiveStore.receiveData.bucketId = token.tierId;
-			receiveStore.receiveData.p2pkPrivateKey =
-				p2pkStore.getPrivateKeyForP2PKEncodedToken(token.tokenString);
-			await cashuDb.lockedTokens.update(token.id, {
-				status: "processing",
-				redeemed: true,
-			});
-			await receiveStore.enqueue(() => wallet.receive(token.tokenString));
-			await cashuDb.lockedTokens.update(token.id, { status: "claimed" });
-			if (token.subscriptionId) {
-				const sub = await cashuDb.subscriptions.get(token.subscriptionId);
-				const idx = sub?.intervals.findIndex(
-					(i) =>
-						i.intervalKey === token.intervalKey || i.lockedTokenId === token.id,
-				);
-				if (sub && idx !== undefined && idx >= 0) {
-					sub.intervals[idx].status = "claimed";
-					sub.intervals[idx].redeemed = true;
-					await cashuDb.subscriptions.update(sub.id, {
-						intervals: sub.intervals,
-					});
-				}
-			}
-		},
+  name: "CreatorLockedTokensTable",
+  props: { bucketId: { type: String, required: true } },
+  data() {
+    return { currentPage: 1, pageSize: 5 };
+  },
+  computed: {
+    ...mapState(useDexieLockedTokensStore, ["lockedTokens"]),
+    ...mapState(useMintsStore, ["activeUnit"]),
+    filteredTokens() {
+      const nostrPubkey = useNostrStore().pubkey;
+      return this.lockedTokens.filter(
+        (t) =>
+          t.owner === "creator" &&
+          t.creatorNpub === nostrPubkey &&
+          t.tierId === this.bucketId,
+      );
+    },
+    maxPages() {
+      return Math.ceil(this.filteredTokens.length / this.pageSize);
+    },
+    paginatedTokens() {
+      const start = (this.currentPage - 1) * this.pageSize;
+      const end = start + this.pageSize;
+      return this.filteredTokens.slice().reverse().slice(start, end);
+    },
+    pendingTokens() {
+      return this.filteredTokens.filter(
+        (t) => !t.redeemed && this.canRedeem(t),
+      );
+    },
+  },
+  methods: {
+    formattedDate(dateStr) {
+      const date = parseISO(dateStr);
+      return formatDistanceToNow(date, { addSuffix: false });
+    },
+    formatTs(ts) {
+      const d = new Date(ts * 1000);
+      return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${(
+        "0" + d.getDate()
+      ).slice(-2)} ${("0" + d.getHours()).slice(-2)}:${(
+        "0" + d.getMinutes()
+      ).slice(-2)}`;
+    },
+    formatCurrency(amount, unit) {
+      return useUiStore().formatCurrency(amount, unit);
+    },
+    canRedeem(token) {
+      const now = Math.floor(Date.now() / 1000);
+      return !token.unlockTs || token.unlockTs <= now;
+    },
+    async redeem(token) {
+      const receiveStore = useReceiveTokensStore();
+      const wallet = useWalletStore();
+      const p2pkStore = useP2PKStore();
+      receiveStore.receiveData.tokensBase64 = token.tokenString;
+      receiveStore.receiveData.bucketId = token.tierId;
+      receiveStore.receiveData.p2pkPrivateKey =
+        p2pkStore.getPrivateKeyForP2PKEncodedToken(token.tokenString);
+      await cashuDb.lockedTokens.update(token.id, {
+        status: "processing",
+        redeemed: true,
+      });
+      await receiveStore.enqueue(() => wallet.receive(token.tokenString));
+      await cashuDb.lockedTokens.update(token.id, { status: "claimed" });
+      if (token.subscriptionId) {
+        const sub = await cashuDb.subscriptions.get(token.subscriptionId);
+        const idx = sub?.intervals.findIndex(
+          (i) =>
+            i.intervalKey === token.intervalKey || i.lockedTokenId === token.id,
+        );
+        if (sub && idx !== undefined && idx >= 0) {
+          sub.intervals[idx].status = "claimed";
+          sub.intervals[idx].redeemed = true;
+          await cashuDb.subscriptions.update(sub.id, {
+            intervals: sub.intervals,
+          });
+        }
+      }
+    },
 
-		async redeemAll() {
-			for (const t of this.pendingTokens) {
-				await this.redeem(t);
-			}
-		},
-	},
+    async redeemAll() {
+      for (const t of this.pendingTokens) {
+        await this.redeem(t);
+      }
+    },
+  },
 });
 </script>
