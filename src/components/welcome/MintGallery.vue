@@ -20,7 +20,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useMintsStore } from 'src/stores/mints'
-import { loadMintCatalog, type MintInfo } from 'src/data/mints'
+import { MINTS, type MintInfo } from 'src/data/mints'
 import MintCard from './MintCard.vue'
 import MintInfoDrawer from './MintInfoDrawer.vue'
 
@@ -29,7 +29,7 @@ interface MintState extends MintInfo {
   latencyMs: number | null
 }
 
-const mints = ref<MintState[]>([])
+const mints = ref<MintState[]>(MINTS.map(m => ({ ...m, status: 'pending', latencyMs: null })))
 const sort = ref<'latency' | 'alpha'>('latency')
 const region = ref<string | null>(null)
 const info = ref(false)
@@ -40,7 +40,7 @@ const sortOptions = [
   { label: 'Alphabetical', value: 'alpha' },
 ]
 const regionOptions = computed(() => {
-  const regions = Array.from(new Set(mints.value.map(m => m.region).filter(Boolean))) as string[]
+  const regions = Array.from(new Set(MINTS.map(m => m.region).filter(Boolean))) as string[]
   return regions.map(r => ({ label: r, value: r }))
 })
 
@@ -54,17 +54,14 @@ const sortedMints = computed(() => {
   return arr
 })
 
-onMounted(async () => {
-  const catalog = await loadMintCatalog()
-  mints.value = catalog.map(m => ({ ...m, status: 'pending', latencyMs: null }))
+onMounted(() => {
   mints.value.forEach(m => pingMint(m))
 })
 
 async function pingMint(m: MintState) {
   const start = performance.now()
   try {
-    const resp = await fetch(m.url + '/info')
-    if (!resp.ok) throw new Error('network')
+    await fetch(m.url + '/info', { method: 'GET', mode: 'no-cors' })
     m.latencyMs = Math.round(performance.now() - start)
     m.status = 'ok'
   } catch (e) {
