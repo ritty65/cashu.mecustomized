@@ -67,39 +67,39 @@
 import { defineComponent, computed } from "vue";
 
 export default defineComponent({
-  name: "AddMintDialog",
-  props: {
-    addMintData: {
-      type: Object,
-      required: true,
-    },
-    showAddMintDialog: {
-      type: Boolean,
-      required: true,
-    },
-    addMintBlocking: {
-      type: Boolean,
-      required: true,
-    },
-  },
-  emits: ["add", "update:showAddMintDialog"],
-  setup(props, { emit }) {
-    const showAddMintDialogLocal = computed({
-      get: () => props.showAddMintDialog,
-      set: (value) => emit("update:showAddMintDialog", value),
-    });
+	name: "AddMintDialog",
+	props: {
+		addMintData: {
+			type: Object,
+			required: true,
+		},
+		showAddMintDialog: {
+			type: Boolean,
+			required: true,
+		},
+		addMintBlocking: {
+			type: Boolean,
+			required: true,
+		},
+	},
+	emits: ["add", "update:showAddMintDialog"],
+	setup(props, { emit }) {
+		const showAddMintDialogLocal = computed({
+			get: () => props.showAddMintDialog,
+			set: (value) => emit("update:showAddMintDialog", value),
+		});
 
-    const addMintLocal = () => {
-      emit("add", props.addMintData, true); // Pass verbose = true
-    };
+		const addMintLocal = () => {
+			emit("add", props.addMintData, true); // Pass verbose = true
+		};
 
-    const mintUrl = computed(() => props.addMintData.url);
+		const mintUrl = computed(() => props.addMintData.url);
 
-    return {
-      addMintLocal,
-      showAddMintDialogLocal,
-      mintUrl,
-    };
-  },
+		return {
+			addMintLocal,
+			showAddMintDialogLocal,
+			mintUrl,
+		};
+	},
 });
 </script>

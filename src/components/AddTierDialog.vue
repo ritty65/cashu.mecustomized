@@ -160,143 +160,143 @@ import { usePriceStore } from "stores/price";
 import { useUiStore } from "stores/ui";
 import MediaPreview from "./MediaPreview.vue";
 import {
-  type SubscriptionFrequency,
-  frequencyToDays,
+	type SubscriptionFrequency,
+	frequencyToDays,
 } from "src/constants/subscriptionFrequency";
 import { filterValidMedia, isTrustedUrl } from "src/utils/validateMedia";
 
 export default defineComponent({
-  name: "AddTierDialog",
-  components: { MediaPreview },
-  props: {
-    modelValue: {
-      type: Boolean,
-      required: true,
-    },
-    tier: {
-      type: Object as () => Partial<Tier>,
-      required: true,
-    },
-  },
-  emits: ["update:modelValue", "save"],
-  setup(props, { emit }) {
-    const priceStore = usePriceStore();
-    const uiStore = useUiStore();
-    const creatorHub = useCreatorHubStore();
-    const nostr = useNostrStore();
+	name: "AddTierDialog",
+	components: { MediaPreview },
+	props: {
+		modelValue: {
+			type: Boolean,
+			required: true,
+		},
+		tier: {
+			type: Object as () => Partial<Tier>,
+			required: true,
+		},
+	},
+	emits: ["update:modelValue", "save"],
+	setup(props, { emit }) {
+		const priceStore = usePriceStore();
+		const uiStore = useUiStore();
+		const creatorHub = useCreatorHubStore();
+		const nostr = useNostrStore();
 
-    const showLocal = computed({
-      get: () => props.modelValue,
-      set: (val) => emit("update:modelValue", val),
-    });
+		const showLocal = computed({
+			get: () => props.modelValue,
+			set: (val) => emit("update:modelValue", val),
+		});
 
-    const localTier = reactive<Partial<Tier>>({
-      media: [],
-      frequency: "monthly" as SubscriptionFrequency,
-      intervalDays: 30,
-      ...props.tier,
-    });
+		const localTier = reactive<Partial<Tier>>({
+			media: [],
+			frequency: "monthly" as SubscriptionFrequency,
+			intervalDays: 30,
+			...props.tier,
+		});
 
-    const frequencyOptions = [
-      { label: "Weekly", value: "weekly" },
-      { label: "Twice Monthly", value: "biweekly" },
-      { label: "Monthly", value: "monthly" },
-    ] as const;
+		const frequencyOptions = [
+			{ label: "Weekly", value: "weekly" },
+			{ label: "Twice Monthly", value: "biweekly" },
+			{ label: "Monthly", value: "monthly" },
+		] as const;
 
-    const mediaTypes = ["image", "video", "audio"] as const;
+		const mediaTypes = ["image", "video", "audio"] as const;
 
-    function addMedia() {
-      if (!localTier.media) localTier.media = [];
-      localTier.media.push({ url: "", type: "image", title: "" });
-    }
+		function addMedia() {
+			if (!localTier.media) localTier.media = [];
+			localTier.media.push({ url: "", type: "image", title: "" });
+		}
 
-    function removeMedia(idx: number) {
-      if (!localTier.media) return;
-      localTier.media.splice(idx, 1);
-    }
+		function removeMedia(idx: number) {
+			if (!localTier.media) return;
+			localTier.media.splice(idx, 1);
+		}
 
-    watch(
-      () => props.tier,
-      (val) => {
-        Object.assign(localTier, val);
-        if (!val.media) {
-          localTier.media = [];
-        }
-        if (!val.frequency) {
-          localTier.frequency = "monthly";
-        }
-        localTier.intervalDays = frequencyToDays(
-          (localTier.frequency as SubscriptionFrequency) || "monthly",
-        );
-      },
-      { immediate: true, deep: true },
-    );
+		watch(
+			() => props.tier,
+			(val) => {
+				Object.assign(localTier, val);
+				if (!val.media) {
+					localTier.media = [];
+				}
+				if (!val.frequency) {
+					localTier.frequency = "monthly";
+				}
+				localTier.intervalDays = frequencyToDays(
+					(localTier.frequency as SubscriptionFrequency) || "monthly",
+				);
+			},
+			{ immediate: true, deep: true },
+		);
 
-    watch(
-      () => localTier.frequency,
-      (val) => {
-        localTier.intervalDays = frequencyToDays(
-          (val as SubscriptionFrequency) || "monthly",
-        );
-      },
-    );
+		watch(
+			() => localTier.frequency,
+			(val) => {
+				localTier.intervalDays = frequencyToDays(
+					(val as SubscriptionFrequency) || "monthly",
+				);
+			},
+		);
 
-    const save = async () => {
-      if (!localTier.name || !localTier.name.trim()) {
-        notifyError("Tier name is required");
-        return;
-      }
-      if (!localTier.description || !localTier.description.trim()) {
-        notifyError("Description is required");
-        return;
-      }
-      if (!localTier.price_sats || localTier.price_sats <= 0) {
-        notifyError("Price must be a positive number");
-        return;
-      }
-      localTier.intervalDays = frequencyToDays(
-        (localTier.frequency as SubscriptionFrequency) || "monthly",
-      );
-      try {
-        await nostr.initSignerIfNotSet();
-        if (!nostr.signer) {
-          notifyError(
-            "Please unlock or connect your Nostr signer before saving tiers",
-          );
-          return;
-        }
-        if (localTier.media) {
-          localTier.media = filterValidMedia(localTier.media);
-        }
-        await creatorHub.addOrUpdateTier({
-          ...localTier,
-          media: localTier.media,
-        });
-        await creatorHub.publishTierDefinitions();
-        notifySuccess("Tier saved & published");
-        emit("update:modelValue", false);
-      } catch (e: any) {
-        notifyError(e.message);
-      }
-    };
+		const save = async () => {
+			if (!localTier.name || !localTier.name.trim()) {
+				notifyError("Tier name is required");
+				return;
+			}
+			if (!localTier.description || !localTier.description.trim()) {
+				notifyError("Description is required");
+				return;
+			}
+			if (!localTier.price_sats || localTier.price_sats <= 0) {
+				notifyError("Price must be a positive number");
+				return;
+			}
+			localTier.intervalDays = frequencyToDays(
+				(localTier.frequency as SubscriptionFrequency) || "monthly",
+			);
+			try {
+				await nostr.initSignerIfNotSet();
+				if (!nostr.signer) {
+					notifyError(
+						"Please unlock or connect your Nostr signer before saving tiers",
+					);
+					return;
+				}
+				if (localTier.media) {
+					localTier.media = filterValidMedia(localTier.media);
+				}
+				await creatorHub.addOrUpdateTier({
+					...localTier,
+					media: localTier.media,
+				});
+				await creatorHub.publishTierDefinitions();
+				notifySuccess("Tier saved & published");
+				emit("update:modelValue", false);
+			} catch (e: any) {
+				notifyError(e.message);
+			}
+		};
 
-    const bitcoinPrice = computed(() => priceStore.bitcoinPrice);
+		const bitcoinPrice = computed(() => priceStore.bitcoinPrice);
 
-    const formatCurrency = (amount: number, unit: string) =>
-      uiStore.formatCurrency(amount, unit);
+		const formatCurrency = (amount: number, unit: string) =>
+			uiStore.formatCurrency(amount, unit);
 
-    return {
-      showLocal,
-      localTier,
-      save,
-      bitcoinPrice,
-      formatCurrency,
-      addMedia,
-      removeMedia,
-      mediaTypes,
-      frequencyOptions,
-      isTrustedUrl,
-    };
-  },
+		return {
+			showLocal,
+			localTier,
+			save,
+			bitcoinPrice,
+			formatCurrency,
+			addMedia,
+			removeMedia,
+			mediaTypes,
+			frequencyOptions,
+			isTrustedUrl,
+		};
+	},
 });
 </script>

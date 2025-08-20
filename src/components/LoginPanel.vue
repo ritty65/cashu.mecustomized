@@ -21,11 +21,11 @@ const store = useCreatorHubStore();
 const nsec = ref("");
 
 async function loginWithNip07() {
-  await store.loginWithNip07();
+	await store.loginWithNip07();
 }
 
 async function loginNsec() {
-  if (!nsec.value) return;
-  await store.loginWithNsec(nsec.value);
+	if (!nsec.value) return;
+	await store.loginWithNsec(nsec.value);
 }
 </script>

@@ -49,27 +49,27 @@ const emit = defineEmits(["edit", "delete", "update:tier"]);
 const tierLocal = reactive<Tier>({ ...props.tier });
 
 watch(
-  () => props.tier,
-  (val) => {
-    Object.assign(tierLocal, val);
-  },
-  { immediate: true, deep: true },
+	() => props.tier,
+	(val) => {
+		Object.assign(tierLocal, val);
+	},
+	{ immediate: true, deep: true },
 );
 
 watch(
-  tierLocal,
-  () => {
-    emit("update:tier", { ...tierLocal });
-  },
-  { deep: true },
+	tierLocal,
+	() => {
+		emit("update:tier", { ...tierLocal });
+	},
+	{ deep: true },
 );
 
 function emitEdit() {
-  emit("edit");
+	emit("edit");
 }
 
 function emitDelete() {
-  emit("delete");
+	emit("delete");
 }
 </script>
 

@@ -1,13 +1,13 @@
-import { MessageQueue } from './utils';
+import { MessageQueue } from "./utils";
 import {
 	JsonRpcErrorObject,
 	JsonRpcMessage,
 	JsonRpcNotification,
 	JsonRpcReqParams,
-	RpcSubId
-} from './model/types';
-import { OnOpenError, OnOpenSuccess } from './model/types/wallet/websocket';
-import { getWebSocketImpl } from './ws';
+	RpcSubId,
+} from "./model/types";
+import { OnOpenError, OnOpenSuccess } from "./model/types/wallet/websocket";
+import { getWebSocketImpl } from "./ws";
 
 export class ConnectionManager {
 	static instace: ConnectionManager;
@@ -49,50 +49,55 @@ export class WSConnection {
 
 	connect() {
 		if (!this.connectionPromise) {
-			this.connectionPromise = new Promise((res: OnOpenSuccess, rej: OnOpenError) => {
-				try {
-					this.ws = new this._WS(this.url.toString());
-				} catch (err) {
-					rej(err);
-					return;
-				}
-				this.ws.onopen = () => {
-					res();
-				};
-				this.ws.onerror = () => {
-					rej(new Error('Failed to open WebSocket'));
-				};
-				this.ws.onmessage = (e: MessageEvent) => {
-					this.messageQueue.enqueue(e.data);
-					if (!this.handlingInterval) {
-						this.handlingInterval = setInterval(
-							this.handleNextMesage.bind(this),
-							0
-						) as unknown as number;
+			this.connectionPromise = new Promise(
+				(res: OnOpenSuccess, rej: OnOpenError) => {
+					try {
+						this.ws = new this._WS(this.url.toString());
+					} catch (err) {
+						rej(err);
+						return;
 					}
-				};
-				this.ws.onclose = () => {
-					this.connectionPromise = undefined;
-				};
-			});
+					this.ws.onopen = () => {
+						res();
+					};
+					this.ws.onerror = () => {
+						rej(new Error("Failed to open WebSocket"));
+					};
+					this.ws.onmessage = (e: MessageEvent) => {
+						this.messageQueue.enqueue(e.data);
+						if (!this.handlingInterval) {
+							this.handlingInterval = setInterval(
+								this.handleNextMesage.bind(this),
+								0,
+							) as unknown as number;
+						}
+					};
+					this.ws.onclose = () => {
+						this.connectionPromise = undefined;
+					};
+				},
+			);
 		}
 		return this.connectionPromise;
 	}
 
-	sendRequest(method: 'subscribe', params: JsonRpcReqParams): void;
-	sendRequest(method: 'unsubscribe', params: { subId: string }): void;
-	sendRequest(method: 'subscribe' | 'unsubscribe', params: Partial<JsonRpcReqParams>) {
+	sendRequest(method: "subscribe", params: JsonRpcReqParams): void;
+	sendRequest(method: "unsubscribe", params: { subId: string }): void;
+	sendRequest(
+		method: "subscribe" | "unsubscribe",
+		params: Partial<JsonRpcReqParams>,
+	) {
 		if (this.ws?.readyState !== 1) {
-			throw new Error('Socket not open...');
+			throw new Error("Socket not open...");
 		}
 		const id = this.rpcId;
 		this.rpcId++;
-		const message = JSON.stringify({ jsonrpc: '2.0', method, params, id });
+		const message = JSON.stringify({ jsonrpc: "2.0", method, params, id });
 		this.ws?.send(message);
 	}
 
 	closeSubscription(subId: string) {
-		this.ws?.send(JSON.stringify(['CLOSE', subId]));
+		this.ws?.send(JSON.stringify(["CLOSE", subId]));
 	}
 
 	addSubListener(subId: string, callback: (payload: any) => any) {
@@ -103,7 +108,7 @@ export class WSConnection {
 	private addRpcListener(
 		callback: () => any,
 		errorCallback: (e: JsonRpcErrorObject) => any,
-		id: Exclude<RpcSubId, null>
+		id: Exclude<RpcSubId, null>,
 	) {
 		this.rpcListeners[id] = { callback, errorCallback };
 	}
@@ -121,7 +126,9 @@ export class WSConnection {
 			delete this.subListeners[subId];
 			return;
 		}
-		this.subListeners[subId] = this.subListeners[subId].filter((fn: any) => fn !== callback);
+		this.subListeners[subId] = this.subListeners[subId].filter(
+			(fn: any) => fn !== callback,
+		);
 	}
 
 	async ensureConnection() {
@@ -140,18 +147,18 @@ export class WSConnection {
 		let parsed;
 		try {
 			parsed = JSON.parse(message) as JsonRpcMessage;
-			if ('result' in parsed && parsed.id != undefined) {
+			if ("result" in parsed && parsed.id != undefined) {
 				if (this.rpcListeners[parsed.id]) {
 					this.rpcListeners[parsed.id].callback();
 					this.removeRpcListener(parsed.id);
 				}
-			} else if ('error' in parsed && parsed.id != undefined) {
+			} else if ("error" in parsed && parsed.id != undefined) {
 				if (this.rpcListeners[parsed.id]) {
 					this.rpcListeners[parsed.id].errorCallback(parsed.error);
 					this.removeRpcListener(parsed.id);
 				}
-			} else if ('method' in parsed) {
-				if ('id' in parsed) {
+			} else if ("method" in parsed) {
+				if ("id" in parsed) {
 					// Do nothing as mints should not send requests
 				} else {
 					const subId = parsed.params.subId;
@@ -160,7 +167,9 @@ export class WSConnection {
 					}
 					if (this.subListeners[subId]?.length > 0) {
 						const notification = parsed as JsonRpcNotification;
-						this.subListeners[subId].forEach((cb) => cb(notification.params.payload));
+						this.subListeners[subId].forEach((cb) =>
+							cb(notification.params.payload),
+						);
 					}
 				}
 			}
@@ -171,12 +180,12 @@ export class WSConnection {
 	}
 
 	createSubscription(
-		params: Omit<JsonRpcReqParams, 'subId'>,
+		params: Omit<JsonRpcReqParams, "subId">,
 		callback: (payload: any) => any,
-		errorCallback: (e: Error) => any
+		errorCallback: (e: Error) => any,
 	) {
 		if (this.ws?.readyState !== 1) {
-			return errorCallback(new Error('Socket is not open'));
+			return errorCallback(new Error("Socket is not open"));
 		}
 		const subId = (Math.random() + 1).toString(36).substring(7);
 		this.addRpcListener(
@@ -186,9 +195,9 @@ export class WSConnection {
 			(e: JsonRpcErrorObject) => {
 				errorCallback(new Error(e.message));
 			},
-			this.rpcId
+			this.rpcId,
 		);
-		this.sendRequest('subscribe', { ...params, subId });
+		this.sendRequest("subscribe", { ...params, subId });
 		this.rpcId++;
 		return subId;
 	}
@@ -197,7 +206,7 @@ export class WSConnection {
 		this.removeRpcListener(subId);
 		this.removeListener(subId, callback);
 		this.rpcId++;
-		this.sendRequest('unsubscribe', { subId });
+		this.sendRequest("unsubscribe", { subId });
 	}
 
 	get activeSubscriptions() {

@@ -22,32 +22,32 @@ import { defineComponent } from "vue";
 import { isTrustedUrl } from "src/utils/sanitize-url";
 
 export default defineComponent({
-  name: "EssentialLink",
-  props: {
-    title: {
-      type: String,
-      required: true,
-    },
+	name: "EssentialLink",
+	props: {
+		title: {
+			type: String,
+			required: true,
+		},
 
-    caption: {
-      type: String,
-      default: "",
-    },
+		caption: {
+			type: String,
+			default: "",
+		},
 
-    link: {
-      type: String,
-      default: "#",
-    },
+		link: {
+			type: String,
+			default: "#",
+		},
 
-    icon: {
-      type: String,
-      default: "",
-    },
-  },
-  computed: {
-    safeLink() {
-      return isTrustedUrl(this.link) ? this.link : "#";
-    },
-  },
+		icon: {
+			type: String,
+			default: "",
+		},
+	},
+	computed: {
+		safeLink() {
+			return isTrustedUrl(this.link) ? this.link : "#";
+		},
+	},
 });
 </script>

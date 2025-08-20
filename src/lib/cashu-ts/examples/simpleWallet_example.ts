@@ -1,23 +1,23 @@
-import { CashuMint } from '../src/CashuMint.js';
-import { CashuWallet } from '../src/CashuWallet.js';
+import { CashuMint } from "../src/CashuMint.js";
+import { CashuWallet } from "../src/CashuWallet.js";
 
-import dns from 'node:dns';
+import dns from "node:dns";
 import {
 	MeltQuoteResponse,
 	MeltQuoteState,
 	MintQuoteResponse,
 	MintQuoteState,
 	Proof,
-	Token
-} from '../src/model/types/index.js';
-import { getEncodedTokenV4, sumProofs } from '../src/utils.js';
-dns.setDefaultResultOrder('ipv4first');
+	Token,
+} from "../src/model/types/index.js";
+import { getEncodedTokenV4, sumProofs } from "../src/utils.js";
+dns.setDefaultResultOrder("ipv4first");
 
 const externalInvoice =
-	'lnbc20u1p3u27nppp5pm074ffk6m42lvae8c6847z7xuvhyknwgkk7pzdce47grf2ksqwsdpv2phhwetjv4jzqcneypqyc6t8dp6xu6twva2xjuzzda6qcqzpgxqyz5vqsp5sw6n7cztudpl5m5jv3z6dtqpt2zhd3q6dwgftey9qxv09w82rgjq9qyyssqhtfl8wv7scwp5flqvmgjjh20nf6utvv5daw5h43h69yqfwjch7wnra3cn94qkscgewa33wvfh7guz76rzsfg9pwlk8mqd27wavf2udsq3yeuju';
+	"lnbc20u1p3u27nppp5pm074ffk6m42lvae8c6847z7xuvhyknwgkk7pzdce47grf2ksqwsdpv2phhwetjv4jzqcneypqyc6t8dp6xu6twva2xjuzzda6qcqzpgxqyz5vqsp5sw6n7cztudpl5m5jv3z6dtqpt2zhd3q6dwgftey9qxv09w82rgjq9qyyssqhtfl8wv7scwp5flqvmgjjh20nf6utvv5daw5h43h69yqfwjch7wnra3cn94qkscgewa33wvfh7guz76rzsfg9pwlk8mqd27wavf2udsq3yeuju";
 
 // const mintUrl = 'https://testnut.cashu.space';
-const mintUrl = 'http://localhost:3338';
+const mintUrl = "http://localhost:3338";
 
 // +++++++++++++++++++++ Example of a simple wallet implementation ++++++++++++++++++
 // run the example with the following command: `npx examples/_simpleWallet.ts`
@@ -60,10 +60,12 @@ const runWalletExample = async () => {
 			// with this command, we can initiate the creation of some ecash.
 			// The mint will return a request, that we have to fullfil in order for the ecash to be issued.
 			// (in most cases this will be a lightning invoice that needs to be paid)
-			console.log('Requesting a mint quote for' + mintAmount + 'satoshis.');
+			console.log("Requesting a mint quote for" + mintAmount + "satoshis.");
 			const quote = await wallet.createMintQuote(mintAmount);
 
-			console.log('Invoice to pay, in order to fullfill the quote: ' + quote.request);
+			console.log(
+				"Invoice to pay, in order to fullfill the quote: " + quote.request,
+			);
 
 			//check if an error occurred in the creation of the quote
 			if (quote.error) {
@@ -76,7 +78,7 @@ const runWalletExample = async () => {
 
 			const checkMintQuote = async (q: MintQuoteResponse) => {
 				// with this call, we can check the current status of a given quote
-				console.log('Checking the status of the quote: ' + q.quote);
+				console.log("Checking the status of the quote: " + q.quote);
 				const quote = await wallet.checkMintQuote(q.quote);
 				if (quote.error) {
 					console.error(quote.error, quote.code, quote.detail);
@@ -85,7 +87,9 @@ const runWalletExample = async () => {
 				if (quote.state === MintQuoteState.PAID) {
 					//if the quote was paid, we can ask the mint to issue the signatures for the ecash
 					const response = await wallet.mintProofs(mintAmount, quote.quote);
-					console.log(`minted proofs: ${response.map((p) => p.amount).join(', ')} sats`);
+					console.log(
+						`minted proofs: ${response.map((p) => p.amount).join(", ")} sats`,
+					);
 
 					// let's store the proofs in the storage we previously created
 					proofs = response;
@@ -94,7 +98,7 @@ const runWalletExample = async () => {
 					sendEcash(10);
 				} else if (quote.state === MintQuoteState.ISSUED) {
 					// if the quote has already been issued, we will receive an error if we try to mint again
-					console.error('Quote has already been issued');
+					console.error("Quote has already been issued");
 					return;
 				} else {
 					// if the quote has not yet been paid, we will wait some more to get the status of the quote again
@@ -114,13 +118,15 @@ const runWalletExample = async () => {
 			// If the amount of the accumulated proofs we provide do not match exactly the amount we want to send,
 			// a split will have to be performed.
 			// this will burn the current proofs at the mint, and return a fresh set of proofs, matching the amount we want to send
-			const { keep, send } = await wallet.send(amount, proofs, { includeFees: true });
+			const { keep, send } = await wallet.send(amount, proofs, {
+				includeFees: true,
+			});
 
 			console.log(
 				`sending ${send.reduce((a, b) => a + b.amount, 0)} keeping ${keep.reduce(
 					(a, b) => a + b.amount,
-					0
-				)}`
+					0,
+				)}`,
 			);
 			// first, let's update our store with the new proofs
 			proofs = keep;
@@ -132,7 +138,7 @@ const runWalletExample = async () => {
 			// In there, we set the mint url, and proof we want to send
 			const token: Token = {
 				mint: mintUrl,
-				proofs: send
+				proofs: send,
 			};
 			// and finally, we can encode the token as a cashu string
 			const cashuString = getEncodedTokenV4(token);
@@ -151,7 +157,10 @@ const runWalletExample = async () => {
 			// this step is crucial. It will burn the received proofs, and create new ones,
 			// making sure the sender cannot try to double spend them.
 			const received = await wallet.receive(cashuString);
-			console.log('Received proofs:' + received.reduce((acc, proof) => acc + proof.amount, 0));
+			console.log(
+				"Received proofs:" +
+					received.reduce((acc, proof) => acc + proof.amount, 0),
+			);
 
 			// after receiving, let's not forget to add the proofs back to our storage
 			proofs.push(...received);
@@ -178,7 +187,9 @@ const runWalletExample = async () => {
 			console.log(`Total quote amount: ${amountToMelt}`);
 
 			// in order to get the correct amount of proofs for the melt request, we can use the `send` function we used before
-			const { keep, send } = await wallet.send(amountToMelt, proofs, { includeFees: true });
+			const { keep, send } = await wallet.send(amountToMelt, proofs, {
+				includeFees: true,
+			});
 
 			// once again, we update the proofs we have to keep.
 			proofs = keep;
@@ -222,7 +233,7 @@ const runWalletExample = async () => {
 			};
 		};
 	} catch (error) {
-		console.error(error, 'u-oh something went wrong');
+		console.error(error, "u-oh something went wrong");
 	}
 };
 

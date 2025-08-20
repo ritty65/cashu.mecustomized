@@ -242,7 +242,7 @@ body.body--dark .wallet-action-btn:active {
   padding-bottom: 15px;
 }
 </style>
-<script>
+<script lang="ts">
 import { debug } from "src/js/logger";
 import { date } from "quasar";
 import { shortenString } from "src/js/string-utils";
@@ -286,6 +286,7 @@ import { useNPCStore } from "src/stores/npubcash";
 import { useNostrStore, SignerType } from "src/stores/nostr";
 import { usePRStore } from "src/stores/payment-request";
 import { useDexieStore } from "src/stores/dexie";
+import { useSignerStore } from "src/stores/signer";
 
 import { useStorageStore } from "src/stores/storage";
 import ReceiveTokenDialog from "src/components/ReceiveTokenDialog.vue";
@@ -589,6 +590,9 @@ export default {
     triggerPwaInstall: function () {
       // Show the install prompt
       // Note: this doesn't work with IOS, we do it with iOSPWAPrompt
+      if (!this.deferredPWAInstallPrompt) {
+        return;
+      }
       this.deferredPWAInstallPrompt.prompt();
       // Wait for the user to respond to the prompt
       this.deferredPWAInstallPrompt.userChoice.then((choiceResult) => {
@@ -624,22 +628,24 @@ export default {
       };
     },
     equalizeButtonWidths: function () {
+      if (typeof document === "undefined") return;
       this.$nextTick(() => {
-        const actionBtns = document.querySelectorAll(".wallet-action-btn");
-        if (actionBtns.length >= 2) {
-          actionBtns.forEach((btn) => {
-            btn.style.width = "auto";
-          });
+        const actionBtns = document.querySelectorAll(
+          ".wallet-action-btn",
+        );
+        if (!actionBtns || actionBtns.length < 2) return;
+        actionBtns.forEach((btn) => {
+          (btn as HTMLElement).style.width = "auto";
+        });
 
-          let maxWidth = 0;
-          actionBtns.forEach((btn) => {
-            maxWidth = Math.max(maxWidth, btn.offsetWidth);
-          });
+        let maxWidth = 0;
+        actionBtns.forEach((btn) => {
+          maxWidth = Math.max(maxWidth, (btn as HTMLElement).offsetWidth);
+        });
 
-          actionBtns.forEach((btn) => {
-            btn.style.width = `${maxWidth}px`;
-          });
-        }
+        actionBtns.forEach((btn) => {
+          (btn as HTMLElement).style.width = `${maxWidth}px`;
+        });
       });
     },
     handleLockedTokenMessage(event) {

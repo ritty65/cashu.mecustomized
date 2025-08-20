@@ -52,61 +52,61 @@ const store = useSubscribersStore();
 const { density, visibleColumns, viewMode } = storeToRefs(store);
 
 const columns = [
-  {
-    name: "subscriber",
-    label: t("CreatorSubscribers.columns.subscriber"),
-    field: "name",
-    align: "left",
-  },
-  {
-    name: "tier",
-    label: t("CreatorSubscribers.columns.tier"),
-    field: "tierName",
-    align: "left",
-  },
-  {
-    name: "frequency",
-    label: t("CreatorSubscribers.columns.frequency"),
-    field: "frequency",
-    align: "left",
-  },
-  {
-    name: "status",
-    label: t("CreatorSubscribers.columns.status"),
-    field: "status",
-    align: "left",
-  },
-  {
-    name: "amount",
-    label: t("CreatorSubscribers.columns.amount"),
-    field: "amountSat",
-    align: "right",
-  },
-  {
-    name: "nextRenewal",
-    label: t("CreatorSubscribers.columns.nextRenewal"),
-    field: "nextRenewal",
-    align: "left",
-  },
-  {
-    name: "lifetime",
-    label: t("CreatorSubscribers.columns.lifetime"),
-    field: "lifetimeSat",
-    align: "right",
-  },
+	{
+		name: "subscriber",
+		label: t("CreatorSubscribers.columns.subscriber"),
+		field: "name",
+		align: "left",
+	},
+	{
+		name: "tier",
+		label: t("CreatorSubscribers.columns.tier"),
+		field: "tierName",
+		align: "left",
+	},
+	{
+		name: "frequency",
+		label: t("CreatorSubscribers.columns.frequency"),
+		field: "frequency",
+		align: "left",
+	},
+	{
+		name: "status",
+		label: t("CreatorSubscribers.columns.status"),
+		field: "status",
+		align: "left",
+	},
+	{
+		name: "amount",
+		label: t("CreatorSubscribers.columns.amount"),
+		field: "amountSat",
+		align: "right",
+	},
+	{
+		name: "nextRenewal",
+		label: t("CreatorSubscribers.columns.nextRenewal"),
+		field: "nextRenewal",
+		align: "left",
+	},
+	{
+		name: "lifetime",
+		label: t("CreatorSubscribers.columns.lifetime"),
+		field: "lifetimeSat",
+		align: "right",
+	},
 ];
 
 const pagination = ref({ page: 1, rowsPerPage: 25 });
 const rowsPerPageOptions = [10, 25, 50];
 
 const paginatedRows = computed(() => {
-  const start = (pagination.value.page - 1) * pagination.value.rowsPerPage;
-  const end = start + pagination.value.rowsPerPage;
-  return props.subscribers.slice(start, end);
+	const start = (pagination.value.page - 1) * pagination.value.rowsPerPage;
+	const end = start + pagination.value.rowsPerPage;
+	return props.subscribers.slice(start, end);
 });
 
 function onRowClick(_evt: Event, row: Subscriber) {
-  emit("select", row);
+	emit("select", row);
 }
 
 defineExpose({ pagination, paginatedRows });

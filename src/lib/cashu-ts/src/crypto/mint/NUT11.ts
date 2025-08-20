@@ -1,12 +1,12 @@
-import { schnorr } from '@noble/curves/secp256k1';
-import { sha256 } from '@noble/hashes/sha256';
-import { parseSecret } from '../common/NUT11.js';
-import { Proof } from '../common/index.js';
-import { BlindedMessage } from '../client/index.js';
+import { schnorr } from "@noble/curves/secp256k1";
+import { sha256 } from "@noble/hashes/sha256";
+import { parseSecret } from "../common/NUT11.js";
+import { Proof } from "../common/index.js";
+import { BlindedMessage } from "../client/index.js";
 
 export const verifyP2PKSig = (proof: Proof) => {
 	if (!proof.witness) {
-		throw new Error('could not verify signature, no witness provided');
+		throw new Error("could not verify signature, no witness provided");
 	}
 	const parsedSecret = parseSecret(proof.secret);
 
@@ -40,13 +40,20 @@ export const verifyP2PKSig = (proof: Proof) => {
 	return schnorr.verify(
 		proof.witness.signatures[0],
 		sha256(new TextDecoder().decode(proof.secret)),
-		parsedSecret[1].data
+		parsedSecret[1].data,
 	);
 };
 
-export const verifyP2PKSigOutput = (output: BlindedMessage, publicKey: string): boolean => {
+export const verifyP2PKSigOutput = (
+	output: BlindedMessage,
+	publicKey: string,
+): boolean => {
 	if (!output.witness) {
-		throw new Error('could not verify signature, no witness provided');
+		throw new Error("could not verify signature, no witness provided");
 	}
-	return schnorr.verify(output.witness.signatures[0], sha256(output.B_.toHex(true)), publicKey);
+	return schnorr.verify(
+		output.witness.signatures[0],
+		sha256(output.B_.toHex(true)),
+		publicKey,
+	);
 };

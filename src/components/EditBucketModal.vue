@@ -93,63 +93,63 @@ const { t } = useI18n();
 const bucketsStore = useBucketsStore();
 
 const showLocal = computed({
-  get: () => props.modelValue,
-  set: (val) => emit("update:modelValue", val),
+	get: () => props.modelValue,
+	set: (val) => emit("update:modelValue", val),
 });
 
 const local = reactive({
-  name: "",
-  color: hashColor(""),
-  description: "",
-  goal: null as number | null,
-  creatorPubkey: "",
+	name: "",
+	color: hashColor(""),
+	description: "",
+	goal: null as number | null,
+	creatorPubkey: "",
 });
 
 const nameTaken = computed(() =>
-  props.bucket
-    ? false
-    : bucketsStore.bucketList.some(
-        (b) =>
-          b.id !== props.bucket?.id &&
-          b.name.toLowerCase() === local.name.trim().toLowerCase(),
-      ),
+	props.bucket
+		? false
+		: bucketsStore.bucketList.some(
+				(b) =>
+					b.id !== props.bucket?.id &&
+					b.name.toLowerCase() === local.name.trim().toLowerCase(),
+			),
 );
 const canSave = computed(
-  () =>
-    local.name.trim().length > 0 &&
-    !nameTaken.value &&
-    (local.goal === null || local.goal >= 0),
+	() =>
+		local.name.trim().length > 0 &&
+		!nameTaken.value &&
+		(local.goal === null || local.goal >= 0),
 );
 
 watch(
-  () => props.bucket,
-  (b) => {
-    if (!b) return;
-    local.name = b.name;
-    local.color = b.color || hashColor(b.name);
-    local.description = b.description || "";
-    local.goal = b.goal ?? null;
-    local.creatorPubkey = b.creatorPubkey || "";
-  },
-  { immediate: true, deep: true },
+	() => props.bucket,
+	(b) => {
+		if (!b) return;
+		local.name = b.name;
+		local.color = b.color || hashColor(b.name);
+		local.description = b.description || "";
+		local.goal = b.goal ?? null;
+		local.creatorPubkey = b.creatorPubkey || "";
+	},
+	{ immediate: true, deep: true },
 );
 
 watch(
-  () => props.modelValue,
-  (val) => {
-    if (val && props.bucket) {
-      local.name = props.bucket.name;
-      local.color = props.bucket.color || hashColor(props.bucket.name);
-      local.description = props.bucket.description || "";
-      local.goal = props.bucket.goal ?? null;
-      local.creatorPubkey = props.bucket.creatorPubkey || "";
-    }
-  },
+	() => props.modelValue,
+	(val) => {
+		if (val && props.bucket) {
+			local.name = props.bucket.name;
+			local.color = props.bucket.color || hashColor(props.bucket.name);
+			local.description = props.bucket.description || "";
+			local.goal = props.bucket.goal ?? null;
+			local.creatorPubkey = props.bucket.creatorPubkey || "";
+		}
+	},
 );
 
 function onSave() {
-  if (!canSave.value) return;
-  emit("save", { ...local });
-  emit("update:modelValue", false);
+	if (!canSave.value) return;
+	emit("save", { ...local });
+	emit("update:modelValue", false);
 }
 </script>

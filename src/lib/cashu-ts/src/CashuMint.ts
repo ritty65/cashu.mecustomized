@@ -1,4 +1,4 @@
-import { ConnectionManager, WSConnection } from './WSConnection.js';
+import { ConnectionManager, WSConnection } from "./WSConnection.js";
 import type {
 	CheckStatePayload,
 	CheckStateResponse,
@@ -17,21 +17,21 @@ import type {
 	MeltQuotePayload,
 	MeltQuoteResponse,
 	PartialMintQuoteResponse,
-	PartialMeltQuoteResponse
-} from './model/types/index.js';
-import { MeltQuoteState } from './model/types/index.js';
-import request from './request.js';
-import { isObj, joinUrls, sanitizeUrl } from './utils.js';
+	PartialMeltQuoteResponse,
+} from "./model/types/index.js";
+import { MeltQuoteState } from "./model/types/index.js";
+import request from "./request.js";
+import { isObj, joinUrls, sanitizeUrl } from "./utils.js";
 import {
 	MeltQuoteResponsePaidDeprecated,
-	handleMeltQuoteResponseDeprecated
-} from './legacy/nut-05.js';
+	handleMeltQuoteResponseDeprecated,
+} from "./legacy/nut-05.js";
 import {
 	MintQuoteResponsePaidDeprecated,
-	handleMintQuoteResponseDeprecated
-} from './legacy/nut-04.js';
-import { handleMintInfoContactFieldDeprecated } from './legacy/nut-06.js';
-import { MintInfo } from './model/MintInfo.js';
+	handleMintQuoteResponseDeprecated,
+} from "./legacy/nut-04.js";
+import { handleMintInfoContactFieldDeprecated } from "./legacy/nut-06.js";
+import { MintInfo } from "./model/MintInfo.js";
 /**
  * Class represents Cashu Mint API. This class contains Lower level functions that are implemented by CashuWallet.
  */
@@ -48,7 +48,7 @@ class CashuMint {
 	constructor(
 		private _mintUrl: string,
 		private _customRequest?: typeof request,
-		authTokenGetter?: () => Promise<string>
+		authTokenGetter?: () => Promise<string>,
 	) {
 		this._mintUrl = sanitizeUrl(_mintUrl);
 		this._customRequest = _customRequest;
@@ -71,11 +71,11 @@ class CashuMint {
 	 */
 	public static async getInfo(
 		mintUrl: string,
-		customRequest?: typeof request
+		customRequest?: typeof request,
 	): Promise<GetInfoResponse> {
 		const requestInstance = customRequest || request;
 		const response = await requestInstance<GetInfoResponse>({
-			endpoint: joinUrls(mintUrl, '/v1/info')
+			endpoint: joinUrls(mintUrl, "/v1/info"),
 		});
 		const data = handleMintInfoContactFieldDeprecated(response);
 		return data;
@@ -107,19 +107,21 @@ class CashuMint {
 		mintUrl: string,
 		swapPayload: SwapPayload,
 		customRequest?: typeof request,
-		blindAuthToken?: string
+		blindAuthToken?: string,
 	): Promise<SwapResponse> {
 		const requestInstance = customRequest || request;
-		const headers: Record<string, string> = blindAuthToken ? { 'Blind-auth': blindAuthToken } : {};
+		const headers: Record<string, string> = blindAuthToken
+			? { "Blind-auth": blindAuthToken }
+			: {};
 		const data = await requestInstance<SwapResponse>({
-			endpoint: joinUrls(mintUrl, '/v1/swap'),
-			method: 'POST',
+			endpoint: joinUrls(mintUrl, "/v1/swap"),
+			method: "POST",
 			requestBody: swapPayload,
-			headers
+			headers,
 		});
 
 		if (!isObj(data) || !Array.isArray(data?.signatures)) {
-			throw new Error(data.detail ?? 'bad response');
+			throw new Error(data.detail ?? "bad response");
 		}
 
 		return data;
@@ -130,8 +132,13 @@ class CashuMint {
 	 * @returns signed outputs
 	 */
 	async swap(swapPayload: SwapPayload): Promise<SwapResponse> {
-		const blindAuthToken = await this.handleBlindAuth('/v1/swap');
-		return CashuMint.swap(this._mintUrl, swapPayload, this._customRequest, blindAuthToken);
+		const blindAuthToken = await this.handleBlindAuth("/v1/swap");
+		return CashuMint.swap(
+			this._mintUrl,
+			swapPayload,
+			this._customRequest,
+			blindAuthToken,
+		);
 	}
 
 	/**
@@ -145,17 +152,19 @@ class CashuMint {
 		mintUrl: string,
 		mintQuotePayload: MintQuotePayload,
 		customRequest?: typeof request,
-		blindAuthToken?: string
+		blindAuthToken?: string,
 	): Promise<PartialMintQuoteResponse> {
 		const requestInstance = customRequest || request;
-		const headers: Record<string, string> = blindAuthToken ? { 'Blind-auth': blindAuthToken } : {};
+		const headers: Record<string, string> = blindAuthToken
+			? { "Blind-auth": blindAuthToken }
+			: {};
 		const response = await requestInstance<
 			PartialMintQuoteResponse & MintQuoteResponsePaidDeprecated
 		>({
-			endpoint: joinUrls(mintUrl, '/v1/mint/quote/bolt11'),
-			method: 'POST',
+			endpoint: joinUrls(mintUrl, "/v1/mint/quote/bolt11"),
+			method: "POST",
 			requestBody: mintQuotePayload,
-			headers
+			headers,
 		});
 		const data = handleMintQuoteResponseDeprecated(response);
 		return data;
@@ -165,13 +174,15 @@ class CashuMint {
 	 * @param mintQuotePayload Payload for creating a new mint quote
 	 * @returns the mint will create and return a new mint quote containing a payment request for the specified amount and unit
 	 */
-	async createMintQuote(mintQuotePayload: MintQuotePayload): Promise<PartialMintQuoteResponse> {
-		const blindAuthToken = await this.handleBlindAuth('/v1/mint/quote/bolt11');
+	async createMintQuote(
+		mintQuotePayload: MintQuotePayload,
+	): Promise<PartialMintQuoteResponse> {
+		const blindAuthToken = await this.handleBlindAuth("/v1/mint/quote/bolt11");
 		return CashuMint.createMintQuote(
 			this._mintUrl,
 			mintQuotePayload,
 			this._customRequest,
-			blindAuthToken
+			blindAuthToken,
 		);
 	}
 
@@ -186,16 +197,18 @@ class CashuMint {
 		mintUrl: string,
 		quote: string,
 		customRequest?: typeof request,
-		blindAuthToken?: string
+		blindAuthToken?: string,
 	): Promise<PartialMintQuoteResponse> {
 		const requestInstance = customRequest || request;
-		const headers: Record<string, string> = blindAuthToken ? { 'Blind-auth': blindAuthToken } : {};
+		const headers: Record<string, string> = blindAuthToken
+			? { "Blind-auth": blindAuthToken }
+			: {};
 		const response = await requestInstance<
 			PartialMintQuoteResponse & MintQuoteResponsePaidDeprecated
 		>({
-			endpoint: joinUrls(mintUrl, '/v1/mint/quote/bolt11', quote),
-			method: 'GET',
-			headers
+			endpoint: joinUrls(mintUrl, "/v1/mint/quote/bolt11", quote),
+			method: "GET",
+			headers,
 		});
 
 		const data = handleMintQuoteResponseDeprecated(response);
@@ -207,8 +220,15 @@ class CashuMint {
 	 * @returns the mint will create and return a Lightning invoice for the specified amount
 	 */
 	async checkMintQuote(quote: string): Promise<PartialMintQuoteResponse> {
-		const blindAuthToken = await this.handleBlindAuth(`/v1/mint/quote/bolt11/${quote}`);
-		return CashuMint.checkMintQuote(this._mintUrl, quote, this._customRequest, blindAuthToken);
+		const blindAuthToken = await this.handleBlindAuth(
+			`/v1/mint/quote/bolt11/${quote}`,
+		);
+		return CashuMint.checkMintQuote(
+			this._mintUrl,
+			quote,
+			this._customRequest,
+			blindAuthToken,
+		);
 	}
 
 	/**
@@ -222,19 +242,21 @@ class CashuMint {
 		mintUrl: string,
 		mintPayload: MintPayload,
 		customRequest?: typeof request,
-		blindAuthToken?: string
+		blindAuthToken?: string,
 	) {
 		const requestInstance = customRequest || request;
-		const headers: Record<string, string> = blindAuthToken ? { 'Blind-auth': blindAuthToken } : {};
+		const headers: Record<string, string> = blindAuthToken
+			? { "Blind-auth": blindAuthToken }
+			: {};
 		const data = await requestInstance<MintResponse>({
-			endpoint: joinUrls(mintUrl, '/v1/mint/bolt11'),
-			method: 'POST',
+			endpoint: joinUrls(mintUrl, "/v1/mint/bolt11"),
+			method: "POST",
 			requestBody: mintPayload,
-			headers
+			headers,
 		});
 
 		if (!isObj(data) || !Array.isArray(data?.signatures)) {
-			throw new Error('bad response');
+			throw new Error("bad response");
 		}
 
 		return data;
@@ -245,8 +267,13 @@ class CashuMint {
 	 * @returns serialized blinded signatures
 	 */
 	async mint(mintPayload: MintPayload) {
-		const blindAuthToken = await this.handleBlindAuth('/v1/mint/bolt11');
-		return CashuMint.mint(this._mintUrl, mintPayload, this._customRequest, blindAuthToken);
+		const blindAuthToken = await this.handleBlindAuth("/v1/mint/bolt11");
+		return CashuMint.mint(
+			this._mintUrl,
+			mintPayload,
+			this._customRequest,
+			blindAuthToken,
+		);
 	}
 
 	/**
@@ -259,28 +286,30 @@ class CashuMint {
 		mintUrl: string,
 		meltQuotePayload: MeltQuotePayload,
 		customRequest?: typeof request,
-		blindAuthToken?: string
+		blindAuthToken?: string,
 	): Promise<PartialMeltQuoteResponse> {
 		const requestInstance = customRequest || request;
-		const headers: Record<string, string> = blindAuthToken ? { 'Blind-auth': blindAuthToken } : {};
+		const headers: Record<string, string> = blindAuthToken
+			? { "Blind-auth": blindAuthToken }
+			: {};
 		const response = await requestInstance<
 			PartialMeltQuoteResponse & MeltQuoteResponsePaidDeprecated
 		>({
-			endpoint: joinUrls(mintUrl, '/v1/melt/quote/bolt11'),
-			method: 'POST',
+			endpoint: joinUrls(mintUrl, "/v1/melt/quote/bolt11"),
+			method: "POST",
 			requestBody: meltQuotePayload,
-			headers
+			headers,
 		});
 
 		const data = handleMeltQuoteResponseDeprecated(response);
 
 		if (
 			!isObj(data) ||
-			typeof data?.amount !== 'number' ||
-			typeof data?.fee_reserve !== 'number' ||
-			typeof data?.quote !== 'string'
+			typeof data?.amount !== "number" ||
+			typeof data?.fee_reserve !== "number" ||
+			typeof data?.quote !== "string"
 		) {
-			throw new Error('bad response');
+			throw new Error("bad response");
 		}
 		return data;
 	}
@@ -289,13 +318,15 @@ class CashuMint {
 	 * @param MeltQuotePayload
 	 * @returns
 	 */
-	async createMeltQuote(meltQuotePayload: MeltQuotePayload): Promise<PartialMeltQuoteResponse> {
-		const blindAuthToken = await this.handleBlindAuth('/v1/melt/quote/bolt11');
+	async createMeltQuote(
+		meltQuotePayload: MeltQuotePayload,
+	): Promise<PartialMeltQuoteResponse> {
+		const blindAuthToken = await this.handleBlindAuth("/v1/melt/quote/bolt11");
 		return CashuMint.createMeltQuote(
 			this._mintUrl,
 			meltQuotePayload,
 			this._customRequest,
-			blindAuthToken
+			blindAuthToken,
 		);
 	}
 
@@ -309,27 +340,31 @@ class CashuMint {
 		mintUrl: string,
 		quote: string,
 		customRequest?: typeof request,
-		blindAuthToken?: string
+		blindAuthToken?: string,
 	): Promise<PartialMeltQuoteResponse> {
 		const requestInstance = customRequest || request;
-		const headers: Record<string, string> = blindAuthToken ? { 'Blind-auth': blindAuthToken } : {};
-		const response = await requestInstance<MeltQuoteResponse & MeltQuoteResponsePaidDeprecated>({
-			endpoint: joinUrls(mintUrl, '/v1/melt/quote/bolt11', quote),
-			method: 'GET',
-			headers
+		const headers: Record<string, string> = blindAuthToken
+			? { "Blind-auth": blindAuthToken }
+			: {};
+		const response = await requestInstance<
+			MeltQuoteResponse & MeltQuoteResponsePaidDeprecated
+		>({
+			endpoint: joinUrls(mintUrl, "/v1/melt/quote/bolt11", quote),
+			method: "GET",
+			headers,
 		});
 
 		const data = handleMeltQuoteResponseDeprecated(response);
 
 		if (
 			!isObj(data) ||
-			typeof data?.amount !== 'number' ||
-			typeof data?.fee_reserve !== 'number' ||
-			typeof data?.quote !== 'string' ||
-			typeof data?.state !== 'string' ||
+			typeof data?.amount !== "number" ||
+			typeof data?.fee_reserve !== "number" ||
+			typeof data?.quote !== "string" ||
+			typeof data?.state !== "string" ||
 			!Object.values(MeltQuoteState).includes(data.state)
 		) {
-			throw new Error('bad response');
+			throw new Error("bad response");
 		}
 
 		return data;
@@ -340,8 +375,15 @@ class CashuMint {
 	 * @returns
 	 */
 	async checkMeltQuote(quote: string): Promise<PartialMeltQuoteResponse> {
-		const blindAuthToken = await this.handleBlindAuth(`/v1/melt/quote/bolt11/${quote}`);
-		return CashuMint.checkMeltQuote(this._mintUrl, quote, this._customRequest, blindAuthToken);
+		const blindAuthToken = await this.handleBlindAuth(
+			`/v1/melt/quote/bolt11/${quote}`,
+		);
+		return CashuMint.checkMeltQuote(
+			this._mintUrl,
+			quote,
+			this._customRequest,
+			blindAuthToken,
+		);
 	}
 
 	/**
@@ -355,25 +397,29 @@ class CashuMint {
 		mintUrl: string,
 		meltPayload: MeltPayload,
 		customRequest?: typeof request,
-		blindAuthToken?: string
+		blindAuthToken?: string,
 	): Promise<PartialMeltQuoteResponse> {
 		const requestInstance = customRequest || request;
-		const headers: Record<string, string> = blindAuthToken ? { 'Blind-auth': blindAuthToken } : {};
-		const response = await requestInstance<MeltQuoteResponse & MeltQuoteResponsePaidDeprecated>({
-			endpoint: joinUrls(mintUrl, '/v1/melt/bolt11'),
-			method: 'POST',
+		const headers: Record<string, string> = blindAuthToken
+			? { "Blind-auth": blindAuthToken }
+			: {};
+		const response = await requestInstance<
+			MeltQuoteResponse & MeltQuoteResponsePaidDeprecated
+		>({
+			endpoint: joinUrls(mintUrl, "/v1/melt/bolt11"),
+			method: "POST",
 			requestBody: meltPayload,
-			headers
+			headers,
 		});
 
 		const data = handleMeltQuoteResponseDeprecated(response);
 
 		if (
 			!isObj(data) ||
-			typeof data?.state !== 'string' ||
+			typeof data?.state !== "string" ||
 			!Object.values(MeltQuoteState).includes(data.state)
 		) {
-			throw new Error('bad response');
+			throw new Error("bad response");
 		}
 
 		return data;
@@ -384,8 +430,13 @@ class CashuMint {
 	 * @returns
 	 */
 	async melt(meltPayload: MeltPayload): Promise<PartialMeltQuoteResponse> {
-		const blindAuthToken = await this.handleBlindAuth('/v1/melt/bolt11');
-		return CashuMint.melt(this._mintUrl, meltPayload, this._customRequest, blindAuthToken);
+		const blindAuthToken = await this.handleBlindAuth("/v1/melt/bolt11");
+		return CashuMint.melt(
+			this._mintUrl,
+			meltPayload,
+			this._customRequest,
+			blindAuthToken,
+		);
 	}
 	/**
 	 * Checks if specific proofs have already been redeemed
@@ -397,17 +448,17 @@ class CashuMint {
 	public static async check(
 		mintUrl: string,
 		checkPayload: CheckStatePayload,
-		customRequest?: typeof request
+		customRequest?: typeof request,
 	): Promise<CheckStateResponse> {
 		const requestInstance = customRequest || request;
 		const data = await requestInstance<CheckStateResponse>({
-			endpoint: joinUrls(mintUrl, '/v1/checkstate'),
-			method: 'POST',
-			requestBody: checkPayload
+			endpoint: joinUrls(mintUrl, "/v1/checkstate"),
+			method: "POST",
+			requestBody: checkPayload,
 		});
 
 		if (!isObj(data) || !Array.isArray(data?.states)) {
-			throw new Error('bad response');
+			throw new Error("bad response");
 		}
 
 		return data;
@@ -423,20 +474,22 @@ class CashuMint {
 	public static async getKeys(
 		mintUrl: string,
 		keysetId?: string,
-		customRequest?: typeof request
+		customRequest?: typeof request,
 	): Promise<MintActiveKeys> {
 		// backwards compatibility for base64 encoded keyset ids
 		if (keysetId) {
 			// make the keysetId url safe
-			keysetId = keysetId.replace(/\//g, '_').replace(/\+/g, '-');
+			keysetId = keysetId.replace(/\//g, "_").replace(/\+/g, "-");
 		}
 		const requestInstance = customRequest || request;
 		const data = await requestInstance<MintActiveKeys>({
-			endpoint: keysetId ? joinUrls(mintUrl, '/v1/keys', keysetId) : joinUrls(mintUrl, '/v1/keys')
+			endpoint: keysetId
+				? joinUrls(mintUrl, "/v1/keys", keysetId)
+				: joinUrls(mintUrl, "/v1/keys"),
 		});
 
 		if (!isObj(data) || !Array.isArray(data.keysets)) {
-			throw new Error('bad response');
+			throw new Error("bad response");
 		}
 
 		return data;
@@ -450,7 +503,7 @@ class CashuMint {
 		const allKeys = await CashuMint.getKeys(
 			mintUrl || this._mintUrl,
 			keysetId,
-			this._customRequest
+			this._customRequest,
 		);
 		return allKeys;
 	}
@@ -462,10 +515,12 @@ class CashuMint {
 	 */
 	public static async getKeySets(
 		mintUrl: string,
-		customRequest?: typeof request
+		customRequest?: typeof request,
 	): Promise<MintAllKeysets> {
 		const requestInstance = customRequest || request;
-		return requestInstance<MintAllKeysets>({ endpoint: joinUrls(mintUrl, '/v1/keysets') });
+		return requestInstance<MintAllKeysets>({
+			endpoint: joinUrls(mintUrl, "/v1/keysets"),
+		});
 	}
 
 	/**
@@ -488,17 +543,21 @@ class CashuMint {
 	public static async restore(
 		mintUrl: string,
 		restorePayload: PostRestorePayload,
-		customRequest?: typeof request
+		customRequest?: typeof request,
 	): Promise<PostRestoreResponse> {
 		const requestInstance = customRequest || request;
 		const data = await requestInstance<PostRestoreResponse>({
-			endpoint: joinUrls(mintUrl, '/v1/restore'),
-			method: 'POST',
-			requestBody: restorePayload
+			endpoint: joinUrls(mintUrl, "/v1/restore"),
+			method: "POST",
+			requestBody: restorePayload,
 		});
 
-		if (!isObj(data) || !Array.isArray(data?.outputs) || !Array.isArray(data?.signatures)) {
-			throw new Error('bad response');
+		if (
+			!isObj(data) ||
+			!Array.isArray(data?.outputs) ||
+			!Array.isArray(data?.signatures)
+		) {
+			throw new Error("bad response");
 		}
 
 		return data;
@@ -507,7 +566,11 @@ class CashuMint {
 	async restore(restorePayload: {
 		outputs: Array<SerializedBlindedMessage>;
 	}): Promise<PostRestoreResponse> {
-		return CashuMint.restore(this._mintUrl, restorePayload, this._customRequest);
+		return CashuMint.restore(
+			this._mintUrl,
+			restorePayload,
+			this._customRequest,
+		);
 	}
 
 	/**
@@ -518,22 +581,22 @@ class CashuMint {
 			await this.ws.ensureConnection();
 		} else {
 			const mintUrl = new URL(this._mintUrl);
-			const wsSegment = 'v1/ws';
+			const wsSegment = "v1/ws";
 			if (mintUrl.pathname) {
-				if (mintUrl.pathname.endsWith('/')) {
+				if (mintUrl.pathname.endsWith("/")) {
 					mintUrl.pathname += wsSegment;
 				} else {
-					mintUrl.pathname += '/' + wsSegment;
+					mintUrl.pathname += "/" + wsSegment;
 				}
 			}
 			this.ws = ConnectionManager.getInstance().getConnection(
-				`${mintUrl.protocol === 'https:' ? 'wss' : 'ws'}://${mintUrl.host}${mintUrl.pathname}`
+				`${mintUrl.protocol === "https:" ? "wss" : "ws"}://${mintUrl.host}${mintUrl.pathname}`,
 			);
 			try {
 				await this.ws.connect();
 			} catch (e) {
 				console.log(e);
-				throw new Error('Failed to connect to WebSocket...');
+				throw new Error("Failed to connect to WebSocket...");
 			}
 		}
 	}
@@ -558,7 +621,9 @@ class CashuMint {
 		const info = await this.getLazyMintInfo();
 		if (info.requiresBlindAuthToken(path)) {
 			if (!this._authTokenGetter) {
-				throw new Error('Can not call a protected endpoint without authProofGetter');
+				throw new Error(
+					"Can not call a protected endpoint without authProofGetter",
+				);
 			}
 			return this._authTokenGetter();
 		}

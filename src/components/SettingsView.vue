@@ -113,7 +113,11 @@
           <q-item-section class="q-mx-none q-pl-none">
             <!-- toggle to turn Lightning address on and off in new row -->
             <div class="row q-pt-md">
-              <q-toggle v-model="npcEnabled" color="primary" />
+              <q-toggle
+                v-model="npcEnabled"
+                color="primary"
+                :aria-label="$t('Settings.lightning_address.enable.toggle')"
+              />
               <q-item-section>
                 <q-item-label title>{{
                   $t("Settings.lightning_address.enable.toggle")
@@ -153,7 +157,13 @@
                 </q-input>
               </div>
               <div class="row q-pt-md">
-                <q-toggle v-model="automaticClaim" color="primary" />
+                <q-toggle
+                  v-model="automaticClaim"
+                  color="primary"
+                  :aria-label="
+                    $t('Settings.lightning_address.automatic_claim.toggle')
+                  "
+                />
                 <q-item-section>
                   <q-item-label title>{{
                     $t("Settings.lightning_address.automatic_claim.toggle")
@@ -404,6 +414,8 @@
                     icon="add"
                     color="primary"
                     @click="addNostrRelay"
+                    :aria-label="$t('Settings.nostr_relays.add.title')"
+                    :title="$t('Settings.nostr_relays.add.title')"
                   ></q-btn>
                 </template>
               </q-input>
@@ -434,6 +446,8 @@
                 size="xs"
                 color="grey"
                 class="q-mr-sm cursor-pointer"
+                :aria-label="$t('Settings.nostr_relays.list.copy_tooltip')"
+                :title="$t('Settings.nostr_relays.list.copy_tooltip')"
                 ><q-tooltip>{{
                   $t("Settings.nostr_relays.list.copy_tooltip")
                 }}</q-tooltip></q-icon
@@ -449,6 +463,8 @@
                 size="1.3em"
                 color="grey"
                 class="q-mr-sm cursor-pointer"
+                :aria-label="$t('Settings.nostr_relays.list.remove_tooltip')"
+                :title="$t('Settings.nostr_relays.list.remove_tooltip')"
                 ><q-tooltip>{{
                   $t("Settings.nostr_relays.list.remove_tooltip")
                 }}</q-tooltip></q-icon
@@ -502,6 +518,9 @@
         <q-toggle
           v-model="receivePaymentRequestsAutomatically"
           color="primary"
+          :aria-label="
+            $t('Settings.payment_requests.claim_automatically.toggle')
+          "
         />
         <q-item-section>
           <q-item-label title>{{
@@ -629,7 +648,13 @@
                 outlined
                 rounded
                 dense
-                v-model="connection.allowanceLeft"
+                v-model.number="connection.allowanceLeft"
+                @update:model-value="
+                  updateConnectionAllowance(
+                    connection.connectionPublicKey,
+                    $event,
+                  )
+                "
                 :label="
                   $t('Settings.nostr_wallet_connect.connection.allowance_label')
                 "
@@ -673,6 +698,12 @@
                       icon="add"
                       color="primary"
                       @click="addRelay"
+                      :aria-label="
+                        $t('Settings.nostr_wallet_connect.relays.add.title')
+                      "
+                      :title="
+                        $t('Settings.nostr_wallet_connect.relays.add.title')
+                      "
                     ></q-btn>
                   </template>
                 </q-input>
@@ -701,6 +732,12 @@
                   size="xs"
                   color="grey"
                   class="q-mr-sm cursor-pointer"
+                  :aria-label="
+                    $t('Settings.nostr_wallet_connect.relays.list.copy_tooltip')
+                  "
+                  :title="
+                    $t('Settings.nostr_wallet_connect.relays.list.copy_tooltip')
+                  "
                   ><q-tooltip>{{
                     $t("Settings.nostr_wallet_connect.relays.list.copy_tooltip")
                   }}</q-tooltip></q-icon
@@ -716,6 +753,16 @@
                   size="1.3em"
                   color="grey"
                   class="q-mr-sm cursor-pointer"
+                  :aria-label="
+                    $t(
+                      'Settings.nostr_wallet_connect.relays.list.remove_tooltip',
+                    )
+                  "
+                  :title="
+                    $t(
+                      'Settings.nostr_wallet_connect.relays.list.remove_tooltip',
+                    )
+                  "
                   ><q-tooltip>{{
                     $t(
                       "Settings.nostr_wallet_connect.relays.list.remove_tooltip",
@@ -908,7 +955,7 @@
             </q-item>
             <q-item>
               <q-toggle
-                v-model="showP2PkButtonInDrawer"
+                v-model="showP2PKButtonInDrawer"
                 :label="$t('Settings.p2pk_features.quick_access.toggle')"
                 color="primary"
               /> </q-item
@@ -1264,7 +1311,7 @@
                 </q-item-label>
                 <div class="row q-py-md">
                   <q-btn dense flat rounded @click="toggleDarkMode" size="md">
-                    Toggle dark mode
+                    {{ $t("Settings.appearance.theme.toggle_dark_mode") }}
                     <q-icon
                       class="q-ml-sm"
                       :name="$q.dark.isActive ? 'brightness_3' : 'wb_sunny'"
@@ -1787,13 +1834,14 @@ import P2PKDialog from "./P2PKDialog.vue";
 import NWCDialog from "./NWCDialog.vue";
 
 import { getShortUrl } from "src/js/wallet-helpers";
+import { sanitizeRelayUrl } from "src/js/relay";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useMintsStore, MintClass } from "src/stores/mints";
 import { useWalletStore } from "src/stores/wallet";
 import { useMnemonicStore } from "src/stores/mnemonic";
 import { useSettingsStore } from "src/stores/settings";
 import { useNostrStore, publishDiscoveryProfile } from "src/stores/nostr";
-import { notifySuccess, notifyError } from "src/js/notify";
+import { notifySuccess, notifyError, notifyWarning } from "src/js/notify";
 import { useNPCStore } from "src/stores/npubcash";
 import { useP2PKStore } from "src/stores/p2pk";
 import { useCreatorProfileStore } from "src/stores/creatorProfile";
@@ -1810,396 +1858,437 @@ import { useStorageStore } from "src/stores/storage";
 import { useI18n } from "vue-i18n";
 
 export default defineComponent({
-  name: "SettingsView",
-  components: {
-    P2PKDialog,
-    NWCDialog,
-  },
-  mixins: [windowMixin],
-  setup() {
-    const { copy } = useClipboard();
-    const p2pkStore = useP2PKStore();
-    return { copy, p2pkStore };
-  },
-  props: {},
-  data: function () {
-    return {
-      themes: [
-        "monochrome",
-        "nostr",
-        "bitcoin",
-        "mint",
-        "autumn",
-        "salvador",
-        "freedom",
-        "cyber",
-        "flamingo",
-        "modern",
-      ],
-      selectedLanguage: navigator.language || "en-US",
-      languageOptions: [
-        { label: "English", value: "en-US" },
-        { label: "Español", value: "es-ES" },
-        { label: "Italiano", value: "it-IT" },
-        { label: "Deutsch", value: "de-DE" },
-        { label: "Français", value: "fr-FR" },
-        { label: "Svenska", value: "sv-SE" },
-        { label: "Ελληνικά", value: "el-GR" },
-        { label: "Türkçe", value: "tr-TR" },
-        { label: "ไทย", value: "th-TH" },
-        { label: "العربية", value: "ar-SA" },
-        { label: "中文", value: "zh-CN" },
-        { label: "日本語", value: "ja-JP" },
-      ],
-      discoveringMints: false,
-      hideMnemonic: true,
-      confirmMnemonic: false,
-      confirmNuke: false,
-      nip46Token: "",
-      nip07SignerAvailable: false,
-      newRelay: "",
-      newNostrRelay: "",
-    };
-  },
-  computed: {
-    ...mapWritableState(useSettingsStore, [
-      "getBitcoinPrice",
-      "checkSentTokens",
-      "useWebsockets",
-      "nfcEncoding",
-      "useNumericKeyboard",
-      "periodicallyCheckIncomingInvoices",
-      "checkIncomingInvoices",
-      "checkInvoicesOnStartup",
-      "enableReceiveSwaps",
-      "showNfcButtonInDrawer",
-      "autoPasteEcashReceive",
-      "autoRedeemLockedTokens",
-      "auditorEnabled",
-      "auditorUrl",
-      "auditorApiUrl",
-      "defaultNostrRelays",
-    ]),
-    ...mapState(useP2PKStore, ["p2pkKeys", "firstKey"]),
-    ...mapWritableState(useP2PKStore, [
-      "showP2PKDialog",
-      "showP2PkButtonInDrawer",
-    ]),
-    ...mapWritableState(useNWCStore, ["showNWCDialog", "showNWCData"]),
-    ...mapState(useMintsStore, ["activeMintUrl", "mints", "activeProofs"]),
-    ...mapState(useNPCStore, ["npcLoading"]),
-    ...mapState(useNostrStore, [
-      "pubkey",
-      "mintRecommendations",
-      "signerType",
-      "seedSignerPrivateKeyNsecComputed",
-    ]),
-    ...mapState(useMnemonicStore, ["mnemonic"]),
-    ...mapState(useUiStore, ["ndefSupported"]),
-    ...mapWritableState(useNPCStore, ["npcAddress"]),
-    ...mapWritableState(useNPCStore, ["npcEnabled", "automaticClaim"]),
-    ...mapWritableState(useWalletStore, ["keysetCounters"]),
-    ...mapWritableState(useMintsStore, [
-      "addMintData",
-      "showAddMintDialog",
-      "showRemoveMintDialog",
-    ]),
-    ...mapWritableState(useNWCStore, ["nwcEnabled", "connections", "relays"]),
-    ...mapWritableState(usePRStore, [
-      "enablePaymentRequest",
-      "receivePaymentRequestsAutomatically",
-    ]),
+	name: "SettingsView",
+	components: {
+		P2PKDialog,
+		NWCDialog,
+	},
+	mixins: [windowMixin],
+	setup() {
+		const { copy } = useClipboard();
+		const p2pkStore = useP2PKStore();
+		return { copy, p2pkStore };
+	},
+	props: {},
+	data: function () {
+		return {
+			themes: [
+				"monochrome",
+				"nostr",
+				"bitcoin",
+				"mint",
+				"autumn",
+				"salvador",
+				"freedom",
+				"cyber",
+				"flamingo",
+				"modern",
+			],
+			selectedLanguage: navigator.language || "en-US",
+			languageOptions: [
+				{ label: "English", value: "en-US" },
+				{ label: "Español", value: "es-ES" },
+				{ label: "Italiano", value: "it-IT" },
+				{ label: "Deutsch", value: "de-DE" },
+				{ label: "Français", value: "fr-FR" },
+				{ label: "Svenska", value: "sv-SE" },
+				{ label: "Ελληνικά", value: "el-GR" },
+				{ label: "Türkçe", value: "tr-TR" },
+				{ label: "ไทย", value: "th-TH" },
+				{ label: "العربية", value: "ar-SA" },
+				{ label: "中文", value: "zh-CN" },
+				{ label: "日本語", value: "ja-JP" },
+			],
+			discoveringMints: false,
+			hideMnemonic: true,
+			confirmMnemonic: false,
+			confirmNuke: false,
+			nip46Token: "",
+			nip07SignerAvailable: false,
+			newRelay: "",
+			newNostrRelay: "",
+		};
+	},
+	computed: {
+		...mapWritableState(useSettingsStore, [
+			"getBitcoinPrice",
+			"checkSentTokens",
+			"useWebsockets",
+			"nfcEncoding",
+			"useNumericKeyboard",
+			"periodicallyCheckIncomingInvoices",
+			"checkIncomingInvoices",
+			"checkInvoicesOnStartup",
+			"enableReceiveSwaps",
+			"showNfcButtonInDrawer",
+			"autoPasteEcashReceive",
+			"autoRedeemLockedTokens",
+			"auditorEnabled",
+			"auditorUrl",
+			"auditorApiUrl",
+			"defaultNostrRelays",
+		]),
+		...mapState(useP2PKStore, ["p2pkKeys", "firstKey"]),
+		...mapWritableState(useP2PKStore, [
+			"showP2PKDialog",
+			"showP2PKButtonInDrawer",
+		]),
+		...mapWritableState(useNWCStore, ["showNWCDialog", "showNWCData"]),
+		...mapState(useMintsStore, [
+			"activeMintUrl",
+			"mints",
+			"activeProofs",
+			"activeUnit",
+			"activeMint",
+		]),
+		...mapState(useNPCStore, ["npcLoading"]),
+		...mapState(useNostrStore, [
+			"pubkey",
+			"mintRecommendations",
+			"signerType",
+			"seedSignerPrivateKeyNsecComputed",
+		]),
+		...mapState(useMnemonicStore, ["mnemonic"]),
+		...mapState(useUiStore, ["ndefSupported"]),
+		...mapWritableState(useNPCStore, ["npcAddress"]),
+		...mapWritableState(useNPCStore, ["npcEnabled", "automaticClaim"]),
+		...mapWritableState(useWalletStore, ["keysetCounters"]),
+		...mapWritableState(useMintsStore, [
+			"addMintData",
+			"showAddMintDialog",
+			"showRemoveMintDialog",
+		]),
+		...mapWritableState(useNWCStore, ["nwcEnabled", "connections", "relays"]),
+		...mapWritableState(usePRStore, [
+			"enablePaymentRequest",
+			"receivePaymentRequestsAutomatically",
+		]),
 
-    keysetCountersByMint() {
-      const mints = this.mints;
-      const keysetCountersByMint = {}; // {mintUrl: [keysetCounter: {id: string, count: number}, ...]}
-      for (let mint of mints) {
-        const mintIds = mint.keysets.map((keyset) => keyset.id);
-        const keysetCounterThisMint = this.keysetCounters.filter((entry) =>
-          mintIds.includes(entry.id),
-        );
-        keysetCountersByMint[mint.url] = keysetCounterThisMint;
-      }
-      return keysetCountersByMint;
-    },
-    hiddenMnemonic() {
-      if (this.hideMnemonic) {
-        return this.mnemonic
-          .split(" ")
-          .map((w) => "*".repeat(6))
-          .join(" ");
-      } else {
-        return this.mnemonic;
-      }
-    },
-    enableNwc: {
-      get() {
-        return this.nwcEnabled;
-      },
-      set(value) {
-        this.nwcEnabled = value;
-      },
-    },
-  },
-  watch: {
-    enableNwc: function () {
-      if (this.enableNwc) {
-        this.listenToNWCCommands();
-      } else {
-        this.unsubscribeNWC();
-      }
-    },
-    npcEnabled: async function () {
-      if (this.npcEnabled) {
-        await this.initSigner();
-        await this.generateNPCConnection();
-      } else {
-        this.npcAddress = "";
-      }
-    },
-  },
-  methods: {
-    ...mapActions(useNostrStore, [
-      "init",
-      "initNip07Signer",
-      "initNip46Signer",
-      "initPrivateKeySigner",
-      "initWalletSeedPrivateKeySigner",
-      "checkNip07Signer",
-      "resetPrivateKeySigner",
-      "resetNip46Signer",
-      "initSigner",
-    ]),
-    ...mapActions(useNWCStore, [
-      "generateNWCConnection",
-      "listenToNWCCommands",
-      "unsubscribeNWC",
-      "getConnectionString",
-    ]),
-    ...mapActions(useP2PKStore, [
-      "importNsec",
-      "createAndSelectNewKey",
-      "showKeyDetails",
-    ]),
-    ...mapActions(useMintsStore, [
-      "addMint",
-      "removeMint",
-      "activateMintUrl",
-      "updateMint",
-    ]),
-    ...mapActions(useMnemonicStore, ["newMnemonic"]),
-    ...mapActions(useWalletStore, [
-      "decodeRequest",
-      "checkProofsSpendable",
-      "increaseKeysetCounter",
-    ]),
-    ...mapActions(useProofsStore, ["serializeProofs"]),
-    ...mapActions(useNPCStore, ["generateNPCConnection"]),
-    ...mapActions(useRestoreStore, ["restoreMint"]),
-    ...mapActions(useDexieStore, ["deleteAllTables"]),
-    ...mapActions(useStorageStore, ["restoreFromBackup", "exportWalletState"]),
-    generateNewMnemonic: async function () {
-      this.newMnemonic();
-      await this.initSigner();
-      await this.generateNPCConnection();
-    },
-    shortUrl: function (url) {
-      return getShortUrl(url);
-    },
-    toggleMnemonicVisibility: function () {
-      this.hideMnemonic = !this.hideMnemonic;
-    },
-    toggleTerminal: function () {
-      useUiStore().toggleDebugConsole();
-    },
-    toggleDarkMode: function () {
-      this.$q.dark.toggle();
-      this.$q.localStorage.set("cashu.darkMode", this.$q.dark.isActive);
-    },
-    unsetAllReservedProofs: async function () {
-      // mark all this.proofs as reserved=false
-      const proofsStore = useProofsStore();
-      await proofsStore.setReserved(await proofsStore.getProofs(), false);
-      this.notifySuccess("All reserved proofs unset");
-    },
-    checkActiveProofsSpendable: async function () {
-      // iterate over this.activeProofs in batches of 50 and check if they are spendable
-      let wallet = useWalletStore().mintWallet(
-        this.activeMintUrl,
-        this.activeUnit,
-      );
-      let proofs = this.activeProofs.flat();
-      debug("Checking proofs", proofs);
-      let allSpentProofs = [];
-      let batch_size = 50;
-      for (let i = 0; i < proofs.length; i += batch_size) {
-        debug("Checking proofs", i, i + batch_size);
-        let batch = proofs.slice(i, i + batch_size);
-        let spent = await this.checkProofsSpendable(batch, wallet, true);
-        allSpentProofs.push(spent);
-      }
-      let spentProofs = allSpentProofs.flat();
-      if (spentProofs.length > 0) {
-        debug("Spent proofs", spentProofs);
-        this.notifySuccess("Removed " + spentProofs.length + " spent proofs");
-      } else {
-        this.notifySuccess("No spent proofs found");
-      }
-    },
-    showP2PKKeyEntry: async function (pubKey) {
-      this.showKeyDetails(pubKey);
-      this.showP2PKDialog = true;
-    },
-    showNWCEntry: async function (connection) {
-      this.showNWCData = {
-        connection,
-        connectionString: this.getConnectionString(connection),
-      };
-      this.showNWCDialog = true;
-    },
-    exportActiveProofs: async function () {
-      // export active proofs
-      const token = await this.serializeProofs(this.activeProofs);
-      this.copy(token);
-    },
-    doPublish: async function () {
-      try {
-        await useNostrStore().initSignerIfNotSet();
-      } catch (e) {
-        useUiStore().showMissingSignerModal = true;
-        return;
-      }
-      try {
-        if (!this.firstKey) {
-          notifyError("No P2PK key");
-          return;
-        }
-        const profileStore = useCreatorProfileStore();
-        await publishDiscoveryProfile({
-          profile: {
-            display_name: profileStore.display_name,
-            picture: profileStore.picture,
-            about: profileStore.about,
-          },
-          p2pkPub: this.firstKey.publicKey,
-          mints: profileStore.mints,
-          relays: profileStore.relays,
-        });
-        notifySuccess("Profile published");
-      } catch (e: any) {
-        notifyError(e?.message || "Failed to publish");
-      }
-    },
-    handleSeedClick: async function () {
-      await this.initWalletSeedPrivateKeySigner();
-      await this.generateNPCConnection();
-    },
-    handleExtensionClick: async function () {
-      await this.initNip07Signer();
-      await this.generateNPCConnection();
-    },
-    handleBunkerClick: async function () {
-      await this.initNip46Signer();
-      await this.generateNPCConnection();
-    },
-    handleNsecClick: async function () {
-      await this.initPrivateKeySigner();
-      await this.generateNPCConnection();
-    },
-    handleResetPrivateKeySigner: async function () {
-      await this.resetPrivateKeySigner();
-      await this.generateNPCConnection();
-    },
-    handleResetNip46Signer: async function () {
-      await this.resetNip46Signer();
-      await this.generateNPCConnection();
-    },
-    showOnboarding: function () {
-      const store = useWelcomeStore();
-      store.welcomeCompleted = false;
-      this.$router.push("/welcome?first=1");
-    },
-    nukeWallet: async function () {
-      // create a backup just in case
-      await this.exportWalletState();
-      // clear dexie tables
-      this.deleteAllTables();
-      localStorage.clear();
-      window.location.href = "/";
-    },
-    addRelay: function () {
-      if (this.newRelay) {
-        this.newRelay = this.newRelay.trim();
-        // if relay is already in relays, don't add it, send notification
-        if (this.relays.includes(this.newRelay)) {
-          this.notifyWarning("Relay already added");
-        } else {
-          this.relays.push(this.newRelay);
-          const profileStore = useCreatorProfileStore();
-          if (!profileStore.relays.includes(this.newRelay)) {
-            profileStore.relays.push(this.newRelay);
-          }
-          this.newRelay = "";
-        }
-      }
-    },
-    removeRelay: function (relay) {
-      this.relays = this.relays.filter((r) => r !== relay);
-      const profileStore = useCreatorProfileStore();
-      profileStore.relays = profileStore.relays.filter((r) => r !== relay);
-    },
-    addNostrRelay: function () {
-      if (this.newNostrRelay) {
-        this.newNostrRelay = this.newNostrRelay.trim();
-        if (this.defaultNostrRelays.includes(this.newNostrRelay)) {
-          this.notifyWarning("Relay already added");
-        } else {
-          this.defaultNostrRelays.push(this.newNostrRelay);
-          const profileStore = useCreatorProfileStore();
-          if (!profileStore.relays.includes(this.newNostrRelay)) {
-            profileStore.relays.push(this.newNostrRelay);
-          }
-          this.newNostrRelay = "";
-        }
-      }
-    },
-    removeNostrRelay: function (relay) {
-      this.defaultNostrRelays = this.defaultNostrRelays.filter(
-        (r) => r !== relay,
-      );
-      const profileStore = useCreatorProfileStore();
-      profileStore.relays = profileStore.relays.filter((r) => r !== relay);
-    },
-    updateNostrRelay: function (index: number, value: string) {
-      const val = value.trim();
-      this.defaultNostrRelays.splice(index, 1, val);
-      const profileStore = useCreatorProfileStore();
-      profileStore.relays.splice(index, 1, val);
-    },
-    changeLanguage(locale) {
-      if (locale === "en") {
-        locale = "en-US";
-      }
-      // Set the i18n locale
-      this.$i18n.locale = locale;
+		keysetCountersByMint() {
+			const mints = this.mints;
+			const keysetCountersByMint = {}; // {mintUrl: [keysetCounter: {id: string, count: number}, ...]}
+			for (let mint of mints) {
+				const mintIds = mint.keysets.map((keyset) => keyset.id);
+				const keysetCounterThisMint = this.keysetCounters.filter((entry) =>
+					mintIds.includes(entry.id),
+				);
+				keysetCountersByMint[mint.url] = keysetCounterThisMint;
+			}
+			return keysetCountersByMint;
+		},
+		hiddenMnemonic() {
+			if (this.hideMnemonic) {
+				return this.mnemonic
+					.split(" ")
+					.map((w) => "*".repeat(6))
+					.join(" ");
+			} else {
+				return this.mnemonic;
+			}
+		},
+		enableNwc: {
+			get() {
+				return this.nwcEnabled;
+			},
+			set(value) {
+				this.nwcEnabled = value;
+			},
+		},
+	},
+	watch: {
+		enableNwc: function () {
+			if (this.enableNwc) {
+				this.listenToNWCCommands();
+			} else {
+				this.unsubscribeNWC();
+			}
+		},
+		npcEnabled: async function () {
+			if (this.npcEnabled) {
+				await this.initSigner();
+				await this.generateNPCConnection();
+			} else {
+				this.npcAddress = "";
+			}
+		},
+	},
+	methods: {
+		...mapActions(useNostrStore, [
+			"init",
+			"initNip07Signer",
+			"initNip46Signer",
+			"initPrivateKeySigner",
+			"initWalletSeedPrivateKeySigner",
+			"checkNip07Signer",
+			"resetPrivateKeySigner",
+			"resetNip46Signer",
+			"initSigner",
+		]),
+		...mapActions(useNWCStore, [
+			"generateNWCConnection",
+			"listenToNWCCommands",
+			"unsubscribeNWC",
+			"getConnectionString",
+			"updateConnectionAllowance",
+		]),
+		...mapActions(useP2PKStore, [
+			"importNsec",
+			"createAndSelectNewKey",
+			"showKeyDetails",
+		]),
+		...mapActions(useMintsStore, [
+			"addMint",
+			"removeMint",
+			"activateMintUrl",
+			"updateMint",
+		]),
+		...mapActions(useMnemonicStore, ["newMnemonic"]),
+		...mapActions(useWalletStore, [
+			"decodeRequest",
+			"checkProofsSpendable",
+			"increaseKeysetCounter",
+		]),
+		...mapActions(useProofsStore, ["serializeProofs"]),
+		...mapActions(useNPCStore, ["generateNPCConnection"]),
+		...mapActions(useRestoreStore, ["restoreMint"]),
+		...mapActions(useDexieStore, ["deleteAllTables"]),
+		...mapActions(useStorageStore, ["restoreFromBackup", "exportWalletState"]),
+		generateNewMnemonic: async function () {
+			this.newMnemonic();
+			await this.initSigner();
+			await this.generateNPCConnection();
+		},
+		shortUrl: function (url) {
+			return getShortUrl(url);
+		},
+		toggleMnemonicVisibility: function () {
+			this.hideMnemonic = !this.hideMnemonic;
+		},
+		toggleTerminal: function () {
+			useUiStore().toggleDebugConsole();
+		},
+		toggleDarkMode: function () {
+			this.$q.dark.toggle();
+			this.$q.localStorage.set("cashu.darkMode", this.$q.dark.isActive);
+		},
+		unsetAllReservedProofs: async function () {
+			// mark all this.proofs as reserved=false
+			const proofsStore = useProofsStore();
+			await proofsStore.setReserved(await proofsStore.getProofs(), false);
+			notifySuccess(
+				this.$t("Settings.notifications.all_reserved_proofs_unset"),
+			);
+		},
+		checkActiveProofsSpendable: async function () {
+			// iterate over this.activeProofs in batches of 50 and check if they are spendable
+			const unit = this.activeUnit || this.activeMint?.unit || "sat";
+			if (!this.activeMintUrl) return;
+			const wallet = useWalletStore().mintWallet(this.activeMintUrl, unit);
+			let proofs = this.activeProofs.flat();
+			debug("Checking proofs", proofs);
+			let allSpentProofs = [];
+			let batch_size = 50;
+			for (let i = 0; i < proofs.length; i += batch_size) {
+				debug("Checking proofs", i, i + batch_size);
+				let batch = proofs.slice(i, i + batch_size);
+				let spent = await this.checkProofsSpendable(batch, wallet, true);
+				allSpentProofs.push(spent);
+			}
+			let spentProofs = allSpentProofs.flat();
+			if (spentProofs.length > 0) {
+				debug("Spent proofs", spentProofs);
+				notifySuccess(
+					this.$t("Settings.notifications.removed_spent_proofs", {
+						count: spentProofs.length,
+					}),
+				);
+			} else {
+				notifySuccess(this.$t("Settings.notifications.no_spent_proofs_found"));
+			}
+		},
+		showP2PKKeyEntry: async function (pubKey) {
+			this.showKeyDetails(pubKey);
+			this.showP2PKDialog = true;
+		},
+		showNWCEntry: async function (connection) {
+			this.showNWCData = {
+				connection,
+				connectionString: this.getConnectionString(connection),
+			};
+			this.showNWCDialog = true;
+		},
+		exportActiveProofs: async function () {
+			// export active proofs
+			const token = await this.serializeProofs(this.activeProofs);
+			this.copy(token);
+		},
+		doPublish: async function () {
+			try {
+				await useNostrStore().initSignerIfNotSet();
+			} catch (e) {
+				useUiStore().showMissingSignerModal = true;
+				return;
+			}
+			try {
+				if (!this.firstKey) {
+					notifyError(this.$t("Settings.notifications.no_p2pk_key"));
+					return;
+				}
+				const profileStore = useCreatorProfileStore();
+				await publishDiscoveryProfile({
+					profile: {
+						display_name: profileStore.display_name,
+						picture: profileStore.picture,
+						about: profileStore.about,
+					},
+					p2pkPub: this.firstKey.publicKey,
+					mints: profileStore.mints,
+					relays: profileStore.relays,
+				});
+				notifySuccess("Profile published");
+			} catch (e: any) {
+				notifyError(
+					e?.message || this.$t("Settings.notifications.failed_to_publish"),
+				);
+			}
+		},
+		handleSeedClick: async function () {
+			await this.initWalletSeedPrivateKeySigner();
+			await this.generateNPCConnection();
+		},
+		handleExtensionClick: async function () {
+			await this.initNip07Signer();
+			await this.generateNPCConnection();
+		},
+		handleBunkerClick: async function () {
+			await this.initNip46Signer();
+			await this.generateNPCConnection();
+		},
+		handleNsecClick: async function () {
+			await this.initPrivateKeySigner();
+			await this.generateNPCConnection();
+		},
+		handleResetPrivateKeySigner: async function () {
+			await this.resetPrivateKeySigner();
+			await this.generateNPCConnection();
+		},
+		handleResetNip46Signer: async function () {
+			await this.resetNip46Signer();
+			await this.generateNPCConnection();
+		},
+		showOnboarding: function () {
+			const store = useWelcomeStore();
+			store.welcomeCompleted = false;
+			this.$router.push("/welcome?first=1");
+		},
+		nukeWallet: async function () {
+			// create a backup just in case
+			await this.exportWalletState();
+			// clear dexie tables
+			this.deleteAllTables();
+			localStorage.clear();
+			window.location.href = "/";
+		},
+		addRelay: function () {
+			if (this.newRelay) {
+				const { url, error } = sanitizeRelayUrl(this.newRelay, this.relays);
+				if (error === "duplicate") {
+					notifyWarning(this.$t("Settings.notifications.relay_already_added"));
+					return;
+				}
+				if (error === "invalid" || !url) {
+					notifyError(this.$t("Settings.notifications.invalid_relay_url"));
+					return;
+				}
+				this.relays.push(url);
+				const profileStore = useCreatorProfileStore();
+				if (
+					!profileStore.relays.some(
+						(r) => r.toLowerCase() === url.toLowerCase(),
+					)
+				) {
+					profileStore.relays.push(url);
+				}
+				this.newRelay = "";
+			}
+		},
+		removeRelay: function (relay) {
+			this.relays = this.relays.filter((r) => r !== relay);
+			const profileStore = useCreatorProfileStore();
+			profileStore.relays = profileStore.relays.filter((r) => r !== relay);
+		},
+		addNostrRelay: function () {
+			if (this.newNostrRelay) {
+				const { url, error } = sanitizeRelayUrl(
+					this.newNostrRelay,
+					this.defaultNostrRelays,
+				);
+				if (error === "duplicate") {
+					notifyWarning(this.$t("Settings.notifications.relay_already_added"));
+					return;
+				}
+				if (error === "invalid" || !url) {
+					notifyError(this.$t("Settings.notifications.invalid_relay_url"));
+					return;
+				}
+				this.defaultNostrRelays.push(url);
+				const profileStore = useCreatorProfileStore();
+				if (
+					!profileStore.relays.some(
+						(r) => r.toLowerCase() === url.toLowerCase(),
+					)
+				) {
+					profileStore.relays.push(url);
+				}
+				this.newNostrRelay = "";
+			}
+		},
+		removeNostrRelay: function (relay) {
+			this.defaultNostrRelays = this.defaultNostrRelays.filter(
+				(r) => r !== relay,
+			);
+			const profileStore = useCreatorProfileStore();
+			profileStore.relays = profileStore.relays.filter((r) => r !== relay);
+		},
+		updateNostrRelay: function (index: number, value: string) {
+			const list = this.defaultNostrRelays.filter((_, i) => i !== index);
+			const { url, error } = sanitizeRelayUrl(value, list);
+			if (error === "duplicate") {
+				notifyWarning(this.$t("Settings.notifications.relay_already_added"));
+				return;
+			}
+			if (error === "invalid" || !url) {
+				notifyError(this.$t("Settings.notifications.invalid_relay_url"));
+				return;
+			}
+			this.defaultNostrRelays.splice(index, 1, url);
+			const profileStore = useCreatorProfileStore();
+			profileStore.relays.splice(index, 1, url);
+		},
+		changeLanguage(locale) {
+			if (locale === "en") {
+				locale = "en-US";
+			}
+			// Set the i18n locale
+			this.$i18n.locale = locale;
 
-      // Store the selected language in localStorage
-      localStorage.setItem("cashu.language", locale);
+			// Store the selected language in localStorage
+			localStorage.setItem("cashu.language", locale);
 
-      // // Reload the page to apply the language change
-      // setTimeout(() => {
-      //   window.location.reload();
-      // }, 300);
-    },
-  },
-  created: async function () {
-    this.nip07SignerAvailable = await this.checkNip07Signer();
-    debug("Nip07 signer available", this.nip07SignerAvailable);
-    // Set the initial selected language based on the current locale
-    const currentLocale =
-      this.$i18n.locale === "en" ? "en-US" : this.$i18n.locale;
-    this.selectedLanguage = currentLocale;
-  },
+			// // Reload the page to apply the language change
+			// setTimeout(() => {
+			//   window.location.reload();
+			// }, 300);
+		},
+	},
+	created: async function () {
+		this.nip07SignerAvailable = await this.checkNip07Signer();
+		debug("Nip07 signer available", this.nip07SignerAvailable);
+		// Set the initial selected language based on the current locale
+		const currentLocale =
+			this.$i18n.locale === "en" ? "en-US" : this.$i18n.locale;
+		this.selectedLanguage = currentLocale;
+	},
 });
 </script>
 <style>

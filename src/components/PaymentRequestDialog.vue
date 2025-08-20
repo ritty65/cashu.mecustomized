@@ -115,8 +115,8 @@ import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useClipboard } from "src/composables/useClipboard";
 import { defineAsyncComponent } from "vue";
-const VueQrcode = defineAsyncComponent(() =>
-  import("@chenfengyuan/vue-qrcode"),
+const VueQrcode = defineAsyncComponent(
+	() => import("@chenfengyuan/vue-qrcode"),
 );
 
 import { usePRStore } from "src/stores/payment-request";
@@ -126,105 +126,105 @@ import { useUiStore } from "../stores/ui";
 import ToggleUnit from "./ToggleUnit.vue";
 
 export default defineComponent({
-  name: "PRDialog",
-  mixins: [windowMixin],
-  components: {
-    VueQrcode,
-    ToggleUnit,
-  },
-  setup() {
-    const { copy } = useClipboard();
-    return { copy };
-  },
-  data() {
-    const amountLabelDefault = this.$t(
-      "PaymentRequestDialog.actions.add_amount.label",
-    );
-    return {
-      paymentRequestAmount: undefined,
-      isEditingAmount: false,
-      amountInputValue: "",
-      amountLabelDefault,
-      amountLabel: amountLabelDefault,
-      defaultAnyMint: this.$t(
-        "PaymentRequestDialog.actions.use_active_mint.label",
-      ),
-      chosenMintUrl: undefined,
-      memo: "",
-    };
-  },
-  computed: {
-    ...mapState(usePRStore, ["showPRKData"]),
-    ...mapState(useMintsStore, [
-      "activeMintUrl",
-      "activeUnit",
-      "activeUnitCurrencyMultiplyer",
-    ]),
-    ...mapWritableState(usePRStore, ["showPRDialog"]),
-  },
-  methods: {
-    ...mapActions(usePRStore, ["newPaymentRequest"]),
-    toggleUnit() {
-      this.paymentRequestAmount = undefined;
-      this.amountLabel = this.amountLabelDefault;
-      this.newPaymentRequest(
-        this.paymentRequestAmount,
-        this.memo,
-        this.chosenMintUrl,
-      );
-    },
-    newRequest() {
-      this.newPaymentRequest(
-        this.paymentRequestAmount,
-        this.memo,
-        this.chosenMintUrl,
-      );
-    },
-    getShortUrl(url) {
-      if (!url) {
-        return this.defaultAnyMint;
-      }
-      return getShortUrl(url);
-    },
-    setActiveMintUrl() {
-      if (this.activeMintUrl == this.chosenMintUrl) {
-        return;
-      }
-      this.chosenMintUrl = this.activeMintUrl;
-      this.newPaymentRequest(
-        this.paymentRequestAmount,
-        this.memo,
-        this.chosenMintUrl,
-      );
-    },
-    startEditingAmount() {
-      this.isEditingAmount = true;
-      this.$nextTick(() => {
-        if (this.$refs.amountInput) {
-          this.$refs.amountInput.focus();
-        }
-      });
-    },
-    finishEditingAmount() {
-      const amount = parseFloat(this.amountInputValue);
-      if (isNaN(amount) || amount <= 0 || this.amountInputValue == "") {
-        this.paymentRequestAmount = undefined;
-        this.amountLabel = this.amountLabelDefault;
-      } else {
-        this.paymentRequestAmount = amount * this.activeUnitCurrencyMultiplyer;
-        this.amountLabel = useUiStore().formatCurrency(
-          amount * this.activeUnitCurrencyMultiplyer,
-          this.activeUnit,
-        );
-      }
-      this.newPaymentRequest(
-        this.paymentRequestAmount,
-        this.memo,
-        this.chosenMintUrl,
-      );
-      this.isEditingAmount = false;
-      this.amountInputValue = "";
-    },
-  },
+	name: "PRDialog",
+	mixins: [windowMixin],
+	components: {
+		VueQrcode,
+		ToggleUnit,
+	},
+	setup() {
+		const { copy } = useClipboard();
+		return { copy };
+	},
+	data() {
+		const amountLabelDefault = this.$t(
+			"PaymentRequestDialog.actions.add_amount.label",
+		);
+		return {
+			paymentRequestAmount: undefined,
+			isEditingAmount: false,
+			amountInputValue: "",
+			amountLabelDefault,
+			amountLabel: amountLabelDefault,
+			defaultAnyMint: this.$t(
+				"PaymentRequestDialog.actions.use_active_mint.label",
+			),
+			chosenMintUrl: undefined,
+			memo: "",
+		};
+	},
+	computed: {
+		...mapState(usePRStore, ["showPRKData"]),
+		...mapState(useMintsStore, [
+			"activeMintUrl",
+			"activeUnit",
+			"activeUnitCurrencyMultiplyer",
+		]),
+		...mapWritableState(usePRStore, ["showPRDialog"]),
+	},
+	methods: {
+		...mapActions(usePRStore, ["newPaymentRequest"]),
+		toggleUnit() {
+			this.paymentRequestAmount = undefined;
+			this.amountLabel = this.amountLabelDefault;
+			this.newPaymentRequest(
+				this.paymentRequestAmount,
+				this.memo,
+				this.chosenMintUrl,
+			);
+		},
+		newRequest() {
+			this.newPaymentRequest(
+				this.paymentRequestAmount,
+				this.memo,
+				this.chosenMintUrl,
+			);
+		},
+		getShortUrl(url) {
+			if (!url) {
+				return this.defaultAnyMint;
+			}
+			return getShortUrl(url);
+		},
+		setActiveMintUrl() {
+			if (this.activeMintUrl == this.chosenMintUrl) {
+				return;
+			}
+			this.chosenMintUrl = this.activeMintUrl;
+			this.newPaymentRequest(
+				this.paymentRequestAmount,
+				this.memo,
+				this.chosenMintUrl,
+			);
+		},
+		startEditingAmount() {
+			this.isEditingAmount = true;
+			this.$nextTick(() => {
+				if (this.$refs.amountInput) {
+					this.$refs.amountInput.focus();
+				}
+			});
+		},
+		finishEditingAmount() {
+			const amount = parseFloat(this.amountInputValue);
+			if (isNaN(amount) || amount <= 0 || this.amountInputValue == "") {
+				this.paymentRequestAmount = undefined;
+				this.amountLabel = this.amountLabelDefault;
+			} else {
+				this.paymentRequestAmount = amount * this.activeUnitCurrencyMultiplyer;
+				this.amountLabel = useUiStore().formatCurrency(
+					amount * this.activeUnitCurrencyMultiplyer,
+					this.activeUnit,
+				);
+			}
+			this.newPaymentRequest(
+				this.paymentRequestAmount,
+				this.memo,
+				this.chosenMintUrl,
+			);
+			this.isEditingAmount = false;
+			this.amountInputValue = "";
+		},
+	},
 });
 </script>

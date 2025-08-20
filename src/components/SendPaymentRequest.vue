@@ -43,81 +43,81 @@ import { usePRStore } from "src/stores/payment-request";
 import { PaymentRequest, PaymentRequestTransportType } from "@cashu/cashu-ts";
 
 export default defineComponent({
-  name: "SendPaymentRequest",
-  mixins: [windowMixin],
-  props: {},
-  data: function () {
-    return {
-      loading: false,
-    };
-  },
-  watch: {},
-  computed: {
-    ...mapWritableState(useSendTokensStore, [
-      "showSendTokens",
-      "showLockInput",
-      "sendData",
-    ]),
-    ...mapState(useMintsStore, ["activeMintUrl", "mints"]),
-  },
-  methods: {
-    ...mapActions(useP2PKStore, ["isLocked", "isLockedToUs"]),
-    ...mapActions(usePRStore, ["parseAndPayPaymentRequest"]),
-    clickPaymentRequest: async function () {
-      this.loading = true;
-      try {
-        await this.parseAndPayPaymentRequest(
-          this.sendData.paymentRequest,
-          this.sendData.tokensBase64,
-        );
-      } catch (error) {
-        console.error(error);
-        notifyError("Error paying payment request");
-      } finally {
-        this.loading = false;
-      }
-    },
-    getPaymentRequestTransportType: function (request) {
-      if (!request || !request.transport) {
-        return "Unknown";
-      }
-      debug(`### getPaymentRequestTransportType: ${request}`);
-      const transports = request.transport;
-      for (const transport of transports) {
-        if (transport.type == PaymentRequestTransportType.NOSTR) {
-          return "Nostr";
-        }
-        if (transport.type == PaymentRequestTransportType.POST) {
-          return "HTTP";
-        }
-      }
-    },
-    getPaymentRequestTarget: function (request) {
-      if (!request || !request.transport) {
-        return "Unknown";
-      }
-      debug(`### getPaymentRequestDestination: ${request}`);
-      const transports = request.transport;
-      for (const transport of transports) {
-        if (transport.type == PaymentRequestTransportType.NOSTR) {
-          return `${transport.target.slice(0, 20)}..${transport.target.slice(
-            -10,
-          )}`;
-        }
-        if (transport.type == PaymentRequestTransportType.POST) {
-          try {
-            const url = new URL(transport.target);
-            return url.hostname;
-          } catch (error) {
-            console.error(
-              `Invalid URL in transport.target: ${transport.target}`,
-              error,
-            );
-            return "Invalid URL";
-          }
-        }
-      }
-    },
-  },
+	name: "SendPaymentRequest",
+	mixins: [windowMixin],
+	props: {},
+	data: function () {
+		return {
+			loading: false,
+		};
+	},
+	watch: {},
+	computed: {
+		...mapWritableState(useSendTokensStore, [
+			"showSendTokens",
+			"showLockInput",
+			"sendData",
+		]),
+		...mapState(useMintsStore, ["activeMintUrl", "mints"]),
+	},
+	methods: {
+		...mapActions(useP2PKStore, ["isLocked", "isLockedToUs"]),
+		...mapActions(usePRStore, ["parseAndPayPaymentRequest"]),
+		clickPaymentRequest: async function () {
+			this.loading = true;
+			try {
+				await this.parseAndPayPaymentRequest(
+					this.sendData.paymentRequest,
+					this.sendData.tokensBase64,
+				);
+			} catch (error) {
+				console.error(error);
+				notifyError("Error paying payment request");
+			} finally {
+				this.loading = false;
+			}
+		},
+		getPaymentRequestTransportType: function (request) {
+			if (!request || !request.transport) {
+				return "Unknown";
+			}
+			debug(`### getPaymentRequestTransportType: ${request}`);
+			const transports = request.transport;
+			for (const transport of transports) {
+				if (transport.type == PaymentRequestTransportType.NOSTR) {
+					return "Nostr";
+				}
+				if (transport.type == PaymentRequestTransportType.POST) {
+					return "HTTP";
+				}
+			}
+		},
+		getPaymentRequestTarget: function (request) {
+			if (!request || !request.transport) {
+				return "Unknown";
+			}
+			debug(`### getPaymentRequestDestination: ${request}`);
+			const transports = request.transport;
+			for (const transport of transports) {
+				if (transport.type == PaymentRequestTransportType.NOSTR) {
+					return `${transport.target.slice(0, 20)}..${transport.target.slice(
+						-10,
+					)}`;
+				}
+				if (transport.type == PaymentRequestTransportType.POST) {
+					try {
+						const url = new URL(transport.target);
+						return url.hostname;
+					} catch (error) {
+						console.error(
+							`Invalid URL in transport.target: ${transport.target}`,
+							error,
+						);
+						return "Invalid URL";
+					}
+				}
+			}
+		},
+	},
 });
 </script>

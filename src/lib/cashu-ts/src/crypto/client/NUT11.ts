@@ -1,18 +1,18 @@
-import { PrivKey, bytesToHex, hexToBytes } from '@noble/curves/abstract/utils';
-import { sha256 } from '@noble/hashes/sha256';
-import { schnorr } from '@noble/curves/secp256k1';
-import { randomBytes } from '@noble/hashes/utils';
-import { parseSecret } from '../common/NUT11.js';
-import { Proof, Secret } from '../common/index.js';
-import { BlindedMessage } from './index.js';
+import { PrivKey, bytesToHex, hexToBytes } from "@noble/curves/abstract/utils";
+import { sha256 } from "@noble/hashes/sha256";
+import { schnorr } from "@noble/curves/secp256k1";
+import { randomBytes } from "@noble/hashes/utils";
+import { parseSecret } from "../common/NUT11.js";
+import { Proof, Secret } from "../common/index.js";
+import { BlindedMessage } from "./index.js";
 
 export const createP2PKsecret = (pubkey: string): Uint8Array => {
 	const newSecret: Secret = [
-		'P2PK',
+		"P2PK",
 		{
 			nonce: bytesToHex(randomBytes(32)),
-			data: pubkey
-		}
+			data: pubkey,
+		},
 	];
 	const parsed = JSON.stringify(newSecret);
 	return new TextEncoder().encode(parsed);
@@ -24,7 +24,10 @@ export const signP2PKsecret = (secret: Uint8Array, privateKey: PrivKey) => {
 	return sig;
 };
 
-export const signBlindedMessage = (B_: string, privateKey: PrivKey): Uint8Array => {
+export const signBlindedMessage = (
+	B_: string,
+	privateKey: PrivKey,
+): Uint8Array => {
 	const msgHash = sha256(B_);
 	const sig = schnorr.sign(msgHash, privateKey);
 	return sig;
@@ -32,10 +35,10 @@ export const signBlindedMessage = (B_: string, privateKey: PrivKey): Uint8Array 
 
 export const getSignedProofs = (
 	proofs: Array<Proof>,
-	privateKey: string | string[]
+	privateKey: string | string[],
 ): Array<Proof> => {
 	let keypairs: Array<{ priv: string; pub: string }> = [];
-	let pk = '';
+	let pk = "";
 
 	if (privateKey instanceof Array) {
 		for (const k of privateKey) {
@@ -48,13 +51,15 @@ export const getSignedProofs = (
 	return proofs.map((p) => {
 		try {
 			const parsed: Secret = parseSecret(p.secret);
-			if (parsed[0] !== 'P2PK') {
-				throw new Error('unknown secret type');
+			if (parsed[0] !== "P2PK") {
+				throw new Error("unknown secret type");
 			}
 			if (keypairs.length) {
-				const matchingKey = keypairs.find((pair) => parsed[1].data === pair.pub)?.priv;
+				const matchingKey = keypairs.find(
+					(pair) => parsed[1].data === pair.pub,
+				)?.priv;
 				if (!matchingKey) {
-					throw new Error('no matching key found');
+					throw new Error("no matching key found");
 				} else {
 					pk = matchingKey;
 				}
@@ -66,7 +71,10 @@ export const getSignedProofs = (
 	});
 };
 
-export const getSignedOutput = (output: BlindedMessage, privateKey: PrivKey): BlindedMessage => {
+export const getSignedOutput = (
+	output: BlindedMessage,
+	privateKey: PrivKey,
+): BlindedMessage => {
 	const B_ = output.B_.toHex(true);
 	const signature = signBlindedMessage(B_, privateKey);
 	output.witness = { signatures: [bytesToHex(signature)] };
@@ -75,7 +83,7 @@ export const getSignedOutput = (output: BlindedMessage, privateKey: PrivKey): Bl
 
 export const getSignedOutputs = (
 	outputs: Array<BlindedMessage>,
-	privateKey: string
+	privateKey: string,
 ): Array<BlindedMessage> => {
 	return outputs.map((o) => getSignedOutput(o, privateKey));
 };
@@ -83,7 +91,7 @@ export const getSignedOutputs = (
 export const getSignedProof = (proof: Proof, privateKey: PrivKey): Proof => {
 	if (!proof.witness) {
 		proof.witness = {
-			signatures: [bytesToHex(signP2PKsecret(proof.secret, privateKey))]
+			signatures: [bytesToHex(signP2PKsecret(proof.secret, privateKey))],
 		};
 	}
 	return proof;

@@ -101,32 +101,32 @@
 import { debug } from "src/js/logger";
 
 interface MintRead {
-  id: number;
-  url: string;
-  info?: string;
-  name?: string;
-  balance: number;
-  sum_donations?: number;
-  updated_at: string;
-  next_update?: string;
-  state: string;
-  n_errors: number;
-  n_mints: number;
-  n_melts: number;
+	id: number;
+	url: string;
+	info?: string;
+	name?: string;
+	balance: number;
+	sum_donations?: number;
+	updated_at: string;
+	next_update?: string;
+	state: string;
+	n_errors: number;
+	n_mints: number;
+	n_melts: number;
 }
 
 interface SwapEventRead {
-  id: number;
-  from_id: number;
-  to_id: number;
-  from_url: string;
-  to_url: string;
-  amount: number;
-  fee: number;
-  created_at: string;
-  time_taken: number;
-  state: string;
-  error: string;
+	id: number;
+	from_id: number;
+	to_id: number;
+	from_url: string;
+	to_url: string;
+	amount: number;
+	fee: number;
+	created_at: string;
+	time_taken: number;
+	state: string;
+	error: string;
 }
 
 import MintAuditWarningBox from "./MintAuditWarningBox.vue";
@@ -138,161 +138,161 @@ import { getShortUrl } from "../js/wallet-helpers";
 import { isTrustedUrl } from "src/utils/sanitize-url";
 
 export default {
-  name: "MintAuditInfo",
-  components: {
-    MintAuditWarningBox,
-    MintAuditSwapsBarChart,
-  },
-  props: {
-    mintUrl: {
-      type: String,
-      required: true,
-    },
-  },
-  data() {
-    const settingsStore = useSettingsStore();
-    return {
-      auditorApiUrl: settingsStore.auditorApiUrl,
-      auditUrl: isTrustedUrl(settingsStore.auditorUrl)
-        ? settingsStore.auditorUrl
-        : "#",
-      auditUrlShort: getShortUrl(settingsStore.auditorUrl),
-      mintNotAudited: false,
-      loading: true,
-      error: null,
-      couldFetchInfo: true,
-      mints: [] as MintRead[],
-      mintInfo: null as MintRead | null,
-      mintSwaps: [] as SwapEventRead[],
-      limit: 100,
-      skip: 0,
-      allLoaded: false,
-      loadingMore: false,
-    };
-  },
-  computed: {
-    successfulSwaps() {
-      return this.mintSwaps.filter((swap) => swap.state === "OK").length;
-    },
-    successRate() {
-      if (this.mintSwaps.length === 0) return 0;
-      return Math.round((this.successfulSwaps / this.mintSwaps.length) * 100);
-    },
-    averageTime() {
-      const successfulSwapsWithTime = this.mintSwaps.filter(
-        (swap) => swap.state === "OK" && swap.time_taken,
-      );
-      if (successfulSwapsWithTime.length === 0) return 0;
-      const totalTime = successfulSwapsWithTime.reduce(
-        (sum, swap) => sum + (swap.time_taken || 0),
-        0,
-      );
-      return totalTime / successfulSwapsWithTime.length;
-    },
-  },
-  mounted() {
-    this.loadMintData();
-  },
-  methods: {
-    async loadMintData() {
-      try {
-        this.loading = true;
-        await this.getMintInfo();
-        if (this.mintInfo && this.mintInfo.id) {
-          await this.getMintSwaps(this.mintInfo.id);
-        }
-      } catch (err: any) {
-        this.error = err.message || "Failed to load mint data";
-      } finally {
-        this.loading = false;
-      }
-    },
-    async getMintInfo() {
-      try {
-        const response = await fetch(
-          `${this.auditorApiUrl}/mints/url?url=${this.mintUrl}`,
-        );
-        if (!response.ok) {
-          if (response.status === 404) {
-            this.mintNotAudited = true;
-            throw new Error(`This mint is not being audited yet.`);
-          }
-          throw new Error(`API error: ${response.status}`);
-        }
-        this.mintInfo = (await response.json()) as MintRead;
-        debug("# MintAuditInfo", this.mintInfo);
-        if (!this.mintInfo) {
-          this.mintNotAudited = true;
-          throw new Error(`This mint is not being audited yet.`);
-        }
-      } catch (err) {
-        console.error("Error fetching mint info:", err);
-        throw err;
-      }
-    },
-    async getMintSwaps(mintId: number, skip = 0, limit = 100) {
-      try {
-        const response = await fetch(
-          `${this.auditorApiUrl}/swaps/mint/${mintId}?skip=${skip}&limit=${limit}`,
-        );
-        if (!response.ok) {
-          throw new Error(`API error: ${response.status}`);
-        }
-        const fetchedSwaps = (await response.json()) as SwapEventRead[];
+	name: "MintAuditInfo",
+	components: {
+		MintAuditWarningBox,
+		MintAuditSwapsBarChart,
+	},
+	props: {
+		mintUrl: {
+			type: String,
+			required: true,
+		},
+	},
+	data() {
+		const settingsStore = useSettingsStore();
+		return {
+			auditorApiUrl: settingsStore.auditorApiUrl,
+			auditUrl: isTrustedUrl(settingsStore.auditorUrl)
+				? settingsStore.auditorUrl
+				: "#",
+			auditUrlShort: getShortUrl(settingsStore.auditorUrl),
+			mintNotAudited: false,
+			loading: true,
+			error: null,
+			couldFetchInfo: true,
+			mints: [] as MintRead[],
+			mintInfo: null as MintRead | null,
+			mintSwaps: [] as SwapEventRead[],
+			limit: 100,
+			skip: 0,
+			allLoaded: false,
+			loadingMore: false,
+		};
+	},
+	computed: {
+		successfulSwaps() {
+			return this.mintSwaps.filter((swap) => swap.state === "OK").length;
+		},
+		successRate() {
+			if (this.mintSwaps.length === 0) return 0;
+			return Math.round((this.successfulSwaps / this.mintSwaps.length) * 100);
+		},
+		averageTime() {
+			const successfulSwapsWithTime = this.mintSwaps.filter(
+				(swap) => swap.state === "OK" && swap.time_taken,
+			);
+			if (successfulSwapsWithTime.length === 0) return 0;
+			const totalTime = successfulSwapsWithTime.reduce(
+				(sum, swap) => sum + (swap.time_taken || 0),
+				0,
+			);
+			return totalTime / successfulSwapsWithTime.length;
+		},
+	},
+	mounted() {
+		this.loadMintData();
+	},
+	methods: {
+		async loadMintData() {
+			try {
+				this.loading = true;
+				await this.getMintInfo();
+				if (this.mintInfo && this.mintInfo.id) {
+					await this.getMintSwaps(this.mintInfo.id);
+				}
+			} catch (err: any) {
+				this.error = err.message || "Failed to load mint data";
+			} finally {
+				this.loading = false;
+			}
+		},
+		async getMintInfo() {
+			try {
+				const response = await fetch(
+					`${this.auditorApiUrl}/mints/url?url=${this.mintUrl}`,
+				);
+				if (!response.ok) {
+					if (response.status === 404) {
+						this.mintNotAudited = true;
+						throw new Error(`This mint is not being audited yet.`);
+					}
+					throw new Error(`API error: ${response.status}`);
+				}
+				this.mintInfo = (await response.json()) as MintRead;
+				debug("# MintAuditInfo", this.mintInfo);
+				if (!this.mintInfo) {
+					this.mintNotAudited = true;
+					throw new Error(`This mint is not being audited yet.`);
+				}
+			} catch (err) {
+				console.error("Error fetching mint info:", err);
+				throw err;
+			}
+		},
+		async getMintSwaps(mintId: number, skip = 0, limit = 100) {
+			try {
+				const response = await fetch(
+					`${this.auditorApiUrl}/swaps/mint/${mintId}?skip=${skip}&limit=${limit}`,
+				);
+				if (!response.ok) {
+					throw new Error(`API error: ${response.status}`);
+				}
+				const fetchedSwaps = (await response.json()) as SwapEventRead[];
 
-        if (skip === 0) {
-          this.mintSwaps = fetchedSwaps;
-        } else {
-          this.mintSwaps = [...this.mintSwaps, ...fetchedSwaps];
-        }
+				if (skip === 0) {
+					this.mintSwaps = fetchedSwaps;
+				} else {
+					this.mintSwaps = [...this.mintSwaps, ...fetchedSwaps];
+				}
 
-        this.skip += limit;
-        this.allLoaded = fetchedSwaps.length < limit;
-      } catch (err) {
-        console.error("Error fetching mint swaps:", err);
-        throw err;
-      }
-    },
-    async getAuditorPaymentRequestsAndHandle() {
-      const walletStore = useWalletStore();
-      const mintStore = useMintsStore();
-      try {
-        const response = await fetch(
-          `${this.auditorApiUrl}/pr?url=${this.mintUrl}`,
-        );
-        const paymentRequestResponse = await response.json();
-        const paymentRequestString = paymentRequestResponse.pr;
-        const paymentRequest = paymentRequestString.replace(/"/g, "");
-        debug("# AuditorPaymentRequests", paymentRequest);
-        await mintStore.activateMintUrl(this.mintUrl);
-        await mintStore.activateUnit("sat");
-        await walletStore.decodeRequest(paymentRequest);
-        // close the mint info dialog
-        this.$emit("close");
-      } catch (err) {
-        console.error("Error fetching auditor payment requests:", err);
-      }
-    },
-    async loadMoreSwaps() {
-      if (this.allLoaded || this.loadingMore || !this.mintInfo) return;
+				this.skip += limit;
+				this.allLoaded = fetchedSwaps.length < limit;
+			} catch (err) {
+				console.error("Error fetching mint swaps:", err);
+				throw err;
+			}
+		},
+		async getAuditorPaymentRequestsAndHandle() {
+			const walletStore = useWalletStore();
+			const mintStore = useMintsStore();
+			try {
+				const response = await fetch(
+					`${this.auditorApiUrl}/pr?url=${this.mintUrl}`,
+				);
+				const paymentRequestResponse = await response.json();
+				const paymentRequestString = paymentRequestResponse.pr;
+				const paymentRequest = paymentRequestString.replace(/"/g, "");
+				debug("# AuditorPaymentRequests", paymentRequest);
+				await mintStore.activateMintUrl(this.mintUrl);
+				await mintStore.activateUnit("sat");
+				await walletStore.decodeRequest(paymentRequest);
+				// close the mint info dialog
+				this.$emit("close");
+			} catch (err) {
+				console.error("Error fetching auditor payment requests:", err);
+			}
+		},
+		async loadMoreSwaps() {
+			if (this.allLoaded || this.loadingMore || !this.mintInfo) return;
 
-      this.loadingMore = true;
-      try {
-        await this.getMintSwaps(this.mintInfo.id, this.skip, this.limit);
-      } finally {
-        this.loadingMore = false;
-      }
-    },
-    formatTime(milliseconds: number) {
-      if (milliseconds === 0) return "N/A";
-      const seconds = milliseconds / 1000;
-      if (seconds < 10) {
-        return `${milliseconds.toFixed(0)} ms`;
-      } else {
-        return `${seconds.toFixed(2)} s`;
-      }
-    },
-  },
+			this.loadingMore = true;
+			try {
+				await this.getMintSwaps(this.mintInfo.id, this.skip, this.limit);
+			} finally {
+				this.loadingMore = false;
+			}
+		},
+		formatTime(milliseconds: number) {
+			if (milliseconds === 0) return "N/A";
+			const seconds = milliseconds / 1000;
+			if (seconds < 10) {
+				return `${milliseconds.toFixed(0)} ms`;
+			} else {
+				return `${seconds.toFixed(2)} s`;
+			}
+		},
+	},
 };
 </script>
 

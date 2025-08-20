@@ -29,40 +29,40 @@
 <script>
 import { defineComponent } from "vue";
 export default defineComponent({
-  name: "iOSPWAPrompt",
-  mixins: [windowMixin],
-  props: {},
-  data: function () {
-    return {
-      showIosPWAPromptLocal:
-        localStorage.getItem("cashu.ui.showIosPWAPrompt") != "seen",
-      showIosPWAPrompt: false,
-    };
-  },
-  mounted() {
-    if (
-      this.showIosPWAPromptLocal &&
-      this.isiOsSafari() &&
-      !this.isInStandaloneMode()
-    ) {
-      this.showIosPWAPrompt = true;
-    }
-  },
-  watch: {},
-  computed: {},
-  methods: {
-    closePrompt() {
-      localStorage.setItem("cashu.ui.showIosPWAPrompt", "seen");
-      this.showIosPWAPrompt = false;
-    },
-    isiOsSafari() {
-      const userAgent = window.navigator.userAgent.toLowerCase();
-      return /iphone|ipod/.test(userAgent) && /safari/.test(userAgent);
-    },
-    isInStandaloneMode() {
-      return "standalone" in window.navigator && window.navigator.standalone;
-    },
-  },
+	name: "iOSPWAPrompt",
+	mixins: [windowMixin],
+	props: {},
+	data: function () {
+		return {
+			showIosPWAPromptLocal:
+				localStorage.getItem("cashu.ui.showIosPWAPrompt") != "seen",
+			showIosPWAPrompt: false,
+		};
+	},
+	mounted() {
+		if (
+			this.showIosPWAPromptLocal &&
+			this.isiOsSafari() &&
+			!this.isInStandaloneMode()
+		) {
+			this.showIosPWAPrompt = true;
+		}
+	},
+	watch: {},
+	computed: {},
+	methods: {
+		closePrompt() {
+			localStorage.setItem("cashu.ui.showIosPWAPrompt", "seen");
+			this.showIosPWAPrompt = false;
+		},
+		isiOsSafari() {
+			const userAgent = window.navigator.userAgent.toLowerCase();
+			return /iphone|ipod/.test(userAgent) && /safari/.test(userAgent);
+		},
+		isInStandaloneMode() {
+			return "standalone" in window.navigator && window.navigator.standalone;
+		},
+	},
 });
 </script>
 <style scoped>

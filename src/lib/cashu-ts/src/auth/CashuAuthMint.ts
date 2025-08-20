@@ -2,10 +2,10 @@ import {
 	BlindAuthMintPayload,
 	BlindAuthMintResponse,
 	MintActiveKeys,
-	MintAllKeysets
-} from '../model/types';
-import request from '../request';
-import { isObj, joinUrls, sanitizeUrl } from '../utils';
+	MintAllKeysets,
+} from "../model/types";
+import request from "../request";
+import { isObj, joinUrls, sanitizeUrl } from "../utils";
 
 /**
  * Class represents Cashu Auth Mint API. This class contains Lower level functions that are implemented by CashuAuthWallet.
@@ -15,7 +15,10 @@ class CashuAuthMint {
 	 * @param _mintUrl requires mint URL to create this object
 	 * @param _customRequest if passed, use custom request implementation for network communication with the mint
 	 */
-	constructor(private _mintUrl: string, private _customRequest?: typeof request) {
+	constructor(
+		private _mintUrl: string,
+		private _customRequest?: typeof request,
+	) {
 		this._mintUrl = sanitizeUrl(_mintUrl);
 		this._customRequest = _customRequest;
 	}
@@ -36,21 +39,21 @@ class CashuAuthMint {
 		mintUrl: string,
 		mintPayload: BlindAuthMintPayload,
 		clearAuthToken: string,
-		customRequest?: typeof request
+		customRequest?: typeof request,
 	) {
 		const requestInstance = customRequest || request;
 		const headers = {
-			'Clear-auth': `${clearAuthToken}`
+			"Clear-auth": `${clearAuthToken}`,
 		};
 		const data = await requestInstance<BlindAuthMintResponse>({
-			endpoint: joinUrls(mintUrl, '/v1/auth/blind/mint'),
-			method: 'POST',
+			endpoint: joinUrls(mintUrl, "/v1/auth/blind/mint"),
+			method: "POST",
 			requestBody: mintPayload,
-			headers
+			headers,
 		});
 
 		if (!isObj(data) || !Array.isArray(data?.signatures)) {
-			throw new Error('bad response');
+			throw new Error("bad response");
 		}
 
 		return data;
@@ -62,7 +65,12 @@ class CashuAuthMint {
 	 * @returns serialized blinded signatures
 	 */
 	async mint(mintPayload: BlindAuthMintPayload, clearAuthToken: string) {
-		return CashuAuthMint.mint(this._mintUrl, mintPayload, clearAuthToken, this._customRequest);
+		return CashuAuthMint.mint(
+			this._mintUrl,
+			mintPayload,
+			clearAuthToken,
+			this._customRequest,
+		);
 	}
 
 	/**
@@ -75,17 +83,17 @@ class CashuAuthMint {
 	public static async getKeys(
 		mintUrl: string,
 		keysetId?: string,
-		customRequest?: typeof request
+		customRequest?: typeof request,
 	): Promise<MintActiveKeys> {
 		const requestInstance = customRequest || request;
 		const data = await requestInstance<MintActiveKeys>({
 			endpoint: keysetId
-				? joinUrls(mintUrl, '/v1/auth/blind/keys', keysetId)
-				: joinUrls(mintUrl, '/v1/auth/blind/keys')
+				? joinUrls(mintUrl, "/v1/auth/blind/keys", keysetId)
+				: joinUrls(mintUrl, "/v1/auth/blind/keys"),
 		});
 
 		if (!isObj(data) || !Array.isArray(data.keysets)) {
-			throw new Error('bad response');
+			throw new Error("bad response");
 		}
 
 		return data;
@@ -99,7 +107,7 @@ class CashuAuthMint {
 		const allKeys = await CashuAuthMint.getKeys(
 			mintUrl || this._mintUrl,
 			keysetId,
-			this._customRequest
+			this._customRequest,
 		);
 		return allKeys;
 	}
@@ -111,11 +119,11 @@ class CashuAuthMint {
 	 */
 	public static async getKeySets(
 		mintUrl: string,
-		customRequest?: typeof request
+		customRequest?: typeof request,
 	): Promise<MintAllKeysets> {
 		const requestInstance = customRequest || request;
 		return requestInstance<MintAllKeysets>({
-			endpoint: joinUrls(mintUrl, '/v1/auth/blind/keysets')
+			endpoint: joinUrls(mintUrl, "/v1/auth/blind/keysets"),
 		});
 	}
 

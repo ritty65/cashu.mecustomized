@@ -2,7 +2,9 @@
   <section role="region" :aria-labelledby="id" class="q-pa-md flex flex-center">
     <div class="text-center">
       <q-icon name="gavel" size="4em" color="primary" />
-      <h1 :id="id" tabindex="-1" class="q-mt-md">{{ $t("Welcome.terms.title") }}</h1>
+      <h1 :id="id" tabindex="-1" class="q-mt-md">
+        {{ $t("Welcome.terms.title") }}
+      </h1>
       <div class="q-mt-sm">
         <q-btn
           flat
@@ -19,7 +21,7 @@
       />
 
       <q-dialog v-model="showTerms">
-        <q-card style="max-width: 720px; width: 90vw;">
+        <q-card style="max-width: 720px; width: 90vw">
           <q-card-section>
             <div class="text-h6">{{ $t("Welcome.terms.title") }}</div>
           </q-card-section>
@@ -28,7 +30,7 @@
             <q-scroll-area style="height: 60vh">
               <div class="q-pa-md">
                 <p class="q-mb-md">
-                  {{ $t('Welcome.terms.summary') || 'Please review the terms below.' }}
+                  {{ $t("Welcome.terms.summary") }}
                 </p>
                 <TermsContent />
               </div>
@@ -36,7 +38,11 @@
           </q-card-section>
           <q-separator />
           <q-card-actions align="between">
-            <q-btn flat :label="$t('global.actions.close.label')" v-close-popup />
+            <q-btn
+              flat
+              :label="$t('global.actions.close.label')"
+              v-close-popup
+            />
             <q-btn
               color="primary"
               :label="$t('Welcome.terms.accept')"
@@ -50,16 +56,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import TermsContent from "src/components/TermsContent.vue";
+import { useWelcomeStore } from "src/stores/welcome";
 
 const id = "welcome-terms-title";
 const showTerms = ref(false);
-const accepted = ref(false);
+const welcomeStore = useWelcomeStore();
+const accepted = computed({
+	get: () => welcomeStore.termsAccepted,
+	set: (val: boolean) => (welcomeStore.termsAccepted = val),
+});
+
+defineExpose({ accepted });
 
 function acceptAndClose() {
-  accepted.value = true;
-  showTerms.value = false;
+	accepted.value = true;
+	showTerms.value = false;
 }
 </script>
 

@@ -331,95 +331,95 @@ import ToggleUnit from "components/ToggleUnit.vue";
 import { Scan as ScanIcon } from "lucide-vue-next";
 
 export default defineComponent({
-  name: "PayInvoiceDialog",
-  mixins: [windowMixin],
-  components: {
-    ChooseMint,
-    ToggleUnit,
-    ScanIcon,
-  },
-  props: {},
-  data: function () {
-    return {};
-  },
-  watch: {
-    activeMintUrl: async function () {
-      if (this.payInvoiceData.show) {
-        await this.meltQuoteInvoiceData();
-      }
-    },
-    activeUnit: async function () {
-      if (this.payInvoiceData.show) {
-        await this.meltQuoteInvoiceData();
-      }
-    },
-  },
-  computed: {
-    ...mapState(useUiStore, ["tickerShort", "globalMutexLock"]),
-    ...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
-    ...mapWritableState(useWalletStore, ["payInvoiceData"]),
-    ...mapState(useMintsStore, [
-      "activeMintUrl",
-      "activeProofs",
-      "mints",
-      "activeUnit",
-      "totalUnitBalance",
-      "activeBalance",
-    ]),
-    ...mapState(usePriceStore, ["bitcoinPrice"]),
-    ...mapState(useBucketsStore, ["bucketList"]),
-    bucketOptions() {
-      return this.bucketList.map((b) => ({ label: b.name, value: b.id }));
-    },
-    canPasteFromClipboard: function () {
-      return (
-        window.isSecureContext &&
-        navigator.clipboard &&
-        navigator.clipboard.readText
-      );
-    },
-    enoughtotalUnitBalance: function () {
-      return (
-        this.activeBalance >= this.payInvoiceData.meltQuote.response.amount
-      );
-    },
-  },
-  methods: {
-    ...mapActions(useWalletStore, [
-      "meltInvoiceData",
-      "meltQuoteInvoiceData",
-      "decodeRequest",
-      "lnurlPaySecond",
-    ]),
-    ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
-    canPay: function () {
-      if (!this.payInvoiceData.invoice) return false;
-      return payInvoiceData.meltQuote.response.amount <= this.totalUnitBalance;
-    },
-    closeParseDialog: function () {
-      setTimeout(() => {
-        clearInterval(this.payInvoiceData.paymentChecker);
-      }, 10000);
-    },
-    decodeAndQuote: async function (request) {
-      await this.decodeRequest(request);
-    },
-    pasteToParseDialog: async function () {
-      debug("pasteToParseDialog");
-      const text = await useUiStore().pasteFromClipboard();
-      if (text) {
-        this.payInvoiceData.input.request = text.trim();
-        // await this.decodeAndQuote(text.trim());
-      }
-    },
-    handleMeltButton: function () {
-      if (this.payInvoiceData.blocking) {
-        throw new Error("already processing an invoice.");
-      }
-      this.meltInvoiceData(this.payInvoiceData.bucketId);
-    },
-  },
-  created: function () {},
+	name: "PayInvoiceDialog",
+	mixins: [windowMixin],
+	components: {
+		ChooseMint,
+		ToggleUnit,
+		ScanIcon,
+	},
+	props: {},
+	data: function () {
+		return {};
+	},
+	watch: {
+		activeMintUrl: async function () {
+			if (this.payInvoiceData.show) {
+				await this.meltQuoteInvoiceData();
+			}
+		},
+		activeUnit: async function () {
+			if (this.payInvoiceData.show) {
+				await this.meltQuoteInvoiceData();
+			}
+		},
+	},
+	computed: {
+		...mapState(useUiStore, ["tickerShort", "globalMutexLock"]),
+		...mapWritableState(useCameraStore, ["camera", "hasCamera"]),
+		...mapWritableState(useWalletStore, ["payInvoiceData"]),
+		...mapState(useMintsStore, [
+			"activeMintUrl",
+			"activeProofs",
+			"mints",
+			"activeUnit",
+			"totalUnitBalance",
+			"activeBalance",
+		]),
+		...mapState(usePriceStore, ["bitcoinPrice"]),
+		...mapState(useBucketsStore, ["bucketList"]),
+		bucketOptions() {
+			return this.bucketList.map((b) => ({ label: b.name, value: b.id }));
+		},
+		canPasteFromClipboard: function () {
+			return (
+				window.isSecureContext &&
+				navigator.clipboard &&
+				navigator.clipboard.readText
+			);
+		},
+		enoughtotalUnitBalance: function () {
+			return (
+				this.activeBalance >= this.payInvoiceData.meltQuote.response.amount
+			);
+		},
+	},
+	methods: {
+		...mapActions(useWalletStore, [
+			"meltInvoiceData",
+			"meltQuoteInvoiceData",
+			"decodeRequest",
+			"lnurlPaySecond",
+		]),
+		...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
+		canPay: function () {
+			if (!this.payInvoiceData.invoice) return false;
+			return payInvoiceData.meltQuote.response.amount <= this.totalUnitBalance;
+		},
+		closeParseDialog: function () {
+			setTimeout(() => {
+				clearInterval(this.payInvoiceData.paymentChecker);
+			}, 10000);
+		},
+		decodeAndQuote: async function (request) {
+			await this.decodeRequest(request);
+		},
+		pasteToParseDialog: async function () {
+			debug("pasteToParseDialog");
+			const text = await useUiStore().pasteFromClipboard();
+			if (text) {
+				this.payInvoiceData.input.request = text.trim();
+				// await this.decodeAndQuote(text.trim());
+			}
+		},
+		handleMeltButton: function () {
+			if (this.payInvoiceData.blocking) {
+				throw new Error("already processing an invoice.");
+			}
+			this.meltInvoiceData(this.payInvoiceData.bucketId);
+		},
+	},
+	created: function () {},
 });
 </script>
 

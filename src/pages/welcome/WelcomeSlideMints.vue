@@ -26,7 +26,7 @@ const props = defineProps<{ onAddMint?: () => void }>();
 const id = "welcome-mints-title";
 
 function addMint() {
-  props.onAddMint?.();
+	props.onAddMint?.();
 }
 </script>
 

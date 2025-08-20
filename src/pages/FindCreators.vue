@@ -116,12 +116,12 @@
 
 <script setup lang="ts">
 import {
-  ref,
-  computed,
-  watch,
-  onMounted,
-  onBeforeUnmount,
-  nextTick,
+	ref,
+	computed,
+	watch,
+	onMounted,
+	onBeforeUnmount,
+	nextTick,
 } from "vue";
 import DonateDialog from "components/DonateDialog.vue";
 import SubscribeDialog from "components/SubscribeDialog.vue";
@@ -133,21 +133,21 @@ import { useSendTokensStore } from "stores/sendTokensStore";
 import { useDonationPresetsStore } from "stores/donationPresets";
 import { useCreatorsStore } from "stores/creators";
 import {
-  useNostrStore,
-  fetchNutzapProfile,
-  RelayConnectionError,
+	useNostrStore,
+	fetchNutzapProfile,
+	RelayConnectionError,
 } from "stores/nostr";
 import { notifyWarning } from "src/js/notify";
 import { useRouter, useRoute } from "vue-router";
 import { useMessengerStore } from "stores/messenger";
 import { useI18n } from "vue-i18n";
 import {
-  QDialog,
-  QCard,
-  QCardSection,
-  QCardActions,
-  QBtn,
-  QSeparator,
+	QDialog,
+	QCard,
+	QCardSection,
+	QCardActions,
+	QBtn,
+	QSeparator,
 } from "quasar";
 import { nip19 } from "nostr-tools";
 
@@ -158,10 +158,10 @@ const showTierDialog = ref(false);
 const loadingTiers = ref(false);
 const dialogPubkey = ref(""); // always 64-char hex
 const dialogNpub = computed(() => {
-  const hex = dialogPubkey.value;
-  if (hex.length === 64 && /^[0-9a-f]{64}$/i.test(hex))
-    return nip19.npubEncode(hex);
-  return "";
+	const hex = dialogPubkey.value;
+	if (hex.length === 64 && /^[0-9a-f]{64}$/i.test(hex))
+		return nip19.npubEncode(hex);
+	return "";
 });
 
 const sendTokensStore = useSendTokensStore();
@@ -181,182 +181,188 @@ const loadingProfile = ref(false);
 let tierTimeout: ReturnType<typeof setTimeout> | null = null;
 
 function getPrice(t: any): number {
-  return t.price_sats ?? t.price ?? 0;
+	return t.price_sats ?? t.price ?? 0;
 }
 
 function bech32ToHex(pubkey: string): string {
-  try {
-    const decoded = nip19.decode(pubkey);
-    return typeof decoded.data === "string" ? decoded.data : pubkey;
-  } catch {
-    return pubkey;
-  }
+	try {
+		const decoded = nip19.decode(pubkey);
+		return typeof decoded.data === "string" ? decoded.data : pubkey;
+	} catch {
+		return pubkey;
+	}
 }
 
 function formatTs(ts: number): string {
-  const d = new Date(ts * 1000);
-  return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${(
-    "0" + d.getDate()
-  ).slice(-2)} ${("0" + d.getHours()).slice(-2)}:${("0" + d.getMinutes()).slice(
-    -2,
-  )}`;
+	const d = new Date(ts * 1000);
+	return `${d.getFullYear()}-${("0" + (d.getMonth() + 1)).slice(-2)}-${(
+		"0" + d.getDate()
+	).slice(-2)} ${("0" + d.getHours()).slice(-2)}:${("0" + d.getMinutes()).slice(
+		-2,
+	)}`;
 }
 
 async function onMessage(ev: MessageEvent) {
-  if (ev.data && ev.data.type === "donate" && ev.data.pubkey) {
-    selectedPubkey.value = ev.data.pubkey; // keep hex
-    showDonateDialog.value = true;
-  } else if (ev.data && ev.data.type === "viewProfile" && ev.data.pubkey) {
-    loadingTiers.value = true;
-    loadingProfile.value = true;
-    nutzapProfile.value = null;
-    if (tierTimeout) clearTimeout(tierTimeout);
-    tierTimeout = setTimeout(() => {
-      loadingTiers.value = false;
-    }, 5000);
-    await creators.fetchTierDefinitions(ev.data.pubkey);
-    dialogPubkey.value = ev.data.pubkey; // keep hex
-    try {
-      const profile = await fetchNutzapProfile(ev.data.pubkey);
-      nutzapProfile.value = profile;
-    } catch (e: any) {
-      if (e instanceof RelayConnectionError) {
-        notifyWarning("Unable to connect to Nostr relays");
-      } else {
-        console.error(e);
-      }
-    } finally {
-      loadingProfile.value = false;
-    }
-    await nextTick();
-    showTierDialog.value = true;
-  } else if (ev.data && ev.data.type === "startChat" && ev.data.pubkey) {
-    const pubkey = nostr.resolvePubkey(ev.data.pubkey);
-    router.push({ path: "/nostr-messenger", query: { pubkey } });
-    const stop = watch(
-      () => messenger.started,
-      (started) => {
-        if (started) {
-          messenger.startChat(pubkey);
-          stop();
-        }
-      },
-    );
-  }
+	if (ev.data && ev.data.type === "donate" && ev.data.pubkey) {
+		selectedPubkey.value = ev.data.pubkey; // keep hex
+		showDonateDialog.value = true;
+	} else if (ev.data && ev.data.type === "viewProfile" && ev.data.pubkey) {
+		loadingTiers.value = true;
+		loadingProfile.value = true;
+		nutzapProfile.value = null;
+		if (tierTimeout) clearTimeout(tierTimeout);
+		tierTimeout = setTimeout(() => {
+			loadingTiers.value = false;
+		}, 5000);
+		await creators.fetchTierDefinitions(ev.data.pubkey);
+		dialogPubkey.value = ev.data.pubkey; // keep hex
+		try {
+			const profile = await fetchNutzapProfile(ev.data.pubkey);
+			nutzapProfile.value = profile;
+		} catch (e: any) {
+			if (e instanceof RelayConnectionError) {
+				notifyWarning("Unable to connect to Nostr relays");
+			} else {
+				console.error(e);
+			}
+		} finally {
+			loadingProfile.value = false;
+		}
+		await nextTick();
+		showTierDialog.value = true;
+	} else if (ev.data && ev.data.type === "startChat" && ev.data.pubkey) {
+		const pubkey = nostr.resolvePubkey(ev.data.pubkey);
+		router.push({ path: "/nostr-messenger", query: { pubkey } });
+		const stop = watch(
+			() => messenger.started,
+			(started) => {
+				if (started) {
+					messenger.startChat(pubkey);
+					stop();
+				}
+			},
+		);
+	}
 }
 
 watch(tiers, (val) => {
-  if (val.length > 0) {
-    loadingTiers.value = false;
-    if (tierTimeout) clearTimeout(tierTimeout);
-  }
+	if (val.length > 0) {
+		loadingTiers.value = false;
+		if (tierTimeout) clearTimeout(tierTimeout);
+	}
 });
 
 watch(tierFetchError, (val) => {
-  if (val) {
-    loadingTiers.value = false;
-    if (tierTimeout) clearTimeout(tierTimeout);
-  }
+	if (val) {
+		loadingTiers.value = false;
+		if (tierTimeout) clearTimeout(tierTimeout);
+	}
 });
 
 watch(showTierDialog, (val) => {
-  if (!val) {
-    nutzapProfile.value = null;
-    loadingProfile.value = false;
-  }
+	if (!val) {
+		nutzapProfile.value = null;
+		loadingProfile.value = false;
+	}
 });
 
 function openSubscribe(tier: any) {
-  selectedTier.value = tier;
-  showSubscribeDialog.value = true;
+	selectedTier.value = tier;
+	showSubscribeDialog.value = true;
 }
 
 function retryFetchTiers() {
-  if (!dialogPubkey.value) return;
-  loadingTiers.value = true;
-  if (tierTimeout) clearTimeout(tierTimeout);
-  tierTimeout = setTimeout(() => {
-    loadingTiers.value = false;
-  }, 5000);
-  creators.fetchTierDefinitions(dialogPubkey.value);
+	if (!dialogPubkey.value) return;
+	loadingTiers.value = true;
+	if (tierTimeout) clearTimeout(tierTimeout);
+	tierTimeout = setTimeout(() => {
+		loadingTiers.value = false;
+	}, 5000);
+	creators.fetchTierDefinitions(dialogPubkey.value);
 }
 
-function confirmSubscribe({ bucketId, periods, amount, startDate, total }: any) {
-  // Nutzap transaction is handled within SubscribeDialog.
-  // Close surrounding dialogs and process any additional UI updates here.
-  showSubscribeDialog.value = false;
-  showTierDialog.value = false;
+function confirmSubscribe({
+	bucketId,
+	periods,
+	amount,
+	startDate,
+	total,
+}: any) {
+	// Nutzap transaction is handled within SubscribeDialog.
+	// Close surrounding dialogs and process any additional UI updates here.
+	showSubscribeDialog.value = false;
+	showTierDialog.value = false;
 }
 
 function handleDonate({
-  bucketId,
-  locked,
-  type,
-  amount,
-  periods,
-  message,
+	bucketId,
+	locked,
+	type,
+	amount,
+	periods,
+	message,
 }: any) {
-  if (!selectedPubkey.value) return;
-  if (type === "one-time") {
-    sendTokensStore.clearSendData();
-    sendTokensStore.recipientPubkey = selectedPubkey.value;
-    sendTokensStore.sendViaNostr = true;
-    sendTokensStore.sendData.bucketId = bucketId;
-    sendTokensStore.sendData.amount = amount;
-    sendTokensStore.sendData.memo = message;
-    sendTokensStore.sendData.p2pkPubkey = locked ? selectedPubkey.value : "";
-    sendTokensStore.showLockInput = locked;
-    showDonateDialog.value = false;
-    sendTokensStore.showSendTokens = true;
-  } else {
-    donationStore.createDonationPreset(
-      periods,
-      amount,
-      selectedPubkey.value,
-      bucketId,
-    );
-    showDonateDialog.value = false;
-  }
+	if (!selectedPubkey.value) return;
+	if (type === "one-time") {
+		sendTokensStore.clearSendData();
+		sendTokensStore.recipientPubkey = selectedPubkey.value;
+		sendTokensStore.sendViaNostr = true;
+		sendTokensStore.sendData.bucketId = bucketId;
+		sendTokensStore.sendData.amount = amount;
+		sendTokensStore.sendData.memo = message;
+		sendTokensStore.sendData.p2pkPubkey = locked ? selectedPubkey.value : "";
+		sendTokensStore.showLockInput = locked;
+		showDonateDialog.value = false;
+		sendTokensStore.showSendTokens = true;
+	} else {
+		donationStore.createDonationPreset(
+			periods,
+			amount,
+			selectedPubkey.value,
+			bucketId,
+		);
+		showDonateDialog.value = false;
+	}
 }
 
 onMounted(async () => {
-  window.addEventListener("message", onMessage);
-  try {
-    await nostr.initNdkReadOnly();
-  } catch (e: any) {
-    notifyWarning("Failed to connect to Nostr relays", e?.message);
-  }
+	window.addEventListener("message", onMessage);
+	try {
+		await nostr.initNdkReadOnly();
+	} catch (e: any) {
+		notifyWarning("Failed to connect to Nostr relays", e?.message);
+	}
 
-  const npub = route.query.npub;
-  if (npub && typeof npub === "string") {
-    const sendViewProfile = () => {
-      try {
-        const decoded = nip19.decode(npub);
-        const hex = typeof decoded.data === "string" ? decoded.data : "";
-        if (hex) {
-          window.postMessage({ type: "viewProfile", pubkey: hex }, "*");
-        }
-      } catch {
-        /* ignore decode errors */
-      }
-    };
+	const npub = route.query.npub;
+	if (npub && typeof npub === "string") {
+		const sendViewProfile = () => {
+			try {
+				const decoded = nip19.decode(npub);
+				const hex = typeof decoded.data === "string" ? decoded.data : "";
+				if (hex) {
+					window.postMessage({ type: "viewProfile", pubkey: hex }, "*");
+				}
+			} catch {
+				/* ignore decode errors */
+			}
+		};
 
-    if (iframeEl.value) {
-      const iframe = iframeEl.value;
-      if (iframe.contentWindow?.document.readyState === "complete") {
-        sendViewProfile();
-      } else {
-        iframe.addEventListener("load", sendViewProfile, { once: true });
-      }
-    }
-  }
+		if (iframeEl.value) {
+			const iframe = iframeEl.value;
+			if (iframe.contentWindow?.document.readyState === "complete") {
+				sendViewProfile();
+			} else {
+				iframe.addEventListener("load", sendViewProfile, { once: true });
+			}
+		}
+	}
 });
 
 onBeforeUnmount(() => {
-  window.removeEventListener("message", onMessage);
-  if (tierTimeout) clearTimeout(tierTimeout);
-  nutzapProfile.value = null;
-  loadingProfile.value = false;
+	window.removeEventListener("message", onMessage);
+	if (tierTimeout) clearTimeout(tierTimeout);
+	nutzapProfile.value = null;
+	loadingProfile.value = false;
 });
 </script>
 

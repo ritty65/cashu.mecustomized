@@ -71,43 +71,43 @@ import { useUiStore } from "src/stores/ui";
 import { useMintsStore } from "src/stores/mints";
 
 export default defineComponent({
-  name: "RemoveMintDialog",
-  props: {
-    mintToRemove: {
-      type: Object,
-      required: true,
-    },
-    showRemoveMintDialog: {
-      type: Boolean,
-      required: true,
-    },
-  },
-  emits: ["remove", "update:showRemoveMintDialog"],
-  setup(props, { emit }) {
-    const mintsStore = useMintsStore();
-    const showRemoveMintDialogLocal = computed({
-      get: () => props.showRemoveMintDialog,
-      set: (value) => emit("update:showRemoveMintDialog", value),
-    });
+	name: "RemoveMintDialog",
+	props: {
+		mintToRemove: {
+			type: Object,
+			required: true,
+		},
+		showRemoveMintDialog: {
+			type: Boolean,
+			required: true,
+		},
+	},
+	emits: ["remove", "update:showRemoveMintDialog"],
+	setup(props, { emit }) {
+		const mintsStore = useMintsStore();
+		const showRemoveMintDialogLocal = computed({
+			get: () => props.showRemoveMintDialog,
+			set: (value) => emit("update:showRemoveMintDialog", value),
+		});
 
-    const removeMintLocal = () => {
-      emit("remove", props.mintToRemove.url);
-      mintsStore.showMintInfoDialog = false;
-      mintsStore.showEditMintDialog = false;
-    };
-    const mintClass = (mint) => {
-      return new MintClass(mint);
-    };
-    const formatCurrency = (amount, unit) => {
-      return useUiStore().formatCurrency(amount, unit);
-    };
+		const removeMintLocal = () => {
+			emit("remove", props.mintToRemove.url);
+			mintsStore.showMintInfoDialog = false;
+			mintsStore.showEditMintDialog = false;
+		};
+		const mintClass = (mint) => {
+			return new MintClass(mint);
+		};
+		const formatCurrency = (amount, unit) => {
+			return useUiStore().formatCurrency(amount, unit);
+		};
 
-    return {
-      removeMintLocal,
-      showRemoveMintDialogLocal,
-      mintClass,
-      formatCurrency,
-    };
-  },
+		return {
+			removeMintLocal,
+			showRemoveMintDialogLocal,
+			mintClass,
+			formatCurrency,
+		};
+	},
 });
 </script>

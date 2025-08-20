@@ -26,199 +26,199 @@
 import { defineComponent, computed } from "vue";
 
 interface MintRead {
-  id: number;
-  url: string;
-  info?: string;
-  name?: string;
-  balance: number;
-  sum_donations?: number;
-  updated_at: string;
-  next_update?: string;
-  state: string;
-  n_errors: number;
-  n_mints: number;
-  n_melts: number;
+	id: number;
+	url: string;
+	info?: string;
+	name?: string;
+	balance: number;
+	sum_donations?: number;
+	updated_at: string;
+	next_update?: string;
+	state: string;
+	n_errors: number;
+	n_mints: number;
+	n_melts: number;
 }
 
 interface SwapEventRead {
-  id: number;
-  from_id: number;
-  to_id: number;
-  from_url: string;
-  to_url: string;
-  amount: number;
-  fee: number;
-  created_at: string;
-  time_taken: number;
-  state: string;
-  error: string;
+	id: number;
+	from_id: number;
+	to_id: number;
+	from_url: string;
+	to_url: string;
+	amount: number;
+	fee: number;
+	created_at: string;
+	time_taken: number;
+	state: string;
+	error: string;
 }
 
 export default defineComponent({
-  name: "MintAuditWarningBox",
-  props: {
-    mint: {
-      type: Object as () => MintRead,
-      required: true,
-    },
-    swaps: {
-      type: Array as () => SwapEventRead[],
-      required: true,
-    },
-    inactiveThresholdDays: {
-      type: Number,
-      default: 2,
-    },
-    recentDaysThreshold: {
-      type: Number,
-      default: 7,
-    },
-    successRateThreshold: {
-      type: Number,
-      default: 85,
-    },
-    slowMintThresholdMs: {
-      type: Number,
-      default: 5000, // 5 seconds in milliseconds
-    },
-    requiredSuccessfulSwaps: {
-      type: Number,
-      default: 7,
-    },
-  },
-  setup(props) {
-    const warningMessages = computed(() => {
-      const messages: string[] = [];
+	name: "MintAuditWarningBox",
+	props: {
+		mint: {
+			type: Object as () => MintRead,
+			required: true,
+		},
+		swaps: {
+			type: Array as () => SwapEventRead[],
+			required: true,
+		},
+		inactiveThresholdDays: {
+			type: Number,
+			default: 2,
+		},
+		recentDaysThreshold: {
+			type: Number,
+			default: 7,
+		},
+		successRateThreshold: {
+			type: Number,
+			default: 85,
+		},
+		slowMintThresholdMs: {
+			type: Number,
+			default: 5000, // 5 seconds in milliseconds
+		},
+		requiredSuccessfulSwaps: {
+			type: Number,
+			default: 7,
+		},
+	},
+	setup(props) {
+		const warningMessages = computed(() => {
+			const messages: string[] = [];
 
-      // Get recent swaps for reuse in multiple conditions
-      const now = new Date();
-      const recentSwaps = props.swaps.filter((swap) => {
-        const swapDate = new Date(swap.created_at);
-        const daysDifference =
-          (now.getTime() - swapDate.getTime()) / (1000 * 60 * 60 * 24);
-        return daysDifference <= props.recentDaysThreshold;
-      });
+			// Get recent swaps for reuse in multiple conditions
+			const now = new Date();
+			const recentSwaps = props.swaps.filter((swap) => {
+				const swapDate = new Date(swap.created_at);
+				const daysDifference =
+					(now.getTime() - swapDate.getTime()) / (1000 * 60 * 60 * 24);
+				return daysDifference <= props.recentDaysThreshold;
+			});
 
-      const successfulRecentSwaps = recentSwaps.filter(
-        (swap) => swap.state === "OK",
-      );
-      const recentSuccessRate =
-        recentSwaps.length > 0
-          ? (successfulRecentSwaps.length / recentSwaps.length) * 100
-          : 0;
+			const successfulRecentSwaps = recentSwaps.filter(
+				(swap) => swap.state === "OK",
+			);
+			const recentSuccessRate =
+				recentSwaps.length > 0
+					? (successfulRecentSwaps.length / recentSwaps.length) * 100
+					: 0;
 
-      // Check mint state
-      if (props.mint.state === "WARN" || props.mint.state === "ERROR") {
-        const baseMessage = "The last swap attempt has failed.";
+			// Check mint state
+			if (props.mint.state === "WARN" || props.mint.state === "ERROR") {
+				const baseMessage = "The last swap attempt has failed.";
 
-        if (recentSwaps.length > 0) {
-          let successMessage = `${successfulRecentSwaps.length} of ${recentSwaps.length} swaps in the last ${props.recentDaysThreshold} days succeeded.`;
+				if (recentSwaps.length > 0) {
+					let successMessage = `${successfulRecentSwaps.length} of ${recentSwaps.length} swaps in the last ${props.recentDaysThreshold} days succeeded.`;
 
-          // Add "However, " prefix if success rate is above threshold
-          if (recentSuccessRate >= props.successRateThreshold) {
-            messages.push(
-              `${baseMessage} However, ${successMessage} This mint seems reliable, failures might be due to the receiving mint.`,
-            );
-          } else {
-            messages.push(
-              `${baseMessage} Only ${successMessage} This mint might be unreliable.`,
-            );
-          }
-        } else {
-          messages.push(baseMessage);
-        }
-      } else if (props.mint.state === "UNKNOWN") {
-        messages.push(
-          "The auditor was not able to determine the quality of this mint yet.",
-        );
-      } else if (props.mint.state === "OK") {
-        // Add warnings for OK state mints with not enough successful swaps or low success rate
-        const warningsNeeded = [];
+					// Add "However, " prefix if success rate is above threshold
+					if (recentSuccessRate >= props.successRateThreshold) {
+						messages.push(
+							`${baseMessage} However, ${successMessage} This mint seems reliable, failures might be due to the receiving mint.`,
+						);
+					} else {
+						messages.push(
+							`${baseMessage} Only ${successMessage} This mint might be unreliable.`,
+						);
+					}
+				} else {
+					messages.push(baseMessage);
+				}
+			} else if (props.mint.state === "UNKNOWN") {
+				messages.push(
+					"The auditor was not able to determine the quality of this mint yet.",
+				);
+			} else if (props.mint.state === "OK") {
+				// Add warnings for OK state mints with not enough successful swaps or low success rate
+				const warningsNeeded = [];
 
-        // Check for not enough successful swaps
-        if (successfulRecentSwaps.length < props.requiredSuccessfulSwaps) {
-          warningsNeeded.push(
-            `The auditor does not have enough recent data on this mint. There were only ${
-              successfulRecentSwaps.length
-            } successful ${
-              successfulRecentSwaps.length === 1 ? "swap" : "swaps"
-            } in the last ${props.recentDaysThreshold} days.`,
-          );
-        }
+				// Check for not enough successful swaps
+				if (successfulRecentSwaps.length < props.requiredSuccessfulSwaps) {
+					warningsNeeded.push(
+						`The auditor does not have enough recent data on this mint. There were only ${
+							successfulRecentSwaps.length
+						} successful ${
+							successfulRecentSwaps.length === 1 ? "swap" : "swaps"
+						} in the last ${props.recentDaysThreshold} days.`,
+					);
+				}
 
-        // Check for low success rate
-        if (
-          recentSwaps.length > 0 &&
-          recentSuccessRate < props.successRateThreshold
-        ) {
-          warningsNeeded.push(
-            `In the last ${
-              props.recentDaysThreshold
-            } days, this mint had a success rate of ${Math.round(
-              recentSuccessRate,
-            )}%, below the recommended ${props.successRateThreshold}%.`,
-          );
-        }
+				// Check for low success rate
+				if (
+					recentSwaps.length > 0 &&
+					recentSuccessRate < props.successRateThreshold
+				) {
+					warningsNeeded.push(
+						`In the last ${
+							props.recentDaysThreshold
+						} days, this mint had a success rate of ${Math.round(
+							recentSuccessRate,
+						)}%, below the recommended ${props.successRateThreshold}%.`,
+					);
+				}
 
-        // Add combined message if both issues exist
-        if (warningsNeeded.length > 0) {
-          messages.push(...warningsNeeded);
-        }
-      }
+				// Add combined message if both issues exist
+				if (warningsNeeded.length > 0) {
+					messages.push(...warningsNeeded);
+				}
+			}
 
-      // Check last successful swap
-      const successfulSwaps = props.swaps.filter((swap) => swap.state === "OK");
-      if (successfulSwaps.length > 0) {
-        const lastSuccessfulSwap = new Date(successfulSwaps[0].created_at);
-        const now = new Date();
-        const daysDifference =
-          (now.getTime() - lastSuccessfulSwap.getTime()) /
-          (1000 * 60 * 60 * 24);
+			// Check last successful swap
+			const successfulSwaps = props.swaps.filter((swap) => swap.state === "OK");
+			if (successfulSwaps.length > 0) {
+				const lastSuccessfulSwap = new Date(successfulSwaps[0].created_at);
+				const now = new Date();
+				const daysDifference =
+					(now.getTime() - lastSuccessfulSwap.getTime()) /
+					(1000 * 60 * 60 * 24);
 
-        if (daysDifference > props.inactiveThresholdDays) {
-          const days = Math.floor(daysDifference);
+				if (daysDifference > props.inactiveThresholdDays) {
+					const days = Math.floor(daysDifference);
 
-          const baseMessage = `This mint had no swaps for ${days} ${
-            days === 1 ? "day" : "days"
-          }. It might be unreachable.`;
-          messages.push(baseMessage);
-        }
+					const baseMessage = `This mint had no swaps for ${days} ${
+						days === 1 ? "day" : "days"
+					}. It might be unreachable.`;
+					messages.push(baseMessage);
+				}
 
-        // Check if mint is slow
-        const successfulSwapsWithTime = successfulSwaps.filter(
-          (swap) => swap.time_taken,
-        );
-        if (successfulSwapsWithTime.length > 0) {
-          const totalTime = successfulSwapsWithTime.reduce(
-            (sum, swap) => sum + (swap.time_taken || 0),
-            0,
-          );
-          const averageTimeMs = totalTime / successfulSwapsWithTime.length;
+				// Check if mint is slow
+				const successfulSwapsWithTime = successfulSwaps.filter(
+					(swap) => swap.time_taken,
+				);
+				if (successfulSwapsWithTime.length > 0) {
+					const totalTime = successfulSwapsWithTime.reduce(
+						(sum, swap) => sum + (swap.time_taken || 0),
+						0,
+					);
+					const averageTimeMs = totalTime / successfulSwapsWithTime.length;
 
-          if (averageTimeMs > props.slowMintThresholdMs) {
-            const averageTimeSeconds = (averageTimeMs / 1000).toFixed(1);
-            messages.push(
-              `This mint is slow. Payments from this mint took ${averageTimeSeconds} seconds on average.`,
-            );
-          }
-        }
-      } else if (props.swaps.length > 0) {
-        // If there are swaps but none are successful
-        messages.push(
-          "No successful swaps recorded for this mint. It might be unreachable.",
-        );
-      }
+					if (averageTimeMs > props.slowMintThresholdMs) {
+						const averageTimeSeconds = (averageTimeMs / 1000).toFixed(1);
+						messages.push(
+							`This mint is slow. Payments from this mint took ${averageTimeSeconds} seconds on average.`,
+						);
+					}
+				}
+			} else if (props.swaps.length > 0) {
+				// If there are swaps but none are successful
+				messages.push(
+					"No successful swaps recorded for this mint. It might be unreachable.",
+				);
+			}
 
-      return messages;
-    });
+			return messages;
+		});
 
-    const hasWarnings = computed(() => warningMessages.value.length > 0);
+		const hasWarnings = computed(() => warningMessages.value.length > 0);
 
-    return {
-      warningMessages,
-      hasWarnings,
-    };
-  },
+		return {
+			warningMessages,
+			hasWarnings,
+		};
+	},
 });
 </script>
 

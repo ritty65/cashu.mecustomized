@@ -54,66 +54,66 @@ import { computed } from "vue";
 import { useSubscribersStore } from "src/stores/subscribersStore";
 
 interface Column {
-  name: string;
-  label: string;
+	name: string;
+	label: string;
 }
 
 const props = withDefaults(
-  defineProps<{
-    columns?: Column[];
-    label?: string;
-    flat?: boolean;
-    icon?: string;
-  }>(),
-  {
-    columns: () => [],
-    label: "Display",
-    flat: true,
-    icon: "view_module",
-  },
+	defineProps<{
+		columns?: Column[];
+		label?: string;
+		flat?: boolean;
+		icon?: string;
+	}>(),
+	{
+		columns: () => [],
+		label: "Display",
+		flat: true,
+		icon: "view_module",
+	},
 );
 
 const emit = defineEmits<{
-  "update:viewMode": ["table" | "card"];
-  "update:density": ["comfortable" | "compact"];
-  "update:visibleColumns": [string[]];
+	"update:viewMode": ["table" | "card"];
+	"update:density": ["comfortable" | "compact"];
+	"update:visibleColumns": [string[]];
 }>();
 
 const store = useSubscribersStore();
 
 if (store.visibleColumns.length === 0 && props.columns.length) {
-  store.visibleColumns.push(...props.columns.map((c) => c.name));
+	store.visibleColumns.push(...props.columns.map((c) => c.name));
 }
 
 const viewMode = computed({
-  get: () => store.viewMode,
-  set: (val: "table" | "card") => {
-    store.setViewMode(val);
-    emit("update:viewMode", val);
-  },
+	get: () => store.viewMode,
+	set: (val: "table" | "card") => {
+		store.setViewMode(val);
+		emit("update:viewMode", val);
+	},
 });
 
 const density = computed({
-  get: () => store.density,
-  set: (val: "comfortable" | "compact") => {
-    store.setDensity(val);
-    emit("update:density", val);
-  },
+	get: () => store.density,
+	set: (val: "comfortable" | "compact") => {
+		store.setDensity(val);
+		emit("update:density", val);
+	},
 });
 
 function onToggleColumn(name: string) {
-  store.toggleColumn(name);
-  emit("update:visibleColumns", store.visibleColumns);
+	store.toggleColumn(name);
+	emit("update:visibleColumns", store.visibleColumns);
 }
 
 const viewOptions = [
-  { label: "Table", value: "table" },
-  { label: "Card", value: "card" },
+	{ label: "Table", value: "table" },
+	{ label: "Card", value: "card" },
 ];
 
 const densityOptions = [
-  { label: "Comfortable", value: "comfortable" },
-  { label: "Compact", value: "compact" },
+	{ label: "Comfortable", value: "comfortable" },
+	{ label: "Compact", value: "compact" },
 ];
 </script>
 

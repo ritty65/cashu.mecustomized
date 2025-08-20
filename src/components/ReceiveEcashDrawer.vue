@@ -87,7 +87,7 @@
           </q-btn>
 
           <q-btn
-            v-if="showP2PkButtonInDrawer && p2pkKeys.length"
+            v-if="showP2PKButtonInDrawer && p2pkKeys.length"
             class="full-width custom-btn"
             @click="handleLockBtn"
           >
@@ -157,134 +157,134 @@ import PRDialog from "./PaymentRequestDialog.vue";
 
 import { mapActions, mapState, mapWritableState } from "pinia";
 import {
-  ChevronLeft as ChevronLeftIcon,
-  Clipboard as ClipboardIcon,
-  FileText as FileTextIcon,
-  Lock as LockIcon,
-  Nfc as NfcIcon,
-  Scan as ScanIcon,
+	ChevronLeft as ChevronLeftIcon,
+	Clipboard as ClipboardIcon,
+	FileText as FileTextIcon,
+	Lock as LockIcon,
+	Nfc as NfcIcon,
+	Scan as ScanIcon,
 } from "lucide-vue-next";
 // import ChooseMint from "components/ChooseMint.vue";
 import TokenInformation from "components/TokenInformation.vue";
 import { notifyError, notifySuccess, notify } from "../js/notify";
 
 export default defineComponent({
-  name: "ReceiveTokenDialog",
-  mixins: [windowMixin],
-  components: {
-    P2PKDialog,
-    PRDialog,
-    ChevronLeftIcon,
-    ClipboardIcon,
-    FileTextIcon,
-    LockIcon,
-    ScanIcon,
-    NfcIcon,
-  },
-  data: function () {
-    return {
-      showP2PKDialog: false,
-    };
-  },
-  computed: {
-    ...mapWritableState(useReceiveTokensStore, [
-      "showReceiveTokens",
-      "receiveData",
-      "scanningCard",
-      "watchClipboardPaste",
-    ]),
-    ...mapState(useUiStore, ["tickerShort", "ndefSupported"]),
-    ...mapState(useMintsStore, [
-      "activeProofs",
-      "activeUnit",
-      "addMintBlocking",
-    ]),
-    ...mapState(useSettingsStore, [
-      "showNfcButtonInDrawer",
-      "autoPasteEcashReceive",
-    ]),
-    ...mapWritableState(useUiStore, ["showReceiveEcashDrawer"]),
-    ...mapWritableState(useMintsStore, ["addMintData", "showAddMintDialog"]),
-    ...mapWritableState(usePRStore, ["showPRDialog"]),
-    ...mapState(useCameraStore, ["hasCamera"]),
-    ...mapState(useP2PKStore, ["p2pkKeys", "showP2PkButtonInDrawer"]),
-    ...mapState(usePRStore, ["enablePaymentRequest"]),
-    ...mapWritableState(useUiStore, ["showReceiveDialog"]),
-    ...mapState(useCameraStore, ["lastScannedResult"]),
-    cardClass: function () {
-      return this.$q.dark.isActive
-        ? "bg-gray-100 text-white"
-        : "bg-white text-dark";
-    },
-    iconBgColor: function () {
-      return this.$q.dark.isActive
-        ? "var(--q-color-grey-10)"
-        : "var(--q-color-grey-2)";
-    },
-  },
-  methods: {
-    ...mapActions(useWalletStore, ["redeem"]),
-    ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
-    ...mapActions(useTokensStore, ["addPendingToken"]),
-    ...mapActions(useP2PKStore, [
-      "getPrivateKeyForP2PKEncodedToken",
-      "createAndSelectNewKey",
-      "showLastKey",
-    ]),
-    ...mapActions(useMintsStore, ["addMint"]),
-    ...mapActions(useReceiveTokensStore, [
-      "receiveIfDecodes",
-      "decodeToken",
-      "knowThisMintOfTokenJson",
-      "toggleScanner",
-      "pasteToParseDialog",
-    ]),
-    isiOsSafari() {
-      const userAgent = window.navigator.userAgent.toLowerCase();
-      const match =
-        /iphone|ipad|ipod/.test(userAgent) && /safari/.test(userAgent);
-      debug(`User agent: ${userAgent}, is iOS Safari: ${match}`);
-      return match;
-    },
-    handlePasteBtn: function () {
-      this.receiveData.tokensBase64 = "";
-      this.showReceiveTokens = true;
-      this.showReceiveEcashDrawer = false;
-      // if (!this.isiOsSafari()
-      if (this.autoPasteEcashReceive) {
-        this.watchClipboardPaste = true;
-      }
-    },
-    handleLockBtn: function () {
-      this.showP2PKDialog = !this.showP2PKDialog;
-      if (!this.p2pkKeys.length || !this.showP2PKDialog) {
-        this.createAndSelectNewKey();
-      }
-      this.showLastKey();
-      this.showReceiveEcashDrawer = false;
-    },
-    handlePaymentRequestBtn: function () {
-      const prStore = usePRStore();
-      this.showPRDialog = !this.showPRDialog;
-      if (this.showPRDialog) {
-        prStore.newPaymentRequest();
-      }
-      this.showReceiveEcashDrawer = false;
-    },
-    handleNFCBtn: function () {
-      this.toggleScanner();
-    },
-    handleQrCodeDecode(result) {
-      debug("QR code decoded:", result);
-      // Handle the decoded QR code result here
-      this.closeCamera();
-      // You might want to process the result here
-    },
-    goBack: function () {
-      this.showReceiveEcashDrawer = false;
-      this.showReceiveDialog = true;
-    },
-  },
+	name: "ReceiveTokenDialog",
+	mixins: [windowMixin],
+	components: {
+		P2PKDialog,
+		PRDialog,
+		ChevronLeftIcon,
+		ClipboardIcon,
+		FileTextIcon,
+		LockIcon,
+		ScanIcon,
+		NfcIcon,
+	},
+	data: function () {
+		return {
+			showP2PKDialog: false,
+		};
+	},
+	computed: {
+		...mapWritableState(useReceiveTokensStore, [
+			"showReceiveTokens",
+			"receiveData",
+			"scanningCard",
+			"watchClipboardPaste",
+		]),
+		...mapState(useUiStore, ["tickerShort", "ndefSupported"]),
+		...mapState(useMintsStore, [
+			"activeProofs",
+			"activeUnit",
+			"addMintBlocking",
+		]),
+		...mapState(useSettingsStore, [
+			"showNfcButtonInDrawer",
+			"autoPasteEcashReceive",
+		]),
+		...mapWritableState(useUiStore, ["showReceiveEcashDrawer"]),
+		...mapWritableState(useMintsStore, ["addMintData", "showAddMintDialog"]),
+		...mapWritableState(usePRStore, ["showPRDialog"]),
+		...mapState(useCameraStore, ["hasCamera"]),
+		...mapState(useP2PKStore, ["p2pkKeys", "showP2PKButtonInDrawer"]),
+		...mapState(usePRStore, ["enablePaymentRequest"]),
+		...mapWritableState(useUiStore, ["showReceiveDialog"]),
+		...mapState(useCameraStore, ["lastScannedResult"]),
+		cardClass: function () {
+			return this.$q.dark.isActive
+				? "bg-gray-100 text-white"
+				: "bg-white text-dark";
+		},
+		iconBgColor: function () {
+			return this.$q.dark.isActive
+				? "var(--q-color-grey-10)"
+				: "var(--q-color-grey-2)";
+		},
+	},
+	methods: {
+		...mapActions(useWalletStore, ["redeem"]),
+		...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
+		...mapActions(useTokensStore, ["addPendingToken"]),
+		...mapActions(useP2PKStore, [
+			"getPrivateKeyForP2PKEncodedToken",
+			"createAndSelectNewKey",
+			"showLastKey",
+		]),
+		...mapActions(useMintsStore, ["addMint"]),
+		...mapActions(useReceiveTokensStore, [
+			"receiveIfDecodes",
+			"decodeToken",
+			"knowThisMintOfTokenJson",
+			"toggleScanner",
+			"pasteToParseDialog",
+		]),
+		isiOsSafari() {
+			const userAgent = window.navigator.userAgent.toLowerCase();
+			const match =
+				/iphone|ipad|ipod/.test(userAgent) && /safari/.test(userAgent);
+			debug(`User agent: ${userAgent}, is iOS Safari: ${match}`);
+			return match;
+		},
+		handlePasteBtn: function () {
+			this.receiveData.tokensBase64 = "";
+			this.showReceiveTokens = true;
+			this.showReceiveEcashDrawer = false;
+			// if (!this.isiOsSafari()
+			if (this.autoPasteEcashReceive) {
+				this.watchClipboardPaste = true;
+			}
+		},
+		handleLockBtn: function () {
+			this.showP2PKDialog = !this.showP2PKDialog;
+			if (!this.p2pkKeys.length || !this.showP2PKDialog) {
+				this.createAndSelectNewKey();
+			}
+			this.showLastKey();
+			this.showReceiveEcashDrawer = false;
+		},
+		handlePaymentRequestBtn: function () {
+			const prStore = usePRStore();
+			this.showPRDialog = !this.showPRDialog;
+			if (this.showPRDialog) {
+				prStore.newPaymentRequest();
+			}
+			this.showReceiveEcashDrawer = false;
+		},
+		handleNFCBtn: function () {
+			this.toggleScanner();
+		},
+		handleQrCodeDecode(result) {
+			debug("QR code decoded:", result);
+			// Handle the decoded QR code result here
+			this.closeCamera();
+			// You might want to process the result here
+		},
+		goBack: function () {
+			this.showReceiveEcashDrawer = false;
+			this.showReceiveDialog = true;
+		},
+	},
 });
 </script>
 

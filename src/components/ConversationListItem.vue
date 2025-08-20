@@ -146,29 +146,29 @@ import { parseMessageSnippet } from "src/utils/message-snippet";
  * 'lastMsg' prop (already provided here) contains created_at in seconds (Nostr).
  */
 function formatExactTime(createdAt?: number | string | null): string {
-  if (!createdAt && createdAt !== 0) return "";
-  const sec = Number(createdAt);
-  const d = new Date((isFinite(sec) ? sec : Date.now() / 1000) * 1000);
-  const now = new Date();
-  const sameDay = d.toDateString() === now.toDateString();
-  const sameYear = d.getFullYear() === now.getFullYear();
-  if (sameDay) {
-    return new Intl.DateTimeFormat(undefined, {
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(d);
-  }
-  if (sameYear) {
-    return new Intl.DateTimeFormat(undefined, {
-      month: "short",
-      day: "numeric",
-    }).format(d);
-  }
-  return new Intl.DateTimeFormat(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  }).format(d);
+	if (!createdAt && createdAt !== 0) return "";
+	const sec = Number(createdAt);
+	const d = new Date((isFinite(sec) ? sec : Date.now() / 1000) * 1000);
+	const now = new Date();
+	const sameDay = d.toDateString() === now.toDateString();
+	const sameYear = d.getFullYear() === now.getFullYear();
+	if (sameDay) {
+		return new Intl.DateTimeFormat(undefined, {
+			hour: "2-digit",
+			minute: "2-digit",
+		}).format(d);
+	}
+	if (sameYear) {
+		return new Intl.DateTimeFormat(undefined, {
+			month: "short",
+			day: "numeric",
+		}).format(d);
+	}
+	return new Intl.DateTimeFormat(undefined, {
+		year: "numeric",
+		month: "short",
+		day: "numeric",
+	}).format(d);
 }
 
 /**
@@ -181,35 +181,35 @@ function formatExactTime(createdAt?: number | string | null): string {
  *  - Otherwise: the original text trimmed.
  */
 function humanizeSnippet(raw: unknown): string {
-  if (!raw) return "";
-  const t = String(raw).trim();
-  // Try JSON first (ignore errors)
-  if (t.startsWith("{") || t.startsWith("[")) {
-    try {
-      const obj = JSON.parse(t);
-      if (obj && typeof obj === "object") {
-        const o: any = obj;
-        if (o.cashu || o.token || o.proofs || o.mint)
-          return "Sent a Cashu token";
-        if (o.cashu_subscription || o.subscription || o.recurrence)
-          return "Subscription payment";
-      }
-    } catch {
-      // fall through
-    }
-  }
-  // Heuristics on plain text
-  if (/"token"\s*:/.test(t) || /\bcashu\b/i.test(t))
-    return "Sent a Cashu token";
-  if (/\bsubscription\b/i.test(t)) return "Subscription payment";
-  if (/https?:\/\/\S{40,}/i.test(t)) return "Link";
-  return t;
+	if (!raw) return "";
+	const t = String(raw).trim();
+	// Try JSON first (ignore errors)
+	if (t.startsWith("{") || t.startsWith("[")) {
+		try {
+			const obj = JSON.parse(t);
+			if (obj && typeof obj === "object") {
+				const o: any = obj;
+				if (o.cashu || o.token || o.proofs || o.mint)
+					return "Sent a Cashu token";
+				if (o.cashu_subscription || o.subscription || o.recurrence)
+					return "Subscription payment";
+			}
+		} catch {
+			// fall through
+		}
+	}
+	// Heuristics on plain text
+	if (/"token"\s*:/.test(t) || /\bcashu\b/i.test(t))
+		return "Sent a Cashu token";
+	if (/\bsubscription\b/i.test(t)) return "Subscription payment";
+	if (/https?:\/\/\S{40,}/i.test(t)) return "Link";
+	return t;
 }
 
 const props = defineProps({
-  pubkey: { type: String, required: true },
-  lastMsg: { type: Object as () => any, default: () => ({}) },
-  selected: { type: Boolean, default: false },
+	pubkey: { type: String, required: true },
+	lastMsg: { type: Object as () => any, default: () => ({}) },
+	selected: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(["click", "pin", "delete"]);
@@ -225,34 +225,34 @@ const selected = computed(() => props.selected);
 const isMini = computed(() => messenger.drawerMini);
 
 const profile = computed(() => {
-  const entry: any = (nostr.profiles as any)[props.pubkey];
-  return entry?.profile ?? entry ?? {};
+	const entry: any = (nostr.profiles as any)[props.pubkey];
+	return entry?.profile ?? entry ?? {};
 });
 
 const alias = computed(() => messenger.aliases[props.pubkey]);
 const profileName = computed(() => {
-  const p: any = profile.value;
-  return (
-    p?.name ||
-    p?.displayName ||
-    p?.display_name ||
-    props.pubkey.slice(0, 8) + "…"
-  );
+	const p: any = profile.value;
+	return (
+		p?.name ||
+		p?.displayName ||
+		p?.display_name ||
+		props.pubkey.slice(0, 8) + "…"
+	);
 });
 const displayName = computed(() => alias.value || profileName.value);
 
 const initials = computed(() => {
-  const name = displayName.value;
-  const words = name.split(/\s+/).filter(Boolean);
-  const letters = words.slice(0, 2).map((w) => w[0]);
-  return letters.join("").toUpperCase();
+	const name = displayName.value;
+	const words = name.split(/\s+/).filter(Boolean);
+	const letters = words.slice(0, 2).map((w) => w[0]);
+	return letters.join("").toUpperCase();
 });
 
 // consider profile fetched once the key exists, even if it has no fields
 const loaded = computed(() => profile.value !== undefined);
 
 const snippet = computed(() =>
-  parseMessageSnippet(props.lastMsg?.content || ""),
+	parseMessageSnippet(props.lastMsg?.content || ""),
 );
 
 // Build display snippet (we already humanize elsewhere)
@@ -260,9 +260,9 @@ const displaySnippet = computed(() => humanizeSnippet(snippet.value?.text));
 
 // Exact time for the last message
 const timeExact = computed(() => {
-  const ts = (props.lastMsg &&
-    (props.lastMsg.created_at ?? props.lastMsg.timestamp)) as any;
-  return formatExactTime(ts);
+	const ts = (props.lastMsg &&
+		(props.lastMsg.created_at ?? props.lastMsg.timestamp)) as any;
+	return formatExactTime(ts);
 });
 
 const showRaw = ref(false);

@@ -1,5 +1,5 @@
-import { MeltQuoteResponse } from '../mint';
-import { Proof, Token } from './index';
+import { MeltQuoteResponse } from "../mint";
+import { Proof, Token } from "./index";
 
 /**
  * Response after paying a Lightning invoice

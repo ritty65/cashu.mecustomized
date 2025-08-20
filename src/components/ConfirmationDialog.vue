@@ -23,27 +23,27 @@
 import { computed } from "vue";
 
 const props = defineProps({
-  modelValue: { type: Boolean, required: true },
-  title: { type: String, required: true },
-  message: { type: String, required: true },
-  confirmLabel: { type: String, default: "OK" },
-  cancelLabel: { type: String, default: "Cancel" },
+	modelValue: { type: Boolean, required: true },
+	title: { type: String, required: true },
+	message: { type: String, required: true },
+	confirmLabel: { type: String, default: "OK" },
+	cancelLabel: { type: String, default: "Cancel" },
 });
 
 const emit = defineEmits(["update:modelValue", "confirm", "cancel"]);
 
 const model = computed({
-  get: () => props.modelValue,
-  set: (val: boolean) => emit("update:modelValue", val),
+	get: () => props.modelValue,
+	set: (val: boolean) => emit("update:modelValue", val),
 });
 
 function onConfirm() {
-  emit("confirm");
-  emit("update:modelValue", false);
+	emit("confirm");
+	emit("update:modelValue", false);
 }
 
 function onCancel() {
-  emit("cancel");
-  emit("update:modelValue", false);
+	emit("cancel");
+	emit("update:modelValue", false);
 }
 </script>

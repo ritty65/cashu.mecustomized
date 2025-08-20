@@ -38,9 +38,9 @@
 <script setup lang="ts">
 import { useQuasar } from "quasar";
 const props = defineProps<{
-  title: string;
-  value: string | number;
-  diff?: number;
+	title: string;
+	value: string | number;
+	diff?: number;
 }>();
 const $q = useQuasar();
 </script>

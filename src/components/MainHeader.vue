@@ -132,13 +132,13 @@
 
 <script>
 import {
-  defineComponent,
-  ref,
-  computed,
-  getCurrentInstance,
-  onMounted,
-  onBeforeUnmount,
-  nextTick,
+	defineComponent,
+	ref,
+	computed,
+	getCurrentInstance,
+	onMounted,
+	onBeforeUnmount,
+	nextTick,
 } from "vue";
 import { useRoute } from "vue-router";
 import { useUiStore } from "src/stores/ui";
@@ -146,129 +146,129 @@ import { useMessengerStore } from "src/stores/messenger";
 import { useQuasar } from "quasar";
 
 export default defineComponent({
-  name: "MainHeader",
-  mixins: [windowMixin],
-  setup() {
-    const vm = getCurrentInstance()?.proxy;
-    const ui = useUiStore();
-    const route = useRoute();
-    const messenger = useMessengerStore();
-    const $q = useQuasar();
-    const mainNavBtn = ref(null);
-    const mobileNavBtn = ref(null);
+	name: "MainHeader",
+	mixins: [windowMixin],
+	setup() {
+		const vm = getCurrentInstance()?.proxy;
+		const ui = useUiStore();
+		const route = useRoute();
+		const messenger = useMessengerStore();
+		const $q = useQuasar();
+		const mainNavBtn = ref(null);
+		const mobileNavBtn = ref(null);
 
-    const focusNavBtn = () => {
-      (mobileNavBtn.value || mainNavBtn.value)?.focus();
-    };
-    const onKeydown = (e) => {
-      if (e.key === "Escape" && ui.mainNavOpen) {
-        ui.closeMainNav();
-        nextTick(focusNavBtn);
-      }
-    };
+		const focusNavBtn = () => {
+			(mobileNavBtn.value || mainNavBtn.value)?.focus();
+		};
+		const onKeydown = (e) => {
+			if (e.key === "Escape" && ui.mainNavOpen) {
+				ui.closeMainNav();
+				nextTick(focusNavBtn);
+			}
+		};
 
-    onMounted(() => window.addEventListener("keydown", onKeydown));
-    onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown));
+		onMounted(() => window.addEventListener("keydown", onKeydown));
+		onBeforeUnmount(() => window.removeEventListener("keydown", onKeydown));
 
-    const toggleDarkMode = () => {
-      console.log("toggleDarkMode", $q.dark.isActive);
-      $q.dark.toggle();
-      $q.localStorage.set("cashu.darkMode", $q.dark.isActive);
-      vm?.notifySuccess(
-        $q.dark.isActive ? "Dark mode enabled" : "Dark mode disabled",
-      );
-    };
-    const darkIcon = computed(() =>
-      $q.dark.isActive ? "wb_sunny" : "brightness_3",
-    );
-    const isMessengerPage = computed(() =>
-      route.path.startsWith("/nostr-messenger"),
-    );
-    const isWelcomePage = computed(() => route.path.startsWith("/welcome"));
-    const appName = "Fundstr";
-    const currentTitle = computed(() => {
-      if (isMessengerPage.value) return "Nostr Messenger";
-      if (route.path.startsWith("/wallet")) return "Wallet";
-      return "Cashu";
-    });
-    const chatButtonColor = computed(() =>
-      $q.dark.isActive ? "white" : "primary",
-    );
-    const countdown = ref(0);
-    const reloading = ref(false);
-    let countdownInterval;
+		const toggleDarkMode = () => {
+			console.log("toggleDarkMode", $q.dark.isActive);
+			$q.dark.toggle();
+			$q.localStorage.set("cashu.darkMode", $q.dark.isActive);
+			vm?.notifySuccess(
+				$q.dark.isActive ? "Dark mode enabled" : "Dark mode disabled",
+			);
+		};
+		const darkIcon = computed(() =>
+			$q.dark.isActive ? "wb_sunny" : "brightness_3",
+		);
+		const isMessengerPage = computed(() =>
+			route.path.startsWith("/nostr-messenger"),
+		);
+		const isWelcomePage = computed(() => route.path.startsWith("/welcome"));
+		const appName = "Fundstr";
+		const currentTitle = computed(() => {
+			if (isMessengerPage.value) return "Nostr Messenger";
+			if (route.path.startsWith("/wallet")) return "Wallet";
+			return "Cashu";
+		});
+		const chatButtonColor = computed(() =>
+			$q.dark.isActive ? "white" : "primary",
+		);
+		const countdown = ref(0);
+		const reloading = ref(false);
+		let countdownInterval;
 
-    const toggleMessengerDrawer = () => {
-      if ($q.screen.lt.md) {
-        messenger.setDrawer(!messenger.drawerOpen);
-      } else {
-        messenger.toggleDrawer();
-        vm?.notify(
-          messenger.drawerMini ? "Messenger collapsed" : "Messenger expanded",
-        );
-      }
-    };
+		const toggleMessengerDrawer = () => {
+			if ($q.screen.lt.md) {
+				messenger.setDrawer(!messenger.drawerOpen);
+			} else {
+				messenger.toggleDrawer();
+				vm?.notify(
+					messenger.drawerMini ? "Messenger collapsed" : "Messenger expanded",
+				);
+			}
+		};
 
-    const isStaging = () => {
-      return location.host.includes("staging");
-    };
+		const isStaging = () => {
+			return location.host.includes("staging");
+		};
 
-    const reload = () => {
-      console.log(
-        "reload",
-        "countdown:",
-        countdown.value,
-        "mutex:",
-        ui.globalMutexLock,
-      );
-      if (countdown.value > 0) {
-        try {
-          clearInterval(countdownInterval);
-          countdown.value = 0;
-          reloading.value = false;
-          vm?.notifyWarning("Reload cancelled");
-        } finally {
-          ui.unlockMutex();
-        }
-        return;
-      }
-      if (ui.globalMutexLock) return;
-      ui.lockMutex();
-      reloading.value = true;
-      countdown.value = 3;
-      vm?.notify("Reloading in 3 seconds…");
-      countdownInterval = setInterval(() => {
-        countdown.value--;
-        if (countdown.value === 0) {
-          clearInterval(countdownInterval);
-          vm?.notifyRefreshed("Reloading…");
-          try {
-            location.reload();
-          } finally {
-            ui.unlockMutex();
-          }
-        }
-      }, 1000);
-    };
+		const reload = () => {
+			console.log(
+				"reload",
+				"countdown:",
+				countdown.value,
+				"mutex:",
+				ui.globalMutexLock,
+			);
+			if (countdown.value > 0) {
+				try {
+					clearInterval(countdownInterval);
+					countdown.value = 0;
+					reloading.value = false;
+					vm?.notifyWarning("Reload cancelled");
+				} finally {
+					ui.unlockMutex();
+				}
+				return;
+			}
+			if (ui.globalMutexLock) return;
+			ui.lockMutex();
+			reloading.value = true;
+			countdown.value = 3;
+			vm?.notify("Reloading in 3 seconds…");
+			countdownInterval = setInterval(() => {
+				countdown.value--;
+				if (countdown.value === 0) {
+					clearInterval(countdownInterval);
+					vm?.notifyRefreshed("Reloading…");
+					try {
+						location.reload();
+					} finally {
+						ui.unlockMutex();
+					}
+				}
+			}, 1000);
+		};
 
-    return {
-      isStaging,
-      reload,
-      countdown,
-      reloading,
-      ui,
-      currentTitle,
-      isWelcomePage,
-      appName,
-      isMessengerPage,
-      toggleMessengerDrawer,
-      toggleDarkMode,
-      darkIcon,
-      chatButtonColor,
-      mainNavBtn,
-      mobileNavBtn,
-    };
-  },
+		return {
+			isStaging,
+			reload,
+			countdown,
+			reloading,
+			ui,
+			currentTitle,
+			isWelcomePage,
+			appName,
+			isMessengerPage,
+			toggleMessengerDrawer,
+			toggleDarkMode,
+			darkIcon,
+			chatButtonColor,
+			mainNavBtn,
+			mobileNavBtn,
+		};
+	},
 });
 </script>
 <style scoped>
