@@ -21,7 +21,7 @@
     "chooseMint": {
       "title": "Pick a mint",
       "desc": "Mints convert Lightning ↔ ecash. You can switch anytime.",
-      "recommended": "Use recommended mint",
+      "recommended": "Browse mints",
       "choose": "Choose a mint"
     },
     "deposit": {
