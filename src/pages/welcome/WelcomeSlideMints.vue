@@ -8,7 +8,13 @@
       <p class="q-mt-sm">{{ t('Welcome.mints.lead') }}</p>
       <p class="text-caption q-mt-sm">{{ t('Welcome.mints.primer') }}</p>
       <div class="q-mt-sm">
-        <q-btn flat dense icon="info" @click="info = true" :label="t('Welcome.mints.browse')" />
+        <q-btn
+          flat
+          dense
+          icon="factory"
+          @click="showCatalog = true"
+          :label="t('Welcome.mints.browse')"
+        />
       </div>
       <q-form class="q-mt-md" @submit.prevent="connect">
         <q-input v-model="url" :placeholder="t('Welcome.mints.placeholder')" autocomplete="off" />
@@ -22,7 +28,26 @@
         </div>
         <q-btn flat color="primary" class="q-mt-sm" @click="addAnother" :label="t('Welcome.mints.addAnother')" />
       </div>
-      <MintInfoDrawer v-model="info" />
+      <q-dialog v-model="showCatalog">
+        <q-card style="min-width:300px">
+          <q-card-section>
+            <div class="text-h6">{{ t('Welcome.mints.browse') }}</div>
+          </q-card-section>
+          <q-list>
+            <q-item
+              v-for="mint in recommendedMints"
+              :key="mint.url"
+              clickable
+              @click="selectMint(mint.url)"
+            >
+              <q-item-section>{{ mint.label || mint.url }}</q-item-section>
+            </q-item>
+          </q-list>
+          <q-card-actions align="right">
+            <q-btn flat :label="t('global.actions.close.label')" v-close-popup />
+          </q-card-actions>
+        </q-card>
+      </q-dialog>
     </div>
   </section>
 </template>
@@ -32,7 +57,6 @@ import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useWelcomeStore } from 'src/stores/welcome'
 import { useMintsStore } from 'src/stores/mints'
-import MintInfoDrawer from 'src/components/welcome/MintInfoDrawer.vue'
 
 const { t } = useI18n()
 const welcome = useWelcomeStore()
@@ -42,7 +66,19 @@ const url = ref((process.env.RECOMMENDED_MINT_URL as string) || '')
 const error = ref('')
 const loading = ref(false)
 const connected = ref<any[]>([])
-const info = ref(false)
+const showCatalog = ref(false)
+const recommendedMints = ref<{ label?: string; url: string }[]>([])
+
+if (process.env.RECOMMENDED_MINTS) {
+  recommendedMints.value = (process.env.RECOMMENDED_MINTS as string)
+    .split(',')
+    .map((u) => ({ url: u.trim() }))
+}
+if (!recommendedMints.value.length && process.env.RECOMMENDED_MINT_URL) {
+  recommendedMints.value.push({
+    url: process.env.RECOMMENDED_MINT_URL as string,
+  })
+}
 
 onMounted(() => {
   if (mints.mints.length > 0) {
@@ -89,6 +125,12 @@ async function connect() {
 function addAnother() {
   url.value = ''
   error.value = ''
+}
+
+function selectMint(mintUrl: string) {
+  showCatalog.value = false
+  url.value = mintUrl
+  connect()
 }
 </script>
 
