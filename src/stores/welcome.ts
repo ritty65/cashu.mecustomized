@@ -13,6 +13,11 @@ export const useWelcomeStore = defineStore('welcome', {
     termsAccepted: useLocalStorage('cashu.welcome.termsAccepted', false),
     nostrSetupCompleted: useLocalStorage('cashu.welcome.nostrSetupCompleted', false),
     mintConnected: useLocalStorage('cashu.welcome.mintConnected', false),
+    featuresVisited: useLocalStorage('cashu.welcome.featuresVisited', {
+      creatorHub: false,
+      subscriptions: false,
+      buckets: false,
+    }),
   }),
   actions: {
     walletHasAtLeastOneMint(): boolean {

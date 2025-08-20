@@ -50,16 +50,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-import TermsContent from "src/components/TermsContent.vue";
+import { ref, watch } from 'vue'
+import TermsContent from 'src/components/TermsContent.vue'
+import { useWelcomeStore } from 'src/stores/welcome'
 
-const id = "welcome-terms-title";
-const showTerms = ref(false);
-const accepted = ref(false);
+const id = 'welcome-terms-title'
+const showTerms = ref(false)
+const accepted = ref(false)
+const welcome = useWelcomeStore()
+
+watch(accepted, (val) => {
+  welcome.termsAccepted = val
+})
 
 function acceptAndClose() {
-  accepted.value = true;
-  showTerms.value = false;
+  accepted.value = true
+  welcome.termsAccepted = true
+  showTerms.value = false
 }
 </script>
 
