@@ -28,22 +28,8 @@
           :disable="!recommendedMints.length"
         />
       </div>
-      <q-form class="q-mt-md" @submit.prevent="connect">
-        <q-select
-          v-model="url"
-          :options="recommendedMints"
-          :option-label="(opt) => opt.label || opt.url"
-          option-value="url"
-          emit-value
-          map-options
-          use-input
-          input-debounce="0"
-          @new-value="onNewValue"
-          :placeholder="t('Welcome.mints.placeholder')"
-        />
-        <div v-if="error" class="text-negative text-caption q-mt-xs">{{ error }}</div>
-        <q-btn color="primary" class="q-mt-md" :loading="loading" type="submit" :label="t('Welcome.mints.connect')" />
-      </q-form>
+      <MintGallery @selected="onMintSelected" class="q-mt-md" />
+      <div v-if="error" class="text-negative text-caption q-mt-xs">{{ error }}</div>
       <div v-if="connected.length" class="q-mt-md">
         <div
           v-for="m in connected"
@@ -94,6 +80,7 @@ import { useI18n } from 'vue-i18n'
 import { useQuasar } from 'quasar'
 import { useWelcomeStore } from 'src/stores/welcome'
 import { useMintsStore } from 'src/stores/mints'
+import MintGallery from 'src/components/welcome/MintGallery.vue'
 
 const { t } = useI18n()
 const $q = useQuasar()
@@ -109,35 +96,32 @@ const recommendedMints = ref<{ label: string; url: string }[]>([])
 
 async function loadRecommendedMints() {
   try {
-    const resp = await fetch('/mints.json')
-    if (!resp.ok) throw new Error('network')
+    const resp = await fetch('https://cashu.space/api/v1/mints')
+    if (!resp.ok) {
+      throw new Error('Failed to fetch mints from cashu.space')
+    }
     const data = await resp.json()
-    recommendedMints.value = Array.isArray(data)
-      ? data.map((m: any) => ({ url: m.url, label: m.label || m.url }))
-      : []
-    if (!recommendedMints.value.length && process.env.RECOMMENDED_MINTS) {
-      recommendedMints.value = (process.env.RECOMMENDED_MINTS as string)
-        .split(',')
-        .map((u) => ({ url: u.trim(), label: u.trim() }))
+    // The cashu.space API returns an object with a 'mints' key
+    if (data && Array.isArray(data.mints)) {
+      recommendedMints.value = data.mints.map((mint: any) => ({
+        url: mint.url,
+        label: mint.name || mint.url,
+      }))
+    } else {
+      // Fallback for unexpected API response structure
+      throw new Error('Invalid data format from cashu.space')
     }
-    if (!recommendedMints.value.length && process.env.RECOMMENDED_MINT_URL) {
-      recommendedMints.value.push({
-        url: process.env.RECOMMENDED_MINT_URL as string,
-        label: process.env.RECOMMENDED_MINT_URL as string,
-      })
-    }
-  } catch {
+  } catch (e) {
+    console.error(e)
+    $q.notify({
+      type: 'negative',
+      message: t('Welcome.mints.errorLoad'),
+    })
+    // Fallback to environment variables if the API call fails
     if (process.env.RECOMMENDED_MINTS) {
       recommendedMints.value = (process.env.RECOMMENDED_MINTS as string)
         .split(',')
         .map((u) => ({ url: u.trim(), label: u.trim() }))
-    } else if (process.env.RECOMMENDED_MINT_URL) {
-      recommendedMints.value.push({
-        url: process.env.RECOMMENDED_MINT_URL as string,
-        label: process.env.RECOMMENDED_MINT_URL as string,
-      })
-    } else {
-      $q.notify({ type: 'negative', message: t('Welcome.mints.errorLoad') })
     }
   }
 }
@@ -219,6 +203,17 @@ async function remove(mintUrl: string) {
   await mints.removeMint(mintUrl)
   connected.value = connected.value.filter((m) => m.url !== mintUrl)
   welcome.mintConnected = mints.mints.length > 0
+}
+
+function onMintSelected() {
+  // The MintGallery component handles adding and activating the mint.
+  // We just need to update the welcome store's state and proceed.
+  welcome.mintConnected = mints.mints.length > 0
+
+  // Check if we can proceed and move to the next slide automatically.
+  if (welcome.canProceed(welcome.currentSlide)) {
+    welcome.currentSlide++
+  }
 }
 </script>
 
