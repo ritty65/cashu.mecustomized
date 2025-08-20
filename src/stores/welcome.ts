@@ -1,32 +1,43 @@
 import { defineStore } from 'pinia'
 import { useLocalStorage } from '@vueuse/core'
-import { useNostrStore } from './nostr'
 import { useMintsStore } from './mints'
-import { useProofsStore } from './proofs'
 
-const DEFAULT_MINT_URL = 'https://mint.example.com'
+export const LAST_WELCOME_SLIDE = 5
 
 export const useWelcomeStore = defineStore('welcome', {
   state: () => ({
-    welcomeCompleted: useLocalStorage<boolean>('cashu.welcome.completed', false).value,
-    recommendedMintUrl: process.env.RECOMMENDED_MINT_URL || DEFAULT_MINT_URL,
+    showWelcome: useLocalStorage('cashu.welcome.show', true),
+    currentSlide: useLocalStorage('cashu.welcome.slide', 0),
+    seedPhraseValidated: useLocalStorage('cashu.welcome.seedValidated', false),
+    walletRestored: useLocalStorage('cashu.welcome.walletRestored', false),
+    termsAccepted: useLocalStorage('cashu.welcome.termsAccepted', false),
+    nostrSetupCompleted: useLocalStorage('cashu.welcome.nostrSetupCompleted', false),
+    mintConnected: useLocalStorage('cashu.welcome.mintConnected', false),
   }),
-  getters: {
-    hasIdentity: () => !!useNostrStore().pubkey,
-    identitySource: () => {
-      const s = (useNostrStore() as any).signerType
-      return s ? String(s).toLowerCase() : null
-    },
-    hasMint: () => !!useMintsStore().activeMintUrl,
-    balanceSats: () =>
-      useProofsStore().proofs.reduce((sum, p) => sum + p.amount, 0),
-    canFinish(): boolean {
-      return this.hasIdentity && this.hasMint
-    },
-  },
   actions: {
-    markWelcomeCompleted() {
-      this.welcomeCompleted = true
+    walletHasAtLeastOneMint(): boolean {
+      const mints = useMintsStore()
+      return mints.mints.length > 0
+    },
+    canProceed(slide: number): boolean {
+      switch (slide) {
+        case 0:
+        case 1:
+        case 2:
+          return true
+        case 3:
+          return this.seedPhraseValidated || this.walletRestored
+        case 4:
+          return this.mintConnected || this.walletHasAtLeastOneMint()
+        case 5:
+          return this.termsAccepted
+        default:
+          return false
+      }
+    },
+    closeWelcome() {
+      this.showWelcome = false
+      this.currentSlide = 0
     },
   },
 })

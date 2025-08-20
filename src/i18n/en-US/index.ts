@@ -1904,6 +1904,17 @@ export const messages = {
       relation:
         "Browse creators in CreatorHub and subscribe to them in Subscriptions.",
     },
+    nostr: {
+      title: "Set up your Nostr identity (optional)",
+      lead: "Nostr is an open identity protocol. Connecting a Nostr key lets Cashu create a Lightning address for tips and back up your mint list. You can skip this.",
+      connect: "Connect Nostr extension",
+      generate: "Generate new key",
+      import: "Import existing key",
+      importPlaceholder: "nsec or hex key",
+      skip: "Skip for now",
+      errorInvalid: "Invalid key",
+      errorConnect: "Could not connect to extension",
+    },
     privacy: {
       title: "Cashu & Privacy",
       lead: "Cashu uses blinded tokens so mints can’t see who you are or what you pay.",
@@ -1915,15 +1926,12 @@ export const messages = {
       ctaLearn: "Learn more",
     },
     mints: {
-      title: "Mints",
-      lead: "A mint is a server that issues and redeems Cashu tokens.",
-      bullets: [
-        "Add one or more mints to receive, send, and swap tokens.",
-        "Each mint defines fees, limits, and availability.",
-        "You can remove or switch mints at any time.",
-      ],
-      ctaPrimary: "Add a Mint",
-      ctaSecondary: "What is a mint?",
+      title: "Connect to a Cashu mint",
+      lead: "Cashu requires a mint to issue and verify ecash. Choose a mint you trust. You can add more later.",
+      placeholder: "https://your-mint.example",
+      connect: "Connect mint",
+      addAnother: "Add another",
+      error: "Could not connect to mint",
     },
     proofs: {
       title: "Proofs",

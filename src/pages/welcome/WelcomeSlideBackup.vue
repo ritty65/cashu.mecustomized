@@ -25,7 +25,7 @@
       </div>
       <q-checkbox
         class="q-mt-md"
-        v-model="welcomeStore.seedAcknowledged"
+        v-model="welcomeStore.seedPhraseValidated"
         :label="$t('Welcome.backup.acknowledge')"
         aria-label="$t('Welcome.backup.acknowledge')"
       />
