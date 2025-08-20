@@ -242,7 +242,7 @@ body.body--dark .wallet-action-btn:active {
   padding-bottom: 15px;
 }
 </style>
-<script lang="ts">
+<script>
 import { debug } from "src/js/logger";
 import { date } from "quasar";
 import { shortenString } from "src/js/string-utils";
