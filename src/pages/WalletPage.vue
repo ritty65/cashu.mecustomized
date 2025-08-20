@@ -516,7 +516,7 @@ export default {
     },
     showWelcomePage: function () {
       const store = useWelcomeStore();
-      if (!store.hasKey || !store.welcomeCompleted) {
+      if (!store.welcomeCompleted) {
         const currentQuery = window.location.search;
         const currentHash = window.location.hash;
         this.$router.push("/welcome" + currentQuery + currentHash);

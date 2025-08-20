@@ -39,12 +39,12 @@ export default route(function (/* { store, ssrContext } */) {
     const welcome = useWelcomeStore();
     const restore = useRestoreStore();
     if (
-      to.path !== "/welcome" &&
-      ( !welcome.hasKey || !welcome.welcomeCompleted ) &&
+      to.path !== '/welcome' &&
+      !welcome.welcomeCompleted &&
       !restore.restoringState &&
-      to.path !== "/restore"
+      to.path !== '/restore'
     ) {
-      next("/welcome?first=1");
+      next('/welcome?first=1');
       return;
     }
     next();
