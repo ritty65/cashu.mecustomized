@@ -49,40 +49,40 @@ const isImage = computed(() => attachment.value?.startsWith("data:image"));
 const fileInput = ref<HTMLInputElement>();
 
 const send = () => {
-	const m = text.value.trim();
-	if (!m && !attachment.value) return;
-	const payload: any = { text: m };
-	if (attachment.value) {
-		payload.attachment = {
-			dataUrl: attachment.value,
-			name: attachmentName.value,
-			type: attachmentType.value,
-		};
-	}
-	emit("send", payload);
-	attachment.value = null;
-	attachmentName.value = "";
-	attachmentType.value = "";
-	text.value = "";
+  const m = text.value.trim();
+  if (!m && !attachment.value) return;
+  const payload: any = { text: m };
+  if (attachment.value) {
+    payload.attachment = {
+      dataUrl: attachment.value,
+      name: attachmentName.value,
+      type: attachmentType.value,
+    };
+  }
+  emit("send", payload);
+  attachment.value = null;
+  attachmentName.value = "";
+  attachmentType.value = "";
+  text.value = "";
 };
 
 const sendToken = () => {
-	emit("sendToken");
+  emit("sendToken");
 };
 
 const selectFile = () => {
-	fileInput.value?.click();
+  fileInput.value?.click();
 };
 
 const handleFile = (e: Event) => {
-	const files = (e.target as HTMLInputElement).files;
-	if (!files || !files[0]) return;
-	const reader = new FileReader();
-	reader.onload = () => {
-		attachment.value = reader.result as string;
-		attachmentName.value = files[0].name;
-		attachmentType.value = files[0].type;
-	};
-	reader.readAsDataURL(files[0]);
+  const files = (e.target as HTMLInputElement).files;
+  if (!files || !files[0]) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    attachment.value = reader.result as string;
+    attachmentName.value = files[0].name;
+    attachmentType.value = files[0].type;
+  };
+  reader.readAsDataURL(files[0]);
 };
 </script>

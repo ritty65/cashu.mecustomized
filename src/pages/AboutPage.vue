@@ -55,7 +55,11 @@
             class="interactive-card block no-underline p-6 md:p-8 flex flex-col cursor-pointer"
             :aria-label="$t(card.titleKey)"
           >
-            <q-icon :name="card.icon" size="2.5rem" class="text-white mb-4" />
+            <q-icon
+              :name="card.icon"
+              size="2.5rem"
+              class="text-white mb-4"
+            />
             <p class="text-accent font-semibold">
               {{ tOr(card.titleKey) }}
             </p>
@@ -812,10 +816,10 @@ import { onMounted, ref, watch, computed } from "vue";
 import { useI18n } from "vue-i18n";
 
 interface NavigationItem {
-	menuItem: string;
-	icon: string;
-	fanText: string;
-	creatorText: string;
+  menuItem: string;
+  icon: string;
+  fanText: string;
+  creatorText: string;
 }
 
 const dialogStep1 = ref(false);
@@ -824,190 +828,190 @@ const dialogStep3 = ref(false);
 
 const { t } = useI18n();
 const tOr = (key: string, fallback = "") => {
-	const val = t(key) as string;
-	return val && val !== key ? val : fallback;
+  const val = t(key) as string;
+  return val && val !== key ? val : fallback;
 };
 
 interface SiteOverviewCard {
-	route: string;
-	titleKey: string;
-	descriptionKey: string;
-	icon: string;
+  route: string;
+  titleKey: string;
+  descriptionKey: string;
+  icon: string;
 }
 
 const siteOverviewCards: SiteOverviewCard[] = [
-	{
-		route: "/wallet",
-		titleKey: "MainHeader.menu.wallet.title",
-		descriptionKey: "AboutPage.siteOverview.wallet.description",
-		icon: "account_balance_wallet",
-	},
-	{
-		route: "/find-creators",
-		titleKey: "MainHeader.menu.findCreators.title",
-		descriptionKey: "AboutPage.siteOverview.findCreators.description",
-		icon: "img:icons/find-creators.svg",
-	},
-	{
-		route: "/creator-hub",
-		titleKey: "MainHeader.menu.creatorHub.title",
-		descriptionKey: "AboutPage.siteOverview.creatorHub.description",
-		icon: "img:icons/creator-hub.svg",
-	},
-	{
-		route: "/my-profile",
-		titleKey: "MainHeader.menu.myProfile.title",
-		descriptionKey: "AboutPage.siteOverview.myProfile.description",
-		icon: "person",
-	},
-	{
-		route: "/buckets",
-		titleKey: "MainHeader.menu.buckets.title",
-		descriptionKey: "AboutPage.siteOverview.buckets.description",
-		icon: "inventory_2",
-	},
-	{
-		route: "/subscriptions",
-		titleKey: "MainHeader.menu.subscriptions.title",
-		descriptionKey: "AboutPage.siteOverview.subscriptions.description",
-		icon: "auto_awesome_motion",
-	},
-	{
-		route: "/nostr-messenger",
-		titleKey: "MainHeader.menu.nostrMessenger.title",
-		descriptionKey: "AboutPage.siteOverview.nostrMessenger.description",
-		icon: "chat",
-	},
-	{
-		route: "/settings",
-		titleKey: "MainHeader.menu.settings.title",
-		descriptionKey: "AboutPage.siteOverview.settings.description",
-		icon: "settings",
-	},
-	{
-		route: "/restore",
-		titleKey: "MainHeader.menu.restore.title",
-		descriptionKey: "AboutPage.siteOverview.restore.description",
-		icon: "settings_backup_restore",
-	},
-	{
-		route: "/already-running",
-		titleKey: "MainHeader.menu.alreadyRunning.title",
-		descriptionKey: "AboutPage.siteOverview.alreadyRunning.description",
-		icon: "warning",
-	},
-	{
-		route: "/welcome",
-		titleKey: "MainHeader.menu.welcome.title",
-		descriptionKey: "AboutPage.siteOverview.welcome.description",
-		icon: "info",
-	},
-	{
-		route: "/terms",
-		titleKey: "MainHeader.menu.terms.title",
-		descriptionKey: "AboutPage.siteOverview.terms.description",
-		icon: "gavel",
-	},
-	{
-		route: "/nostr-login",
-		titleKey: "MainHeader.menu.nostrLogin.title",
-		descriptionKey: "AboutPage.siteOverview.nostrLogin.description",
-		icon: "vpn_key",
-	},
+  {
+    route: "/wallet",
+    titleKey: "MainHeader.menu.wallet.title",
+    descriptionKey: "AboutPage.siteOverview.wallet.description",
+    icon: "account_balance_wallet",
+  },
+  {
+    route: "/find-creators",
+    titleKey: "MainHeader.menu.findCreators.title",
+    descriptionKey: "AboutPage.siteOverview.findCreators.description",
+    icon: "img:icons/find-creators.svg",
+  },
+  {
+    route: "/creator-hub",
+    titleKey: "MainHeader.menu.creatorHub.title",
+    descriptionKey: "AboutPage.siteOverview.creatorHub.description",
+    icon: "img:icons/creator-hub.svg",
+  },
+  {
+    route: "/my-profile",
+    titleKey: "MainHeader.menu.myProfile.title",
+    descriptionKey: "AboutPage.siteOverview.myProfile.description",
+    icon: "person",
+  },
+  {
+    route: "/buckets",
+    titleKey: "MainHeader.menu.buckets.title",
+    descriptionKey: "AboutPage.siteOverview.buckets.description",
+    icon: "inventory_2",
+  },
+  {
+    route: "/subscriptions",
+    titleKey: "MainHeader.menu.subscriptions.title",
+    descriptionKey: "AboutPage.siteOverview.subscriptions.description",
+    icon: "auto_awesome_motion",
+  },
+  {
+    route: "/nostr-messenger",
+    titleKey: "MainHeader.menu.nostrMessenger.title",
+    descriptionKey: "AboutPage.siteOverview.nostrMessenger.description",
+    icon: "chat",
+  },
+  {
+    route: "/settings",
+    titleKey: "MainHeader.menu.settings.title",
+    descriptionKey: "AboutPage.siteOverview.settings.description",
+    icon: "settings",
+  },
+  {
+    route: "/restore",
+    titleKey: "MainHeader.menu.restore.title",
+    descriptionKey: "AboutPage.siteOverview.restore.description",
+    icon: "settings_backup_restore",
+  },
+  {
+    route: "/already-running",
+    titleKey: "MainHeader.menu.alreadyRunning.title",
+    descriptionKey: "AboutPage.siteOverview.alreadyRunning.description",
+    icon: "warning",
+  },
+  {
+    route: "/welcome",
+    titleKey: "MainHeader.menu.welcome.title",
+    descriptionKey: "AboutPage.siteOverview.welcome.description",
+    icon: "info",
+  },
+  {
+    route: "/terms",
+    titleKey: "MainHeader.menu.terms.title",
+    descriptionKey: "AboutPage.siteOverview.terms.description",
+    icon: "gavel",
+  },
+  {
+    route: "/nostr-login",
+    titleKey: "MainHeader.menu.nostrLogin.title",
+    descriptionKey: "AboutPage.siteOverview.nostrLogin.description",
+    icon: "vpn_key",
+  },
 ];
 
 // navigation items for the navigation map
 const navigationItems = computed<NavigationItem[]>(() => [
-	{
-		menuItem: t("MainHeader.menu.wallet.title"),
-		icon: "account_balance_wallet",
-		fanText: t("AboutPage.navigation.items.wallet.fan"),
-		creatorText: t("AboutPage.navigation.items.wallet.creator"),
-	},
-	{
-		menuItem: t("MainHeader.menu.settings.title"),
-		icon: "settings",
-		fanText: t("AboutPage.navigation.items.settings.fan"),
-		creatorText: t("AboutPage.navigation.items.settings.creator"),
-	},
-	{
-		menuItem: t("MainHeader.menu.findCreators.title"),
-		icon: "img:icons/find-creators.svg",
-		fanText: t("AboutPage.navigation.items.findCreators.fan"),
-		creatorText: t("AboutPage.navigation.items.findCreators.creator"),
-	},
-	{
-		menuItem: t("MainHeader.menu.creatorHub.title"),
-		icon: "img:icons/creator-hub.svg",
-		fanText: t("AboutPage.navigation.items.creatorHub.fan"),
-		creatorText: t("AboutPage.navigation.items.creatorHub.creator"),
-	},
-	{
-		menuItem: t("MainHeader.menu.myProfile.title"),
-		icon: "person",
-		fanText: t("AboutPage.navigation.items.myProfile.fan"),
-		creatorText: t("AboutPage.navigation.items.myProfile.creator"),
-	},
-	{
-		menuItem: t("MainHeader.menu.buckets.title"),
-		icon: "inventory_2",
-		fanText: t("AboutPage.navigation.items.buckets.fan"),
-		creatorText: t("AboutPage.navigation.items.buckets.creator"),
-	},
-	{
-		menuItem: t("MainHeader.menu.subscriptions.title"),
-		icon: "auto_awesome_motion",
-		fanText: t("AboutPage.navigation.items.subscriptions.fan"),
-		creatorText: t("AboutPage.navigation.items.subscriptions.creator"),
-	},
-	{
-		menuItem: t("MainHeader.menu.nostrMessenger.title"),
-		icon: "chat",
-		fanText: t("AboutPage.navigation.items.chats.fan"),
-		creatorText: t("AboutPage.navigation.items.chats.creator"),
-	},
-	{
-		menuItem: t("MainHeader.menu.restore.title"),
-		icon: "settings_backup_restore",
-		fanText: t("AboutPage.navigation.items.restore.fan"),
-		creatorText: t("AboutPage.navigation.items.restore.creator"),
-	},
-	{
-		menuItem: t("MainHeader.menu.alreadyRunning.title"),
-		icon: "warning",
-		fanText: t("AboutPage.navigation.items.alreadyRunning.fan"),
-		creatorText: t("AboutPage.navigation.items.alreadyRunning.creator"),
-	},
-	{
-		menuItem: t("MainHeader.menu.welcome.title"),
-		icon: "info",
-		fanText: t("AboutPage.navigation.items.welcome.fan"),
-		creatorText: t("AboutPage.navigation.items.welcome.creator"),
-	},
-	{
-		menuItem: t("MainHeader.menu.terms.title"),
-		icon: "gavel",
-		fanText: t("AboutPage.navigation.items.terms.fan"),
-		creatorText: t("AboutPage.navigation.items.terms.creator"),
-	},
-	{
-		menuItem: t("MainHeader.menu.about.title"),
-		icon: "info",
-		fanText: t("AboutPage.navigation.items.about.fan"),
-		creatorText: t("AboutPage.navigation.items.about.creator"),
-	},
-	{
-		menuItem: t("MainHeader.menu.links.title"),
-		icon: "link",
-		fanText: t("AboutPage.navigation.items.externalLinks.fan"),
-		creatorText: t("AboutPage.navigation.items.externalLinks.creator"),
-	},
-	{
-		menuItem: t("MainHeader.menu.nostrLogin.title"),
-		icon: "vpn_key",
-		fanText: t("AboutPage.navigation.items.nostrLogin.fan"),
-		creatorText: t("AboutPage.navigation.items.nostrLogin.creator"),
-	},
+  {
+    menuItem: t("MainHeader.menu.wallet.title"),
+    icon: "account_balance_wallet",
+    fanText: t("AboutPage.navigation.items.wallet.fan"),
+    creatorText: t("AboutPage.navigation.items.wallet.creator"),
+  },
+  {
+    menuItem: t("MainHeader.menu.settings.title"),
+    icon: "settings",
+    fanText: t("AboutPage.navigation.items.settings.fan"),
+    creatorText: t("AboutPage.navigation.items.settings.creator"),
+  },
+  {
+    menuItem: t("MainHeader.menu.findCreators.title"),
+    icon: "img:icons/find-creators.svg",
+    fanText: t("AboutPage.navigation.items.findCreators.fan"),
+    creatorText: t("AboutPage.navigation.items.findCreators.creator"),
+  },
+  {
+    menuItem: t("MainHeader.menu.creatorHub.title"),
+    icon: "img:icons/creator-hub.svg",
+    fanText: t("AboutPage.navigation.items.creatorHub.fan"),
+    creatorText: t("AboutPage.navigation.items.creatorHub.creator"),
+  },
+  {
+    menuItem: t("MainHeader.menu.myProfile.title"),
+    icon: "person",
+    fanText: t("AboutPage.navigation.items.myProfile.fan"),
+    creatorText: t("AboutPage.navigation.items.myProfile.creator"),
+  },
+  {
+    menuItem: t("MainHeader.menu.buckets.title"),
+    icon: "inventory_2",
+    fanText: t("AboutPage.navigation.items.buckets.fan"),
+    creatorText: t("AboutPage.navigation.items.buckets.creator"),
+  },
+  {
+    menuItem: t("MainHeader.menu.subscriptions.title"),
+    icon: "auto_awesome_motion",
+    fanText: t("AboutPage.navigation.items.subscriptions.fan"),
+    creatorText: t("AboutPage.navigation.items.subscriptions.creator"),
+  },
+  {
+    menuItem: t("MainHeader.menu.nostrMessenger.title"),
+    icon: "chat",
+    fanText: t("AboutPage.navigation.items.chats.fan"),
+    creatorText: t("AboutPage.navigation.items.chats.creator"),
+  },
+  {
+    menuItem: t("MainHeader.menu.restore.title"),
+    icon: "settings_backup_restore",
+    fanText: t("AboutPage.navigation.items.restore.fan"),
+    creatorText: t("AboutPage.navigation.items.restore.creator"),
+  },
+  {
+    menuItem: t("MainHeader.menu.alreadyRunning.title"),
+    icon: "warning",
+    fanText: t("AboutPage.navigation.items.alreadyRunning.fan"),
+    creatorText: t("AboutPage.navigation.items.alreadyRunning.creator"),
+  },
+  {
+    menuItem: t("MainHeader.menu.welcome.title"),
+    icon: "info",
+    fanText: t("AboutPage.navigation.items.welcome.fan"),
+    creatorText: t("AboutPage.navigation.items.welcome.creator"),
+  },
+  {
+    menuItem: t("MainHeader.menu.terms.title"),
+    icon: "gavel",
+    fanText: t("AboutPage.navigation.items.terms.fan"),
+    creatorText: t("AboutPage.navigation.items.terms.creator"),
+  },
+  {
+    menuItem: t("MainHeader.menu.about.title"),
+    icon: "info",
+    fanText: t("AboutPage.navigation.items.about.fan"),
+    creatorText: t("AboutPage.navigation.items.about.creator"),
+  },
+  {
+    menuItem: t("MainHeader.menu.links.title"),
+    icon: "link",
+    fanText: t("AboutPage.navigation.items.externalLinks.fan"),
+    creatorText: t("AboutPage.navigation.items.externalLinks.creator"),
+  },
+  {
+    menuItem: t("MainHeader.menu.nostrLogin.title"),
+    icon: "vpn_key",
+    fanText: t("AboutPage.navigation.items.nostrLogin.fan"),
+    creatorText: t("AboutPage.navigation.items.nostrLogin.creator"),
+  },
 ]);
 
 const mode = ref<"fan" | "creator">("fan");
@@ -1015,34 +1019,34 @@ const mapContainer = ref<HTMLElement | null>(null);
 const openIndex = ref<number | null>(null);
 
 watch(mode, (val) => {
-	if (mapContainer.value) {
-		mapContainer.value.classList.toggle("fan-mode", val === "fan");
-		mapContainer.value.classList.toggle("creator-mode", val === "creator");
-	}
+  if (mapContainer.value) {
+    mapContainer.value.classList.toggle("fan-mode", val === "fan");
+    mapContainer.value.classList.toggle("creator-mode", val === "creator");
+  }
 });
 
 onMounted(() => {
-	if (mapContainer.value) {
-		mapContainer.value.classList.add("fan-mode");
-	}
+  if (mapContainer.value) {
+    mapContainer.value.classList.add("fan-mode");
+  }
 
-	if ("IntersectionObserver" in window) {
-		const observer = new IntersectionObserver((entries) => {
-			entries.forEach((entry) => {
-				if (entry.isIntersecting) {
-					entry.target.classList.add("is-visible");
-				}
-			});
-		});
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("is-visible");
+        }
+      });
+    });
 
-		document.querySelectorAll(".fade-in-section").forEach((el) => {
-			observer.observe(el);
-		});
-	} else {
-		document
-			.querySelectorAll(".fade-in-section")
-			.forEach((el) => el.classList.add("is-visible"));
-	}
+    document.querySelectorAll(".fade-in-section").forEach((el) => {
+      observer.observe(el);
+    });
+  } else {
+    document
+      .querySelectorAll(".fade-in-section")
+      .forEach((el) => el.classList.add("is-visible"));
+  }
 });
 </script>
 

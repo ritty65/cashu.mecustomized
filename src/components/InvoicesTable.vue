@@ -111,71 +111,71 @@ import { useInvoicesWorkerStore } from "src/stores/invoicesWorker";
 import { formatDistanceToNow, parseISO } from "date-fns";
 
 export default defineComponent({
-	name: "InvoicesTable",
-	mixins: [windowMixin],
-	props: {},
-	data: function () {
-		return {
-			currentPage: 1,
-			pageSize: 5,
-			filterPending: false,
-		};
-	},
-	watch: {
-		filterPending: function () {
-			this.currentPage = 1;
-		},
-	},
-	computed: {
-		...mapWritableState(useUiStore, ["showInvoiceDetails"]),
-		...mapWritableState(useInvoiceHistoryStore, ["invoiceHistory"]),
-		...mapWritableState(useWalletStore, ["invoiceData", "payInvoiceData"]),
-		maxPages() {
-			return Math.ceil(this.invoiceHistory.length / this.pageSize);
-		},
-		paginatedInvoices() {
-			const start = (this.currentPage - 1) * this.pageSize;
-			const end = start + this.pageSize;
-			if (this.filterPending) {
-				return this.invoiceHistory
-					.filter((invoice) => invoice.status === "pending")
-					.slice(start, end);
-			}
-			return this.invoiceHistory.slice().reverse().slice(start, end);
-		},
-	},
-	methods: {
-		...mapActions(useWalletStore, [
-			"checkInvoice",
-			"mintOnPaid",
-			"checkOutgoingInvoice",
-		]),
-		shortenString: function (s) {
-			return shortenString(s, 20, 10);
-		},
-		handlePageChange(page) {
-			this.currentPage = page;
-		},
-		showInvoiceDialog: async function (invoice) {
-			this.invoiceData = invoice;
-			this.showInvoiceDetails = true;
-			if (invoice.status === "pending") {
-				if (invoice.amount > 0) {
-					try {
-						await this.checkInvoice(invoice.quote, false, false);
-					} catch (e) {
-						this.mintOnPaid(invoice.quote, false, true, false);
-					}
-				} else {
-					this.checkOutgoingInvoice(invoice.quote, true);
-				}
-			}
-		},
-		formattedDate(date_str) {
-			const date = parseISO(date_str); // Convert string to date object
-			return formatDistanceToNow(date, { addSuffix: false }); // "6 hours ago"
-		},
-	},
-	created: function () {},
+  name: "InvoicesTable",
+  mixins: [windowMixin],
+  props: {},
+  data: function () {
+    return {
+      currentPage: 1,
+      pageSize: 5,
+      filterPending: false,
+    };
+  },
+  watch: {
+    filterPending: function () {
+      this.currentPage = 1;
+    },
+  },
+  computed: {
+    ...mapWritableState(useUiStore, ["showInvoiceDetails"]),
+    ...mapWritableState(useInvoiceHistoryStore, ["invoiceHistory"]),
+    ...mapWritableState(useWalletStore, ["invoiceData", "payInvoiceData"]),
+    maxPages() {
+      return Math.ceil(this.invoiceHistory.length / this.pageSize);
+    },
+    paginatedInvoices() {
+      const start = (this.currentPage - 1) * this.pageSize;
+      const end = start + this.pageSize;
+      if (this.filterPending) {
+        return this.invoiceHistory
+          .filter((invoice) => invoice.status === "pending")
+          .slice(start, end);
+      }
+      return this.invoiceHistory.slice().reverse().slice(start, end);
+    },
+  },
+  methods: {
+    ...mapActions(useWalletStore, [
+      "checkInvoice",
+      "mintOnPaid",
+      "checkOutgoingInvoice",
+    ]),
+    shortenString: function (s) {
+      return shortenString(s, 20, 10);
+    },
+    handlePageChange(page) {
+      this.currentPage = page;
+    },
+    showInvoiceDialog: async function (invoice) {
+      this.invoiceData = invoice;
+      this.showInvoiceDetails = true;
+      if (invoice.status === "pending") {
+        if (invoice.amount > 0) {
+          try {
+            await this.checkInvoice(invoice.quote, false, false);
+          } catch (e) {
+            this.mintOnPaid(invoice.quote, false, true, false);
+          }
+        } else {
+          this.checkOutgoingInvoice(invoice.quote, true);
+        }
+      }
+    },
+    formattedDate(date_str) {
+      const date = parseISO(date_str); // Convert string to date object
+      return formatDistanceToNow(date, { addSuffix: false }); // "6 hours ago"
+    },
+  },
+  created: function () {},
 });
 </script>

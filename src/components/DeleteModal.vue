@@ -20,7 +20,7 @@ const props = defineProps<{ modelValue: boolean }>();
 const emit = defineEmits(["update:modelValue", "confirm"]);
 
 const showLocal = computed({
-	get: () => props.modelValue,
-	set: (val: boolean) => emit("update:modelValue", val),
+  get: () => props.modelValue,
+  set: (val: boolean) => emit("update:modelValue", val),
 });
 </script>

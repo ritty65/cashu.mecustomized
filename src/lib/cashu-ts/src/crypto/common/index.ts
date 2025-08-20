@@ -1,26 +1,16 @@
-import { ProjPointType } from "@noble/curves/abstract/weierstrass";
-import { secp256k1 } from "@noble/curves/secp256k1";
-import { sha256 } from "@noble/hashes/sha256";
-import { bytesToHex, hexToBytes } from "@noble/curves/abstract/utils";
-import {
-	bytesToNumber,
-	encodeBase64toUint8,
-	hexToNumber,
-} from "../util/utils.js";
-import "buffer";
+import { ProjPointType } from '@noble/curves/abstract/weierstrass';
+import { secp256k1 } from '@noble/curves/secp256k1';
+import { sha256 } from '@noble/hashes/sha256';
+import { bytesToHex, hexToBytes } from '@noble/curves/abstract/utils';
+import { bytesToNumber, encodeBase64toUint8, hexToNumber } from '../util/utils.js';
+import 'buffer';
 declare const Buffer: any;
 
-export type Enumerate<
-	N extends number,
-	Acc extends number[] = [],
-> = Acc["length"] extends N
+export type Enumerate<N extends number, Acc extends number[] = []> = Acc['length'] extends N
 	? Acc[number]
-	: Enumerate<N, [...Acc, Acc["length"]]>;
+	: Enumerate<N, [...Acc, Acc['length']]>;
 
-export type IntRange<F extends number, T extends number> = Exclude<
-	Enumerate<T>,
-	Enumerate<F>
->;
+export type IntRange<F extends number, T extends number> = Exclude<Enumerate<T>, Enumerate<F>>;
 
 export type MintKeys = { [k: string]: Uint8Array };
 
@@ -76,7 +66,7 @@ export type SerializedBlindedMessage = {
 
 export type Secret = [WellKnownSecret, SecretData];
 
-export type WellKnownSecret = "P2PK";
+export type WellKnownSecret = 'P2PK';
 
 export type SecretData = {
 	nonce: string;
@@ -92,11 +82,9 @@ export type Tags = {
 	[k: string]: string;
 };
 
-export type SigFlag = "SIG_INPUTS" | "SIG_ALL";
+export type SigFlag = 'SIG_INPUTS' | 'SIG_ALL';
 
-const DOMAIN_SEPARATOR = hexToBytes(
-	"536563703235366b315f48617368546f43757276655f43617368755f",
-);
+const DOMAIN_SEPARATOR = hexToBytes('536563703235366b315f48617368546f43757276655f43617368755f');
 
 export function hashToCurve(secret: Uint8Array): ProjPointType<bigint> {
 	const msgToHash = sha256(Buffer.concat([DOMAIN_SEPARATOR, secret]));
@@ -106,19 +94,17 @@ export function hashToCurve(secret: Uint8Array): ProjPointType<bigint> {
 		const counterBytes = new Uint8Array(counter.buffer);
 		const hash = sha256(Buffer.concat([msgToHash, counterBytes]));
 		try {
-			return pointFromHex(
-				bytesToHex(Buffer.concat([new Uint8Array([0x02]), hash])),
-			);
+			return pointFromHex(bytesToHex(Buffer.concat([new Uint8Array([0x02]), hash])));
 		} catch (error) {
 			counter[0]++;
 		}
 	}
-	throw new Error("No valid point found");
+	throw new Error('No valid point found');
 }
 
 export function hash_e(pubkeys: Array<ProjPointType<bigint>>): Uint8Array {
 	const hexStrings = pubkeys.map((p) => p.toHex(false));
-	const e_ = hexStrings.join("");
+	const e_ = hexStrings.join('');
 	const e = sha256(new TextEncoder().encode(e_));
 	return e;
 }
@@ -137,8 +123,7 @@ export const getKeysetIdInt = (keysetId: string): bigint => {
 		keysetIdInt = hexToNumber(keysetId) % BigInt(2 ** 31 - 1);
 	} else {
 		//legacy keyset compatibility
-		keysetIdInt =
-			bytesToNumber(encodeBase64toUint8(keysetId)) % BigInt(2 ** 31 - 1);
+		keysetIdInt = bytesToNumber(encodeBase64toUint8(keysetId)) % BigInt(2 ** 31 - 1);
 	}
 	return keysetIdInt;
 };
@@ -155,9 +140,7 @@ export function serializeMintKeys(mintKeys: MintKeys): SerializedMintKeys {
 	return serializedMintKeys;
 }
 
-export function deserializeMintKeys(
-	serializedMintKeys: SerializedMintKeys,
-): MintKeys {
+export function deserializeMintKeys(serializedMintKeys: SerializedMintKeys): MintKeys {
 	const mintKeys: MintKeys = {};
 	Object.keys(serializedMintKeys).forEach((p) => {
 		mintKeys[p] = hexToBytes(serializedMintKeys[p]);
@@ -166,7 +149,7 @@ export function deserializeMintKeys(
 }
 
 export function deriveKeysetId(keys: MintKeys): string {
-	const KEYSET_VERSION = "00";
+	const KEYSET_VERSION = '00';
 	const mapBigInt = (k: [string, string]): [bigint, string] => {
 		return [BigInt(k[0]), k[1]];
 	};
@@ -176,8 +159,8 @@ export function deriveKeysetId(keys: MintKeys): string {
 		.map(([, pubKey]) => hexToBytes(pubKey))
 		.reduce((prev, curr) => mergeUInt8Arrays(prev, curr), new Uint8Array());
 	const hash = sha256(pubkeysConcat);
-	const hashHex = Buffer.from(hash).toString("hex").slice(0, 14);
-	return "00" + hashHex;
+	const hashHex = Buffer.from(hash).toString('hex').slice(0, 14);
+	return '00' + hashHex;
 }
 
 function mergeUInt8Arrays(a1: Uint8Array, a2: Uint8Array): Uint8Array {

@@ -59,55 +59,55 @@ const memo = ref("");
 const bucketId = ref("");
 
 const bucketOptions = computed(() =>
-	bucketList.value.map((b) => ({
-		label: `${b.name} (${uiStore.formatCurrency(
-			bucketBalances.value[b.id] ?? 0,
-			activeUnit.value,
-		)})`,
-		value: b.id,
-	})),
+  bucketList.value.map((b) => ({
+    label: `${b.name} (${uiStore.formatCurrency(
+      bucketBalances.value[b.id] ?? 0,
+      activeUnit.value,
+    )})`,
+    value: b.id,
+  })),
 );
 
 const totalBalance = computed(() =>
-	Object.values(bucketBalances.value).reduce((sum, v) => sum + v, 0),
+  Object.values(bucketBalances.value).reduce((sum, v) => sum + v, 0),
 );
 
 const formattedTotalBalance = computed(() =>
-	uiStore.formatCurrency(totalBalance.value, activeUnit.value),
+  uiStore.formatCurrency(totalBalance.value, activeUnit.value),
 );
 
 function reset() {
-	amount.value = null;
-	memo.value = "";
-	bucketId.value = bucketList.value[0]?.id || "";
+  amount.value = null;
+  memo.value = "";
+  bucketId.value = bucketList.value[0]?.id || "";
 }
 
 function showDialog() {
-	reset();
-	show.value = true;
+  reset();
+  show.value = true;
 }
 
 function hideDialog() {
-	show.value = false;
+  show.value = false;
 }
 
 defineExpose({ show: showDialog, hide: hideDialog });
 
 function cancel() {
-	hideDialog();
+  hideDialog();
 }
 
 async function confirm() {
-	if (!props.recipient || !amount.value) {
-		hideDialog();
-		return;
-	}
-	await messenger.sendToken(
-		props.recipient,
-		amount.value,
-		bucketId.value,
-		memo.value.trim() || undefined,
-	);
-	hideDialog();
+  if (!props.recipient || !amount.value) {
+    hideDialog();
+    return;
+  }
+  await messenger.sendToken(
+    props.recipient,
+    amount.value,
+    bucketId.value,
+    memo.value.trim() || undefined,
+  );
+  hideDialog();
 }
 </script>

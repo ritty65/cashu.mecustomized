@@ -27,20 +27,20 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import {
-	isTrustedUrl,
-	normalizeMediaUrl,
-	determineMediaType,
+  isTrustedUrl,
+  normalizeMediaUrl,
+  determineMediaType,
 } from "src/utils/validateMedia";
 
 const props = defineProps<{ url: string }>();
 
 const src = computed(() => {
-	const n = normalizeMediaUrl(props.url);
-	return isTrustedUrl(n) ? n : "";
+  const n = normalizeMediaUrl(props.url);
+  return isTrustedUrl(n) ? n : "";
 });
 
 const type = computed(() =>
-	src.value ? determineMediaType(src.value) : "image",
+  src.value ? determineMediaType(src.value) : "image",
 );
 </script>
 

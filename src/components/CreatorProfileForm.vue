@@ -127,60 +127,60 @@ const profileStore = useCreatorProfileStore();
 const p2pkStore = useP2PKStore();
 
 const {
-	display_name,
-	picture,
-	about,
-	pubkey: profilePub,
-	mints: profileMints,
-	relays: profileRelays,
+  display_name,
+  picture,
+  about,
+  pubkey: profilePub,
+  mints: profileMints,
+  relays: profileRelays,
 } = storeToRefs(profileStore);
 
 const hasP2PK = computed(() => p2pkStore.p2pkKeys.length > 0);
 const p2pkOptions = computed(() =>
-	p2pkStore.p2pkKeys.map((k) => ({
-		label: shortenString(k.publicKey, 16, 6),
-		value: k.publicKey,
-	})),
+  p2pkStore.p2pkKeys.map((k) => ({
+    label: shortenString(k.publicKey, 16, 6),
+    value: k.publicKey,
+  })),
 );
 const selectedKeyShort = computed(() =>
-	profilePub.value ? shortenString(profilePub.value, 16, 6) : "",
+  profilePub.value ? shortenString(profilePub.value, 16, 6) : "",
 );
 
 async function generateP2PK() {
-	await p2pkStore.createAndSelectNewKey();
-	if (p2pkStore.firstKey) {
-		profilePub.value = p2pkStore.firstKey.publicKey;
-	}
+  await p2pkStore.createAndSelectNewKey();
+  if (p2pkStore.firstKey) {
+    profilePub.value = p2pkStore.firstKey.publicKey;
+  }
 }
 
 const display_nameLocal = computed({
-	get: () => display_name.value,
-	set: (val: string) => (display_name.value = val),
+  get: () => display_name.value,
+  set: (val: string) => (display_name.value = val),
 });
 const pictureLocal = computed({
-	get: () => picture.value,
-	set: (val: string) => (picture.value = val),
+  get: () => picture.value,
+  set: (val: string) => (picture.value = val),
 });
 const aboutLocal = computed({
-	get: () => about.value,
-	set: (val: string) => (about.value = val),
+  get: () => about.value,
+  set: (val: string) => (about.value = val),
 });
 const profilePubLocal = computed({
-	get: () => profilePub.value,
-	set: (val: string | null) => (profilePub.value = val || ""),
+  get: () => profilePub.value,
+  set: (val: string | null) => (profilePub.value = val || ""),
 });
 const profileMintsLocal = computed({
-	get: () => profileMints.value,
-	set: (val: string[]) => (profileMints.value = val),
+  get: () => profileMints.value,
+  set: (val: string[]) => (profileMints.value = val),
 });
 const profileRelaysLocal = computed({
-	get: () => profileRelays.value,
-	set: (val: string[]) => (profileRelays.value = val),
+  get: () => profileRelays.value,
+  set: (val: string[]) => (profileRelays.value = val),
 });
 
 const validUrl = computed(() => /^https?:\/\/.+/.test(pictureLocal.value));
 const urlRule = (val: string) =>
-	/^https?:\/\/.+/.test(val) || t("creatorHub.invalidUrl");
+  /^https?:\/\/.+/.test(val) || t("creatorHub.invalidUrl");
 const urlListRule = (val: string[]) =>
-	val.every((u) => /^wss?:\/\//.test(u)) || t("creatorHub.invalidUrl");
+  val.every((u) => /^wss?:\/\//.test(u)) || t("creatorHub.invalidUrl");
 </script>

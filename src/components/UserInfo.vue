@@ -43,31 +43,31 @@ const $q = useQuasar();
 const nostr = useNostrStore();
 
 const profile = computed(() => {
-	const entry: any = (nostr.profiles as any)[nostr.pubkey];
-	return entry?.profile ?? entry ?? {};
+  const entry: any = (nostr.profiles as any)[nostr.pubkey];
+  return entry?.profile ?? entry ?? {};
 });
 
 const initials = computed(() => {
-	const name = profile.value.display_name || profile.value.name || "";
-	const parts = name.split(/\s+/).filter(Boolean);
-	return parts
-		.slice(0, 2)
-		.map((w) => w[0])
-		.join("")
-		.toUpperCase();
+  const name = profile.value.display_name || profile.value.name || "";
+  const parts = name.split(/\s+/).filter(Boolean);
+  return parts
+    .slice(0, 2)
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase();
 });
 
 const truncatedNpub = computed(
-	() => shortenString(nostr.npub, 12, 6) || nostr.npub,
+  () => shortenString(nostr.npub, 12, 6) || nostr.npub,
 );
 
 function copyPubkey() {
-	navigator.clipboard.writeText(nostr.npub);
+  navigator.clipboard.writeText(nostr.npub);
 }
 
 function toggleDark() {
-	$q.dark.toggle();
-	$q.localStorage.set("cashu.darkMode", $q.dark.isActive);
+  $q.dark.toggle();
+  $q.localStorage.set("cashu.darkMode", $q.dark.isActive);
 }
 </script>
 

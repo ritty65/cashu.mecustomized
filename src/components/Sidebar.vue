@@ -58,32 +58,32 @@ const mini = ref(false);
 const { t } = useI18n();
 
 const navLinks = [
-	{ to: "/wallet", label: "Wallet", icon: "account_balance_wallet" },
-	{
-		to: "/find-creators",
-		label: "Find Creators",
-		icon: "img:icons/find-creators.svg",
-	},
-	{ to: "/nostr-messenger", label: "Chats", icon: "chat" },
+  { to: "/wallet", label: "Wallet", icon: "account_balance_wallet" },
+  {
+    to: "/find-creators",
+    label: "Find Creators",
+    icon: "img:icons/find-creators.svg",
+  },
+  { to: "/nostr-messenger", label: "Chats", icon: "chat" },
 ];
 
 const accountLinks = [
-	{ to: "/my-profile", label: "Profile", icon: "person" },
-	{ to: "/subscriptions", label: "Subscriptions", icon: "auto_awesome_motion" },
+  { to: "/my-profile", label: "Profile", icon: "person" },
+  { to: "/subscriptions", label: "Subscriptions", icon: "auto_awesome_motion" },
 ];
 
 const docLinks = [
-	{
-		to: "/terms",
-		label: t("MainHeader.menu.terms.terms.title"),
-		icon: "gavel",
-	},
-	{ to: "/about", label: t("MainHeader.menu.about.about.title"), icon: "info" },
-	{
-		href: "https://primal.net/KalonAxiarch",
-		label: "KalonAxiarch",
-		icon: "link",
-	},
+  {
+    to: "/terms",
+    label: t("MainHeader.menu.terms.terms.title"),
+    icon: "gavel",
+  },
+  { to: "/about", label: t("MainHeader.menu.about.about.title"), icon: "info" },
+  {
+    href: "https://primal.net/KalonAxiarch",
+    label: "KalonAxiarch",
+    icon: "link",
+  },
 ];
 </script>
 

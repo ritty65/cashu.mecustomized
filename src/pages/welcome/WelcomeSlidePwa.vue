@@ -30,13 +30,13 @@ const props = defineProps<{ deferredPrompt?: any }>();
 const id = "welcome-pwa-title";
 
 function install() {
-	if (props.deferredPrompt) {
-		props.deferredPrompt.prompt();
-	}
+  if (props.deferredPrompt) {
+    props.deferredPrompt.prompt();
+  }
 }
 
 function skip() {
-	/* no-op in placeholder */
+  /* no-op in placeholder */
 }
 </script>
 

@@ -40,44 +40,44 @@ import { useUiStore } from "stores/ui";
 import { storeToRefs } from "pinia";
 
 export default defineComponent({
-	name: "ChooseExistingTokenDialog",
-	props: {
-		modelValue: Boolean,
-		bucketId: {
-			type: String,
-			required: true,
-		},
-	},
-	emits: ["update:modelValue", "selected", "back"],
-	setup(props, { emit }) {
-		const tokensStore = useTokensStore();
-		const uiStore = useUiStore();
-		const { historyTokens } = storeToRefs(tokensStore);
+  name: "ChooseExistingTokenDialog",
+  props: {
+    modelValue: Boolean,
+    bucketId: {
+      type: String,
+      required: true,
+    },
+  },
+  emits: ["update:modelValue", "selected", "back"],
+  setup(props, { emit }) {
+    const tokensStore = useTokensStore();
+    const uiStore = useUiStore();
+    const { historyTokens } = storeToRefs(tokensStore);
 
-		const model = computed({
-			get: () => props.modelValue,
-			set: (v: boolean) => emit("update:modelValue", v),
-		});
+    const model = computed({
+      get: () => props.modelValue,
+      set: (v: boolean) => emit("update:modelValue", v),
+    });
 
-		const tokens = computed(() =>
-			historyTokens.value.filter(
-				(t) => t.bucketId === props.bucketId && t.status === "pending",
-			),
-		);
+    const tokens = computed(() =>
+      historyTokens.value.filter(
+        (t) => t.bucketId === props.bucketId && t.status === "pending",
+      ),
+    );
 
-		function selectToken(token: string) {
-			emit("selected", token);
-		}
+    function selectToken(token: string) {
+      emit("selected", token);
+    }
 
-		function back() {
-			emit("back");
-		}
+    function back() {
+      emit("back");
+    }
 
-		function formatCurrency(amount: number, unit: string) {
-			return uiStore.formatCurrency(amount, unit);
-		}
+    function formatCurrency(amount: number, unit: string) {
+      return uiStore.formatCurrency(amount, unit);
+    }
 
-		return { model, tokens, selectToken, back, formatCurrency };
-	},
+    return { model, tokens, selectToken, back, formatCurrency };
+  },
 });
 </script>

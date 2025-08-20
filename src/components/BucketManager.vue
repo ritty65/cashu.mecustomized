@@ -148,296 +148,296 @@ import MoveTokensModal from "./MoveTokensModal.vue";
 import BucketsToolbar from "./BucketsToolbar.vue";
 
 export default defineComponent({
-	name: "BucketManager",
-	components: {
-		BucketCard,
-		BucketDialog,
-		EditBucketModal,
-		BucketDetailModal,
-		MoveTokensModal,
-		BucketsToolbar,
-	},
-	setup() {
-		const bucketsStore = useBucketsStore();
-		const uiStore = useUiStore();
-		const { t } = useI18n();
-		const $q = useQuasar();
+  name: "BucketManager",
+  components: {
+    BucketCard,
+    BucketDialog,
+    EditBucketModal,
+    BucketDetailModal,
+    MoveTokensModal,
+    BucketsToolbar,
+  },
+  setup() {
+    const bucketsStore = useBucketsStore();
+    const uiStore = useUiStore();
+    const { t } = useI18n();
+    const $q = useQuasar();
 
-		const dialogOpen = ref(false);
-		const showDelete = ref(false);
-		const deleteId = ref(null as string | null);
+    const dialogOpen = ref(false);
+    const showDelete = ref(false);
+    const deleteId = ref(null as string | null);
 
-		const editingBucket = ref<any>(null);
-		const viewingBucket = ref<any>(null);
-		const isMoveModalOpen = ref(false);
-		const multiSelectMode = ref(false);
-		const selectedBucketIds = ref<string[]>([]);
+    const editingBucket = ref<any>(null);
+    const viewingBucket = ref<any>(null);
+    const isMoveModalOpen = ref(false);
+    const multiSelectMode = ref(false);
+    const selectedBucketIds = ref<string[]>([]);
 
-		const editModalOpen = computed({
-			get: () => editingBucket.value !== null,
-			set: (val: boolean) => {
-				if (!val) editingBucket.value = null;
-			},
-		});
+    const editModalOpen = computed({
+      get: () => editingBucket.value !== null,
+      set: (val: boolean) => {
+        if (!val) editingBucket.value = null;
+      },
+    });
 
-		const detailModalOpen = computed({
-			get: () => viewingBucket.value !== null,
-			set: (val: boolean) => {
-				if (!val) viewingBucket.value = null;
-			},
-		});
-		const isLoading = ref(true);
+    const detailModalOpen = computed({
+      get: () => viewingBucket.value !== null,
+      set: (val: boolean) => {
+        if (!val) viewingBucket.value = null;
+      },
+    });
+    const isLoading = ref(true);
 
-		onMounted(async () => {
-			await nextTick();
-			isLoading.value = false;
-		});
+    onMounted(async () => {
+      await nextTick();
+      isLoading.value = false;
+    });
 
-		const viewMode = ref("active");
+    const viewMode = ref("active");
 
-		const bucketList = computed(() => bucketsStore.bucketList);
-		const searchTerm = ref("");
-		const sortBy = ref("name-asc");
-		const bucketBalances = computed(() => bucketsStore.bucketBalances);
+    const bucketList = computed(() => bucketsStore.bucketList);
+    const searchTerm = ref("");
+    const sortBy = ref("name-asc");
+    const bucketBalances = computed(() => bucketsStore.bucketBalances);
 
-		const activeBuckets = computed(() =>
-			bucketList.value.filter((b) => !b.isArchived),
-		);
+    const activeBuckets = computed(() =>
+      bucketList.value.filter((b) => !b.isArchived),
+    );
 
-		const activeBucketCount = computed(() => activeBuckets.value.length);
+    const activeBucketCount = computed(() => activeBuckets.value.length);
 
-		const totalActiveBalance = computed(() => {
-			return activeBuckets.value.reduce(
-				(sum, b) => sum + (bucketBalances.value[b.id] || 0),
-				0,
-			);
-		});
+    const totalActiveBalance = computed(() => {
+      return activeBuckets.value.reduce(
+        (sum, b) => sum + (bucketBalances.value[b.id] || 0),
+        0,
+      );
+    });
 
-		const filteredBuckets = computed(() => {
-			const term = searchTerm.value.toLowerCase();
-			const list = bucketList.value
-				.filter((b) => {
-					if (viewMode.value === "archived") return b.isArchived;
-					if (viewMode.value === "active") return !b.isArchived;
-					return true;
-				})
-				.filter((b) => {
-					const name = (b.name || "").toLowerCase();
-					const description = (b.description || "").toLowerCase();
-					return name.includes(term) || description.includes(term);
-				});
-			const sorted = [...list];
-			switch (sortBy.value) {
-				case "name-desc":
-					sorted.sort((a, b) => (b.name || "").localeCompare(a.name || ""));
-					break;
-				case "balance-asc":
-					sorted.sort(
-						(a, b) =>
-							(bucketBalances.value[a.id] || 0) -
-							(bucketBalances.value[b.id] || 0),
-					);
-					break;
-				case "balance-desc":
-					sorted.sort(
-						(a, b) =>
-							(bucketBalances.value[b.id] || 0) -
-							(bucketBalances.value[a.id] || 0),
-					);
-					break;
-				case "name-asc":
-				default:
-					sorted.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
-					break;
-			}
-			return sorted;
-		});
+    const filteredBuckets = computed(() => {
+      const term = searchTerm.value.toLowerCase();
+      const list = bucketList.value
+        .filter((b) => {
+          if (viewMode.value === "archived") return b.isArchived;
+          if (viewMode.value === "active") return !b.isArchived;
+          return true;
+        })
+        .filter((b) => {
+          const name = (b.name || "").toLowerCase();
+          const description = (b.description || "").toLowerCase();
+          return name.includes(term) || description.includes(term);
+        });
+      const sorted = [...list];
+      switch (sortBy.value) {
+        case "name-desc":
+          sorted.sort((a, b) => (b.name || "").localeCompare(a.name || ""));
+          break;
+        case "balance-asc":
+          sorted.sort(
+            (a, b) =>
+              (bucketBalances.value[a.id] || 0) -
+              (bucketBalances.value[b.id] || 0),
+          );
+          break;
+        case "balance-desc":
+          sorted.sort(
+            (a, b) =>
+              (bucketBalances.value[b.id] || 0) -
+              (bucketBalances.value[a.id] || 0),
+          );
+          break;
+        case "name-asc":
+        default:
+          sorted.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+          break;
+      }
+      return sorted;
+    });
 
-		const mintsStore = useMintsStore();
-		const { activeUnit } = storeToRefs(mintsStore);
+    const mintsStore = useMintsStore();
+    const { activeUnit } = storeToRefs(mintsStore);
 
-		const proofsStore = useProofsStore();
+    const proofsStore = useProofsStore();
 
-		const formatCurrency = (amount: number, unit: string) =>
-			uiStore.formatCurrency(amount, unit);
+    const formatCurrency = (amount: number, unit: string) =>
+      uiStore.formatCurrency(amount, unit);
 
-		const openAdd = () => {
-			dialogOpen.value = true;
-		};
+    const openAdd = () => {
+      dialogOpen.value = true;
+    };
 
-		const openEdit = (bucket: any) => {
-			editingBucket.value = bucket;
-			editModalOpen.value = true;
-		};
+    const openEdit = (bucket: any) => {
+      editingBucket.value = bucket;
+      editModalOpen.value = true;
+    };
 
-		const openDetail = (bucket: any) => {
-			viewingBucket.value = bucket;
-			detailModalOpen.value = true;
-		};
+    const openDetail = (bucket: any) => {
+      viewingBucket.value = bucket;
+      detailModalOpen.value = true;
+    };
 
-		const toggleBucketSelection = (id: string) => {
-			if (selectedBucketIds.value.includes(id)) {
-				selectedBucketIds.value = selectedBucketIds.value.filter(
-					(b) => b !== id,
-				);
-			} else {
-				selectedBucketIds.value.push(id);
-			}
-		};
+    const toggleBucketSelection = (id: string) => {
+      if (selectedBucketIds.value.includes(id)) {
+        selectedBucketIds.value = selectedBucketIds.value.filter(
+          (b) => b !== id,
+        );
+      } else {
+        selectedBucketIds.value.push(id);
+      }
+    };
 
-		const toggleMultiSelect = () => {
-			multiSelectMode.value = !multiSelectMode.value;
-			if (!multiSelectMode.value) selectedBucketIds.value = [];
-		};
+    const toggleMultiSelect = () => {
+      multiSelectMode.value = !multiSelectMode.value;
+      if (!multiSelectMode.value) selectedBucketIds.value = [];
+    };
 
-		const moveSelected = () => {
-			isMoveModalOpen.value = true;
-		};
+    const moveSelected = () => {
+      isMoveModalOpen.value = true;
+    };
 
-		const handleEditSave = (data: any) => {
-			if (editingBucket.value) {
-				bucketsStore.editBucket(editingBucket.value.id, { ...data });
-			}
-			editModalOpen.value = false;
-		};
+    const handleEditSave = (data: any) => {
+      if (editingBucket.value) {
+        bucketsStore.editBucket(editingBucket.value.id, { ...data });
+      }
+      editModalOpen.value = false;
+    };
 
-		const handleMoveTokens = async ({
-			secrets,
-			bucketId,
-		}: {
-			secrets: string[];
-			bucketId: string;
-		}) => {
-			await proofsStore.moveProofs(secrets, bucketId);
-			isMoveModalOpen.value = false;
-		};
+    const handleMoveTokens = async ({
+      secrets,
+      bucketId,
+    }: {
+      secrets: string[];
+      bucketId: string;
+    }) => {
+      await proofsStore.moveProofs(secrets, bucketId);
+      isMoveModalOpen.value = false;
+    };
 
-		const onDragStart = (ev: DragEvent, id: string) => {
-			ev.dataTransfer?.setData("application/x-bucket-id", id);
-		};
+    const onDragStart = (ev: DragEvent, id: string) => {
+      ev.dataTransfer?.setData("application/x-bucket-id", id);
+    };
 
-		const handleDrop = async (ev: DragEvent, id: string) => {
-			ev.preventDefault();
-			const bucketIdData = ev.dataTransfer?.getData("application/x-bucket-id");
-			if (bucketIdData) {
-				const draggedId = bucketIdData;
-				if (draggedId && draggedId !== id) {
-					const draggedItem = bucketsStore.bucketList.find(
-						(b) => b.id === draggedId,
-					);
-					const targetItem = bucketsStore.bucketList.find((b) => b.id === id);
-					if (draggedItem && targetItem) {
-						const secrets = proofsStore.proofs
-							.filter((p) => p.bucketId === draggedId)
-							.map((p) => p.secret);
-						if (secrets.length) {
-							$q.dialog({
-								title: t("BucketManager.move_confirm.title"),
-								message: t("BucketManager.move_confirm.text", {
-									from: draggedItem.name,
-									to: targetItem.name,
-								}),
-								cancel: true,
-								persistent: true,
-							}).onOk(async () => {
-								await proofsStore.moveProofs(secrets, id);
-								$q.notify({
-									type: "positive",
-									message: t("BucketManager.notifications.move_success"),
-								});
-							});
-						}
-					}
-				}
-				return;
-			}
-			const data = ev.dataTransfer?.getData("text/plain");
-			if (!data) return;
-			let secrets: string[] | undefined;
-			try {
-				secrets = JSON.parse(data);
-			} catch (e) {
-				secrets = data.split(",");
-			}
-			if (Array.isArray(secrets) && secrets.length) {
-				try {
-					await proofsStore.moveProofs(secrets, id);
-					$q.notify({
-						type: "positive",
-						message: t("BucketManager.notifications.move_success"),
-					});
-				} catch (e) {
-					$q.notify({ type: "negative", message: "Move failed" });
-				}
-			}
-		};
+    const handleDrop = async (ev: DragEvent, id: string) => {
+      ev.preventDefault();
+      const bucketIdData = ev.dataTransfer?.getData("application/x-bucket-id");
+      if (bucketIdData) {
+        const draggedId = bucketIdData;
+        if (draggedId && draggedId !== id) {
+          const draggedItem = bucketsStore.bucketList.find(
+            (b) => b.id === draggedId,
+          );
+          const targetItem = bucketsStore.bucketList.find((b) => b.id === id);
+          if (draggedItem && targetItem) {
+            const secrets = proofsStore.proofs
+              .filter((p) => p.bucketId === draggedId)
+              .map((p) => p.secret);
+            if (secrets.length) {
+              $q.dialog({
+                title: t("BucketManager.move_confirm.title"),
+                message: t("BucketManager.move_confirm.text", {
+                  from: draggedItem.name,
+                  to: targetItem.name,
+                }),
+                cancel: true,
+                persistent: true,
+              }).onOk(async () => {
+                await proofsStore.moveProofs(secrets, id);
+                $q.notify({
+                  type: "positive",
+                  message: t("BucketManager.notifications.move_success"),
+                });
+              });
+            }
+          }
+        }
+        return;
+      }
+      const data = ev.dataTransfer?.getData("text/plain");
+      if (!data) return;
+      let secrets: string[] | undefined;
+      try {
+        secrets = JSON.parse(data);
+      } catch (e) {
+        secrets = data.split(",");
+      }
+      if (Array.isArray(secrets) && secrets.length) {
+        try {
+          await proofsStore.moveProofs(secrets, id);
+          $q.notify({
+            type: "positive",
+            message: t("BucketManager.notifications.move_success"),
+          });
+        } catch (e) {
+          $q.notify({ type: "negative", message: "Move failed" });
+        }
+      }
+    };
 
-		const openDelete = (id: string) => {
-			deleteId.value = id;
-			showDelete.value = true;
-		};
+    const openDelete = (id: string) => {
+      deleteId.value = id;
+      showDelete.value = true;
+    };
 
-		const deleteBucket = () => {
-			bucketsStore.deleteBucket(deleteId.value as string);
-			showDelete.value = false;
-		};
+    const deleteBucket = () => {
+      bucketsStore.deleteBucket(deleteId.value as string);
+      showDelete.value = false;
+    };
 
-		const handleMenuAction = ({ action, bucket }: any) => {
-			switch (action) {
-				case "manage":
-					openDetail(bucket);
-					break;
-				case "edit":
-					openEdit(bucket);
-					break;
-				case "archive":
-					bucketsStore.editBucket(bucket.id, {
-						isArchived: !bucket.isArchived,
-					});
-					break;
-				case "delete":
-					openDelete(bucket.id);
-					break;
-			}
-		};
+    const handleMenuAction = ({ action, bucket }: any) => {
+      switch (action) {
+        case "manage":
+          openDetail(bucket);
+          break;
+        case "edit":
+          openEdit(bucket);
+          break;
+        case "archive":
+          bucketsStore.editBucket(bucket.id, {
+            isArchived: !bucket.isArchived,
+          });
+          break;
+        case "delete":
+          openDelete(bucket.id);
+          break;
+      }
+    };
 
-		return {
-			DEFAULT_BUCKET_ID,
-			bucketList,
-			searchTerm,
-			sortBy,
-			viewMode,
-			filteredBuckets,
-			bucketBalances,
-			activeBucketCount,
-			totalActiveBalance,
-			activeUnit,
-			dialogOpen,
-			showDelete,
-			editModalOpen,
-			detailModalOpen,
-			isMoveModalOpen,
-			editingBucket,
-			viewingBucket,
-			openAdd,
-			openEdit,
-			openDetail,
-			handleEditSave,
-			onDragStart,
-			openDelete,
-			deleteBucket,
-			formatCurrency,
-			handleDrop,
-			handleMenuAction,
-			multiSelectMode,
-			selectedBucketIds,
-			toggleBucketSelection,
-			toggleMultiSelect,
-			moveSelected,
-			handleMoveTokens,
-			isLoading,
-		};
-	},
+    return {
+      DEFAULT_BUCKET_ID,
+      bucketList,
+      searchTerm,
+      sortBy,
+      viewMode,
+      filteredBuckets,
+      bucketBalances,
+      activeBucketCount,
+      totalActiveBalance,
+      activeUnit,
+      dialogOpen,
+      showDelete,
+      editModalOpen,
+      detailModalOpen,
+      isMoveModalOpen,
+      editingBucket,
+      viewingBucket,
+      openAdd,
+      openEdit,
+      openDetail,
+      handleEditSave,
+      onDragStart,
+      openDelete,
+      deleteBucket,
+      formatCurrency,
+      handleDrop,
+      handleMenuAction,
+      multiSelectMode,
+      selectedBucketIds,
+      toggleBucketSelection,
+      toggleMultiSelect,
+      moveSelected,
+      handleMoveTokens,
+      isLoading,
+    };
+  },
 });
 </script>
 

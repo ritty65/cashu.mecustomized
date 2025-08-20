@@ -25,11 +25,11 @@ import RelayManager from "./RelayManager.vue";
 const show = ref(false);
 
 function showDialog() {
-	show.value = true;
+  show.value = true;
 }
 
 function hideDialog() {
-	show.value = false;
+  show.value = false;
 }
 
 defineExpose({ show: showDialog, hide: hideDialog });

@@ -206,13 +206,13 @@ import type { Subscriber } from "src/types/subscriber";
 import { copyNpub } from "src/utils/clipboard";
 
 const props = defineProps<{
-	modelValue: boolean;
-	subscriber: Subscriber | null;
-	width?: number;
+  modelValue: boolean;
+  subscriber: Subscriber | null;
+  width?: number;
 }>();
 
 const emit = defineEmits<{
-	"update:modelValue": [boolean];
+  "update:modelValue": [boolean];
 }>();
 
 const { t } = useI18n();
@@ -220,58 +220,58 @@ const router = useRouter();
 const $q = useQuasar();
 
 const drawerWidth = computed(
-	() => props.width ?? ($q.screen.lt.md ? 320 : 400),
+  () => props.width ?? ($q.screen.lt.md ? 320 : 400),
 );
 
 function initials(name: string) {
-	if (!name) return "";
-	return name
-		.split(/\s+/)
-		.filter(Boolean)
-		.map((p) => p[0])
-		.join("")
-		.toUpperCase();
+  if (!name) return "";
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((p) => p[0])
+    .join("")
+    .toUpperCase();
 }
 
 function distToNow(ts: number) {
-	return formatDistanceToNow(ts * 1000, { addSuffix: true });
+  return formatDistanceToNow(ts * 1000, { addSuffix: true });
 }
 
 function formatDate(ts: number) {
-	return format(ts * 1000, "PP p");
+  return format(ts * 1000, "PP p");
 }
 
 function copyCurrentNpub() {
-	if (!props.subscriber) return;
-	copyNpub(props.subscriber.npub);
+  if (!props.subscriber) return;
+  copyNpub(props.subscriber.npub);
 }
 
 function dmSubscriber() {
-	if (!props.subscriber) return;
-	router.push({
-		path: "/nostr-messenger",
-		query: { pubkey: props.subscriber.npub },
-	});
+  if (!props.subscriber) return;
+  router.push({
+    path: "/nostr-messenger",
+    query: { pubkey: props.subscriber.npub },
+  });
 }
 
 const payments = computed(() => {
-	const r = props.subscriber;
-	if (!r) return [] as any[];
-	const interval =
-		r.frequency === "weekly" ? 7 : r.frequency === "biweekly" ? 14 : 30;
-	const last = (r.nextRenewal ?? r.startDate) - interval * 86400;
-	return [
-		{ ts: last, amount: r.amountSat },
-		{ ts: r.nextRenewal ?? r.startDate, amount: r.amountSat },
-	];
+  const r = props.subscriber;
+  if (!r) return [] as any[];
+  const interval =
+    r.frequency === "weekly" ? 7 : r.frequency === "biweekly" ? 14 : 30;
+  const last = (r.nextRenewal ?? r.startDate) - interval * 86400;
+  return [
+    { ts: last, amount: r.amountSat },
+    { ts: r.nextRenewal ?? r.startDate, amount: r.amountSat },
+  ];
 });
 
 const activity = computed(() => {
-	const r = props.subscriber;
-	if (!r) return [] as any[];
-	const arr = [{ ts: r.startDate, text: "Started subscription" }];
-	if (r.nextRenewal) arr.push({ ts: r.nextRenewal, text: "Next renewal" });
-	return arr;
+  const r = props.subscriber;
+  if (!r) return [] as any[];
+  const arr = [{ ts: r.startDate, text: "Started subscription" }];
+  if (r.nextRenewal) arr.push({ ts: r.nextRenewal, text: "Next renewal" });
+  return arr;
 });
 </script>
 

@@ -1,4 +1,4 @@
-import { Proof } from "./index";
+import { Proof } from './index';
 
 export type RawTransport = {
 	t: PaymentRequestTransportType; // type
@@ -30,8 +30,8 @@ export type PaymentRequestTransport = {
 };
 
 export enum PaymentRequestTransportType {
-	POST = "post",
-	NOSTR = "nostr",
+	POST = 'post',
+	NOSTR = 'nostr'
 }
 
 export type PaymentRequestPayload = {

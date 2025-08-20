@@ -13,7 +13,7 @@ type ResultKeyType = Extract<ResultValue, number | string>;
 export type ValidDecodedType = Extract<ResultValue, ResultObject>;
 
 function isResultKeyType(value: ResultValue): value is ResultKeyType {
-	return typeof value === "number" || typeof value === "string";
+	return typeof value === 'number' || typeof value === 'string';
 }
 
 type DecodeResult<T extends ResultValue> = {
@@ -32,20 +32,20 @@ function encodeItem(value: any, buffer: Array<number>) {
 		buffer.push(0xf6);
 	} else if (value === undefined) {
 		buffer.push(0xf7);
-	} else if (typeof value === "boolean") {
+	} else if (typeof value === 'boolean') {
 		buffer.push(value ? 0xf5 : 0xf4);
-	} else if (typeof value === "number") {
+	} else if (typeof value === 'number') {
 		encodeUnsigned(value, buffer);
-	} else if (typeof value === "string") {
+	} else if (typeof value === 'string') {
 		encodeString(value, buffer);
 	} else if (Array.isArray(value)) {
 		encodeArray(value, buffer);
 	} else if (value instanceof Uint8Array) {
 		encodeByteString(value, buffer);
-	} else if (typeof value === "object") {
+	} else if (typeof value === 'object') {
 		encodeObject(value, buffer);
 	} else {
-		throw new Error("Unsupported type");
+		throw new Error('Unsupported type');
 	}
 }
 
@@ -57,15 +57,9 @@ function encodeUnsigned(value: number, buffer: Array<number>) {
 	} else if (value < 65536) {
 		buffer.push(0x19, value >> 8, value & 0xff);
 	} else if (value < 4294967296) {
-		buffer.push(
-			0x1a,
-			value >> 24,
-			(value >> 16) & 0xff,
-			(value >> 8) & 0xff,
-			value & 0xff,
-		);
+		buffer.push(0x1a, value >> 24, (value >> 16) & 0xff, (value >> 8) & 0xff, value & 0xff);
 	} else {
-		throw new Error("Unsupported integer size");
+		throw new Error('Unsupported integer size');
 	}
 }
 
@@ -84,10 +78,10 @@ function encodeByteString(value: Uint8Array, buffer: Array<number>) {
 			(length >> 24) & 0xff,
 			(length >> 16) & 0xff,
 			(length >> 8) & 0xff,
-			length & 0xff,
+			length & 0xff
 		);
 	} else {
-		throw new Error("Byte string too long to encode");
+		throw new Error('Byte string too long to encode');
 	}
 
 	for (let i = 0; i < value.length; i++) {
@@ -111,10 +105,10 @@ function encodeString(value: string, buffer: Array<number>) {
 			(length >> 24) & 0xff,
 			(length >> 16) & 0xff,
 			(length >> 8) & 0xff,
-			length & 0xff,
+			length & 0xff
 		);
 	} else {
-		throw new Error("String too long to encode");
+		throw new Error('String too long to encode');
 	}
 
 	for (let i = 0; i < utf8.length; i++) {
@@ -131,7 +125,7 @@ function encodeArray(value: Array<any>, buffer: Array<number>) {
 	} else if (length < 65536) {
 		buffer.push(0x99, length >> 8, length & 0xff);
 	} else {
-		throw new Error("Unsupported array length");
+		throw new Error('Unsupported array length');
 	}
 
 	for (const item of value) {
@@ -157,7 +151,7 @@ export function decodeCBOR(data: Uint8Array): ResultValue {
 
 function decodeItem(view: DataView, offset: number): DecodeResult<ResultValue> {
 	if (offset >= view.byteLength) {
-		throw new Error("Unexpected end of data");
+		throw new Error('Unexpected end of data');
 	}
 	const initialByte = view.getUint8(offset++);
 	const majorType = initialByte >> 5;
@@ -186,7 +180,7 @@ function decodeItem(view: DataView, offset: number): DecodeResult<ResultValue> {
 function decodeLength(
 	view: DataView,
 	offset: number,
-	additionalInfo: number,
+	additionalInfo: number
 ): DecodeResult<number> {
 	if (additionalInfo < 24) return { value: additionalInfo, offset };
 	if (additionalInfo === 24) return { value: view.getUint8(offset++), offset };
@@ -212,68 +206,44 @@ function decodeLength(
 function decodeUnsigned(
 	view: DataView,
 	offset: number,
-	additionalInfo: number,
+	additionalInfo: number
 ): DecodeResult<number> {
-	const { value, offset: newOffset } = decodeLength(
-		view,
-		offset,
-		additionalInfo,
-	);
+	const { value, offset: newOffset } = decodeLength(view, offset, additionalInfo);
 	return { value, offset: newOffset };
 }
 
 function decodeSigned(
 	view: DataView,
 	offset: number,
-	additionalInfo: number,
+	additionalInfo: number
 ): DecodeResult<number> {
-	const { value, offset: newOffset } = decodeLength(
-		view,
-		offset,
-		additionalInfo,
-	);
+	const { value, offset: newOffset } = decodeLength(view, offset, additionalInfo);
 	return { value: -1 - value, offset: newOffset };
 }
 
 function decodeByteString(
 	view: DataView,
 	offset: number,
-	additionalInfo: number,
+	additionalInfo: number
 ): DecodeResult<Uint8Array> {
-	const { value: length, offset: newOffset } = decodeLength(
-		view,
-		offset,
-		additionalInfo,
-	);
+	const { value: length, offset: newOffset } = decodeLength(view, offset, additionalInfo);
 	if (newOffset + length > view.byteLength) {
-		throw new Error("Byte string length exceeds data length");
+		throw new Error('Byte string length exceeds data length');
 	}
-	const value = new Uint8Array(
-		view.buffer,
-		view.byteOffset + newOffset,
-		length,
-	);
+	const value = new Uint8Array(view.buffer, view.byteOffset + newOffset, length);
 	return { value, offset: newOffset + length };
 }
 
 function decodeString(
 	view: DataView,
 	offset: number,
-	additionalInfo: number,
+	additionalInfo: number
 ): DecodeResult<string> {
-	const { value: length, offset: newOffset } = decodeLength(
-		view,
-		offset,
-		additionalInfo,
-	);
+	const { value: length, offset: newOffset } = decodeLength(view, offset, additionalInfo);
 	if (newOffset + length > view.byteLength) {
-		throw new Error("String length exceeds data length");
+		throw new Error('String length exceeds data length');
 	}
-	const bytes = new Uint8Array(
-		view.buffer,
-		view.byteOffset + newOffset,
-		length,
-	);
+	const bytes = new Uint8Array(view.buffer, view.byteOffset + newOffset, length);
 	const value = new TextDecoder().decode(bytes);
 	return { value, offset: newOffset + length };
 }
@@ -281,13 +251,9 @@ function decodeString(
 function decodeArray(
 	view: DataView,
 	offset: number,
-	additionalInfo: number,
+	additionalInfo: number
 ): DecodeResult<Array<ResultValue>> {
-	const { value: length, offset: newOffset } = decodeLength(
-		view,
-		offset,
-		additionalInfo,
-	);
+	const { value: length, offset: newOffset } = decodeLength(view, offset, additionalInfo);
 	const array = [];
 	let currentOffset = newOffset;
 	for (let i = 0; i < length; i++) {
@@ -301,19 +267,15 @@ function decodeArray(
 function decodeMap(
 	view: DataView,
 	offset: number,
-	additionalInfo: number,
+	additionalInfo: number
 ): DecodeResult<Record<string, ResultValue>> {
-	const { value: length, offset: newOffset } = decodeLength(
-		view,
-		offset,
-		additionalInfo,
-	);
+	const { value: length, offset: newOffset } = decodeLength(view, offset, additionalInfo);
 	const map: { [key: string]: ResultValue } = {};
 	let currentOffset = newOffset;
 	for (let i = 0; i < length; i++) {
 		const keyResult = decodeItem(view, currentOffset);
 		if (!isResultKeyType(keyResult.value)) {
-			throw new Error("Invalid key type");
+			throw new Error('Invalid key type');
 		}
 		const valueResult = decodeItem(view, keyResult.offset);
 		map[keyResult.value] = valueResult.value;
@@ -338,7 +300,7 @@ function decodeFloat16(uint16: number): number {
 function decodeSimpleAndFloat(
 	view: DataView,
 	offset: number,
-	additionalInfo: number,
+	additionalInfo: number
 ): DecodeResult<SimpleValue | number> {
 	if (additionalInfo < 24) {
 		switch (additionalInfo) {

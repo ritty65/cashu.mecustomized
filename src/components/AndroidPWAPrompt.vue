@@ -34,39 +34,39 @@
 import { defineComponent } from "vue";
 
 export default defineComponent({
-	name: "AndroidPWAPrompt",
-	data() {
-		return {
-			showAndroidPWAPromptLocal:
-				localStorage.getItem("cashu.ui.showAndroidPWAPrompt") != "seen",
-			showAndroidPWAPrompt: false,
-		};
-	},
-	mounted() {
-		if (
-			this.showAndroidPWAPromptLocal &&
-			this.isChromeOnAndroid() &&
-			!this.isInStandaloneMode()
-		) {
-			this.showAndroidPWAPrompt = true;
-		}
-	},
-	methods: {
-		closePrompt() {
-			localStorage.setItem("cashu.ui.showAndroidPWAPrompt", "seen");
-			this.showAndroidPWAPrompt = false;
-		},
-		isChromeOnAndroid() {
-			const userAgent = navigator.userAgent.toLowerCase();
-			const isAndroid = /android/.test(userAgent);
-			const isChrome =
-				/chrome/.test(userAgent) && !/edge|edg|opr|opera/.test(userAgent);
-			return isAndroid && isChrome;
-		},
-		isInStandaloneMode() {
-			return window.matchMedia("(display-mode: standalone)").matches;
-		},
-	},
+  name: "AndroidPWAPrompt",
+  data() {
+    return {
+      showAndroidPWAPromptLocal:
+        localStorage.getItem("cashu.ui.showAndroidPWAPrompt") != "seen",
+      showAndroidPWAPrompt: false,
+    };
+  },
+  mounted() {
+    if (
+      this.showAndroidPWAPromptLocal &&
+      this.isChromeOnAndroid() &&
+      !this.isInStandaloneMode()
+    ) {
+      this.showAndroidPWAPrompt = true;
+    }
+  },
+  methods: {
+    closePrompt() {
+      localStorage.setItem("cashu.ui.showAndroidPWAPrompt", "seen");
+      this.showAndroidPWAPrompt = false;
+    },
+    isChromeOnAndroid() {
+      const userAgent = navigator.userAgent.toLowerCase();
+      const isAndroid = /android/.test(userAgent);
+      const isChrome =
+        /chrome/.test(userAgent) && !/edge|edg|opr|opera/.test(userAgent);
+      return isAndroid && isChrome;
+    },
+    isInStandaloneMode() {
+      return window.matchMedia("(display-mode: standalone)").matches;
+    },
+  },
 });
 </script>
 

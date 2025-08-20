@@ -4,7 +4,7 @@ export class HttpResponseError extends Error {
 	constructor(message: string, status: number) {
 		super(message);
 		this.status = status;
-		this.name = "HttpResponseError";
+		this.name = 'HttpResponseError';
 		Object.setPrototypeOf(this, HttpResponseError.prototype);
 	}
 }
@@ -13,7 +13,7 @@ export class HttpResponseError extends Error {
 export class NetworkError extends Error {
 	constructor(message: string) {
 		super(message);
-		this.name = "NetworkError";
+		this.name = 'NetworkError';
 		Object.setPrototypeOf(this, NetworkError.prototype);
 	}
 }
@@ -25,9 +25,9 @@ export class NetworkError extends Error {
 export class MintOperationError extends HttpResponseError {
 	code: number;
 	constructor(code: number, detail: string) {
-		super(detail || "Unknown mint operation error", 400);
+		super(detail || 'Unknown mint operation error', 400);
 		this.code = code;
-		this.name = "MintOperationError";
+		this.name = 'MintOperationError';
 		Object.setPrototypeOf(this, MintOperationError.prototype);
 	}
 }

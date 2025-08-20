@@ -32,27 +32,27 @@ import { useNutzapStore } from "stores/nutzap";
 import token from "src/js/token";
 
 export default defineComponent({
-	name: "NutzapNotification",
-	setup() {
-		const store = useNutzapStore();
-		const entries = computed(() => {
-			return store.incoming.map((ev) => {
-				let amount = 0;
-				try {
-					const decoded = token.decode(ev.content.trim());
-					amount = decoded
-						? token.getProofs(decoded).reduce((s, p) => (s += p.amount), 0)
-						: 0;
-				} catch {}
-				return { ev, amount, tier: "Nutzap" };
-			});
-		});
+  name: "NutzapNotification",
+  setup() {
+    const store = useNutzapStore();
+    const entries = computed(() => {
+      return store.incoming.map((ev) => {
+        let amount = 0;
+        try {
+          const decoded = token.decode(ev.content.trim());
+          amount = decoded
+            ? token.getProofs(decoded).reduce((s, p) => (s += p.amount), 0)
+            : 0;
+        } catch {}
+        return { ev, amount, tier: "Nutzap" };
+      });
+    });
 
-		const claim = (ev: any) => {
-			store.claim(ev);
-		};
+    const claim = (ev: any) => {
+      store.claim(ev);
+    };
 
-		return { entries, claim };
-	},
+    return { entries, claim };
+  },
 });
 </script>

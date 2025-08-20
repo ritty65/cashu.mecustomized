@@ -27,6 +27,6 @@
 import { defineComponent } from "vue";
 
 export default defineComponent({
-	name: "AlreadyRunning",
+  name: "AlreadyRunning",
 });
 </script>

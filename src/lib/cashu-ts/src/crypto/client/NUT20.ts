@@ -1,11 +1,11 @@
-import { schnorr } from "@noble/curves/secp256k1";
-import { SerializedBlindedMessage } from "../../model/types";
-import { bytesToHex, hexToBytes } from "@noble/hashes/utils";
-import { sha256 } from "@noble/hashes/sha256";
+import { schnorr } from '@noble/curves/secp256k1';
+import { SerializedBlindedMessage } from '../../model/types';
+import { bytesToHex, hexToBytes } from '@noble/hashes/utils';
+import { sha256 } from '@noble/hashes/sha256';
 
 function constructMessage(
 	quote: string,
-	blindedMessages: Array<SerializedBlindedMessage>,
+	blindedMessages: Array<SerializedBlindedMessage>
 ): Uint8Array {
 	let message = quote;
 	for (const blindedMessage of blindedMessages) {
@@ -18,7 +18,7 @@ function constructMessage(
 export function signMintQuote(
 	privkey: string,
 	quote: string,
-	blindedMessages: Array<SerializedBlindedMessage>,
+	blindedMessages: Array<SerializedBlindedMessage>
 ): string {
 	const message = constructMessage(quote, blindedMessages);
 	const privkeyBytes = hexToBytes(privkey);
@@ -30,7 +30,7 @@ export function verifyMintQuoteSignature(
 	pubkey: string,
 	quote: string,
 	blindedMessages: Array<SerializedBlindedMessage>,
-	signature: string,
+	signature: string
 ): boolean {
 	const sigbytes = hexToBytes(signature);
 	let pubkeyBytes = hexToBytes(pubkey);

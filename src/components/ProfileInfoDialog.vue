@@ -58,8 +58,8 @@ const props = defineProps<{ modelValue: boolean; pubkey: string }>();
 const emit = defineEmits(["update:modelValue", "clear-chat"]);
 
 const showLocal = computed({
-	get: () => props.modelValue,
-	set: (v: boolean) => emit("update:modelValue", v),
+  get: () => props.modelValue,
+  set: (v: boolean) => emit("update:modelValue", v),
 });
 
 const nostr = useNostrStore();
@@ -73,54 +73,54 @@ const recentPost = ref<string | null>(null);
 const tiers = ref<any[]>([]);
 
 async function load() {
-	if (!props.pubkey) return;
-	profile.value = await nostr.getProfile(props.pubkey);
-	followers.value = await nostr.fetchFollowerCount(props.pubkey);
-	following.value = await nostr.fetchFollowingCount(props.pubkey);
-	joined.value = await nostr.fetchJoinDate(props.pubkey);
-	recentPost.value = await nostr.fetchMostRecentPost(props.pubkey);
-	await creators.fetchTierDefinitions(props.pubkey);
-	tiers.value = creators.tiersMap[props.pubkey] || [];
+  if (!props.pubkey) return;
+  profile.value = await nostr.getProfile(props.pubkey);
+  followers.value = await nostr.fetchFollowerCount(props.pubkey);
+  following.value = await nostr.fetchFollowingCount(props.pubkey);
+  joined.value = await nostr.fetchJoinDate(props.pubkey);
+  recentPost.value = await nostr.fetchMostRecentPost(props.pubkey);
+  await creators.fetchTierDefinitions(props.pubkey);
+  tiers.value = creators.tiersMap[props.pubkey] || [];
 }
 
 watch(
-	() => props.pubkey,
-	() => {
-		load();
-	},
-	{ immediate: true },
+  () => props.pubkey,
+  () => {
+    load();
+  },
+  { immediate: true },
 );
 
 const displayName = computed(() => {
-	if (!props.pubkey) return "";
-	const p: any = profile.value;
-	if (p?.display_name) return p.display_name;
-	if (p?.name) return p.name;
-	try {
-		return nip19.npubEncode(nostr.resolvePubkey(props.pubkey));
-	} catch (e) {
-		return props.pubkey.slice(0, 8) + "..." + props.pubkey.slice(-4);
-	}
+  if (!props.pubkey) return "";
+  const p: any = profile.value;
+  if (p?.display_name) return p.display_name;
+  if (p?.name) return p.name;
+  try {
+    return nip19.npubEncode(nostr.resolvePubkey(props.pubkey));
+  } catch (e) {
+    return props.pubkey.slice(0, 8) + "..." + props.pubkey.slice(-4);
+  }
 });
 
 const initials = computed(() => {
-	const name = displayName.value.trim();
-	if (!name) return "";
-	const parts = name.split(" ");
-	if (parts.length >= 2) {
-		return (parts[0][0] + parts[1][0]).toUpperCase();
-	}
-	return name.slice(0, 2).toUpperCase();
+  const name = displayName.value.trim();
+  if (!name) return "";
+  const parts = name.split(" ");
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  return name.slice(0, 2).toUpperCase();
 });
 
 const joinedText = computed(() => {
-	if (!joined.value) return "";
-	const d = new Date(joined.value * 1000);
-	return d.toLocaleDateString();
+  if (!joined.value) return "";
+  const d = new Date(joined.value * 1000);
+  return d.toLocaleDateString();
 });
 
 function handleClear() {
-	emit("clear-chat");
+  emit("clear-chat");
 }
 </script>
 

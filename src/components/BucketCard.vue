@@ -153,107 +153,107 @@ import { DEFAULT_BUCKET_ID } from "@/constants/buckets";
 import { useUiStore } from "stores/ui";
 
 export default defineComponent({
-	name: "BucketCard",
-	components: {},
-	props: {
-		bucket: { type: Object as () => any, required: true },
-		balance: { type: Number, default: 0 },
-		activeUnit: { type: String, required: true },
-		multiSelectMode: { type: Boolean, default: false },
-		selected: { type: Boolean, default: false },
-	},
-	emits: ["menu-action", "toggle-select"],
-	setup(props, { emit }) {
-		const uiStore = useUiStore();
-		const { t } = useI18n();
+  name: "BucketCard",
+  components: {},
+  props: {
+    bucket: { type: Object as () => any, required: true },
+    balance: { type: Number, default: 0 },
+    activeUnit: { type: String, required: true },
+    multiSelectMode: { type: Boolean, default: false },
+    selected: { type: Boolean, default: false },
+  },
+  emits: ["menu-action", "toggle-select"],
+  setup(props, { emit }) {
+    const uiStore = useUiStore();
+    const { t } = useI18n();
 
-		const bucketColor = computed(
-			() => props.bucket.color || hashColor(props.bucket.name),
-		);
+    const bucketColor = computed(
+      () => props.bucket.color || hashColor(props.bucket.name),
+    );
 
-		const adjustColor = (col: string, amt: number) => {
-			let color = col.startsWith("#") ? col.slice(1) : col;
-			const num = parseInt(color, 16);
-			let r = (num >> 16) + amt;
-			r = Math.max(Math.min(255, r), 0);
-			let g = ((num >> 8) & 0x00ff) + amt;
-			g = Math.max(Math.min(255, g), 0);
-			let b = (num & 0x00ff) + amt;
-			b = Math.max(Math.min(255, b), 0);
-			return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-		};
+    const adjustColor = (col: string, amt: number) => {
+      let color = col.startsWith("#") ? col.slice(1) : col;
+      const num = parseInt(color, 16);
+      let r = (num >> 16) + amt;
+      r = Math.max(Math.min(255, r), 0);
+      let g = ((num >> 8) & 0x00ff) + amt;
+      g = Math.max(Math.min(255, g), 0);
+      let b = (num & 0x00ff) + amt;
+      b = Math.max(Math.min(255, b), 0);
+      return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+    };
 
-		const isColorDark = (color: string) => {
-			const hex = color.replace("#", "");
-			const r = parseInt(hex.substring(0, 2), 16);
-			const g = parseInt(hex.substring(2, 4), 16);
-			const b = parseInt(hex.substring(4, 6), 16);
-			const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-			return brightness < 128;
-		};
+    const isColorDark = (color: string) => {
+      const hex = color.replace("#", "");
+      const r = parseInt(hex.substring(0, 2), 16);
+      const g = parseInt(hex.substring(2, 4), 16);
+      const b = parseInt(hex.substring(4, 6), 16);
+      const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+      return brightness < 128;
+    };
 
-		const vibrantColor = computed(() => adjustColor(bucketColor.value, 20));
+    const vibrantColor = computed(() => adjustColor(bucketColor.value, 20));
 
-		const avatarStyle = computed(() => ({
-			backgroundColor: vibrantColor.value,
-			color: isColorDark(vibrantColor.value) ? "white" : "black",
-		}));
+    const avatarStyle = computed(() => ({
+      backgroundColor: vibrantColor.value,
+      color: isColorDark(vibrantColor.value) ? "white" : "black",
+    }));
 
-		const formatCurrency = (amount: number, unit: string) => {
-			return uiStore.formatCurrency(amount, unit);
-		};
+    const formatCurrency = (amount: number, unit: string) => {
+      return uiStore.formatCurrency(amount, unit);
+    };
 
-		const menu = ref(false);
-		const menuTarget = ref<HTMLElement | null>(null);
-		const dragOver = ref(false);
+    const menu = ref(false);
+    const menuTarget = ref<HTMLElement | null>(null);
+    const dragOver = ref(false);
 
-		const progressRatio = computed(() => {
-			if (!props.bucket.goal || props.bucket.goal === 0) return 0;
-			return Math.min(props.balance / props.bucket.goal, 1);
-		});
+    const progressRatio = computed(() => {
+      if (!props.bucket.goal || props.bucket.goal === 0) return 0;
+      return Math.min(props.balance / props.bucket.goal, 1);
+    });
 
-		const emitAction = (action: string) => {
-			emit("menu-action", { action, bucket: props.bucket });
-		};
+    const emitAction = (action: string) => {
+      emit("menu-action", { action, bucket: props.bucket });
+    };
 
-		const emitToggle = () => {
-			emit("toggle-select", props.bucket.id);
-		};
+    const emitToggle = () => {
+      emit("toggle-select", props.bucket.id);
+    };
 
-		const onDragOver = () => {
-			dragOver.value = true;
-		};
+    const onDragOver = () => {
+      dragOver.value = true;
+    };
 
-		const onDragLeave = () => {
-			dragOver.value = false;
-		};
+    const onDragLeave = () => {
+      dragOver.value = false;
+    };
 
-		const onDrop = () => {
-			dragOver.value = false;
-		};
+    const onDrop = () => {
+      dragOver.value = false;
+    };
 
-		const handleClick = () => {
-			if (props.multiSelectMode) emitToggle();
-		};
+    const handleClick = () => {
+      if (props.multiSelectMode) emitToggle();
+    };
 
-		return {
-			formatCurrency,
-			menu,
-			emitAction,
-			emitToggle,
-			handleClick,
-			onDragOver,
-			onDragLeave,
-			onDrop,
-			bucketColor,
-			avatarStyle,
-			dragOver,
-			DEFAULT_BUCKET_ID,
-			t,
-			progressRatio,
-			menuTarget,
-		};
-	},
+    return {
+      formatCurrency,
+      menu,
+      emitAction,
+      emitToggle,
+      handleClick,
+      onDragOver,
+      onDragLeave,
+      onDrop,
+      bucketColor,
+      avatarStyle,
+      dragOver,
+      DEFAULT_BUCKET_ID,
+      t,
+      progressRatio,
+      menuTarget,
+    };
+  },
 });
 </script>
 

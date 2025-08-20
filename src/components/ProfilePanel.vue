@@ -18,9 +18,9 @@ import CreatorProfileForm from "./CreatorProfileForm.vue";
 import { useCreatorHubStore } from "stores/creatorHub";
 import { useCreatorProfileStore } from "stores/creatorProfile";
 import {
-	useNostrStore,
-	publishDiscoveryProfile,
-	PublishTimeoutError,
+  useNostrStore,
+  publishDiscoveryProfile,
+  PublishTimeoutError,
 } from "stores/nostr";
 import { useMintsStore } from "stores/mints";
 import { storeToRefs } from "pinia";
@@ -32,39 +32,39 @@ const nostr = useNostrStore();
 const mintsStore = useMintsStore();
 
 const {
-	display_name,
-	picture,
-	about,
-	pubkey: profilePub,
-	mints: profileMints,
-	relays: profileRelays,
-	isDirty,
+  display_name,
+  picture,
+  about,
+  pubkey: profilePub,
+  mints: profileMints,
+  relays: profileRelays,
+  isDirty,
 } = storeToRefs(profileStore);
 
 async function publishProfile() {
-	try {
-		await publishDiscoveryProfile({
-			profile: {
-				display_name: display_name.value,
-				picture: picture.value,
-				about: about.value,
-			},
-			p2pkPub: profilePub.value || "",
-			mints: profileMints.value,
-			relays: profileRelays.value,
-		});
-		notifySuccess("Profile updated");
-		profileStore.markClean();
-	} catch (e: any) {
-		if (e instanceof PublishTimeoutError) {
-			notifyError("Publishing timed out");
-		} else {
-			notifyError(e?.message || "Failed to publish profile");
-		}
-	}
+  try {
+    await publishDiscoveryProfile({
+      profile: {
+        display_name: display_name.value,
+        picture: picture.value,
+        about: about.value,
+      },
+      p2pkPub: profilePub.value || "",
+      mints: profileMints.value,
+      relays: profileRelays.value,
+    });
+    notifySuccess("Profile updated");
+    profileStore.markClean();
+  } catch (e: any) {
+    if (e instanceof PublishTimeoutError) {
+      notifyError("Publishing timed out");
+    } else {
+      notifyError(e?.message || "Failed to publish profile");
+    }
+  }
 }
 
 async function saveProfile() {
-	await publishProfile();
+  await publishProfile();
 }
 </script>

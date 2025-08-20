@@ -32,31 +32,31 @@ const pubkey = ref("");
 const nostr = useNostrStore();
 
 function start() {
-	const pk = pubkey.value.trim();
-	if (!pk) return;
-	let valid = /^[0-9a-fA-F]{64}$/.test(pk);
-	if (!valid && pk.startsWith("npub")) {
-		try {
-			const decoded = nip19.decode(pk);
-			valid = decoded.type === "npub" && typeof decoded.data === "string";
-		} catch {}
-	}
-	if (!valid) {
-		notifyError("Invalid Nostr pubkey");
-		return;
-	}
-	const resolved = nostr.resolvePubkey(pk);
-	emit("start", resolved);
-	pubkey.value = "";
-	show.value = false;
+  const pk = pubkey.value.trim();
+  if (!pk) return;
+  let valid = /^[0-9a-fA-F]{64}$/.test(pk);
+  if (!valid && pk.startsWith("npub")) {
+    try {
+      const decoded = nip19.decode(pk);
+      valid = decoded.type === "npub" && typeof decoded.data === "string";
+    } catch {}
+  }
+  if (!valid) {
+    notifyError("Invalid Nostr pubkey");
+    return;
+  }
+  const resolved = nostr.resolvePubkey(pk);
+  emit("start", resolved);
+  pubkey.value = "";
+  show.value = false;
 }
 
 function showDialog() {
-	show.value = true;
+  show.value = true;
 }
 
 function hideDialog() {
-	show.value = false;
+  show.value = false;
 }
 
 defineExpose({ show: showDialog, hide: hideDialog });

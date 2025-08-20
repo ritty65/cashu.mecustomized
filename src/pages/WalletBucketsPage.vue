@@ -36,7 +36,7 @@ const { selectedBucketIds } = storeToRefs(bucketsStore);
 const selectedCount = computed(() => selectedBucketIds.value.length);
 
 function moveSelected() {
-	bucketsStore.moveSelectedBuckets();
+  bucketsStore.moveSelectedBuckets();
 }
 </script>
 

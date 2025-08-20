@@ -173,8 +173,8 @@ import { defineComponent } from "vue";
 import { mapActions, mapState, mapWritableState } from "pinia";
 import { useClipboard } from "src/composables/useClipboard";
 import { defineAsyncComponent } from "vue";
-const VueQrcode = defineAsyncComponent(
-	() => import("@chenfengyuan/vue-qrcode"),
+const VueQrcode = defineAsyncComponent(() =>
+  import("@chenfengyuan/vue-qrcode"),
 );
 
 import { useWalletStore } from "src/stores/wallet";
@@ -187,101 +187,101 @@ import { useSettingsStore } from "../stores/settings";
 import NumericKeyboard from "components/NumericKeyboard.vue";
 
 export default defineComponent({
-	name: "InvoiceDetailDialog",
-	mixins: [windowMixin],
-	components: {
-		ChooseMint,
-		VueQrcode,
-		NumericKeyboard,
-	},
-	setup() {
-		const { copy } = useClipboard();
-		return { copy };
-	},
-	props: {},
-	data: function () {
-		return {
-			createInvoiceButtonBlocked: false,
-		};
-	},
-	watch: {
-		showInvoiceDetails: function (val) {
-			if (val) {
-				this.$nextTick(() => {
-					if (!this.invoiceData.amount) {
-						this.showNumericKeyboard = true;
-					} else {
-						this.showNumericKeyboard = false;
-					}
-				});
-			}
-		},
-	},
-	computed: {
-		...mapState(useWalletStore, ["invoiceData"]),
-		...mapState(useMintsStore, [
-			"activeUnit",
-			"activeUnitLabel",
-			"activeUnitCurrencyMultiplyer",
-		]),
-		...mapState(useWorkersStore, ["invoiceWorkerRunning"]),
-		...mapWritableState(useUiStore, [
-			"showInvoiceDetails",
-			"tickerShort",
-			"globalMutexLock",
-			"showNumericKeyboard",
-		]),
-		...mapState(useSettingsStore, ["useNumericKeyboard"]),
-		displayUnit: function () {
-			let display = this.formatCurrency(
-				this.invoiceData.amount,
-				this.invoiceData.unit,
-				true,
-			);
-			return display;
-		},
-		shortUrl: function () {
-			return getShortUrl(this.invoiceData.mint);
-		},
-		runnerActive: function () {
-			return this.invoiceWorkerRunning;
-		},
-		isSmallScreen() {
-			return this.$q.screen.lt.sm;
-		},
-	},
-	methods: {
-		...mapActions(useWalletStore, [
-			"requestMint",
-			"lnurlPaySecond",
-			"mintOnPaid",
-		]),
-		...mapActions(useMintsStore, ["toggleUnit"]),
-		requestMintButton: async function () {
-			if (!this.invoiceData.amount) {
-				return;
-			}
-			try {
-				this.showNumericKeyboard = false;
-				const mintStore = useMintsStore();
-				this.invoiceData.amount *= this.activeUnitCurrencyMultiplyer;
-				this.createInvoiceButtonBlocked = true;
-				const mintWallet = useWalletStore().mintWallet(
-					mintStore.activeMintUrl,
-					mintStore.activeUnit,
-				);
-				const mintQuote = await this.requestMint(
-					this.invoiceData.amount,
-					mintWallet,
-				);
-				await this.mintOnPaid(mintQuote.quote);
-			} catch (e) {
-				debug("#### requestMintButton", e);
-			} finally {
-				this.createInvoiceButtonBlocked = false;
-			}
-		},
-	},
+  name: "InvoiceDetailDialog",
+  mixins: [windowMixin],
+  components: {
+    ChooseMint,
+    VueQrcode,
+    NumericKeyboard,
+  },
+  setup() {
+    const { copy } = useClipboard();
+    return { copy };
+  },
+  props: {},
+  data: function () {
+    return {
+      createInvoiceButtonBlocked: false,
+    };
+  },
+  watch: {
+    showInvoiceDetails: function (val) {
+      if (val) {
+        this.$nextTick(() => {
+          if (!this.invoiceData.amount) {
+            this.showNumericKeyboard = true;
+          } else {
+            this.showNumericKeyboard = false;
+          }
+        });
+      }
+    },
+  },
+  computed: {
+    ...mapState(useWalletStore, ["invoiceData"]),
+    ...mapState(useMintsStore, [
+      "activeUnit",
+      "activeUnitLabel",
+      "activeUnitCurrencyMultiplyer",
+    ]),
+    ...mapState(useWorkersStore, ["invoiceWorkerRunning"]),
+    ...mapWritableState(useUiStore, [
+      "showInvoiceDetails",
+      "tickerShort",
+      "globalMutexLock",
+      "showNumericKeyboard",
+    ]),
+    ...mapState(useSettingsStore, ["useNumericKeyboard"]),
+    displayUnit: function () {
+      let display = this.formatCurrency(
+        this.invoiceData.amount,
+        this.invoiceData.unit,
+        true,
+      );
+      return display;
+    },
+    shortUrl: function () {
+      return getShortUrl(this.invoiceData.mint);
+    },
+    runnerActive: function () {
+      return this.invoiceWorkerRunning;
+    },
+    isSmallScreen() {
+      return this.$q.screen.lt.sm;
+    },
+  },
+  methods: {
+    ...mapActions(useWalletStore, [
+      "requestMint",
+      "lnurlPaySecond",
+      "mintOnPaid",
+    ]),
+    ...mapActions(useMintsStore, ["toggleUnit"]),
+    requestMintButton: async function () {
+      if (!this.invoiceData.amount) {
+        return;
+      }
+      try {
+        this.showNumericKeyboard = false;
+        const mintStore = useMintsStore();
+        this.invoiceData.amount *= this.activeUnitCurrencyMultiplyer;
+        this.createInvoiceButtonBlocked = true;
+        const mintWallet = useWalletStore().mintWallet(
+          mintStore.activeMintUrl,
+          mintStore.activeUnit,
+        );
+        const mintQuote = await this.requestMint(
+          this.invoiceData.amount,
+          mintWallet,
+        );
+        await this.mintOnPaid(mintQuote.quote);
+      } catch (e) {
+        debug("#### requestMintButton", e);
+      } finally {
+        this.createInvoiceButtonBlocked = false;
+      }
+    },
+  },
 });
 </script>
 

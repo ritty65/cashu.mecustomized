@@ -1,18 +1,15 @@
-import { hash_e, createRandomPrivateKey, DLEQ } from "../common/index.js";
-import { ProjPointType } from "@noble/curves/abstract/weierstrass";
-import { bytesToHex, numberToBytesBE } from "@noble/curves/abstract/utils";
-import { secp256k1 } from "@noble/curves/secp256k1";
-import { bytesToNumber, hexToNumber } from "../util/utils.js";
+import { hash_e, createRandomPrivateKey, DLEQ } from '../common/index.js';
+import { ProjPointType } from '@noble/curves/abstract/weierstrass';
+import { bytesToHex, numberToBytesBE } from '@noble/curves/abstract/utils';
+import { secp256k1 } from '@noble/curves/secp256k1';
+import { bytesToNumber, hexToNumber } from '../util/utils.js';
 
 /**
  * !!! WARNING !!! Not recommended for production use, due to non-constant time operations
  * See: https://github.com/cashubtc/cashu-crypto-ts/pull/2 for more details
  * See: https://en.wikipedia.org/wiki/Timing_attack for information about timing attacks.
  */
-export const createDLEQProof = (
-	B_: ProjPointType<bigint>,
-	a: Uint8Array,
-): DLEQ => {
+export const createDLEQProof = (B_: ProjPointType<bigint>, a: Uint8Array): DLEQ => {
 	const r = bytesToHex(createRandomPrivateKey()); // r <- random
 	const R_1 = secp256k1.ProjectivePoint.fromPrivateKey(r); // R1 = rG
 	const R_2 = B_.multiply(hexToNumber(r)); // R2 = rB_

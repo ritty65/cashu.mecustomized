@@ -113,8 +113,8 @@ const emit = defineEmits(["update:modelValue", "move"]);
 const { t } = useI18n();
 
 const showLocal = computed({
-	get: () => props.modelValue,
-	set: (val: boolean) => emit("update:modelValue", val),
+  get: () => props.modelValue,
+  set: (val: boolean) => emit("update:modelValue", val),
 });
 
 const bucketsStore = useBucketsStore();
@@ -125,66 +125,66 @@ const { activeUnit } = storeToRefs(mintsStore);
 const { bucketBalances } = storeToRefs(bucketsStore);
 
 const bucketList = computed(() => {
-	if (props.bucketIds && props.bucketIds.length) {
-		return bucketsStore.bucketList.filter((b) =>
-			props.bucketIds!.includes(b.id),
-		);
-	}
-	return bucketsStore.bucketList;
+  if (props.bucketIds && props.bucketIds.length) {
+    return bucketsStore.bucketList.filter((b) =>
+      props.bucketIds!.includes(b.id),
+    );
+  }
+  return bucketsStore.bucketList;
 });
 
 const proofsByBucket = computed<Record<string, WalletProof[]>>(() => {
-	const map: Record<string, WalletProof[]> = {};
-	bucketList.value.forEach((b) => {
-		map[b.id] = proofsStore.proofs.filter(
-			(p) => p.bucketId === b.id && !p.reserved,
-		);
-	});
-	return map;
+  const map: Record<string, WalletProof[]> = {};
+  bucketList.value.forEach((b) => {
+    map[b.id] = proofsStore.proofs.filter(
+      (p) => p.bucketId === b.id && !p.reserved,
+    );
+  });
+  return map;
 });
 
 const selectedSecrets = ref<string[]>([]);
 const targetBucketId = ref<string | null>(null);
 
 function toggleProof(secret: string, val: boolean) {
-	if (val) {
-		if (!selectedSecrets.value.includes(secret))
-			selectedSecrets.value.push(secret);
-	} else {
-		selectedSecrets.value = selectedSecrets.value.filter((s) => s !== secret);
-	}
+  if (val) {
+    if (!selectedSecrets.value.includes(secret))
+      selectedSecrets.value.push(secret);
+  } else {
+    selectedSecrets.value = selectedSecrets.value.filter((s) => s !== secret);
+  }
 }
 
 const bucketOptions = computed(() =>
-	bucketList.value.map((b) => ({
-		label: b.name,
-		value: b.id,
-		color: b.color || DEFAULT_COLOR,
-		balance: bucketBalances.value[b.id] ?? 0,
-	})),
+  bucketList.value.map((b) => ({
+    label: b.name,
+    value: b.id,
+    color: b.color || DEFAULT_COLOR,
+    balance: bucketBalances.value[b.id] ?? 0,
+  })),
 );
 
 function formatCurrency(amount: number, unit: string) {
-	return uiStore.formatCurrency(amount, unit);
+  return uiStore.formatCurrency(amount, unit);
 }
 
 async function moveSelected() {
-	if (!targetBucketId.value) {
-		notifyError(t("MoveTokens.errors.select_bucket"));
-		return;
-	}
-	const bucketExists = bucketsStore.bucketList.find(
-		(b) => b.id === targetBucketId.value,
-	);
-	if (!bucketExists) {
-		notifyError(`Bucket not found: ${targetBucketId.value}`);
-		return;
-	}
-	emit("move", {
-		secrets: [...selectedSecrets.value],
-		bucketId: targetBucketId.value,
-	});
-	selectedSecrets.value = [];
-	emit("update:modelValue", false);
+  if (!targetBucketId.value) {
+    notifyError(t("MoveTokens.errors.select_bucket"));
+    return;
+  }
+  const bucketExists = bucketsStore.bucketList.find(
+    (b) => b.id === targetBucketId.value,
+  );
+  if (!bucketExists) {
+    notifyError(`Bucket not found: ${targetBucketId.value}`);
+    return;
+  }
+  emit("move", {
+    secrets: [...selectedSecrets.value],
+    bucketId: targetBucketId.value,
+  });
+  selectedSecrets.value = [];
+  emit("update:modelValue", false);
 }
 </script>

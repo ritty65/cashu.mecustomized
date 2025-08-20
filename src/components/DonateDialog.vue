@@ -80,90 +80,90 @@ import { storeToRefs } from "pinia";
 import { useDonationPresetsStore } from "stores/donationPresets";
 
 export default defineComponent({
-	name: "DonateDialog",
-	props: {
-		modelValue: Boolean,
-		creatorPubkey: { type: String, default: "" },
-	},
-	emits: ["update:modelValue", "confirm"],
-	setup(props, { emit }) {
-		const bucketsStore = useBucketsStore();
-		const mintsStore = useMintsStore();
-		const uiStore = useUiStore();
-		const donationStore = useDonationPresetsStore();
-		const { bucketList, bucketBalances } = storeToRefs(bucketsStore);
-		const { activeUnit } = storeToRefs(mintsStore);
+  name: "DonateDialog",
+  props: {
+    modelValue: Boolean,
+    creatorPubkey: { type: String, default: "" },
+  },
+  emits: ["update:modelValue", "confirm"],
+  setup(props, { emit }) {
+    const bucketsStore = useBucketsStore();
+    const mintsStore = useMintsStore();
+    const uiStore = useUiStore();
+    const donationStore = useDonationPresetsStore();
+    const { bucketList, bucketBalances } = storeToRefs(bucketsStore);
+    const { activeUnit } = storeToRefs(mintsStore);
 
-		const bucketId = ref<string>(DEFAULT_BUCKET_ID);
-		const locked = ref<"normal" | "locked">("normal");
-		const type = ref<"one-time" | "schedule">("one-time");
-		const amount = ref<number>(0);
-		const message = ref<string>("");
-		const preset = ref<number>(donationStore.presets[0]?.periods || 0);
+    const bucketId = ref<string>(DEFAULT_BUCKET_ID);
+    const locked = ref<"normal" | "locked">("normal");
+    const type = ref<"one-time" | "schedule">("one-time");
+    const amount = ref<number>(0);
+    const message = ref<string>("");
+    const preset = ref<number>(donationStore.presets[0]?.periods || 0);
 
-		const model = computed({
-			get: () => props.modelValue,
-			set: (v: boolean) => emit("update:modelValue", v),
-		});
+    const model = computed({
+      get: () => props.modelValue,
+      set: (v: boolean) => emit("update:modelValue", v),
+    });
 
-		const bucketOptions = computed(() =>
-			bucketList.value.map((b) => ({
-				label: `${b.name} (${uiStore.formatCurrency(
-					bucketBalances.value[b.id] ?? 0,
-					activeUnit.value,
-				)})`,
-				value: b.id,
-			})),
-		);
+    const bucketOptions = computed(() =>
+      bucketList.value.map((b) => ({
+        label: `${b.name} (${uiStore.formatCurrency(
+          bucketBalances.value[b.id] ?? 0,
+          activeUnit.value,
+        )})`,
+        value: b.id,
+      })),
+    );
 
-		const typeOptions = [
-			{ label: "One-time", value: "one-time" },
-			{ label: "Scheduled", value: "schedule" },
-		];
+    const typeOptions = [
+      { label: "One-time", value: "one-time" },
+      { label: "Scheduled", value: "schedule" },
+    ];
 
-		const lockOptions = [
-			{ label: "Normal", value: "normal" },
-			{ label: "P2PK Lock", value: "locked" },
-		];
+    const lockOptions = [
+      { label: "Normal", value: "normal" },
+      { label: "P2PK Lock", value: "locked" },
+    ];
 
-		const presetOptions = computed(() =>
-			donationStore.presets.map((p) => ({
-				label: `${p.periods}p`,
-				value: p.periods,
-			})),
-		);
+    const presetOptions = computed(() =>
+      donationStore.presets.map((p) => ({
+        label: `${p.periods}p`,
+        value: p.periods,
+      })),
+    );
 
-		const cancel = () => {
-			emit("update:modelValue", false);
-		};
+    const cancel = () => {
+      emit("update:modelValue", false);
+    };
 
-		const confirm = () => {
-			emit("confirm", {
-				bucketId: bucketId.value,
-				locked: locked.value === "locked",
-				type: type.value,
-				amount: amount.value,
-				periods: preset.value,
-				message: message.value,
-			});
-			emit("update:modelValue", false);
-		};
+    const confirm = () => {
+      emit("confirm", {
+        bucketId: bucketId.value,
+        locked: locked.value === "locked",
+        type: type.value,
+        amount: amount.value,
+        periods: preset.value,
+        message: message.value,
+      });
+      emit("update:modelValue", false);
+    };
 
-		return {
-			model,
-			bucketId,
-			locked,
-			type,
-			amount,
-			message,
-			preset,
-			bucketOptions,
-			typeOptions,
-			lockOptions,
-			presetOptions,
-			cancel,
-			confirm,
-		};
-	},
+    return {
+      model,
+      bucketId,
+      locked,
+      type,
+      amount,
+      message,
+      preset,
+      bucketOptions,
+      typeOptions,
+      lockOptions,
+      presetOptions,
+      cancel,
+      confirm,
+    };
+  },
 });
 </script>

@@ -82,31 +82,31 @@ const aliasPubkey = ref("");
 const aliasName = ref("");
 
 const addRelay = () => {
-	if (relayInput.value.trim()) {
-		relays.value.push(relayInput.value.trim());
-		relayInput.value = "";
-	}
+  if (relayInput.value.trim()) {
+    relays.value.push(relayInput.value.trim());
+    relayInput.value = "";
+  }
 };
 
 const removeRelay = (index: number) => {
-	relays.value.splice(index, 1);
+  relays.value.splice(index, 1);
 };
 
 const saveAlias = () => {
-	if (!aliasPubkey.value.trim()) return;
-	messenger.setAlias(aliasPubkey.value.trim(), aliasName.value.trim());
-	aliasPubkey.value = "";
-	aliasName.value = "";
+  if (!aliasPubkey.value.trim()) return;
+  messenger.setAlias(aliasPubkey.value.trim(), aliasName.value.trim());
+  aliasPubkey.value = "";
+  aliasName.value = "";
 };
 
 const removeAlias = (key: string) => {
-	messenger.setAlias(key, "");
+  messenger.setAlias(key, "");
 };
 
 const save = async () => {
-	nostr.relays = relays.value as any;
-	await nostr.initPrivateKeySigner(privKey.value as any);
-	pubKey.value = nostr.npub;
-	showDialog.value = false;
+  nostr.relays = relays.value as any;
+  await nostr.initPrivateKeySigner(privKey.value as any);
+  pubKey.value = nostr.npub;
+  showDialog.value = false;
 };
 </script>
