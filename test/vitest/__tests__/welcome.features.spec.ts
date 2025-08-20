@@ -36,13 +36,20 @@ describe("WelcomeSlideFeatures", () => {
 
 describe('WelcomeSlideNostr', () => {
   it('marks setup completion on generate', async () => {
+    localStorage.clear()
     setActivePinia(createPinia())
     const nostr = useNostrStore()
     nostr.initWalletSeedPrivateKeySigner = async () => {}
     const wrapper = mount(WelcomeSlideNostr, {
       global: {
         mocks: { t: (msg: string) => msg },
-        stubs: { 'q-icon': { template: '<i></i>' }, 'q-btn': { template: '<button @click="$emit(\'click\')"><slot/></button>' }, 'q-form': { template: '<form @submit.prevent="(e)=>$emit(\'submit\',e)"><slot/></form>' }, 'q-input': { props:['modelValue','label'], template: '<input />' } }
+        stubs: {
+          'q-icon': { template: '<i></i>' },
+          'q-btn': { template: '<button @click="$emit(\'click\')"><slot/></button>' },
+          'q-form': { template: '<form @submit.prevent="(e)=>$emit(\'submit\',e)"><slot/></form>' },
+          'q-input': { props:['modelValue','label'], template: '<input />' },
+          'NostrBackupDialog': { template: '<div></div>', props:['modelValue','nsec'] }
+        }
       }
     })
     const welcome = useWelcomeStore()
@@ -50,13 +57,64 @@ describe('WelcomeSlideNostr', () => {
     await btns[0].trigger('click')
     expect(welcome.nostrSetupCompleted).toBe(true)
   })
+
+  it('import invalid key shows error and flag remains false', async () => {
+    localStorage.clear()
+    setActivePinia(createPinia())
+    const nostr = useNostrStore()
+    nostr.initPrivateKeySigner = vi.fn().mockRejectedValue(new Error('bad'))
+    const wrapper = mount(WelcomeSlideNostr, {
+      global: {
+        mocks: { t: (msg: string) => msg },
+        stubs: {
+          'q-icon': { template: '<i></i>' },
+          'q-btn': { template: '<button @click="$emit(\'click\')"><slot/></button>' },
+          'q-form': { template: '<form @submit.prevent="(e)=>$emit(\'submit\',e)"><slot/></form>' },
+          'q-input': { props:['modelValue','label'], template: '<input />' },
+          'NostrBackupDialog': { template: '<div></div>', props:['modelValue','nsec'] }
+        }
+      }
+    })
+    ;(wrapper.vm as any).nsec = 'a'.repeat(64)
+    await wrapper.find('form').trigger('submit')
+    const welcome = useWelcomeStore()
+    expect(welcome.nostrSetupCompleted).toBe(false)
+    expect(wrapper.text()).toContain('Welcome.nostr.errorInvalid')
+  })
+
+  it('connect extension path', async () => {
+    localStorage.clear()
+    setActivePinia(createPinia())
+    const nostr = useNostrStore()
+    nostr.connectBrowserSigner = vi.fn().mockResolvedValue(undefined)
+    window.nostr = { getPublicKey: vi.fn().mockResolvedValue('a'.repeat(64)) } as any
+    const wrapper = mount(WelcomeSlideNostr, {
+      global: {
+        mocks: { t: (msg: string) => msg },
+        stubs: {
+          'q-icon': { template: '<i></i>' },
+          'q-btn': { template: '<button @click="$emit(\'click\')"><slot/></button>' },
+          'q-form': { template: '<form @submit.prevent="(e)=>$emit(\'submit\',e)"><slot/></form>' },
+          'q-input': { props:['modelValue','label'], template: '<input />' },
+          'NostrBackupDialog': { template: '<div></div>', props:['modelValue','nsec'] }
+        }
+      }
+    })
+    const btns = wrapper.findAll('button')
+    await btns[0].trigger('click')
+    const welcome = useWelcomeStore()
+    expect(welcome.nostrSetupCompleted).toBe(true)
+    delete (window as any).nostr
+  })
 })
 
 describe('WelcomeSlideMints', () => {
   it('sets mintConnected when adding mint', async () => {
+    localStorage.clear()
     setActivePinia(createPinia())
     const mints = useMintsStore()
     mints.addMint = async (d: any) => ({ url: d.url }) as any
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({}))
     const wrapper = mount(WelcomeSlideMints, {
       global: {
         mocks: { t: (msg: string) => msg },
@@ -64,12 +122,39 @@ describe('WelcomeSlideMints', () => {
           'q-icon': { template: '<i></i>' },
           'q-input': { props:['modelValue','placeholder'], template: '<input />' },
           'q-form': { template: '<form @submit.prevent="(e)=>$emit(\'submit\',e)"><slot/></form>' },
-          'q-btn': { template: '<button @click="$emit(\'click\')"><slot/></button>' }
+          'q-btn': { template: '<button @click="$emit(\'click\')"><slot/></button>' },
+          'MintInfoDrawer': { template: '<div></div>' }
         }
       }
     })
+    ;(wrapper.vm as any).url = 'example.com'
     await wrapper.find('form').trigger('submit')
     const welcome = useWelcomeStore()
     expect(welcome.mintConnected).toBe(true)
+  })
+
+  it('bad URL shows error and does not set flag', async () => {
+    localStorage.clear()
+    setActivePinia(createPinia())
+    const mints = useMintsStore()
+    mints.addMint = vi.fn()
+    vi.stubGlobal('fetch', vi.fn())
+    const wrapper = mount(WelcomeSlideMints, {
+      global: {
+        mocks: { t: (msg: string) => msg },
+        stubs: {
+          'q-icon': { template: '<i></i>' },
+          'q-input': { props:['modelValue','placeholder'], template: '<input />' },
+          'q-form': { template: '<form @submit.prevent="(e)=>$emit(\'submit\',e)"><slot/></form>' },
+          'q-btn': { template: '<button @click="$emit(\'click\')"><slot/></button>' },
+          'MintInfoDrawer': { template: '<div></div>' }
+        }
+      }
+    })
+    ;(wrapper.vm as any).url = 'badurl'
+    await wrapper.find('form').trigger('submit')
+    const welcome = useWelcomeStore()
+    expect(welcome.mintConnected).toBe(false)
+    expect(wrapper.text()).toContain('Welcome.mints.error')
   })
 })

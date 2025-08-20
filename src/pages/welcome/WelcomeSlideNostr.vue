@@ -20,6 +20,7 @@
         <div v-if="npub" class="text-positive text-caption">{{ npub }}</div>
         <q-btn flat color="primary" @click="skip" :label="t('Welcome.nostr.skip')" />
       </div>
+      <NostrBackupDialog v-model="showBackup" :nsec="backupNsec" />
     </div>
   </section>
 </template>
@@ -29,6 +30,9 @@ import { ref, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useNostrStore } from 'src/stores/nostr'
 import { useWelcomeStore } from 'src/stores/welcome'
+import NostrBackupDialog from 'src/components/welcome/NostrBackupDialog.vue'
+import { nip19 } from 'nostr-tools'
+import { hexToBytes } from '@noble/hashes/utils'
 
 const { t } = useI18n()
 const nostr = useNostrStore()
@@ -38,6 +42,8 @@ const id = 'welcome-nostr-title'
 const nsec = ref('')
 const error = ref('')
 const npub = ref('')
+const showBackup = ref(false)
+const backupNsec = ref('')
 
 const hasNip07 = computed(() => typeof window !== 'undefined' && !!(window as any).nostr?.getPublicKey)
 
@@ -59,16 +65,41 @@ async function generate() {
   await nostr.initWalletSeedPrivateKeySigner()
   welcome.nostrSetupCompleted = true
   npub.value = nostr.npub
+  backupNsec.value = nostr.activePrivateKeyNsec
+  showBackup.value = true
 }
 
 async function importKey() {
   error.value = ''
+  const input = nsec.value.trim()
+  let nsecToUse = ''
+  if (input.startsWith('nsec1')) {
+    try {
+      nip19.decode(input)
+      nsecToUse = input
+    } catch {
+      error.value = t('Welcome.nostr.errorInvalid')
+      return
+    }
+  } else if (/^[0-9a-fA-F]{64}$/.test(input)) {
+    try {
+      nsecToUse = nip19.nsecEncode(hexToBytes(input))
+    } catch {
+      error.value = t('Welcome.nostr.errorInvalid')
+      return
+    }
+  } else {
+    error.value = t('Welcome.nostr.errorInvalid')
+    return
+  }
   try {
-    await nostr.initPrivateKeySigner(nsec.value.trim())
+    await nostr.initPrivateKeySigner(nsecToUse)
     welcome.nostrSetupCompleted = true
     npub.value = nostr.npub
+    backupNsec.value = nostr.activePrivateKeyNsec
+    showBackup.value = true
     nsec.value = ''
-  } catch (e) {
+  } catch {
     error.value = t('Welcome.nostr.errorInvalid')
   }
 }

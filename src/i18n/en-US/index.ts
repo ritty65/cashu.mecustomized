@@ -1914,6 +1914,9 @@ export const messages = {
       skip: "Skip for now",
       errorInvalid: "Invalid key",
       errorConnect: "Could not connect to extension",
+      backupTitle: "Backup your Nostr secret",
+      backupWarning: "Anyone with this can act as you. Store it privately. We cannot recover it.",
+      backupOk: "Got it",
     },
     privacy: {
       title: "Cashu & Privacy",
@@ -1927,7 +1930,7 @@ export const messages = {
     },
     mints: {
       title: "Connect to a Cashu mint",
-      lead: "Cashu requires a mint to issue and verify ecash. Choose a mint you trust. You can add more later.",
+      lead: "You must connect a mint to issue and verify ecash; you can add more later.",
       placeholder: "https://your-mint.example",
       connect: "Connect mint",
       addAnother: "Add another",
