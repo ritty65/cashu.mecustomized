@@ -38,26 +38,27 @@
 
 <script setup lang="ts">
 const id = "welcome-finish-title";
-const props = defineProps<{
-  onAddMint?: () => void;
-  onCreateBuckets?: () => void;
-  onRestore?: () => void;
-}>();
+const emit = defineEmits([
+  "open-wallet",
+  "add-mint",
+  "create-buckets",
+  "restore",
+]);
 
 function addMint() {
-  props.onAddMint?.();
+  emit("add-mint");
 }
 
 function createBuckets() {
-  props.onCreateBuckets?.();
+  emit("create-buckets");
 }
 
 function restore() {
-  props.onRestore?.();
+  emit("restore");
 }
 
 function openWallet() {
-  /* handled by main welcome page */
+  emit("open-wallet");
 }
 </script>
 

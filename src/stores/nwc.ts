@@ -430,6 +430,17 @@ export const useNWCStore = defineStore("nwc", {
         "&relay=",
       )}&secret=${connectionSecretHex}`;
     },
+    updateConnectionAllowance(pubkeyOrId: string, allowance: number) {
+      const idx = this.connections.findIndex(
+        (c) =>
+          c.walletPublicKey === pubkeyOrId ||
+          c.connectionPublicKey === pubkeyOrId,
+      );
+      if (idx !== -1) {
+        this.connections[idx].allowanceLeft = allowance;
+        this.connections = this.connections.slice();
+      }
+    },
     generateNWCConnection: async function () {
       const nostr = useNostrStore();
       await nostr.initSignerIfNotSet();

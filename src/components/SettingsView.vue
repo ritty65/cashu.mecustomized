@@ -113,7 +113,11 @@
           <q-item-section class="q-mx-none q-pl-none">
             <!-- toggle to turn Lightning address on and off in new row -->
             <div class="row q-pt-md">
-              <q-toggle v-model="npcEnabled" color="primary" />
+              <q-toggle
+                v-model="npcEnabled"
+                color="primary"
+                :aria-label="$t('Settings.lightning_address.enable.toggle')"
+              />
               <q-item-section>
                 <q-item-label title>{{
                   $t("Settings.lightning_address.enable.toggle")
@@ -153,7 +157,13 @@
                 </q-input>
               </div>
               <div class="row q-pt-md">
-                <q-toggle v-model="automaticClaim" color="primary" />
+                <q-toggle
+                  v-model="automaticClaim"
+                  color="primary"
+                  :aria-label="
+                    $t('Settings.lightning_address.automatic_claim.toggle')
+                  "
+                />
                 <q-item-section>
                   <q-item-label title>{{
                     $t("Settings.lightning_address.automatic_claim.toggle")
@@ -502,6 +512,9 @@
         <q-toggle
           v-model="receivePaymentRequestsAutomatically"
           color="primary"
+          :aria-label="
+            $t('Settings.payment_requests.claim_automatically.toggle')
+          "
         />
         <q-item-section>
           <q-item-label title>{{
@@ -629,7 +642,13 @@
                 outlined
                 rounded
                 dense
-                v-model="connection.allowanceLeft"
+                v-model.number="connection.allowanceLeft"
+                @update:model-value="
+                  updateConnectionAllowance(
+                    connection.walletPublicKey,
+                    connection.allowanceLeft
+                  )
+                "
                 :label="
                   $t('Settings.nostr_wallet_connect.connection.allowance_label')
                 "
@@ -908,7 +927,7 @@
             </q-item>
             <q-item>
               <q-toggle
-                v-model="showP2PkButtonInDrawer"
+                v-model="showP2PKButtonInDrawer"
                 :label="$t('Settings.p2pk_features.quick_access.toggle')"
                 color="primary"
               /> </q-item
@@ -1263,8 +1282,16 @@
                   >{{ $t("Settings.appearance.theme.description") }}
                 </q-item-label>
                 <div class="row q-py-md">
-                  <q-btn dense flat rounded @click="toggleDarkMode" size="md">
-                    Toggle dark mode
+                  <q-btn
+                    dense
+                    flat
+                    rounded
+                    @click="toggleDarkMode"
+                    size="md"
+                    :aria-label="$t('Settings.appearance.theme.toggle')"
+                    :title="$t('Settings.appearance.theme.toggle')"
+                  >
+                    {{ $t('Settings.appearance.theme.toggle') }}
                     <q-icon
                       class="q-ml-sm"
                       :name="$q.dark.isActive ? 'brightness_3' : 'wb_sunny'"
@@ -1793,7 +1820,7 @@ import { useWalletStore } from "src/stores/wallet";
 import { useMnemonicStore } from "src/stores/mnemonic";
 import { useSettingsStore } from "src/stores/settings";
 import { useNostrStore, publishDiscoveryProfile } from "src/stores/nostr";
-import { notifySuccess, notifyError } from "src/js/notify";
+import { notifySuccess, notifyError, notifyWarning } from "src/js/notify";
 import { useNPCStore } from "src/stores/npubcash";
 import { useP2PKStore } from "src/stores/p2pk";
 import { useCreatorProfileStore } from "src/stores/creatorProfile";
@@ -1808,6 +1835,7 @@ import { useReceiveTokensStore } from "../stores/receiveTokensStore";
 import { useWelcomeStore } from "src/stores/welcome";
 import { useStorageStore } from "src/stores/storage";
 import { useI18n } from "vue-i18n";
+import { validateRelayUrl, normalizeRelayUrl } from "src/js/relay";
 
 export default defineComponent({
   name: "SettingsView",
@@ -1883,10 +1911,16 @@ export default defineComponent({
     ...mapState(useP2PKStore, ["p2pkKeys", "firstKey"]),
     ...mapWritableState(useP2PKStore, [
       "showP2PKDialog",
-      "showP2PkButtonInDrawer",
+      "showP2PKButtonInDrawer",
     ]),
     ...mapWritableState(useNWCStore, ["showNWCDialog", "showNWCData"]),
-    ...mapState(useMintsStore, ["activeMintUrl", "mints", "activeProofs"]),
+    ...mapState(useMintsStore, [
+      "activeMintUrl",
+      "mints",
+      "activeProofs",
+      "activeUnit",
+      "activeMint",
+    ]),
     ...mapState(useNPCStore, ["npcLoading"]),
     ...mapState(useNostrStore, [
       "pubkey",
@@ -1975,6 +2009,7 @@ export default defineComponent({
       "listenToNWCCommands",
       "unsubscribeNWC",
       "getConnectionString",
+      "updateConnectionAllowance",
     ]),
     ...mapActions(useP2PKStore, [
       "importNsec",
@@ -2020,14 +2055,12 @@ export default defineComponent({
       // mark all this.proofs as reserved=false
       const proofsStore = useProofsStore();
       await proofsStore.setReserved(await proofsStore.getProofs(), false);
-      this.notifySuccess("All reserved proofs unset");
+      notifySuccess(this.$t('Settings.notifications.reserved_unset'));
     },
     checkActiveProofsSpendable: async function () {
       // iterate over this.activeProofs in batches of 50 and check if they are spendable
-      let wallet = useWalletStore().mintWallet(
-        this.activeMintUrl,
-        this.activeUnit,
-      );
+      const unit = this.activeUnit || this.activeMint?.units?.[0] || "sat";
+      let wallet = useWalletStore().mintWallet(this.activeMintUrl, unit);
       let proofs = this.activeProofs.flat();
       debug("Checking proofs", proofs);
       let allSpentProofs = [];
@@ -2041,9 +2074,13 @@ export default defineComponent({
       let spentProofs = allSpentProofs.flat();
       if (spentProofs.length > 0) {
         debug("Spent proofs", spentProofs);
-        this.notifySuccess("Removed " + spentProofs.length + " spent proofs");
+        notifySuccess(
+          this.$t('Settings.notifications.spent_removed', {
+            count: spentProofs.length,
+          }),
+        );
       } else {
-        this.notifySuccess("No spent proofs found");
+        notifySuccess(this.$t('Settings.notifications.no_spent'));
       }
     },
     showP2PKKeyEntry: async function (pubKey) {
@@ -2129,18 +2166,22 @@ export default defineComponent({
     },
     addRelay: function () {
       if (this.newRelay) {
-        this.newRelay = this.newRelay.trim();
-        // if relay is already in relays, don't add it, send notification
-        if (this.relays.includes(this.newRelay)) {
-          this.notifyWarning("Relay already added");
-        } else {
-          this.relays.push(this.newRelay);
-          const profileStore = useCreatorProfileStore();
-          if (!profileStore.relays.includes(this.newRelay)) {
-            profileStore.relays.push(this.newRelay);
-          }
-          this.newRelay = "";
+        const result = validateRelayUrl(this.newRelay, this.relays);
+        if (result === "invalid") {
+          notifyError(this.$t('Settings.relays.errors.invalid'));
+          return;
         }
+        if (result === "duplicate") {
+          notifyWarning(this.$t('Settings.relays.errors.duplicate'));
+          return;
+        }
+        const relay = normalizeRelayUrl(this.newRelay);
+        this.relays.push(relay);
+        const profileStore = useCreatorProfileStore();
+        if (!profileStore.relays.map((r) => r.toLowerCase()).includes(relay.toLowerCase())) {
+          profileStore.relays.push(relay);
+        }
+        this.newRelay = "";
       }
     },
     removeRelay: function (relay) {
@@ -2150,17 +2191,22 @@ export default defineComponent({
     },
     addNostrRelay: function () {
       if (this.newNostrRelay) {
-        this.newNostrRelay = this.newNostrRelay.trim();
-        if (this.defaultNostrRelays.includes(this.newNostrRelay)) {
-          this.notifyWarning("Relay already added");
-        } else {
-          this.defaultNostrRelays.push(this.newNostrRelay);
-          const profileStore = useCreatorProfileStore();
-          if (!profileStore.relays.includes(this.newNostrRelay)) {
-            profileStore.relays.push(this.newNostrRelay);
-          }
-          this.newNostrRelay = "";
+        const result = validateRelayUrl(this.newNostrRelay, this.defaultNostrRelays);
+        if (result === "invalid") {
+          notifyError(this.$t('Settings.relays.errors.invalid'));
+          return;
         }
+        if (result === "duplicate") {
+          notifyWarning(this.$t('Settings.relays.errors.duplicate'));
+          return;
+        }
+        const relay = normalizeRelayUrl(this.newNostrRelay);
+        this.defaultNostrRelays.push(relay);
+        const profileStore = useCreatorProfileStore();
+        if (!profileStore.relays.map((r) => r.toLowerCase()).includes(relay.toLowerCase())) {
+          profileStore.relays.push(relay);
+        }
+        this.newNostrRelay = "";
       }
     },
     removeNostrRelay: function (relay) {

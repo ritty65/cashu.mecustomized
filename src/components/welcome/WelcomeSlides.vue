@@ -1,7 +1,13 @@
 <template>
   <q-carousel v-model="slide" animated swipeable>
     <q-carousel-slide v-for="s in slides" :name="s.name" :key="s.name">
-      <component :is="s.component" />
+      <component
+        :is="s.component"
+        @open-wallet="emit('open-wallet')"
+        @add-mint="emit('add-mint')"
+        @create-buckets="emit('create-buckets')"
+        @restore="emit('restore')"
+      />
     </q-carousel-slide>
   </q-carousel>
 </template>
@@ -16,6 +22,13 @@ import WelcomeSlideBuckets from 'src/pages/welcome/WelcomeSlideBuckets.vue'
 import WelcomeSlidePwa from 'src/pages/welcome/WelcomeSlidePwa.vue'
 import WelcomeSlideTerms from 'src/pages/welcome/WelcomeSlideTerms.vue'
 import WelcomeSlideFinish from 'src/pages/welcome/WelcomeSlideFinish.vue'
+
+const emit = defineEmits([
+  'open-wallet',
+  'add-mint',
+  'create-buckets',
+  'restore'
+])
 
 const slide = ref(0)
 const slides = [

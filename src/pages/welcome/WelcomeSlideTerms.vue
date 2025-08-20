@@ -50,17 +50,26 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import TermsContent from "src/components/TermsContent.vue";
+import { useWelcomeStore } from "src/stores/welcome";
 
 const id = "welcome-terms-title";
 const showTerms = ref(false);
-const accepted = ref(false);
+const welcome = useWelcomeStore();
+const accepted = computed({
+  get: () => welcome.termsAccepted,
+  set: (val: boolean) => {
+    if (val) welcome.acceptTerms();
+  },
+});
 
 function acceptAndClose() {
-  accepted.value = true;
+  welcome.acceptTerms();
   showTerms.value = false;
 }
+
+defineExpose({ accepted });
 </script>
 
 <style scoped>

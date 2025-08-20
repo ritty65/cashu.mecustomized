@@ -21,6 +21,15 @@ import { notifyApiError, notifyError } from "src/js/notify";
 import { cashuDb } from "./dexie";
 import { maybeRepublishNutzapProfile } from "./creatorHub";
 
+const OLD_DRAWER_KEY = "cashu.p2pk.showP2PkButtonInDrawer";
+const NEW_DRAWER_KEY =
+  LOCAL_STORAGE_KEYS.CASHU_P2PK_SHOWP2PKBUTTONINDRAWER;
+const oldDrawer = localStorage.getItem(OLD_DRAWER_KEY);
+if (oldDrawer !== null && localStorage.getItem(NEW_DRAWER_KEY) === null) {
+  localStorage.setItem(NEW_DRAWER_KEY, oldDrawer);
+  localStorage.removeItem(OLD_DRAWER_KEY);
+}
+
 /** Return `{ pub, priv }` where `pub` is SEC-compressed hex. */
 export function generateP2pkKeyPair(): { pub: string; priv: string } {
   const priv = generateSecretKey();
@@ -79,7 +88,7 @@ export async function buildTimedOutputs(
 export const useP2PKStore = defineStore("p2pk", {
   state: () => ({
     p2pkKeys: useLocalStorage<P2PKKey[]>(LOCAL_STORAGE_KEYS.CASHU_P2PKKEYS, []),
-    showP2PkButtonInDrawer: useLocalStorage<boolean>(
+    showP2PKButtonInDrawer: useLocalStorage<boolean>(
       LOCAL_STORAGE_KEYS.CASHU_P2PK_SHOWP2PKBUTTONINDRAWER,
       false,
     ),
