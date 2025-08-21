@@ -32,20 +32,45 @@ export function mergeDefaultRelays(ndk: NDK) {
   }
 }
 
+function attachRelayErrorHandlers(ndk: NDK) {
+  const reported = new Set<string>();
+  ndk.pool.on("relay:disconnect", (relay: any) => {
+    if (reported.has(relay.url)) return;
+    reported.add(relay.url);
+    console.debug(`[NDK] relay disconnected: ${relay.url}`);
+  });
+  ndk.pool.on("notice", (relay: any, notice: string) => {
+    console.debug(`[NDK] notice from ${relay.url}: ${notice}`);
+  });
+}
+
 let ndkInstance: NDK | undefined;
 let ndkPromise: Promise<NDK> | undefined;
 
-export async function safeConnect(ndk: NDK): Promise<Error | null> {
-  try {
-    await ndk.connect(10_000);
-    return null;
-  } catch (e: any) {
-    console.warn(
-      "[NDK] connect failed, continuing in offline mode:",
-      e?.message,
-    );
-    return e as Error;
+export async function safeConnect(
+  ndk: NDK,
+  retries = 3,
+): Promise<Error | null> {
+  let lastError: Error | null = null;
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      await ndk.connect(10_000);
+      return null;
+    } catch (e: any) {
+      lastError = e as Error;
+      if (attempt < retries) {
+        const delay = 1000 * 2 ** (attempt - 1);
+        console.debug(
+          `[NDK] connect attempt ${attempt} failed, retrying in ${delay}ms`,
+        );
+        await new Promise((r) => setTimeout(r, delay));
+      }
+    }
   }
+  console.warn(
+    "[NDK] connect failed after", retries, "attempts:", lastError?.message,
+  );
+  return lastError;
 }
 
 async function createReadOnlyNdk(): Promise<NDK> {
@@ -60,12 +85,13 @@ async function createReadOnlyNdk(): Promise<NDK> {
   const healthy = await filterHealthyRelays(relays);
   const relayUrls = healthy.length ? healthy : FREE_RELAYS;
   const ndk = new NDK({ explicitRelayUrls: relayUrls });
+  attachRelayErrorHandlers(ndk);
   mergeDefaultRelays(ndk);
   await safeConnect(ndk);
   await new Promise((r) => setTimeout(r, 3000));
   if (![...ndk.pool.relays.values()].some((r: any) => r.connected)) {
     mergeDefaultRelays(ndk);
-    await ndk.connect(8000);
+    await safeConnect(ndk);
   }
   return ndk;
 }
@@ -76,13 +102,14 @@ export async function createSignedNdk(signer: NDKSigner): Promise<NDK> {
     ? settings.defaultNostrRelays
     : DEFAULT_RELAYS;
   const ndk = new NDK({ explicitRelayUrls: relays });
+  attachRelayErrorHandlers(ndk);
   mergeDefaultRelays(ndk);
   ndk.signer = signer;
-  await ndk.connect();
+  await safeConnect(ndk);
   await new Promise((r) => setTimeout(r, 3000));
   if (![...ndk.pool.relays.values()].some((r: any) => r.connected)) {
     mergeDefaultRelays(ndk);
-    await ndk.connect(8000);
+    await safeConnect(ndk);
   }
   return ndk;
 }
@@ -108,12 +135,13 @@ export async function createNdk(): Promise<NDK> {
   const healthy = await filterHealthyRelays(relays);
   const relayUrls = healthy.length ? healthy : FREE_RELAYS;
   const ndk = new NDK({ signer: signer as any, explicitRelayUrls: relayUrls });
+  attachRelayErrorHandlers(ndk);
   mergeDefaultRelays(ndk);
   await safeConnect(ndk);
   await new Promise((r) => setTimeout(r, 3000));
   if (![...ndk.pool.relays.values()].some((r: any) => r.connected)) {
     mergeDefaultRelays(ndk);
-    await ndk.connect(8000);
+    await safeConnect(ndk);
   }
   return ndk;
 }
@@ -123,9 +151,10 @@ export async function rebuildNdk(
   signer?: NDKSigner,
 ): Promise<NDK> {
   const ndk = new NDK({ explicitRelayUrls: relays });
+  attachRelayErrorHandlers(ndk);
   mergeDefaultRelays(ndk);
   if (signer) ndk.signer = signer;
-  await ndk.connect(10_000);
+  await safeConnect(ndk);
   return ndk;
 }
 
