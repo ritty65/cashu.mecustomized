@@ -138,6 +138,10 @@ export const useMintsStore = defineStore("mints", {
       }
       try {
         const parsed = new URL(url);
+        if (parsed.hostname === "undefined") {
+          activeMintUrl.value = "";
+          return false;
+        }
         return parsed.protocol === "https:";
       } catch {
         return false;
