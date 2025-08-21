@@ -1,0 +1,13 @@
+name: Docker Build
+on:
+  pull_request: { branches: [ Phase10 ] }
+  push:        { branches: [ "**"    ] }
+jobs:
+  check-secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Web-only PR: no secrets to check."
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Dockerfile removed for web-only repo; skipping image build."

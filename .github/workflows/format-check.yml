@@ -1,9 +1,7 @@
 name: Check format
 on:
-  pull_request:
-    branches: [ Phase10 ]
-  push:
-    branches: [ "**" ]
+  pull_request: { branches: [ Phase10 ] }
+  push:        { branches: [ "**"    ] }
 jobs:
   format-check:
     runs-on: ubuntu-latest
@@ -12,11 +10,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
-      - name: Install pnpm explicitly
-        run: |
-          npm i -g pnpm@8.15.7
-          pnpm -v
-      - name: Install deps
+      - name: Install pnpm
+        run: npm i -g pnpm@8.15.7 && pnpm -v
+      - name: Install deps (single-package mode)
         run: pnpm install --no-frozen-lockfile
       - name: Lint or Prettier (non-blocking for this cleanup PR)
         shell: bash
