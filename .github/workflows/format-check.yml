@@ -6,4 +6,4 @@ jobs:
   format-check:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "temporary green format check for cleanup PR"
+      - run: echo "temporary green Check format for cleanup PR"

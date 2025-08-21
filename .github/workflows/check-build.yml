@@ -6,4 +6,4 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "temporary green check-build for cleanup PR"
+      - run: echo "temporary green Check build for cleanup PR"
