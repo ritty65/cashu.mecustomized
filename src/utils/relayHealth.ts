@@ -1,9 +1,39 @@
 import { FREE_RELAYS } from "src/config/relays";
 
+// keep track of relays that have already produced a constructor error so we only
+// emit a single console message per relay. This keeps startup logs readable when
+// many relays are unreachable.
+const reportedFailures = new Map<string, number>();
+let aggregateTimer: ReturnType<typeof setTimeout> | null = null;
+
+function scheduleFailureLog() {
+  if (aggregateTimer) return;
+  aggregateTimer = setTimeout(() => {
+    const entries = Array.from(reportedFailures.entries());
+    reportedFailures.clear();
+    aggregateTimer = null;
+    if (!entries.length) return;
+    const summary = entries
+      .map(([u, c]) => (c > 1 ? `${u} (x${c})` : u))
+      .join(", ");
+    console.error(`WebSocket ping failed for: ${summary}`);
+  }, 0);
+}
+
 export async function pingRelay(url: string): Promise<boolean> {
   return new Promise((resolve) => {
     let settled = false;
-    const ws = new WebSocket(url);
+    let ws: WebSocket;
+    try {
+      ws = new WebSocket(url);
+    } catch (err) {
+      // Catch constructor errors (e.g. invalid URL or security issues) and log
+      // them in an aggregated fashion instead of flooding the console.
+      reportedFailures.set(url, (reportedFailures.get(url) ?? 0) + 1);
+      scheduleFailureLog();
+      resolve(false);
+      return;
+    }
     const timer = setTimeout(() => {
       if (!settled) {
         settled = true;
@@ -25,6 +55,9 @@ export async function pingRelay(url: string): Promise<boolean> {
       if (!settled) {
         settled = true;
         clearTimeout(timer);
+        // aggregate error rather than letting each failed relay spam the console
+        reportedFailures.set(url, (reportedFailures.get(url) ?? 0) + 1);
+        scheduleFailureLog();
         resolve(false);
       }
     };
