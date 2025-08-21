@@ -14,7 +14,7 @@ import path from "path";
 export default configure(function () {
   const csp = [
     "default-src 'self'",
-    "connect-src 'self' https: wss:",
+    "connect-src 'self' https://api.coinbase.com https://npub.cash https://audit.8333.space https://api.audit.8333.space https://api.nostr.band https: wss:",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
     "img-src 'self' https: data:",
@@ -73,7 +73,7 @@ export default configure(function () {
             "http-equiv": "Content-Security-Policy",
             content: [
               "default-src 'self'",
-              "connect-src 'self' https: wss:",
+              "connect-src 'self' https://api.coinbase.com https://npub.cash https://audit.8333.space https://api.audit.8333.space https://api.nostr.band https: wss:",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
               "img-src 'self' https: data:",
