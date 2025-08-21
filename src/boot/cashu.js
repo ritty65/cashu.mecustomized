@@ -8,8 +8,18 @@ export default boot(async () => {
   const walletStore = useWalletStore();
   const wallet = walletStore.wallet;
   const mints = useMintsStore();
-  if (mints.activeMintUrl) {
-    const ok = await verifyMint(mints.activeMintUrl);
+  const mintUrl = mints.activeMintUrl;
+  let valid = false;
+  if (mintUrl && mintUrl !== "undefined") {
+    try {
+      const parsed = new URL(mintUrl);
+      valid = parsed.protocol === "https:";
+    } catch {
+      valid = false;
+    }
+  }
+  if (valid) {
+    const ok = await verifyMint(mintUrl);
     if (!ok) {
       Notify.create({
         type: "negative",
