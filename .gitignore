@@ -45,3 +45,8 @@ backups/
 output.txt
 rollup-plugin-visualizer/
 .icon_swap_backups/
+node_modules/
+.quasar/
+.vscode/
+.idea/
+*.log
