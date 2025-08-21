@@ -6,11 +6,13 @@
       <p class="q-mt-sm">{{ t('Welcome.nostr.lead') }}</p>
       <div class="q-gutter-y-md q-mt-md">
         <q-btn
-          color="primary"
-          :label="t('Welcome.nostr.connect')"
-          @click="connectNip07"
-          :disable="!hasNip07"
-        />
+            color="primary"
+            :label="connected ? t('Welcome.nostr.connected') : t('Welcome.nostr.connect')"
+            @click="connectNip07"
+            :disable="!hasNip07 || connected"
+            :loading="connecting"
+            :icon="connected ? 'check' : undefined"
+          />
       <div v-if="!hasNip07" class="text-caption">
         <div>{{ t('Welcome.nostr.installHint') }}</div>
         <div>{{ t('Welcome.nostr.installBrowser', { browser: browserLabel }) }}</div>
@@ -55,6 +57,8 @@ const error = ref('')
 const npub = ref('')
 const showBackup = ref(false)
 const backupNsec = ref('')
+const connecting = ref(false)
+const connected = ref(false)
 
 const hasNip07 = computed(() => typeof window !== 'undefined' && !!(window as any).nostr?.getPublicKey)
 
@@ -115,16 +119,21 @@ const suggestedExtensions = computed(() => {
 
 async function connectNip07() {
   error.value = ''
+  connecting.value = true
   try {
     const pk = await (window as any).nostr.getPublicKey()
     await nostr.connectBrowserSigner()
     nostr.setPubkey(pk)
     welcome.nostrSetupCompleted = true
     npub.value = nostr.npub
+    connected.value = true
+    $q.notify({ type: 'positive', message: t('Welcome.nostr.connected') })
   } catch (e) {
     const msg = t('Welcome.nostr.errorConnect')
     error.value = msg
     $q.notify({ type: 'negative', message: msg })
+  } finally {
+    connecting.value = false
   }
 }
 
@@ -177,6 +186,7 @@ function skip() {
   nsec.value = ''
   error.value = ''
   npub.value = ''
+  connected.value = false
 }
 </script>
 
