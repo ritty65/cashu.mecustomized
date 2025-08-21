@@ -11,13 +11,20 @@
 import { configure } from "quasar/wrappers";
 import path from "path";
 
-export default configure(function (ctx) {
-  const csp = ctx.dev
-    ? "default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' wss:; frame-ancestors 'none'; object-src 'none'; base-uri 'self';"
-    : "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' wss:; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; require-trusted-types-for 'script';";
-  const cspHeader = ctx.dev
-    ? "Content-Security-Policy-Report-Only"
-    : "Content-Security-Policy";
+export default configure(function () {
+  const csp = [
+    "default-src 'self'",
+    "connect-src 'self' https: wss:",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+    "img-src 'self' https: data:",
+    "font-src 'self' https://fonts.gstatic.com",
+    "frame-src 'self' https:",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+  ].join("; ");
+  const cspHeader = "Content-Security-Policy";
 
   return {
     alias: { buffer: "buffer", process: "process/browser" },
@@ -59,6 +66,25 @@ export default configure(function (ctx) {
     build: {
       alias: {
         "@": path.resolve(__dirname, "src"),
+      },
+      htmlOptions: {
+        meta: {
+          "Content-Security-Policy": {
+            "http-equiv": "Content-Security-Policy",
+            content: [
+              "default-src 'self'",
+              "connect-src 'self' https: wss:",
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+              "img-src 'self' https: data:",
+              "font-src 'self' https://fonts.gstatic.com",
+              "frame-src 'self' https:",
+              "object-src 'none'",
+              "base-uri 'self'",
+              "form-action 'self'",
+            ].join("; "),
+          },
+        },
       },
       optimizeDeps: { include: ["process", "buffer", "vue-chartjs"] },
       target: {
