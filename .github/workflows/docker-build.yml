@@ -6,8 +6,8 @@ jobs:
   check-secrets:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Web-only PR: no secrets to check."
+      - run: echo "Web-only cleanup PR: no secrets to check."
   build:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Dockerfile removed for web-only repo; skipping image build."
+      - run: echo "Dockerfile removed for web-only repo; intentionally skipping image build."
