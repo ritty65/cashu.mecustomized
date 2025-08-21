@@ -14,15 +14,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 8.15.7
-          run_install: true
-      - run: node -v && pnpm -v
+          cache: 'pnpm'
+      - name: Enable pnpm via corepack (pin exact)
+        run: |
+          corepack enable
+          corepack prepare pnpm@8.15.7 --activate
+          pnpm -v
+      - name: Install deps
+        run: pnpm install --no-frozen-lockfile
       - name: Lint or Prettier (non-blocking for this cleanup PR)
         shell: bash
         run: |
-          if pnpm -s run | grep -qE "^\s*lint"; then
+          if pnpm -s run | grep -qE '^\s*lint'; then
             pnpm -s run lint || echo "::warning:: lint failed; not blocking this cleanup PR"
           else
             pnpm dlx prettier --check . || echo "::warning:: prettier found issues; not blocking this cleanup PR"
