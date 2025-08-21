@@ -663,10 +663,11 @@ export const useNostrStore = defineStore("nostr", {
     async connectBrowserSigner() {
       const nip07 = new NDKNip07Signer();
       try {
-        await nip07.user();
+        const user = await nip07.user();
         this.signer = nip07;
         this.signerType = SignerType.NIP07;
-        await useNdk({ requireSigner: true });
+        this.setPubkey(user.pubkey);
+        useNdk({ requireSigner: true }).catch(() => {});
       } catch (e) {
         throw new Error("The signer request was rejected or blocked.");
       }

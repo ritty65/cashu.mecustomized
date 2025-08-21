@@ -52,7 +52,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
 import { useQuasar } from 'quasar'
@@ -69,6 +69,8 @@ import type { WelcomeTask } from 'src/types/welcome'
 import { useWelcomeStore, LAST_WELCOME_SLIDE } from 'src/stores/welcome'
 import { useMnemonicStore } from 'src/stores/mnemonic'
 import { useStorageStore } from 'src/stores/storage'
+import { useNostrStore } from 'src/stores/nostr'
+import { useNdk } from 'src/composables/useNdk'
 
 const { t } = useI18n()
 const welcome = useWelcomeStore()
@@ -76,6 +78,7 @@ const router = useRouter()
 const $q = useQuasar()
 const mnemonicStore = useMnemonicStore()
 const storageStore = useStorageStore()
+const nostr = useNostrStore()
 const showSeedDialog = ref(false)
 const showChecklist = ref(false)
 
@@ -142,4 +145,15 @@ function jump(i: number) {
     welcome.currentSlide = i
   }
 }
+
+onMounted(() => {
+  nostr
+    .initNip07Signer()
+    .then(() => {
+      if (nostr.signer) {
+        useNdk({ requireSigner: true }).catch(() => {})
+      }
+    })
+    .catch(() => {})
+})
 </script>

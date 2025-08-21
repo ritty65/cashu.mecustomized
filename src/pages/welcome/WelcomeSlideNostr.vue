@@ -1,6 +1,6 @@
 <template>
   <section role="region" :aria-labelledby="id" class="q-pa-md flex flex-center">
-    <div class="text-center" style="max-width:400px">
+    <div class="text-center q-mx-auto" style="max-width:600px">
       <q-icon name="badge" size="4em" color="primary" />
       <h1 :id="id" tabindex="-1" class="q-mt-md">{{ t('Welcome.nostr.title') }}</h1>
       <p class="q-mt-sm">{{ t('Welcome.nostr.lead') }}</p>
@@ -121,9 +121,9 @@ async function connectNip07() {
   error.value = ''
   connecting.value = true
   try {
-    const pk = await (window as any).nostr.getPublicKey()
-    await nostr.connectBrowserSigner()
-    nostr.setPubkey(pk)
+    if (!nostr.signer) {
+      await nostr.connectBrowserSigner()
+    }
     welcome.nostrSetupCompleted = true
     npub.value = nostr.npub
     connected.value = true
