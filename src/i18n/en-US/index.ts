@@ -1804,6 +1804,11 @@ export const messages = {
             "Your public storefront as seen by visitors. Great for a quick audit of how your profile appears worldwide.",
         },
 
+        creatorHub: {
+          fan: "Publish a profile; get support.",
+          creator: "Set tiers, goals and withdraw earnings.",
+        },
+
         myProfile: {
           fan: "Show off your avatar, npub link and optional NIP-05. Personal stats: total zaps sent & received, bucket balances.",
           creator:
@@ -1918,7 +1923,8 @@ export const messages = {
       errorInvalid: "Invalid key",
       errorConnect: "Extension connection failed. Make sure a NIP-07 extension is installed and try again.",
       installHint: "Install a NIP-07 browser extension",
-      installUrl: "https://github.com/albyorg/alby-extension",
+      installBrowser: "Choose an extension for {browser}",
+      unknownBrowser: "your browser",
       backupTitle: "Backup your Nostr secret",
       backupWarning: "Anyone with this can act as you. Store it privately. We cannot recover it.",
       backupOk: "Got it",

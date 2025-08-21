@@ -11,13 +11,15 @@
           @click="connectNip07"
           :disable="!hasNip07"
         />
-        <div v-if="!hasNip07" class="text-caption">
-          <a
-            :href="t('Welcome.nostr.installUrl')"
-            target="_blank"
-            class="text-primary"
-          >{{ t('Welcome.nostr.installHint') }}</a>
-        </div>
+      <div v-if="!hasNip07" class="text-caption">
+        <div>{{ t('Welcome.nostr.installHint') }}</div>
+        <div>{{ t('Welcome.nostr.installBrowser', { browser: browserLabel }) }}</div>
+        <ul class="q-mt-xs">
+          <li v-for="ext in suggestedExtensions" :key="ext.name">
+            <a :href="ext.url" target="_blank" class="text-primary">{{ ext.name }}</a>
+          </li>
+        </ul>
+      </div>
         <q-btn color="primary" :label="t('Welcome.nostr.generate')" @click="generate" />
         <q-form @submit.prevent="importKey">
           <q-input v-model="nsec" :label="t('Welcome.nostr.importPlaceholder')" autocomplete="off" />
@@ -55,6 +57,61 @@ const showBackup = ref(false)
 const backupNsec = ref('')
 
 const hasNip07 = computed(() => typeof window !== 'undefined' && !!(window as any).nostr?.getPublicKey)
+
+type BrowserKind = 'chromium' | 'firefox' | 'safari' | 'unknown'
+const browser = ref<BrowserKind>('unknown')
+
+if (typeof navigator !== 'undefined') {
+  const ua = navigator.userAgent
+  if (/firefox/i.test(ua)) browser.value = 'firefox'
+  else if (/safari/i.test(ua) && !/chrome|chromium|crios|edg/i.test(ua)) browser.value = 'safari'
+  else if (/chrome|chromium|crios|edg/i.test(ua)) browser.value = 'chromium'
+}
+
+const browserLabel = computed(() => {
+  switch (browser.value) {
+    case 'chromium':
+      return 'Chromium'
+    case 'firefox':
+      return 'Firefox'
+    case 'safari':
+      return 'Safari'
+    default:
+      return t('Welcome.nostr.unknownBrowser')
+  }
+})
+
+interface ExtensionLink {
+  name: string
+  url: string
+  browsers: BrowserKind[]
+}
+
+const extensions: ExtensionLink[] = [
+  {
+    name: 'Alby',
+    url: 'https://github.com/getAlby/lightning-browser-extension',
+    browsers: ['chromium', 'firefox'],
+  },
+  { name: 'nos2x', url: 'https://github.com/fiatjaf/nos2x', browsers: ['chromium'] },
+  { name: 'nos2x-fox', url: 'https://github.com/diegogurpegui/nos2x-fox', browsers: ['firefox'] },
+  { name: 'nostr-keyx', url: 'https://github.com/susumuota/nostr-keyx', browsers: ['chromium'] },
+  { name: 'AKA Profiles', url: 'https://github.com/neilck/aka-extension', browsers: ['chromium'] },
+  { name: 'Frost2x', url: 'https://github.com/FROSTR-ORG/frost2x', browsers: ['chromium'] },
+  { name: 'Keys.Band', url: 'https://github.com/toastr-space/keys-band', browsers: ['chromium'] },
+  { name: 'horse', url: 'https://github.com/fiatjaf/horse', browsers: ['chromium'] },
+  { name: 'Nostore', url: 'https://github.com/ursuscamp/nostore', browsers: ['safari'] },
+  {
+    name: 'Blockcore Wallet',
+    url: 'https://github.com/block-core/blockcore-wallet',
+    browsers: ['chromium', 'firefox'],
+  },
+]
+
+const suggestedExtensions = computed(() => {
+  const list = extensions.filter((e) => e.browsers.includes(browser.value))
+  return list.length ? list : extensions
+})
 
 async function connectNip07() {
   error.value = ''
