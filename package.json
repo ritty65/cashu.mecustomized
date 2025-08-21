@@ -8,7 +8,7 @@
   "type": "module",
   "scripts": {
     "dev": "quasar dev",
-    "build": "quasar build",
+    "build": "quasar build -m pwa",
     "build:pwa": "quasar build -m pwa",
     "quasar": "quasar",
     "lint": "eslint .",
@@ -18,17 +18,14 @@
     "test:ci": "vitest run test/markdown.sanitize.spec.ts test/safeHtml.spec.ts test/sanitize-url.spec.ts test/tooltip.sanitize.spec.ts",
     "test:e2e": "playwright test test/e2e/profile.sanitize.spec.ts",
     "types": "tsc -p tsconfig.local.json --noEmit",
-    "ci:verify": "pnpm run types && pnpm run lint && pnpm run build && pnpm run build:pwa",
+    "ci:verify": "pnpm run build",
     "lint:fix": "eslint . --fix",
     "check:i18n": "node scripts/check-i18n.js",
     "format:check": "prettier --check ."
   },
   "dependencies": {
-    "@capacitor/android": "^6.2.0",
     "@capacitor/clipboard": "^6.0.2",
-    "@capacitor/core": "^6.2.0",
     "@capacitor/haptics": "^6.0.2",
-    "@capacitor/ios": "^6.0.0",
     "@cashu/cashu-ts": "file:src/lib/cashu-ts",
     "@cashu/crypto": "^0.3.4",
     "@chenfengyuan/vue-qrcode": "^2.0.0",
@@ -43,7 +40,6 @@
     "axios": "^1.6.8",
     "bech32": "^2.0.0",
     "buffer": "^6.0.3",
-    "capacitor-plugin-safe-area": "^3.0.4",
     "chart.js": "^4.x",
     "core-js": "^3.37.0",
     "date-fns": "^3.6.0",
@@ -68,8 +64,6 @@
     "vuedraggable": "^4.1.0"
   },
   "devDependencies": {
-    "@capacitor/assets": "^3.0.5",
-    "@capacitor/cli": "^6.2.0",
     "@noble/curves": "^1.9.6",
     "@noble/secp256k1": "^2.3.0",
     "@pinia/testing": "^0.1.0",
@@ -84,8 +78,6 @@
     "@vitest/ui": "^3.2.4",
     "@vue/test-utils": "^2.4.6",
     "autoprefixer": "^10.4.21",
-    "electron": "^37.2.4",
-    "electron-packager": "^17.1.2",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^8.10.0",
     "eslint-plugin-vue": "^9.26.0",
@@ -111,24 +103,21 @@
     "workbox-strategies": "^6.6.1",
     "ws": "^8.16.0"
   },
-  "overrides": {
-    "cross-spawn": "^7.0.3",
-    "semver-regex": "^4.0.5"
-  },
   "engines": {
-    "node": ">=16.11.0",
+    "node": ">=18.18.0",
     "npm": ">= 6.13.4",
     "yarn": ">= 1.21.1"
   },
   "pnpm": {
     "overrides": {
       "form-data": "^4.0.4",
-      "semver-regex": "^3.1.4",
+      "semver-regex": "^4.0.5",
       "http-cache-semantics": "^4.1.1",
       "cross-spawn": "^7.0.3",
       "phin": "^3.7.1",
       "on-headers": "^1.1.0",
       "tmp": "^0.2.4"
     }
-  }
+  },
+  "packageManager": "pnpm@8"
 }

@@ -1,9 +1,0 @@
-version: "2"
-services:
-  Fundstr:
-    image: Fundstr
-    build: .
-    container_name: Fundstr
-    restart: always
-    ports:
-      - "127.0.0.1:3000:80"
