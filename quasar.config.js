@@ -193,8 +193,10 @@ export default configure(function (ctx) {
       manifestFilename: "manifest.json",
       useCredentialsForManifestTag: false,
       workboxOptions: {
+        cleanupOutdatedCaches: true,
         skipWaiting: true,
         clientsClaim: true,
+        navigateFallbackDenylist: [/^\/api/, /^https:\/\/fonts\.googleapis\.com/],
       },
       // useFilenameHashes: true,
       // extendGenerateSWOptions (cfg) {}

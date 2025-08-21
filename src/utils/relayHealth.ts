@@ -44,9 +44,17 @@ export async function pingRelay(url: string): Promise<boolean> {
 }
 
 export async function filterHealthyRelays(relays: string[]): Promise<string[]> {
-  const results = await Promise.all(
-    relays.map(async (u) => ((await pingRelay(u)) ? u : null)),
-  );
-  const healthy = results.filter((u): u is string => !!u);
+  const healthy: string[] = [];
+  const batchSize = 10;
+
+  for (let i = 0; i < relays.length; i += batchSize) {
+    const batch = relays.slice(i, i + batchSize);
+    const results = await Promise.all(
+      batch.map(async (u) => ((await pingRelay(u)) ? u : null)),
+    );
+    const batchHealthy = results.filter((u): u is string => !!u);
+    healthy.push(...batchHealthy);
+  }
+
   return healthy.length >= 2 ? healthy : FREE_RELAYS;
 }
