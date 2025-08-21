@@ -1812,6 +1812,11 @@ export const messages = {
             "Your public storefront as seen by visitors. Great for a quick audit of how your profile appears worldwide.",
         },
 
+        creatorHub: {
+          fan: "Publish a profile; get support.",
+          creator: "Set tiers, goals and withdraw earnings.",
+        },
+
         myProfile: {
           fan: "Show off your avatar, npub link and optional NIP-05. Personal stats: total zaps sent & received, bucket balances.",
           creator:
