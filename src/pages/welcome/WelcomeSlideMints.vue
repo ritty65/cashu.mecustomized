@@ -1,6 +1,6 @@
 <template>
   <section role="region" :aria-labelledby="id" class="q-pa-md flex flex-center">
-    <div class="text-center" style="max-width: 400px">
+    <div class="text-center q-mx-auto" style="max-width: 600px">
       <q-icon name="factory" size="4em" color="primary" />
       <h1 :id="id" tabindex="-1" class="q-mt-md">
         {{ t('Welcome.mints.title') }}
