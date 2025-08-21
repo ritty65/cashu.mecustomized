@@ -3,17 +3,20 @@ on:
   pull_request:
     branches: [ Phase10 ]
   push:
-    branches: [ "**" ]
+    branches: [ "**" ]   # keep push so the required "build (push)" context runs
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      CI: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
-      - run: corepack enable
-      - run: pnpm -v
-      - run: pnpm install --frozen-lockfile=false
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 8.15.7
+          run_install: true
+      - run: node -v && pnpm -v
       - run: pnpm run build
