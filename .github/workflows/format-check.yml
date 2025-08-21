@@ -14,11 +14,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'pnpm'
-      - name: Enable pnpm via corepack (pin exact)
+      - name: Install pnpm (explicit, reliable)
         run: |
-          corepack enable
-          corepack prepare pnpm@8.15.7 --activate
+          npm i -g pnpm@8.15.7
           pnpm -v
       - name: Install deps
         run: pnpm install --no-frozen-lockfile
