@@ -1893,8 +1893,6 @@ export const messages = {
     features: {
       title: "Get to Know the App",
       lead: "Explore these key sections to start using the wallet:",
-      subtitle: "Click a feature below to see what it's for.",
-      intro: "Click on each step to learn what it's for.",
       bullets: {
         creatorHub: {
           label: "CreatorHub",
@@ -1908,9 +1906,7 @@ export const messages = {
           label: "Buckets",
           desc: "Organize your tokens.",
         },
-      },
-      relation:
-        "Browse creators in CreatorHub and subscribe to them in Subscriptions.",
+      }
     },
     nostr: {
       title: "Set up your Nostr identity (optional)",

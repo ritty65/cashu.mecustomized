@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { useLocalStorage } from '@vueuse/core'
 
-export const LAST_WELCOME_SLIDE = 5
+export const LAST_WELCOME_SLIDE = 6
 
 export const useWelcomeStore = defineStore('welcome', {
   state: () => ({
@@ -17,6 +17,7 @@ export const useWelcomeStore = defineStore('welcome', {
       subscriptions: false,
       buckets: false,
     }),
+    welcomeCompleted: useLocalStorage('cashu.welcome.completed', false),
   }),
   actions: {
     canProceed(slide: number): boolean {
@@ -31,6 +32,8 @@ export const useWelcomeStore = defineStore('welcome', {
           return true
         case 5:
           return this.termsAccepted
+        case 6:
+          return true
         default:
           return false
       }
@@ -38,6 +41,8 @@ export const useWelcomeStore = defineStore('welcome', {
     closeWelcome() {
       this.showWelcome = false
       this.currentSlide = 0
+      this.featuresVisited = { creatorHub: false, subscriptions: false, buckets: false }
+      this.welcomeCompleted = true
     },
   },
 })

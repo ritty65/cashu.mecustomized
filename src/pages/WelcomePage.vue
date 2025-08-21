@@ -44,7 +44,7 @@
         :progress="progress"
         :can-finish="canFinish"
         @run="runTask"
-        @finish="showChecklist=false"
+        @finish="finishOnboarding"
       />
     </q-dialog>
     <RevealSeedDialog v-model="showSeedDialog" :seed="mnemonicStore.mnemonic" />
@@ -62,6 +62,7 @@ import WelcomeSlidePwa from './welcome/WelcomeSlidePwa.vue'
 import WelcomeSlideBackup from './welcome/WelcomeSlideBackup.vue'
 import WelcomeSlideMints from './welcome/WelcomeSlideMints.vue'
 import WelcomeSlideTerms from './welcome/WelcomeSlideTerms.vue'
+import WelcomeSlideFinish from './welcome/WelcomeSlideFinish.vue'
 import TaskChecklist from 'src/components/welcome/TaskChecklist.vue'
 import RevealSeedDialog from 'src/components/welcome/RevealSeedDialog.vue'
 import type { WelcomeTask } from 'src/types/welcome'
@@ -76,6 +77,7 @@ const $q = useQuasar()
 const mnemonicStore = useMnemonicStore()
 const storageStore = useStorageStore()
 const showSeedDialog = ref(false)
+const showChecklist = ref(false)
 
 function revealSeed() {
   showSeedDialog.value = true
@@ -83,6 +85,12 @@ function revealSeed() {
 
 function downloadBackup() {
   storageStore.exportWalletState()
+}
+
+function finishOnboarding() {
+  showChecklist.value = false
+  welcome.closeWelcome()
+  router.push('/')
 }
 
 const slides = [
@@ -95,9 +103,8 @@ const slides = [
   },
   { component: WelcomeSlideMints },
   { component: WelcomeSlideTerms },
+  { component: WelcomeSlideFinish, props: { onOpenWallet: finishOnboarding } },
 ]
-
-const showChecklist = ref(false)
 
 const tasks = computed<WelcomeTask[]>(() => [
   {
@@ -120,8 +127,7 @@ function runTask(task: WelcomeTask) {
 
 function next() {
   if (welcome.currentSlide === LAST_WELCOME_SLIDE) {
-    welcome.closeWelcome()
-    router.push('/')
+    finishOnboarding()
   } else if (welcome.canProceed(welcome.currentSlide)) {
     welcome.currentSlide++
   }
