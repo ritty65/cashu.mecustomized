@@ -43,6 +43,7 @@ const props = defineProps<{
   onCreateBuckets?: () => void;
   onRestore?: () => void;
 }>();
+const emit = defineEmits<{ (e: 'open-wallet'): void }>();
 
 function addMint() {
   props.onAddMint?.();
@@ -57,7 +58,7 @@ function restore() {
 }
 
 function openWallet() {
-  /* handled by main welcome page */
+  emit('open-wallet');
 }
 </script>
 

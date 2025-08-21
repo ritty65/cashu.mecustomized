@@ -1913,9 +1913,7 @@ export const messages = {
           label: "Buckets",
           desc: "Organize your tokens.",
         },
-      },
-      relation:
-        "Browse creators in CreatorHub and subscribe to them in Subscriptions.",
+      }
     },
     privacy: {
       title: "Cashu & Privacy",

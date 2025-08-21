@@ -4,10 +4,7 @@
       <q-icon name="apps" size="4em" color="primary" />
       <h1 :id="id" tabindex="-1" class="q-mt-md">{{ $t('Welcome.features.title') }}</h1>
       <p class="q-mt-sm">{{ $t('Welcome.features.lead') }}</p>
-      <p class="text-caption q-mt-sm">{{ $t('Welcome.features.subtitle') }}</p>
-      <p class="text-caption q-mt-sm">{{ $t('Welcome.features.intro') }}</p>
       <NavigationMap :items="navigationItems" @opened="markVisited" />
-      <p class="q-mt-md">{{ $t('Welcome.features.relation') }}</p>
     </div>
   </section>
 </template>
