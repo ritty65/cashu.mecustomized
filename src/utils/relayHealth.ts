@@ -45,6 +45,7 @@ export async function pingRelay(url: string): Promise<boolean> {
 
 export async function filterHealthyRelays(relays: string[]): Promise<string[]> {
   const healthy: string[] = [];
+  // Process relays in small batches to avoid exhausting browser resources
   const batchSize = 10;
 
   for (let i = 0; i < relays.length; i += batchSize) {
