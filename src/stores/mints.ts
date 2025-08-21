@@ -132,6 +132,24 @@ export const useMintsStore = defineStore("mints", {
       await proofsStore.updateActiveProofs();
     });
 
+    const isValidUrl = (url: string): boolean => {
+      if (!url || url === "undefined") {
+        return false;
+      }
+      try {
+        const parsed = new URL(url);
+        return parsed.protocol === "https:";
+      } catch {
+        return false;
+      }
+    };
+
+    if (!isValidUrl(activeMintUrl.value)) {
+      activeMintUrl.value = "";
+      uiStoreGlobal.setTab("mints");
+      showAddMintDialog.value = true;
+    }
+
     return {
       t,
       activeProofs,
