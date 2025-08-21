@@ -1914,8 +1914,9 @@ export const messages = {
     },
     nostr: {
       title: "Set up your Nostr identity (optional)",
-      lead: "Nostr is an open identity protocol. Connecting a Nostr key lets Cashu create a Lightning address for tips and back up your mint list. You can skip this.",
+      lead: "Nostr is a decentralized, censorship-resistant identity protocol. Connecting a Nostr key lets Cashu create a Lightning address for tips and back up your mint list. You can skip this.",
       connect: "Connect Nostr extension",
+      connected: "Connected",
       generate: "Generate new key",
       import: "Import existing key",
       importPlaceholder: "nsec or hex key",
