@@ -7,14 +7,12 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    env:
-      CI: true
+    env: { CI: true }
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - name: Install pnpm (explicit, reliable)
+        with: { node-version: 20 }
+      - name: Install pnpm explicitly
         run: |
           npm i -g pnpm@8.15.7
           pnpm -v
