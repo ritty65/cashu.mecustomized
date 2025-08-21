@@ -15,7 +15,7 @@ export const useLockedTokensRedeemWorker = defineStore(
   "lockedTokensRedeemWorker",
   {
     state: () => ({
-      checkInterval: 5000,
+      checkInterval: 60 * 1000,
       worker: null as NodeJS.Timeout | null,
       redeemChain: Promise.resolve() as Promise<void>,
     }),
