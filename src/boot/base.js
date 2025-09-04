@@ -219,28 +219,35 @@ window.windowMixin = {
 
     // only for iOS
     if (window.Capacitor && Capacitor.getPlatform() === "ios") {
-      const { SafeArea } = await import(
-        /* @vite-ignore */ "capacitor-plugin-safe-area"
-      );
-      SafeArea.getStatusBarHeight().then(({ statusBarHeight }) => {
-        document.documentElement.style.setProperty(
-          `--safe-area-inset-top`,
-          `${statusBarHeight}px`,
+      try {
+        // use a dynamic string so Vite does not try to resolve the module
+        const moduleName = "capacitor-plugin-safe-area";
+        const { SafeArea } = await import(
+          /* @vite-ignore */ moduleName
         );
-      });
-
-      SafeArea.removeAllListeners();
-
-      // when safe-area changed
-      SafeArea.addListener("safeAreaChanged", (data) => {
-        const { insets } = data;
-        for (const [key, value] of Object.entries(insets)) {
+        SafeArea.getStatusBarHeight().then(({ statusBarHeight }) => {
           document.documentElement.style.setProperty(
-            `--safe-area-inset-${key}`,
-            `${value}px`,
+            `--safe-area-inset-top`,
+            `${statusBarHeight}px`,
           );
-        }
-      });
+        });
+
+        SafeArea.removeAllListeners();
+
+        // when safe-area changed
+        SafeArea.addListener("safeAreaChanged", (data) => {
+          const { insets } = data;
+          for (const [key, value] of Object.entries(insets)) {
+            document.documentElement.style.setProperty(
+              `--safe-area-inset-${key}`,
+              `${value}px`,
+            );
+          }
+        });
+      } catch (err) {
+        // plugin not available; ignore safe area handling
+        console.warn("SafeArea plugin not available", err);
+      }
     }
   },
 };
