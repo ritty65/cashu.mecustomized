@@ -1,6 +1,5 @@
 import { useUiStore } from "stores/ui";
 import { Clipboard } from "@capacitor/clipboard";
-import { SafeArea } from "capacitor-plugin-safe-area";
 
 window.LOCALE = "en";
 // window.EventHub = new Vue();
@@ -178,7 +177,7 @@ window.windowMixin = {
       });
     },
   },
-  created: function () {
+  created: async function () {
     if (
       this.$q.localStorage.getItem("cashu.darkMode") == true ||
       this.$q.localStorage.getItem("cashu.darkMode") == false
@@ -220,6 +219,9 @@ window.windowMixin = {
 
     // only for iOS
     if (window.Capacitor && Capacitor.getPlatform() === "ios") {
+      const { SafeArea } = await import(
+        /* @vite-ignore */ "capacitor-plugin-safe-area"
+      );
       SafeArea.getStatusBarHeight().then(({ statusBarHeight }) => {
         document.documentElement.style.setProperty(
           `--safe-area-inset-top`,
