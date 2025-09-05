@@ -219,34 +219,32 @@ window.windowMixin = {
     }
 
     // only for iOS
-    if (window.Capacitor && Capacitor.getPlatform() === "ios") {
-      import(
-        /* @vite-ignore */ "capacitor-plugin-safe-area"
-      )
-        .then(({ SafeArea }) => {
-          SafeArea.getStatusBarHeight().then(({ statusBarHeight }) => {
-            document.documentElement.style.setProperty(
-              `--safe-area-inset-top`,
-              `${statusBarHeight}px`
-            );
-          });
+    if (
+      window.Capacitor &&
+      Capacitor.getPlatform() === "ios" &&
+      Capacitor.isPluginAvailable("SafeArea")
+    ) {
+      const { SafeArea } = Capacitor.Plugins;
 
-          SafeArea.removeAllListeners();
+      SafeArea.getStatusBarHeight().then(({ statusBarHeight }) => {
+        document.documentElement.style.setProperty(
+          `--safe-area-inset-top`,
+          `${statusBarHeight}px`
+        );
+      });
 
-          // when safe-area changed
-          SafeArea.addListener("safeAreaChanged", (data) => {
-            const { insets } = data;
-            for (const [key, value] of Object.entries(insets)) {
-              document.documentElement.style.setProperty(
-                `--safe-area-inset-${key}`,
-                `${value}px`
-              );
-            }
-          });
-        })
-        .catch(() => {
-          // plugin not available
-        });
+      SafeArea.removeAllListeners();
+
+      // when safe-area changed
+      SafeArea.addListener("safeAreaChanged", (data) => {
+        const { insets } = data;
+        for (const [key, value] of Object.entries(insets)) {
+          document.documentElement.style.setProperty(
+            `--safe-area-inset-${key}`,
+            `${value}px`
+          );
+        }
+      });
     }
   },
 };
