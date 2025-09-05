@@ -10,6 +10,7 @@
 
 import { configure } from "quasar/wrappers";
 import path from "path";
+import postcssConfig from "./postcss.config.cjs";
 
 export default configure(function (/* ctx */) {
   return {
@@ -42,6 +43,8 @@ export default configure(function (/* ctx */) {
         browser: ["esnext"],
         node: "node16",
       },
+
+      postcss: postcssConfig,
 
       vueRouterMode: "history", // available values: 'hash', 'history'
       // vueRouterBase,
