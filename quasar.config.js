@@ -65,6 +65,19 @@ export default configure(function (/* ctx */) {
           ...(viteConf.resolve.alias || {}),
           "@cashu/cashu-ts": path.resolve(__dirname, "src/lib/cashu-ts/src/index.ts"),
         };
+
+        // Some dependencies like nostr-tools and noble crypto libraries
+        // don't play well with Vite's dependency optimizer. Exclude them
+        // from the optimization step so they are loaded directly from
+        // node_modules at runtime.
+        viteConf.optimizeDeps = viteConf.optimizeDeps || {};
+        viteConf.optimizeDeps.exclude = [
+          ...(viteConf.optimizeDeps.exclude || []),
+          "nostr-tools",
+          "@noble/curves",
+          "@noble/hashes",
+          "@noble/secp256k1",
+        ];
       },
       // viteVuePluginOptions: {},
 
