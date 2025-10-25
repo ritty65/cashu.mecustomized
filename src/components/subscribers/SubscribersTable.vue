@@ -10,6 +10,23 @@
     v-model:pagination="pagination"
     @row-click="onRowClick"
   >
+    <template #body-cell-subscriber="props">
+      <q-td :props="props">
+        <div class="row items-center no-wrap">
+          <span>{{ props.row.name || shortenNpub(props.row.npub) }}</span>
+          <q-tooltip v-if="!props.row.name">{{ props.row.npub }}</q-tooltip>
+          <q-btn
+            flat
+            dense
+            icon="content_copy"
+            size="sm"
+            class="q-ml-xs focus-outline"
+            aria-label="Copy npub"
+            @click.stop="copyNpub(props.row.npub)"
+          />
+        </div>
+      </q-td>
+    </template>
     <template #bottom="scope">
       <div class="q-table__bottom row items-center justify-end q-pa-sm">
         <q-pagination
@@ -40,6 +57,7 @@ import { useI18n } from "vue-i18n";
 import { useSubscribersStore } from "src/stores/subscribersStore";
 import { storeToRefs } from "pinia";
 import type { Subscriber } from "src/types/subscriber";
+import { copyNpub, shortenNpub } from "src/utils/clipboard";
 
 defineOptions({ name: "SubscribersTable" });
 
