@@ -203,8 +203,27 @@ have received it. Run the helper script with your npub:
 npx ts-node scripts/verifyNutzapProfile.ts <your-npub>
 ```
 
-The script connects read-only to your configured relays and prints the fetched
-profile data so you can double-check the values.
+The script connects read-only to your configured relays and prints the fetched profile data so you can double-check the values. 
+
+### Running Tests
+
+Before running the test suite, install dependencies:
+
+```bash
+pnpm install
+# or
+npm install
+```
+
+Then execute:
+
+```bash
+pnpm test
+# or
+npx vitest
+```
+
+These tests connect to a test Cashu mint and require the environment variables `OICD_TOKEN_ENDPOINT`, `OICD_USERNAME` and `OICD_PASSWORD`. Ensure they are set (or skip `auth.test.ts`) and that network connectivity is available.
 
 ## Contributing
 
@@ -213,8 +232,13 @@ Contributions are welcome! Open an issue or pull request to discuss your ideas. 
 Before submitting a pull request, install dependencies and run the test suite:
 
 ```bash
+pnpm install
+# or
 npm install
-npm run test:ci
+
+pnpm test
+# or
+npx vitest
 ```
 
 Some tests communicate with an external Cashu mint. Ensure network connectivity
