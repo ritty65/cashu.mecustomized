@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { useLocalStorage } from "@vueuse/core";
 import { generateSecretKey, getPublicKey, nip19 } from "nostr-tools";
 import { bytesToHex } from "@noble/hashes/utils"; // already an installed dependency
+import * as secp from "@noble/secp256k1";
 import { WalletProof } from "stores/mints";
 import token from "src/js/token";
 
@@ -11,6 +12,18 @@ type P2PKKey = {
   used: boolean;
   usedCount: number;
 };
+
+function ensureCompressed(key: string): string {
+  if (!key) return key;
+  if (key.length === 64) {
+    key = "02" + key;
+  }
+  try {
+    return secp.Point.fromHex(key).toHex(true);
+  } catch {
+    return key;
+  }
+}
 
 export const useP2PKStore = defineStore("p2pk", {
   state: () => ({
@@ -28,14 +41,12 @@ export const useP2PKStore = defineStore("p2pk", {
       return this.p2pkKeys.filter((m) => m.publicKey == key).length > 0;
     },
     maybeConvertNpub: function (key: string) {
-      // Check and convert npub to P2PK
-      if (key && key.startsWith("npub1")) {
-        const { type, data } = nip19.decode(key);
-        if (type === "npub" && data.length === 64) {
-          key = "02" + data;
-        }
+      if (!key) return key;
+      if (key.startsWith("npub1")) {
+        let data = nip19.decode(key).data as string | Uint8Array;
+        key = data instanceof Uint8Array ? bytesToHex(data) : data.toLowerCase();
       }
-      return key;
+      return ensureCompressed(key);
     },
     isValidPubkey: function (key: string) {
       key = this.maybeConvertNpub(key);
