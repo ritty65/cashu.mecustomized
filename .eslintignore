@@ -6,4 +6,5 @@
 /node_modules
 .eslintrc.js
 babel.config.js
+test/**
 **/cashu-ts/dist/**

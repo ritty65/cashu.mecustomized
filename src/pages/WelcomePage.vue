@@ -81,6 +81,7 @@ import WelcomeSlidePrivacy from "./welcome/WelcomeSlidePrivacy.vue";
 import WelcomeSlideMints from "./welcome/WelcomeSlideMints.vue";
 import WelcomeSlideProofs from "./welcome/WelcomeSlideProofs.vue";
 import WelcomeSlideBuckets from "./welcome/WelcomeSlideBuckets.vue";
+import { i18n } from "../boot/i18n";
 
 export default {
   name: "WelcomePage",
@@ -115,7 +116,7 @@ export default {
         locale = "en-US";
       }
       // Set the i18n locale
-      this.$i18n.locale = locale;
+      i18n.global.locale = locale;
 
       // Store the selected language in localStorage
       localStorage.setItem("cashu.language", locale);
@@ -125,7 +126,7 @@ export default {
     // Set the initial selected language based on the current locale or from storage
     const stored = localStorage.getItem("cashu.language");
     const initLocale =
-      stored || this.$i18n.locale || navigator.language || "en-US";
+      stored || i18n.global.locale || navigator.language || "en-US";
     this.selectedLanguage = initLocale === "en" ? "en-US" : initLocale;
   },
   setup() {

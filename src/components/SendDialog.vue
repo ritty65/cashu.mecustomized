@@ -154,9 +154,7 @@ export default defineComponent({
     ...mapActions(useCameraStore, ["closeCamera", "showCamera"]),
     showParseDialog: function () {
       if (!this.canMakePayments) {
-        notifyWarning(
-          this.$i18n.t("SendDialog.actions.lightning.error_no_mints")
-        );
+        notifyWarning(this.$t("SendDialog.actions.lightning.error_no_mints"));
         this.showSendDialog = false;
         return;
       }
@@ -174,7 +172,7 @@ export default defineComponent({
     showSendTokensDialog: function () {
       debug("##### showSendTokensDialog");
       if (!this.canMakePayments) {
-        notifyWarning(this.$i18n.t("SendDialog.actions.ecash.error_no_mints"));
+        notifyWarning(this.$t("SendDialog.actions.ecash.error_no_mints"));
         this.showSendDialog = false;
         return;
       }
