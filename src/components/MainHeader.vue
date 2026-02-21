@@ -364,7 +364,7 @@ export default defineComponent({
       return location.host.includes("staging");
     };
 
-    const reload = () => {
+    const reload = async () => {
       if (countdown.value > 0) {
         try {
           clearInterval(countdownInterval);
@@ -375,7 +375,7 @@ export default defineComponent({
         return;
       }
       if (uiStore.globalMutexLock) return;
-      uiStore.lockMutex();
+      await uiStore.lockMutex();
       countdown.value = 3;
       countdownInterval = setInterval(() => {
         countdown.value--;

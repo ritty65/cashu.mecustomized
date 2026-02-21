@@ -241,11 +241,12 @@ export const useWalletStore = defineStore("wallet", {
       }
     },
     signP2PKIfNeeded: function <T extends Proof>(proofs: T[]): T[] {
-      if (
-        !proofs.some(
-          (p) => typeof p.secret === "string" && p.secret.startsWith("P2PK:")
-        )
-      ) {
+      const needsSignature = proofs.some(
+        (p) =>
+          typeof p.secret === "string" &&
+          (p.secret.startsWith("P2PK:") || p.secret.startsWith('["P2PK"'))
+      );
+      if (!needsSignature) {
         return proofs;
       }
       const privKey = useNostrStore().privKeyHex;

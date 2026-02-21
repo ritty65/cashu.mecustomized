@@ -7,6 +7,7 @@ import { useMintsStore } from "./mints";
 import token from "src/js/token";
 import { ensureCompressed } from "src/utils/ecash";
 import { debug } from "src/js/logger";
+import { getEncodedToken } from "@cashu/cashu-ts";
 
 export const useLockedTokensRedeemWorker = defineStore(
   "lockedTokensRedeemWorker",
@@ -82,16 +83,28 @@ export const useLockedTokensRedeemWorker = defineStore(
 
             // normalise secret before redeem
             decoded.proofs.forEach((p) => {
-              if (
-                typeof p.secret === "string" &&
-                p.secret.startsWith('["P2PK"')
-              ) {
+              if (typeof p.secret !== "string") return;
+
+              if (p.secret.startsWith('["P2PK"')) {
                 const s = JSON.parse(p.secret);
                 if (s[1]?.data) s[1].data = ensureCompressed(s[1].data);
                 p.secret = JSON.stringify(s);
+              } else if (p.secret.startsWith("P2PK:")) {
+                const parts = p.secret.split(":");
+                if (parts.length >= 2) {
+                  try {
+                    parts[1] = ensureCompressed(parts[1]);
+                  } catch {}
+                  p.secret = parts.join(":");
+                }
               }
             });
-            receiveStore.receiveData.tokensBase64 = entry.tokenString;
+            const normalized = getEncodedToken({
+              mint: mintUrl,
+              unit,
+              proofs: decoded.proofs,
+            });
+            receiveStore.receiveData.tokensBase64 = normalized;
             receiveStore.receiveData.bucketId = entry.tierId;
             debug("locked token redeem: sending proofs", proofs);
             try {
@@ -107,7 +120,19 @@ export const useLockedTokensRedeemWorker = defineStore(
                   tokenId: entry.id,
                 });
               } else {
-                throw err;
+                if (
+                  typeof err?.message === "string" &&
+                  err.message.includes("proofs could not be verified")
+                ) {
+                  console.error(
+                    "Removing invalid locked token",
+                    entry.id,
+                    err.message
+                  );
+                  await cashuDb.lockedTokens.delete(entry.id);
+                } else {
+                  throw err;
+                }
               }
             }
           } catch (e) {

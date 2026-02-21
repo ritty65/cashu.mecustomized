@@ -1,11 +1,11 @@
-/**
- * Configures the Cashu-ts library axios client
- */
-// import { setupAxios } from "@cashu/cashu-ts";
+// src/boot/cashu.js
+// Quasar boot file that configures axios used by @cashu/cashu-ts.
+// Runs once on app start.
 
-// export default () => {
-//   setupAxios({
-//     // Default timeout for any interaction using the cashu-ts library to interact with a mint
-//     timeout: 15 * 1000, // 15 seconds
-//   });
-// };
+import { boot } from 'quasar/wrappers';
+import { setupAxios } from '@cashu/cashu-ts';
+
+export default boot(() => {
+  // 15-second network timeout for all Cashu mint requests.
+  setupAxios({ timeout: 15_000 });
+});
